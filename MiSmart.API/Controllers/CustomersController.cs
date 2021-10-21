@@ -1,0 +1,170 @@
+
+
+using MiSmart.Infrastructure.Controllers;
+using MiSmart.Infrastructure.Responses;
+using MiSmart.API.Commands;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using System.Text.Json;
+using System;
+using MiSmart.Infrastructure.Helpers;
+using MiSmart.DAL.Models;
+using MiSmart.DAL.Repositories;
+using System.Linq;
+using MiSmart.Infrastructure.Commands;
+using System.Linq.Expressions;
+using MiSmart.DAL.ViewModels;
+using MiSmart.Infrastructure.Permissions;
+using MiSmart.API.Permissions;
+using MiSmart.DAL.Responses;
+
+namespace MiSmart.API.Controllers
+{
+    public class CustomersController : AuthorizedAPIControllerBase
+    {
+
+        private readonly CustomerRepository customerRepository;
+        public CustomersController(IActionResponseFactory actionResponseFactory, CustomerRepository customerRepository) : base(actionResponseFactory)
+        {
+            this.customerRepository = customerRepository;
+        }
+        [HttpPost]
+        [HasPermission(typeof(AdminPermission))]
+        public IActionResult Create([FromBody] AddingCustomerCommand command)
+        {
+            var response = actionResponseFactory.CreateInstance();
+            var validated = true;
+            if (validated)
+            {
+                var customer = new Customer { Name = command.Name, Address = command.Address };
+                customerRepository.Create(customer);
+                response.SetCreatedObject(customer);
+            }
+            return response.ToIActionResult();
+        }
+        [HttpGet]
+        public IActionResult GetList([FromQuery] PageCommand pageCommand, [FromQuery] String search, [FromQuery] String mode = "Small")
+        {
+            var response = actionResponseFactory.CreateInstance();
+            Expression<Func<Customer, Boolean>> query = ww => (!String.IsNullOrWhiteSpace(search) ? (ww.Name.ToLower().Contains(search.ToLower()) || ww.Address.ToLower().Contains(search.ToLower())) : true);
+            if (mode == "Large")
+            {
+                // var listResponse = customerRepository.GetListResponseView<SmallCustomerViewModel>(pageCommand, query);
+                // listResponse.SetResponse(response);
+            }
+            else
+            {
+                var listResponse = customerRepository.GetListResponseView<SmallCustomerViewModel>(pageCommand, query);
+                listResponse.SetResponse(response);
+            }
+
+            return response.ToIActionResult();
+        }
+
+        [HttpPost("{id:int}/AssignUser")]
+        public IActionResult AssignCustomerUser([FromServices] CustomerUserRepository customerUserRepository, [FromRoute] Int32 id, [FromBody] AssigningCustomerUserCommand command)
+        {
+            var response = actionResponseFactory.CreateInstance();
+
+            var validated = true;
+            if (!customerRepository.HasOwnerPermission(id, CurrentUser))
+            {
+                validated = false;
+                response.AddNotAllowedErr();
+            }
+            else
+            {
+                if (customerUserRepository.Any(ww => ww.CustomerID == id && ww.UserID == command.UserID))
+                {
+                    validated = false;
+                    response.AddExistedErr("UserID");
+                }
+            }
+            if (validated)
+            {
+                CustomerUser customerUser = new CustomerUser { CustomerID = id, UserID = command.UserID.Value, Type = command.Type };
+                customerUserRepository.Create(customerUser);
+                response.SetCreatedObject(customerUser);
+            }
+
+
+            return response.ToIActionResult();
+        }
+
+        [HttpPost("{id:int}/Teams/{teamID:long}/AssignUser")]
+        public IActionResult AssignTeamUser([FromServices] TeamRepository teamRepository, [FromServices] TeamUserRepository teamUserRepository, [FromServices] CustomerUserRepository customerUserRepository, [FromRoute] Int32 id, [FromRoute] Int64 teamID, [FromBody] AssigningTeamUserCommand command)
+        {
+            var response = actionResponseFactory.CreateInstance();
+            var validated = true;
+            if (!customerRepository.HasOwnerPermission(id, CurrentUser))
+            {
+                validated = false;
+                response.AddNotAllowedErr();
+            }
+            else
+            {
+                var team = teamRepository.Get(ww => ww.ID == teamID && ww.CustomerID == id);
+                if (team is not null)
+                {
+                    if (team.TeamUsers.Any(ww => ww.UserID == command.UserID))
+                    {
+                        validated = false;
+                        response.AddExistedErr("UserID");
+                    }
+                }
+                else
+                {
+                    validated = false;
+                    response.AddInvalidErr("TeamID");
+                }
+            }
+
+            if (validated)
+            {
+                var teamUser = new TeamUser { UserID = command.UserID.Value, TeamID = teamID, Type = command.Type };
+                teamUserRepository.Create(teamUser);
+                if (!customerUserRepository.Any(ww => ww.CustomerID == id && ww.UserID == command.UserID))
+                {
+                    var customerUser = new CustomerUser { CustomerID = id, UserID = command.UserID.Value, Type = CustomerMemberType.Member };
+                    customerUserRepository.Create(customerUser);
+                }
+                response.SetCreatedObject(teamUser);
+            }
+
+
+            return response.ToIActionResult();
+        }
+        [HttpGet("{id:int}/FlightStats")]
+        public IActionResult GetFlightStats([FromServices] FlightStatRepository flightStatRepository, [FromRoute] Int32 id, [FromQuery] PageCommand pageCommand, [FromQuery] Int64? teamID, [FromQuery] Int32? deviceID, [FromQuery] String mode = "Small")
+        {
+            var response =new FlightStatsActionResponse();
+            response.ApplySettings(actionResponseFactory.Settings);
+            var validated = true;
+            if (!customerRepository.HasMemberPermission(id, CurrentUser))
+            {
+                validated = false;
+                response.AddNotAllowedErr();
+            }
+
+            if (validated)
+            {
+                Expression<Func<FlightStat, Boolean>> query = ww => (ww.CustomerID == id)
+                && (teamID.HasValue ? (ww.Device.TeamID == teamID.Value) : true)
+                && (deviceID.HasValue ? (ww.DeviceID == deviceID.Value) : true);
+                if (mode == "Large")
+                {
+
+                }
+                else
+                {
+                    var listResponse = flightStatRepository.GetListFlightStatsView<SmallFlightStatViewModel>(pageCommand, query, ww => ww.CreateTime, false);
+                    listResponse.SetResponse(response);
+                }
+            }
+
+
+
+            return response.ToIActionResult();
+        }
+    }
+}

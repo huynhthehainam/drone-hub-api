@@ -1,0 +1,42 @@
+# Please refer https://aka.ms/HTTPSinContainer on how to setup an https developer certificate for your ASP .NET Core service.
+
+version: "3.4"
+networks:
+  mismart:
+    driver: bridge
+
+services:
+  redis_image:
+    image: redis
+    networks:
+      - mismart
+    restart: unless-stopped
+    depends_on:
+      - postgres_image
+
+  postgres_image:
+    image: postgres
+    restart: always
+    volumes:
+      - ./db_volumne:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: mismart123@123
+    networks:
+      - mismart
+
+  mismartapi:
+    image: mismartapi
+    build:
+      context: .
+      dockerfile: MiSmart.API/Dockerfile
+    ports:
+      # - 5024:80
+      - 5024:5000
+      - 1886:1883
+    networks:
+      - mismart
+    environment:
+      - ASPNETCORE_URLS=http://+:80
+      - ASPNETCORE_ENVIRONMENT=Docker
+    depends_on:
+      - postgres_image
