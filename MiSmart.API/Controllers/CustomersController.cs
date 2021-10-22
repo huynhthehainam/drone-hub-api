@@ -232,5 +232,65 @@ namespace MiSmart.API.Controllers
 
             return response.ToIActionResult();
         }
+        [HttpGet("{id:int}/Devices")]
+        public IActionResult GetDevices([FromServices] DeviceRepository deviceRepository, [FromRoute] Int32 id, [FromQuery] PageCommand pageCommand, [FromQuery] String search, [FromQuery] String mode = "Small")
+        {
+            var response = actionResponseFactory.CreateInstance();
+            var validated = true;
+            if (!customerRepository.HasMemberPermission(id, CurrentUser))
+            {
+                validated = false;
+                response.AddNotAllowedErr();
+            }
+
+            if (validated)
+            {
+                search = search.ToLower();
+                Expression<Func<Device, Boolean>> query = ww => (ww.CustomerID == id)
+                   && (!String.IsNullOrWhiteSpace(search) ? (ww.Name.ToLower().Contains(search)) : true);
+                if (mode == "Large")
+                {
+
+
+                }
+                else
+                {
+                    var listResponse = deviceRepository.GetListResponseView<SmallDeviceViewModel>(pageCommand, query);
+                    listResponse.SetResponse(response);
+                }
+            }
+
+
+
+            return response.ToIActionResult();
+        }
+        [HttpGet("{id:int}/Devices/{deviceID:int}/Records")]
+        public IActionResult GetDeviceRecords([FromServices] TelemetryRecordRepository telemetryRecordRepository, [FromRoute] Int32 id, [FromRoute] Int32 deviceID, [FromQuery] PageCommand pageCommand, [FromQuery] String mode = "Small")
+        {
+            var response = actionResponseFactory.CreateInstance();
+
+            var validated = true;
+            if (!customerRepository.HasMemberPermission(id, CurrentUser))
+            {
+                validated = false;
+                response.AddNotAllowedErr();
+            }
+
+            if (validated)
+            {
+                Expression<Func<TelemetryRecord, Boolean>> query = ww => (ww.DeviceID == deviceID && ww.Device.CustomerID == id);
+                if (mode == "Large")
+                {
+
+                }
+                else
+                {
+                    var listResponse = telemetryRecordRepository.GetListResponseView<TelemetryRecordViewModel>(pageCommand, query, ww => ww.CreatedTime, false);
+                    listResponse.SetResponse(response);
+                }
+            }
+
+            return response.ToIActionResult();
+        }
     }
 }

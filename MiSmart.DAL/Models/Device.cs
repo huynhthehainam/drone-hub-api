@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using MiSmart.Infrastructure.Data;
@@ -70,6 +71,18 @@ namespace MiSmart.DAL.Models
             set => deviceModel = value;
         }
         public Int32 DeviceModelID { get; set; }
+        public LocationPoint LastLocation
+        {
+            get
+            {
+                var lastRecord = Records.OrderByDescending(ww => ww.CreatedTime).FirstOrDefault();
+                if (lastRecord is not null)
+                {
+                    return new LocationPoint { Latitude = lastRecord.Latitude, Longitude = lastRecord.Longitude };
+                }
+                return null;
+            }
+        }
     }
 
 }
