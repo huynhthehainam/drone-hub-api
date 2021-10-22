@@ -12,6 +12,8 @@ using MQTTnet.AspNetCore.AttributeRouting;
 using System.Text.Json;
 using MiSmart.DAL.Repositories;
 using System.Collections.Generic;
+using Microsoft.AspNet.SignalR;
+using MiSmart.API.Hubs;
 
 namespace MiSmart.API.MqttControllers
 {
@@ -23,11 +25,12 @@ namespace MiSmart.API.MqttControllers
     {
         private readonly TelemetryRecordRepository telemetryRecordRepository;
         private readonly FlightStatRepository flightStatRepository;
-
-        public DevicesController(TelemetryRecordRepository telemetryRecordRepository, FlightStatRepository flightStatRepository) : base()
+        private readonly IHubContext<DeviceNotificationHub> deviceHub;
+        public DevicesController(TelemetryRecordRepository telemetryRecordRepository, FlightStatRepository flightStatRepository, IHubContext<DeviceNotificationHub> deviceHub) : base()
         {
 
             this.telemetryRecordRepository = telemetryRecordRepository;
+            this.deviceHub = deviceHub;
             this.flightStatRepository = flightStatRepository;
 
 
@@ -104,6 +107,7 @@ namespace MiSmart.API.MqttControllers
 
                         };
                         flightStatRepository.Create(stat);
+                        deviceHub.Clients.All.PublicUpdateEventAsync(device.ID, "FlightStats", stat).Wait();
                         return Ok();
                     }
                 }
