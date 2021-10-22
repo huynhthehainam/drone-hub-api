@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Connections.Features;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
+
 using MiSmart.DAL.DatabaseContexts;
 using MiSmart.DAL.Repositories;
 
@@ -21,25 +22,27 @@ namespace MiSmart.API.Hubs
     [Authorize]
     public class DeviceNotificationHub : Hub
     {
-        public List<DeviceWebSocketClient> DeviceClients { get; set; } = new List<DeviceWebSocketClient>();
         private readonly IServiceProvider serviceProvider;
+
         public DeviceNotificationHub(IServiceProvider serviceProvider)
         {
             this.serviceProvider = serviceProvider;
         }
+
         public override async Task OnConnectedAsync()
         {
             await base.OnConnectedAsync();
         }
         public override async Task OnDisconnectedAsync(Exception exception)
         {
-            var removedClients = DeviceClients.Where(ww => ww.ConnectionID == Context.ConnectionId).ToList();
-            foreach (var client in removedClients)
-            {
-                DeviceClients.Remove(client);
-            }
+            // var removedClients = manager.DeviceClients.Where(ww => ww.ConnectionID == Context.ConnectionId).ToList();
+            // foreach (var client in removedClients)
+            // {
+            //     manager.DeviceClients.Remove(client);
+            // }
             await base.OnDisconnectedAsync(exception);
         }
+
 
         public async Task SetupDeviceAsync(Int32 id)
         {
@@ -50,11 +53,14 @@ namespace MiSmart.API.Hubs
                     var device = databaseContext.Devices.FirstOrDefault(ww => ww.ID == id);
                     if (device is not null)
                     {
-                        DeviceClients.Add(new DeviceWebSocketClient
-                        {
-                            ConnectionID = Context.ConnectionId,
-                            DeviceID = device.ID
-                        });
+                        // if (!manager.DeviceClients.Any(ww => ww.DeviceID == id && ww.ConnectionID == Context.ConnectionId))
+                        // {
+                        //     manager.DeviceClients.Add(new DeviceWebSocketClient
+                        //     {
+                        //         ConnectionID = Context.ConnectionId,
+                        //         DeviceID = device.ID
+                        //     });
+                        // }
                         await Clients.Client(Context.ConnectionId).SendAsync("Response", $"You are listening to device with id: {id}");
 
                     }

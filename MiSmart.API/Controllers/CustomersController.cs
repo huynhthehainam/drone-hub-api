@@ -135,9 +135,9 @@ namespace MiSmart.API.Controllers
             return response.ToIActionResult();
         }
         [HttpGet("{id:int}/FlightStats")]
-        public IActionResult GetFlightStats([FromServices] FlightStatRepository flightStatRepository, [FromRoute] Int32 id, [FromQuery] PageCommand pageCommand, [FromQuery] Int64? teamID, [FromQuery] Int32? deviceID, [FromQuery] String mode = "Small")
+        public IActionResult GetFlightStats([FromServices] FlightStatRepository flightStatRepository, [FromRoute] Int32 id, [FromQuery] PageCommand pageCommand, [FromQuery] DateTime? from, [FromQuery] DateTime? to, [FromQuery] Int64? teamID, [FromQuery] Int32? deviceID, [FromQuery] String mode = "Small")
         {
-            var response =new FlightStatsActionResponse();
+            var response = new FlightStatsActionResponse();
             response.ApplySettings(actionResponseFactory.Settings);
             var validated = true;
             if (!customerRepository.HasMemberPermission(id, CurrentUser))
@@ -149,8 +149,10 @@ namespace MiSmart.API.Controllers
             if (validated)
             {
                 Expression<Func<FlightStat, Boolean>> query = ww => (ww.CustomerID == id)
-                && (teamID.HasValue ? (ww.Device.TeamID == teamID.Value) : true)
-                && (deviceID.HasValue ? (ww.DeviceID == deviceID.Value) : true);
+                    && (teamID.HasValue ? (ww.Device.TeamID == teamID.Value) : true)
+                    && (deviceID.HasValue ? (ww.DeviceID == deviceID.Value) : true)
+                    && (from.HasValue ? (ww.FlightTime >= from.Value) : true)
+                    && (to.HasValue ? (ww.FlightTime <= to.Value) : true);
                 if (mode == "Large")
                 {
 
@@ -158,6 +160,70 @@ namespace MiSmart.API.Controllers
                 else
                 {
                     var listResponse = flightStatRepository.GetListFlightStatsView<SmallFlightStatViewModel>(pageCommand, query, ww => ww.CreateTime, false);
+                    listResponse.SetResponse(response);
+                }
+            }
+
+
+
+            return response.ToIActionResult();
+        }
+        [HttpGet("{id:int}/Fields")]
+        public IActionResult GetFields([FromServices] FieldRepository fieldRepository, [FromRoute] Int32 id, [FromQuery] PageCommand pageCommand, [FromQuery] DateTime? from, [FromQuery] DateTime? to, [FromQuery] String search, [FromQuery] String mode = "Small")
+        {
+            var response = actionResponseFactory.CreateInstance();
+            var validated = true;
+            if (!customerRepository.HasMemberPermission(id, CurrentUser))
+            {
+                validated = false;
+                response.AddNotAllowedErr();
+            }
+            if (validated)
+            {
+                search = search.ToLower();
+                Expression<Func<Field, Boolean>> query = ww => (ww.CustomerID == id)
+                    && (from.HasValue ? (ww.CreatedTime >= from.Value) : true)
+                    && (to.HasValue ? (ww.CreatedTime <= to.Value) : true)
+                    && (!String.IsNullOrWhiteSpace(search) ? (ww.Name.ToLower().Contains(search) || ww.FieldLocation.ToLower().Contains(search) || ww.FieldName.ToLower().Contains(search)) : true);
+                if (mode == "Large")
+                {
+
+                }
+                else
+                {
+                    var listResponse = fieldRepository.GetListResponseView<FieldViewModel>(pageCommand, query, ww => ww.CreatedTime, false);
+                    listResponse.SetResponse(response);
+                }
+            }
+
+
+            return response.ToIActionResult();
+        }
+
+        [HttpGet("{id:int}/Teams")]
+        public IActionResult GetTeams([FromServices] TeamRepository teamRepository, [FromRoute] Int32 id, [FromQuery] PageCommand pageCommand, [FromQuery] String search, [FromQuery] String mode = "Small")
+        {
+            var response = actionResponseFactory.CreateInstance();
+            var validated = true;
+            if (!customerRepository.HasMemberPermission(id, CurrentUser))
+            {
+                validated = false;
+                response.AddNotAllowedErr();
+            }
+
+            if (validated)
+            {
+                search = search.ToLower();
+                Expression<Func<Team, Boolean>> query = ww => (ww.CustomerID == id)
+                   && (!String.IsNullOrWhiteSpace(search) ? (ww.Name.ToLower().Contains(search)) : true);
+                if (mode == "Large")
+                {
+
+
+                }
+                else
+                {
+                    var listResponse = teamRepository.GetListResponseView<SmallTeamViewModel>(pageCommand, query);
                     listResponse.SetResponse(response);
                 }
             }

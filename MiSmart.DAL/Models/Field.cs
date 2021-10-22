@@ -42,13 +42,13 @@ namespace MiSmart.DAL.Models
         public Field() : base() { }
         public Field(ILazyLoader lazyLoader) : base(lazyLoader) { }
         public String Name { get; set; }
-        public string CreatedTime { get; set; }
+        public DateTime CreatedTime { get; set; } = DateTime.Now;
         public String FieldName { get; set; }
         public String FieldLocation { get; set; }
         public String PilotName { get; set; }
         public Double MappingArea { get; set; }
         public AreaUnit Unit { get; set; } = AreaUnit.Hectare;
-        public Double MappingTime { get; set; } 
+        public Double MappingTime { get; set; }
         public DateTime? UpdatedTime { get; set; } = null;
 
         private Customer customer;
@@ -85,7 +85,7 @@ namespace MiSmart.DAL.Models
 
         public String LocationPointString { get; set; }
         [NotMapped]
-        public LocationPoint locationPoint
+        public LocationPoint LocationPoint
         {
             get => JsonSerializer.Deserialize<LocationPoint>(LocationPointString);
             set => LocationPointString = JsonSerializer.Serialize(value);

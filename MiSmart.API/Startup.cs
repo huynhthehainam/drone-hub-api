@@ -35,6 +35,7 @@ using Microsoft.AspNetCore.SignalR;
 using System.Reflection;
 using MiSmart.API.Settings;
 
+
 namespace MiSmart.API
 {
     public class Startup
@@ -122,14 +123,13 @@ namespace MiSmart.API
             services.AddScoped<CacheService, CacheService>();
             services.AddScoped<EmailService, EmailService>();
 
-
+            #endregion
             #region AddingFactories
 
             services.AddSingleton<IActionResponseFactory, ActionResponseFactory>();
             #endregion
 
 
-            #endregion
             #region AddingRepositories
 
             services.AddScoped<CustomerRepository, CustomerRepository>();
@@ -140,9 +140,12 @@ namespace MiSmart.API
             services.AddScoped<TelemetryRecordRepository, TelemetryRecordRepository>();
             services.AddScoped<DeviceModelRepository, DeviceModelRepository>();
             services.AddScoped<FlightStatRepository, FlightStatRepository>();
+            services.AddScoped<FieldRepository, FieldRepository>();
 
 
             #endregion
+
+
             #region AddingCors
 
             var customCorsUrls = new List<String>() { "http://localhost:4200" };
