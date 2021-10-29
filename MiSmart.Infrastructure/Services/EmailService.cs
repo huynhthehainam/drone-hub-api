@@ -12,10 +12,10 @@ namespace MiSmart.Infrastructure.Services
     {
         private SmtpSettings smtpSettings;
         private EmailSettings emailSettings;
-        public EmailService(IOptions<SmtpSettings> smtpSettings, IOptions<EmailSettings> emailSettings)
+        public EmailService(IOptions<SmtpSettings> options, IOptions<EmailSettings> options1)
         {
-            this.smtpSettings = smtpSettings.Value;
-            this.emailSettings = emailSettings.Value;
+            this.smtpSettings = options.Value;
+            this.emailSettings = options1.Value;
         }
         public Task SendMailAsync(String[] receivedUsers, String[] cCedUsers, String[] bCCedUsers, String subject, String body, Boolean isBodyHtml = false, String senderName = null, String from = null)
         {
