@@ -19,14 +19,15 @@ namespace MiSmart.DAL.Repositories
 
         public Boolean HasOwnerPermission(Int32 customerID, UserCacheViewModel currentUser)
         {
+            if (currentUser.IsAdmin)
+            {
+                return true;
+            }
 
             var customer = Get(ww => ww.ID == customerID);
             if (customer is not null)
             {
-                if (currentUser.IsAdmin)
-                {
-                    return true;
-                }
+
                 var customerUser = customer.CustomerUsers.FirstOrDefault(ww => ww.UserID == currentUser.ID && ww.Type == CustomerMemberType.Owner);
                 if (customerUser is not null)
                 {
@@ -37,12 +38,13 @@ namespace MiSmart.DAL.Repositories
         }
         public Boolean HasMemberPermission(Int32 customerID, UserCacheViewModel currentUser)
         {
+            if (currentUser.IsAdmin)
+                return true;
 
             var customer = Get(ww => ww.ID == customerID);
             if (customer is not null)
             {
-                if (currentUser.IsAdmin)
-                    return true;
+
                 var customerUser = customer.CustomerUsers.FirstOrDefault(ww => ww.UserID == currentUser.ID);
                 if (customerUser is not null)
                     return true;

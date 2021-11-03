@@ -67,6 +67,11 @@ namespace MiSmart.API.Controllers
             var response = actionResponseFactory.CreateInstance();
 
             var validated = true;
+            if (!customerRepository.Any(ww => ww.ID == id))
+            {
+                validated = false;
+                response.AddNotFoundErr("Company");
+            }
             if (!customerRepository.HasOwnerPermission(id, CurrentUser))
             {
                 validated = false;
