@@ -13,9 +13,7 @@ using MiSmart.DAL.Repositories;
 using System.Linq;
 using MiSmart.Infrastructure.Commands;
 using MiSmart.DAL.ViewModels;
-
-
-
+using MiSmart.Infrastructure.ViewModels;
 
 namespace MiSmart.API.Controllers
 {
@@ -31,7 +29,7 @@ namespace MiSmart.API.Controllers
             var customerUser = customerUserRepository.Get(ww => ww.UserID == CurrentUser.ID);
             if (customerUser is not null)
             {
-                response.Data = new { ID = CurrentUser.ID, CustomerID = customerUser.CustomerID, CustomerName = customerUser.Customer.Name };
+                response.Data = new { ID = CurrentUser.ID, Customer = ViewModelHelpers.ConvertToViewModel<Customer, SmallCustomerViewModel>(customerUser.Customer) };
             }
             else
             {
