@@ -32,7 +32,7 @@ namespace MiSmart.DAL.Models
         public List<LocationPoint> FlywayPoints
         {
             get => JsonSerializer.Deserialize<List<LocationPoint>>(FlywayPointsString);
-            set => JsonSerializer.Serialize(value);
+            set => FlywayPointsString = JsonSerializer.Serialize(value);
         }
         private Device device;
         [JsonIgnore]

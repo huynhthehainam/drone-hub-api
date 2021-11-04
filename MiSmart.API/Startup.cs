@@ -29,7 +29,6 @@ using MiSmart.API.Services;
 using MiSmart.API.MqttControllers;
 using MiSmart.Infrastructure.Mqtt;
 using MiSmart.DAL.Repositories;
-using MiSmart.API.Hubs;
 
 using Microsoft.AspNetCore.SignalR;
 using System.Reflection;
@@ -84,9 +83,9 @@ namespace MiSmart.API
                .AddMqttConnectionHandler()
                .AddConnections()
                .AddMqttWebSocketServerAdapter();
-
-            // services.AddScoped<MqttBaseController, MqttController>();
             services.AddMqttControllers();
+            // services.AddScoped<MqttBaseController, MqttController>();
+            // services.AddScoped<MqttBaseController, DevicesController>();
 
             #endregion
 
@@ -163,7 +162,7 @@ namespace MiSmart.API
             #region ConfiguringWebSocket
 
 
-            services.AddSignalR();
+            // services.AddSignalR();
 
             #endregion
 
@@ -216,10 +215,10 @@ namespace MiSmart.API
             {
                 endpoints.MapControllers();
                 endpoints.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
-                endpoints.MapHub<DeviceNotificationHub>("/hubs/devices", options =>
-                {
+                // endpoints.MapHub<DeviceNotificationHub>("/hubs/devices", options =>
+                // {
 
-                });
+                // });
             });
             app.UseMqttServer(server =>
                app.ApplicationServices.GetRequiredService<IMqttService>().ConfigureMqttServer(server));

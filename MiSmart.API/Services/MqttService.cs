@@ -30,6 +30,8 @@ namespace MiSmart.API.Services
         }
         public void ConfigureMqttServerOptions(AspNetMqttServerOptionsBuilder options)
         {
+            Console.WriteLine("Configure Mqtt Server Options");
+
             options.WithoutDefaultEndpoint();
             options.WithConnectionValidator(this);
             options.WithApplicationMessageInterceptor(this);
@@ -37,6 +39,7 @@ namespace MiSmart.API.Services
         }
         public void ConfigureMqttServer(IMqttServer mqtt)
         {
+            Console.WriteLine("Configure Mqtt Server");
             Server = mqtt;
             mqtt.ApplicationMessageReceivedHandler = this;
             mqtt.StartedHandler = this;
@@ -52,11 +55,11 @@ namespace MiSmart.API.Services
             return Task.Run(() =>
               {
                   Console.WriteLine(
-                      $"{DateTime.Now.ToString(CultureInfo.InvariantCulture)} - Received MQTT Message Logged:{"_newLine"}" +
-                      $"- Topic = {eventArgs.ApplicationMessage.Topic + "_newLine"}" +
-                      $"- Payload = {Encoding.UTF8.GetString(eventArgs.ApplicationMessage.Payload) + "_newLine"}" +
-                      $"- QoS = {eventArgs.ApplicationMessage.QualityOfServiceLevel + "_newLine"}" +
-                      $"- Retain = {eventArgs.ApplicationMessage.Retain + "_newLine"}");
+                      $"{DateTime.Now.ToString(CultureInfo.InvariantCulture)} - Received MQTT Message Logged:");
+                  Console.WriteLine($"- Topic = {eventArgs.ApplicationMessage.Topic }");
+                  Console.WriteLine($"- Payload = {Encoding.UTF8.GetString(eventArgs.ApplicationMessage.Payload) }");
+                  Console.WriteLine($"- QoS = {eventArgs.ApplicationMessage.QualityOfServiceLevel }");
+                  Console.WriteLine($"- Retain = {eventArgs.ApplicationMessage.Retain }");
               });
         }
 
@@ -110,6 +113,7 @@ namespace MiSmart.API.Services
                     }
                     else
                     {
+                        Console.WriteLine($"ClientID {context.Username} is invalidated");
                         context.ReasonCode = MqttConnectReasonCode.BadUserNameOrPassword;
                     }
                 }
