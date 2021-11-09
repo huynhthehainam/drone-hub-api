@@ -140,7 +140,7 @@ namespace MiSmart.API.Controllers
             return response.ToIActionResult();
         }
         [HttpGet("{id:int}/FlightStats")]
-        public IActionResult GetFlightStats([FromServices] FlightStatRepository flightStatRepository, [FromRoute] Int32 id, [FromQuery] PageCommand pageCommand, [FromQuery] DateTime? from, [FromQuery] DateTime? to, [FromQuery] Int64? teamID, [FromQuery] Int32? deviceID, [FromQuery] String mode = "Small")
+        public IActionResult GetFlightStats([FromServices] FlightStatRepository flightStatRepository, [FromRoute] Int32 id, [FromQuery] PageCommand pageCommand, [FromQuery] DateTime? from, [FromQuery] DateTime? to, [FromQuery] Int64? teamID, [FromQuery] Int32? deviceID, [FromQuery] Int32? deviceModelID, [FromQuery] String mode = "Small")
         {
             var response = new FlightStatsActionResponse();
             response.ApplySettings(actionResponseFactory.Settings);

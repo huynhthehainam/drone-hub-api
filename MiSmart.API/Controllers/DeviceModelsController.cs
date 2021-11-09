@@ -13,6 +13,7 @@ using MiSmart.DAL.Repositories;
 using System.Linq;
 using MiSmart.Infrastructure.Commands;
 using MiSmart.DAL.ViewModels;
+using System.Linq.Expressions;
 
 namespace MiSmart.API.Controllers
 {
@@ -34,6 +35,22 @@ namespace MiSmart.API.Controllers
                 var model = new DeviceModel() { Name = command.Name };
                 deviceModelRepository.Create(model);
                 response.SetCreatedObject(model);
+            }
+
+
+
+            return response.ToIActionResult();
+        }
+        [HttpGet]
+        public IActionResult GetActionResult([FromBody] PageCommand pageCommand)
+        {
+            var response = actionResponseFactory.CreateInstance();
+            var validated = true;
+            if (validated)
+            {
+                Expression<Func<DeviceModel, Boolean>> query = ww => true;
+                var listResponse = deviceModelRepository.GetListResponseView<SmallDeviceModelVieModel>(pageCommand, query);
+                listResponse.SetResponse(response);
             }
 
 

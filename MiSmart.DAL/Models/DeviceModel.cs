@@ -20,9 +20,6 @@ namespace MiSmart.DAL.Models
         {
         }
         public String Name { get; set; }
-
-
-
         private ICollection<Device> devices;
         [JsonIgnore]
         public ICollection<Device> Devices

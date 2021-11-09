@@ -40,3 +40,4 @@ services:
       - ASPNETCORE_ENVIRONMENT=Docker
     depends_on:
       - postgres_image
+      - redis_image
