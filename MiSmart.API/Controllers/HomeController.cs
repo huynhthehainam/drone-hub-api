@@ -17,7 +17,7 @@ namespace MiSmart.API.Controllers
         public IActionResult Index()
         {
             var response = actionResponseFactory.CreateInstance();
-          
+
             response.Data = new
             {
                 CreatedBy = "MiSmart",
