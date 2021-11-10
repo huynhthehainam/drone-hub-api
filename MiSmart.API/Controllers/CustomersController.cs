@@ -185,11 +185,10 @@ namespace MiSmart.API.Controllers
             }
             if (validated)
             {
-                search = search.ToLower();
                 Expression<Func<Field, Boolean>> query = ww => (ww.CustomerID == id)
                     && (from.HasValue ? (ww.CreatedTime >= from.Value) : true)
                     && (to.HasValue ? (ww.CreatedTime <= to.Value) : true)
-                    && (!String.IsNullOrWhiteSpace(search) ? (ww.Name.ToLower().Contains(search) || ww.FieldLocation.ToLower().Contains(search) || ww.FieldName.ToLower().Contains(search)) : true);
+                    && (!String.IsNullOrWhiteSpace(search) ? (ww.Name.ToLower().Contains(search.ToLower()) || ww.FieldLocation.ToLower().Contains(search.ToLower()) || ww.FieldName.ToLower().Contains(search.ToLower())) : true);
                 if (mode == "Large")
                 {
 
@@ -218,9 +217,9 @@ namespace MiSmart.API.Controllers
 
             if (validated)
             {
-                search = search.ToLower();
+                
                 Expression<Func<Team, Boolean>> query = ww => (ww.CustomerID == id)
-                   && (!String.IsNullOrWhiteSpace(search) ? (ww.Name.ToLower().Contains(search)) : true);
+                   && (!String.IsNullOrWhiteSpace(search) ? (ww.Name.ToLower().Contains(search.ToLower())) : true);
                 if (mode == "Large")
                 {
 
@@ -250,9 +249,8 @@ namespace MiSmart.API.Controllers
 
             if (validated)
             {
-                search = search.ToLower();
                 Expression<Func<Device, Boolean>> query = ww => (ww.CustomerID == id)
-                   && (!String.IsNullOrWhiteSpace(search) ? (ww.Name.ToLower().Contains(search)) : true);
+                   && (!String.IsNullOrWhiteSpace(search) ? (ww.Name.ToLower().Contains(search.ToLower())) : true);
                 if (mode == "Large")
                 {
 
