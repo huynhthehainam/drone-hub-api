@@ -15,6 +15,7 @@ using MiSmart.Infrastructure.Commands;
 using MiSmart.DAL.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using System.IO;
+using System.Linq.Expressions;
 
 namespace MiSmart.API.Controllers
 {
@@ -55,6 +56,18 @@ namespace MiSmart.API.Controllers
 
 
             return response.ToIActionResult();
+        }
+        [AllowAnonymous]
+        [HttpGet]
+        public IActionResult GetList([FromServices] PlanRepository planRepository, [FromQuery] PageCommand pageCommand)
+        {
+            var response = actionResponseFactory.CreateInstance();
+            Expression<Func<Plan, Boolean>> query = ww => true;
+            var listResponse = planRepository.GetListResponseView<SmallPlanViewModel>(pageCommand, query);
+            listResponse.SetResponse(response);
+
+            return response.ToIActionResult();
+
         }
 
         [AllowAnonymous]
