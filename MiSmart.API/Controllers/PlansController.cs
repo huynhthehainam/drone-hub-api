@@ -50,7 +50,9 @@ namespace MiSmart.API.Controllers
                 {
                     planRepository.Update(plan);
                 }
+                response.SetCreatedObject(plan);
             }
+
 
             return response.ToIActionResult();
         }
