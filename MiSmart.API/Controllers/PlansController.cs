@@ -32,10 +32,10 @@ namespace MiSmart.API.Controllers
             var response = actionResponseFactory.CreateInstance();
             var validated = true;
 
-            var plan = planRepository.Get(ww => ww.Name == command.Name);
+            var plan = planRepository.Get(ww => ww.FileName == command.File.FileName);
             if (plan is null)
             {
-                plan = new Plan { Name = command.Name, };
+                plan = new Plan { FileName = command.File.FileName };
             }
             plan.Latitude = command.Latitude.GetValueOrDefault();
             plan.Longitude = command.Longitude.GetValueOrDefault();

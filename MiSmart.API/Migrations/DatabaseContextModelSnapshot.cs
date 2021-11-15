@@ -265,9 +265,6 @@ namespace MiSmart.API.Migrations
                     b.Property<double>("Longitude")
                         .HasColumnType("double precision");
 
-                    b.Property<string>("Name")
-                        .HasColumnType("text");
-
                     b.HasKey("ID");
 
                     b.ToTable("Plans");

@@ -10,7 +10,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MiSmart.API.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20211115052545_Initial")]
+    [Migration("20211115080020_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -266,9 +266,6 @@ namespace MiSmart.API.Migrations
 
                     b.Property<double>("Longitude")
                         .HasColumnType("double precision");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("text");
 
                     b.HasKey("ID");
 

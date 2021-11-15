@@ -9,7 +9,6 @@ namespace MiSmart.API.Commands
 {
     public class AddingPlanCommand
     {
-        public String Name { get; set; }
         [AllowedExtensions(new String[] { ".plan" })]
         [Required]
         public IFormFile File { get; set; }

@@ -18,7 +18,18 @@ namespace MiSmart.DAL.Models
         public Plan(ILazyLoader lazyLoader) : base(lazyLoader)
         {
         }
-        public String Name { get; set; }
+        public String Name
+        {
+            get
+            {
+                var words = this.FileName.Split(".", StringSplitOptions.RemoveEmptyEntries);
+                if (words.Length > 0)
+                {
+                    return words[0];
+                }
+                return null;
+            }
+        }
         public Double Longitude { get; set; }
         public Double Latitude { get; set; }
         public Byte[] FileBytes { get; set; }
