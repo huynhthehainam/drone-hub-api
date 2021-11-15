@@ -122,8 +122,8 @@ namespace MiSmart.API.Migrations
                         .HasColumnType("bigint")
                         .UseIdentityByDefaultColumn();
 
-                    b.Property<string>("CreatedTime")
-                        .HasColumnType("text");
+                    b.Property<DateTime>("CreatedTime")
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("CustomerID")
                         .HasColumnType("integer");
@@ -237,9 +237,6 @@ namespace MiSmart.API.Migrations
                     b.Property<string>("TaskLocation")
                         .HasColumnType("text");
 
-                    b.Property<string>("TeamName")
-                        .HasColumnType("text");
-
                     b.HasKey("ID");
 
                     b.HasIndex("CustomerID");
@@ -247,6 +244,33 @@ namespace MiSmart.API.Migrations
                     b.HasIndex("DeviceID");
 
                     b.ToTable("FlightStats");
+                });
+
+            modelBuilder.Entity("MiSmart.DAL.Models.Plan", b =>
+                {
+                    b.Property<long>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .UseIdentityByDefaultColumn();
+
+                    b.Property<byte[]>("FileBytes")
+                        .HasColumnType("bytea");
+
+                    b.Property<string>("FileName")
+                        .HasColumnType("text");
+
+                    b.Property<double>("Latitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("Longitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("text");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("Plans");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.Team", b =>

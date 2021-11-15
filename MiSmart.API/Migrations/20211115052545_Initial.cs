@@ -36,6 +36,23 @@ namespace MiSmart.API.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Plans",
+                columns: table => new
+                {
+                    ID = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "text", nullable: true),
+                    Longitude = table.Column<double>(type: "double precision", nullable: false),
+                    Latitude = table.Column<double>(type: "double precision", nullable: false),
+                    FileBytes = table.Column<byte[]>(type: "bytea", nullable: true),
+                    FileName = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Plans", x => x.ID);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "CustomerUsers",
                 columns: table => new
                 {
@@ -63,7 +80,7 @@ namespace MiSmart.API.Migrations
                     ID = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "text", nullable: true),
-                    CreatedTime = table.Column<string>(type: "text", nullable: true),
+                    CreatedTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     FieldName = table.Column<string>(type: "text", nullable: true),
                     FieldLocation = table.Column<string>(type: "text", nullable: true),
                     PilotName = table.Column<string>(type: "text", nullable: true),
@@ -188,7 +205,6 @@ namespace MiSmart.API.Migrations
                     TaskAreaUnit = table.Column<int>(type: "integer", nullable: false),
                     FlightDuration = table.Column<double>(type: "double precision", nullable: false),
                     PilotName = table.Column<string>(type: "text", nullable: true),
-                    TeamName = table.Column<string>(type: "text", nullable: true),
                     FlywayPointsString = table.Column<string>(type: "text", nullable: true),
                     DeviceID = table.Column<int>(type: "integer", nullable: false),
                     CustomerID = table.Column<int>(type: "integer", nullable: false)
@@ -295,6 +311,9 @@ namespace MiSmart.API.Migrations
 
             migrationBuilder.DropTable(
                 name: "FlightStats");
+
+            migrationBuilder.DropTable(
+                name: "Plans");
 
             migrationBuilder.DropTable(
                 name: "TeamUsers");

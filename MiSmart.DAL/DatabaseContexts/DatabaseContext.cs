@@ -23,6 +23,7 @@ namespace MiSmart.DAL.DatabaseContexts
         public DbSet<FlightStat> FlightStats { get; set; }
         public DbSet<DeviceModel> DeviceModels { get; set; }
         public DbSet<CustomerUser> CustomerUsers { get; set; }
+        public DbSet<Plan> Plans { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Customer>(ww =>
@@ -67,6 +68,8 @@ namespace MiSmart.DAL.DatabaseContexts
                 ww.HasOne(ww => ww.Device).WithMany(ww => ww.FlightStats).HasForeignKey(ww => ww.DeviceID).OnDelete(DeleteBehavior.Cascade);
                 ww.HasOne(ww => ww.Customer).WithMany(ww => ww.FlightStats).HasForeignKey(ww => ww.CustomerID).OnDelete(DeleteBehavior.Cascade);
             });
+
+            modelBuilder.Entity<Plan>();
         }
     }
 }

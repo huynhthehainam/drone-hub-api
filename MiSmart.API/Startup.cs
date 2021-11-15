@@ -140,6 +140,7 @@ namespace MiSmart.API
             services.AddScoped<DeviceModelRepository, DeviceModelRepository>();
             services.AddScoped<FlightStatRepository, FlightStatRepository>();
             services.AddScoped<FieldRepository, FieldRepository>();
+            services.AddScoped<PlanRepository, PlanRepository>();
 
 
             #endregion
