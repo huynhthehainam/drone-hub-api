@@ -81,10 +81,32 @@ namespace MiSmart.API.Controllers
             {
                 validated = false;
 
+                response.AddNotFoundErr("Plan");
             }
             if (validated)
             {
                 response.SetFile(plan.FileBytes, "application/octet-stream", plan.FileName);
+            }
+
+
+            return response.ToIActionResult();
+        }
+
+        [HttpDelete("{id:long}")]
+        public IActionResult Delete([FromServices] PlanRepository planRepository, [FromRoute] Int64 id)
+        {
+            var response = actionResponseFactory.CreateInstance();
+            var validated = true;
+            var plan = planRepository.Get(ww => ww.ID == id);
+            if (plan is null)
+            {
+                validated = false;
+                response.AddNotFoundErr("Plan");
+            }
+            if (validated)
+            {
+                planRepository.Delete(plan);
+                response.SetNoContent();
             }
 
 
