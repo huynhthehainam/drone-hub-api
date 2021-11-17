@@ -204,11 +204,44 @@ namespace MiSmart.API.Controllers
             return response.ToIActionResult();
         }
 
+        [HttpPost("{id:int}/Teams")]
+        public IActionResult CreateTeam([FromServices] TeamRepository teamRepository, [FromRoute] Int32 id, [FromBody] AddingTeamCommand command)
+        {
+            var response = actionResponseFactory.CreateInstance();
+            var validated = true;
+            if (!customerRepository.Any(ww => ww.ID == id))
+            {
+                validated = false;
+                response.AddNotFoundErr("Customer");
+            }
+            if (!customerRepository.HasOwnerPermission(id, CurrentUser))
+            {
+                validated = false;
+                response.AddNotAllowedErr();
+            }
+
+            if (validated)
+            {
+                var team = new Team { Name = command.Name, CustomerID = id };
+                teamRepository.Create(team);
+                response.SetCreatedObject(team);
+            }
+
+
+
+            return response.ToIActionResult();
+        }
+
         [HttpGet("{id:int}/Teams")]
         public IActionResult GetTeams([FromServices] TeamRepository teamRepository, [FromRoute] Int32 id, [FromQuery] PageCommand pageCommand, [FromQuery] String search, [FromQuery] String mode = "Small")
         {
             var response = actionResponseFactory.CreateInstance();
             var validated = true;
+            if (!customerRepository.Any(ww => ww.ID == id))
+            {
+                validated = false;
+                response.AddNotFoundErr("Customer");
+            }
             if (!customerRepository.HasMemberPermission(id, CurrentUser))
             {
                 validated = false;
@@ -217,7 +250,7 @@ namespace MiSmart.API.Controllers
 
             if (validated)
             {
-                
+
                 Expression<Func<Team, Boolean>> query = ww => (ww.CustomerID == id)
                    && (!String.IsNullOrWhiteSpace(search) ? (ww.Name.ToLower().Contains(search.ToLower())) : true);
                 if (mode == "Large")
@@ -241,6 +274,11 @@ namespace MiSmart.API.Controllers
         {
             var response = actionResponseFactory.CreateInstance();
             var validated = true;
+            if (!customerRepository.Any(ww => ww.ID == id))
+            {
+                validated = false;
+                response.AddNotFoundErr("Customer");
+            }
             if (!customerRepository.HasMemberPermission(id, CurrentUser))
             {
                 validated = false;
@@ -273,6 +311,11 @@ namespace MiSmart.API.Controllers
             var response = actionResponseFactory.CreateInstance();
 
             var validated = true;
+            if (!customerRepository.Any(ww => ww.ID == id))
+            {
+                validated = false;
+                response.AddNotFoundErr("Customer");
+            }
             if (!customerRepository.HasMemberPermission(id, CurrentUser))
             {
                 validated = false;
