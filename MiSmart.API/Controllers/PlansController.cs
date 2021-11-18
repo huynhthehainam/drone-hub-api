@@ -62,7 +62,7 @@ namespace MiSmart.API.Controllers
         public IActionResult GetList([FromServices] PlanRepository planRepository, [FromQuery] PageCommand pageCommand, [FromQuery] String search)
         {
             var response = actionResponseFactory.CreateInstance();
-            Expression<Func<Plan, Boolean>> query = ww => (String.IsNullOrWhiteSpace(search) ? true : ww.Name.ToLower().Contains(search.ToLower()));
+            Expression<Func<Plan, Boolean>> query = ww => (String.IsNullOrWhiteSpace(search) ? true : ww.FileName.ToLower().Contains(search.ToLower()));
             var listResponse = planRepository.GetListResponseView<SmallPlanViewModel>(pageCommand, query);
             listResponse.SetResponse(response);
 
