@@ -19,7 +19,6 @@ services:
     build:
       context: .
       dockerfile: db.Dockerfile
-    container_name: db
     environment:
       - POSTGRES_PASSWORD=mismart123@123
     ports:
