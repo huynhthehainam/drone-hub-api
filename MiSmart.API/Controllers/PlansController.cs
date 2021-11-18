@@ -67,11 +67,12 @@ namespace MiSmart.API.Controllers
             var response = actionResponseFactory.CreateInstance();
             var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
             Point centerLocation = null;
-            if (latitude.HasValue && longitude.HasValue && range.HasValue){
+            if (latitude.HasValue && longitude.HasValue && range.HasValue)
+            {
                 centerLocation = geometryFactory.CreatePoint(new Coordinate(longitude.GetValueOrDefault(), latitude.GetValueOrDefault()));
             }
-            Expression<Func<Plan, Boolean>> query = ww => (String.IsNullOrWhiteSpace(search) ? 
-            ((centerLocation != null) ? (ww.Location.Distance(centerLocation)< range.GetValueOrDefault()) : true) 
+            Expression<Func<Plan, Boolean>> query = ww => (String.IsNullOrWhiteSpace(search) ?
+            ((centerLocation != null) ? (ww.Location.Distance(centerLocation) < range.GetValueOrDefault()) : true)
             : ww.FileName.ToLower().Contains(search.ToLower()));
             var listResponse = planRepository.GetListResponseView<SmallPlanViewModel>(pageCommand, query);
             listResponse.SetResponse(response);

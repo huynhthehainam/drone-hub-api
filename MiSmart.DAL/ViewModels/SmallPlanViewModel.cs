@@ -11,7 +11,9 @@ namespace MiSmart.DAL.ViewModels
         public Int64 ID { get; set; }
         public String Name { get; set; }
         public String FileName { get; set; }
-        public Point Location { get; set; }
+        public Double Longitude { get; set; }
+        public Double Latitude { get; set; }
+
 
 
         public void LoadFrom(Plan entity)
@@ -19,7 +21,8 @@ namespace MiSmart.DAL.ViewModels
             ID = entity.ID;
             Name = entity.Name;
             FileName = entity.FileName;
-            Location = entity.Location;
+            Longitude = entity.Location.X;
+            Latitude =  entity.Location.Y;
         }
     }
 }
