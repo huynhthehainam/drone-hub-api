@@ -21,12 +21,9 @@ services:
       dockerfile: db.Dockerfile
     environment:
       - POSTGRES_PASSWORD=mismart123@123
-    ports:
-      - 5432
     volumes:
-      - ./db_volumne:/var/lib/postgresql/data:Z
+      - ./db_volumne:/var/lib/postgresql/data
     restart: unless-stopped
-    oom_score_adj: -100
     networks:
       - mismart
 
