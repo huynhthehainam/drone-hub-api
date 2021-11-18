@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using System.Text.Json;
 using MiSmart.Infrastructure.Data;
 using System.ComponentModel.DataAnnotations.Schema;
+using NetTopologySuite.Geometries;
 
 namespace MiSmart.DAL.Models
 {
@@ -30,8 +31,7 @@ namespace MiSmart.DAL.Models
                 return null;
             }
         }
-        public Double Longitude { get; set; }
-        public Double Latitude { get; set; }
+        public Point Location { get; set; }
         public Byte[] FileBytes { get; set; }
         public String FileName { get; set; }
     }
