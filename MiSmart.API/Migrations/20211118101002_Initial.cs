@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+using NetTopologySuite.Geometries;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace MiSmart.API.Migrations
@@ -8,6 +9,9 @@ namespace MiSmart.API.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AlterDatabase()
+                .Annotation("Npgsql:PostgresExtension:postgis", ",,");
+
             migrationBuilder.CreateTable(
                 name: "Customers",
                 columns: table => new
@@ -41,8 +45,7 @@ namespace MiSmart.API.Migrations
                 {
                     ID = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Longitude = table.Column<double>(type: "double precision", nullable: false),
-                    Latitude = table.Column<double>(type: "double precision", nullable: false),
+                    Location = table.Column<Point>(type: "geography (point)", nullable: true),
                     FileBytes = table.Column<byte[]>(type: "bytea", nullable: true),
                     FileName = table.Column<string>(type: "text", nullable: true)
                 },

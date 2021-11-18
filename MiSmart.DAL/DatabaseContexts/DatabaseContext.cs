@@ -26,6 +26,7 @@ namespace MiSmart.DAL.DatabaseContexts
         public DbSet<Plan> Plans { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.HasPostgresExtension("postgis");
             modelBuilder.Entity<Customer>(ww =>
             {
 
@@ -69,7 +70,10 @@ namespace MiSmart.DAL.DatabaseContexts
                 ww.HasOne(ww => ww.Customer).WithMany(ww => ww.FlightStats).HasForeignKey(ww => ww.CustomerID).OnDelete(DeleteBehavior.Cascade);
             });
 
-            modelBuilder.Entity<Plan>();
+            modelBuilder.Entity<Plan>(ww =>
+            {
+                ww.Property(ww => ww.Location).HasColumnType("geography (point)");
+            });
         }
     }
 }

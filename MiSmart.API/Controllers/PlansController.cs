@@ -39,8 +39,8 @@ namespace MiSmart.API.Controllers
             {
                 plan = new Plan { FileName = command.File.FileName };
             }
-            var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
-            plan.Location = geometryFactory.CreatePoint(new Coordinate(command.Latitude.GetValueOrDefault(), command.Longitude.GetValueOrDefault()));
+            // var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
+            // plan.Location = geometryFactory.CreatePoint(new Coordinate(command.Longitude.GetValueOrDefault(), command.Latitude.GetValueOrDefault()));
             plan.FileName = command.File.FileName;
             plan.FileBytes = command.GetFileBytes();
             if (validated)
@@ -65,16 +65,16 @@ namespace MiSmart.API.Controllers
         [FromQuery] Double? latitude, [FromQuery] Double? longitude, [FromQuery] Double? range)
         {
             var response = actionResponseFactory.CreateInstance();
-            var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
-            Point centerLocation = null;
-            if (latitude.HasValue && longitude.HasValue && range.HasValue){
-                centerLocation = geometryFactory.CreatePoint(new Coordinate(latitude.GetValueOrDefault(), longitude.GetValueOrDefault()));
-            }
-            Expression<Func<Plan, Boolean>> query = ww => (String.IsNullOrWhiteSpace(search) ? 
-            ((centerLocation != null) ? (ww.Location.Distance(centerLocation)< range.GetValueOrDefault()) : true) 
-            : ww.FileName.ToLower().Contains(search.ToLower()));
-            var listResponse = planRepository.GetListResponseView<SmallPlanViewModel>(pageCommand, query);
-            listResponse.SetResponse(response);
+            // var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
+            // Point centerLocation = null;
+            // if (latitude.HasValue && longitude.HasValue && range.HasValue){
+            //     centerLocation = geometryFactory.CreatePoint(new Coordinate(longitude.GetValueOrDefault(), latitude.GetValueOrDefault()));
+            // }
+            // Expression<Func<Plan, Boolean>> query = ww => (String.IsNullOrWhiteSpace(search) ? 
+            // ((centerLocation != null) ? (ww.Location.Distance(centerLocation)< range.GetValueOrDefault()) : true) 
+            // : ww.FileName.ToLower().Contains(search.ToLower()));
+            // var listResponse = planRepository.GetListResponseView<SmallPlanViewModel>(pageCommand, query);
+            // listResponse.SetResponse(response);
 
             return response.ToIActionResult();
 

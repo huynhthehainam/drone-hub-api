@@ -33,7 +33,8 @@ using MiSmart.DAL.Repositories;
 using Microsoft.AspNetCore.SignalR;
 using System.Reflection;
 using MiSmart.API.Settings;
-
+using Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace MiSmart.API
 {
@@ -48,10 +49,12 @@ namespace MiSmart.API
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            services.AddEntityFrameworkNpgsqlNetTopologySuite().AddDbContext<DatabaseContext>((sp, opt) => opt.UseNpgsql(Configuration.GetConnectionString(DbConnection.DatabaseKey), b =>
+            // services.AddSingleton<IRelationalTypeMappingSource,NpgsqlTypeMappingSource>();
+            services.AddEntityFrameworkNpgsqlNetTopologySuite().AddEntityFrameworkNpgsql().AddDbContext<DatabaseContext>((sp, opt) => opt.UseNpgsql(Configuration.GetConnectionString(DbConnection.DatabaseKey), b =>
             {
-                b.MigrationsAssembly("MiSmart.API");
                 b.UseNetTopologySuite();
+                b.MigrationsAssembly("MiSmart.API");
+
             }).UseInternalServiceProvider(sp));
             services.AddDistributedRedisCache(option =>
             {
@@ -68,7 +71,6 @@ namespace MiSmart.API
                 Description = "Drone hub management"
             });
             services.AddHttpClient();
-
 
 
 
@@ -136,12 +138,13 @@ namespace MiSmart.API
             services.AddScoped<TeamRepository, TeamRepository>();
             services.AddScoped<DeviceRepository, DeviceRepository>();
             services.AddScoped<TeamUserRepository, TeamUserRepository>();
+            services.AddScoped<PlanRepository, PlanRepository>();
+
             services.AddScoped<CustomerUserRepository, CustomerUserRepository>();
             services.AddScoped<TelemetryRecordRepository, TelemetryRecordRepository>();
             services.AddScoped<DeviceModelRepository, DeviceModelRepository>();
             services.AddScoped<FlightStatRepository, FlightStatRepository>();
             services.AddScoped<FieldRepository, FieldRepository>();
-            services.AddScoped<PlanRepository, PlanRepository>();
 
 
             #endregion
