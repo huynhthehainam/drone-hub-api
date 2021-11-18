@@ -15,14 +15,22 @@ services:
       - postgres_image
 
   postgres_image:
-    image: postgres
-    restart: always
-    volumes:
-      - ./db_volumne:/var/lib/postgresql/data
+    image: huynhthehainam/webodm_db
+    build:
+      context: .
+      dockerfile: db.Dockerfile
+    container_name: db
     environment:
-      POSTGRES_PASSWORD: mismart123@123
+      - POSTGRES_PASSWORD=mismart123@123
+    ports:
+      - 5432
+    volumes:
+      - ./db_volumne:/var/lib/postgresql/data:Z
+    restart: unless-stopped
+    oom_score_adj: -100
     networks:
       - mismart
+
 
   mismartapi:
     image: mismartapi
