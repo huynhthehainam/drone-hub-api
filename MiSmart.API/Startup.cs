@@ -48,9 +48,10 @@ namespace MiSmart.API
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            services.AddEntityFrameworkNpgsql().AddDbContext<DatabaseContext>((sp, opt) => opt.UseNpgsql(Configuration.GetConnectionString(DbConnection.DatabaseKey), b =>
+            services.AddEntityFrameworkNpgsqlNetTopologySuite().AddDbContext<DatabaseContext>((sp, opt) => opt.UseNpgsql(Configuration.GetConnectionString(DbConnection.DatabaseKey), b =>
             {
                 b.MigrationsAssembly("MiSmart.API");
+                b.UseNetTopologySuite();
             }).UseInternalServiceProvider(sp));
             services.AddDistributedRedisCache(option =>
             {

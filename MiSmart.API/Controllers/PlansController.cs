@@ -16,6 +16,8 @@ using MiSmart.DAL.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using System.IO;
 using System.Linq.Expressions;
+using NetTopologySuite.Geometries;
+using NetTopologySuite;
 
 namespace MiSmart.API.Controllers
 {
@@ -37,8 +39,8 @@ namespace MiSmart.API.Controllers
             {
                 plan = new Plan { FileName = command.File.FileName };
             }
-            plan.Latitude = command.Latitude.GetValueOrDefault();
-            plan.Longitude = command.Longitude.GetValueOrDefault();
+            var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
+            plan.Location = geometryFactory.CreatePoint(new Coordinate(command.Latitude.GetValueOrDefault(), command.Longitude.GetValueOrDefault()));
             plan.FileName = command.File.FileName;
             plan.FileBytes = command.GetFileBytes();
             if (validated)
@@ -59,10 +61,18 @@ namespace MiSmart.API.Controllers
         }
         [AllowAnonymous]
         [HttpGet]
-        public IActionResult GetList([FromServices] PlanRepository planRepository, [FromQuery] PageCommand pageCommand, [FromQuery] String search)
+        public IActionResult GetList([FromServices] PlanRepository planRepository, [FromQuery] PageCommand pageCommand, [FromQuery] String search,
+        [FromQuery] Double? latitude, [FromQuery] Double? longitude, [FromQuery] Double? range)
         {
             var response = actionResponseFactory.CreateInstance();
-            Expression<Func<Plan, Boolean>> query = ww => (String.IsNullOrWhiteSpace(search) ? true : ww.FileName.ToLower().Contains(search.ToLower()));
+            var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
+            Point centerLocation = null;
+            if (latitude.HasValue && longitude.HasValue && range.HasValue){
+                centerLocation = geometryFactory.CreatePoint(new Coordinate(latitude.GetValueOrDefault(), longitude.GetValueOrDefault()));
+            }
+            Expression<Func<Plan, Boolean>> query = ww => (String.IsNullOrWhiteSpace(search) ? 
+            ((centerLocation != null) ? (ww.Location.Distance(centerLocation)< range.GetValueOrDefault()) : true) 
+            : ww.FileName.ToLower().Contains(search.ToLower()));
             var listResponse = planRepository.GetListResponseView<SmallPlanViewModel>(pageCommand, query);
             listResponse.SetResponse(response);
 
