@@ -15,7 +15,7 @@ services:
       - postgres_image
 
   postgres_image:
-    image: huynhthehainam/webodm_db
+    image: huynhthehainam/dronehub_db
     build:
       context: .
       dockerfile: db.Dockerfile
