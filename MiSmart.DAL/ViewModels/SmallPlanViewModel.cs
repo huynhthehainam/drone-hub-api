@@ -35,7 +35,7 @@ namespace MiSmart.DAL.ViewModels
                     {
                         var d = Distance.GetValueOrDefault();
                         var d1 = d.ToString("0.##");
-                        result = $"{d} m";
+                        result = $"{d1} m";
                     }
                 }
                 return result;
