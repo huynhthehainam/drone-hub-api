@@ -15,12 +15,15 @@ services:
       - postgres_image
 
   postgres_image:
-    image: postgis/postgis
+    image: huynhthehainam/dronehub_db
+    build:
+      context: .
+      dockerfile: db.Dockerfile
+    environment:
+      - POSTGRES_PASSWORD=mismart123@123
     volumes:
       - ./db_volumne:/var/lib/postgresql/data
     restart: unless-stopped
-    environment:
-      POSTGRES_PASSWORD: mismart123@123
     networks:
       - mismart
 
@@ -31,7 +34,6 @@ services:
       context: .
       dockerfile: MiSmart.API/Dockerfile
     ports:
-      # - 5024:80
       - 5024:5000
       - 1886:1883
     networks:
