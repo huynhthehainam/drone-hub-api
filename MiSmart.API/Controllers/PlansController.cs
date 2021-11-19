@@ -18,6 +18,7 @@ using System.IO;
 using System.Linq.Expressions;
 using NetTopologySuite.Geometries;
 using NetTopologySuite;
+using MiSmart.DAL.Extensions;
 
 namespace MiSmart.API.Controllers
 {
@@ -42,7 +43,6 @@ namespace MiSmart.API.Controllers
             if (validated)
             {
                 var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
-
                 plan.Location = geometryFactory.CreatePoint(new Coordinate(command.Longitude.GetValueOrDefault(), command.Latitude.GetValueOrDefault()));
                 plan.FileName = command.File.FileName;
                 plan.FileBytes = command.GetFileBytes();
@@ -67,8 +67,9 @@ namespace MiSmart.API.Controllers
         [FromQuery] Double? latitude, [FromQuery] Double? longitude, [FromQuery] Double? range)
         {
             var response = actionResponseFactory.CreateInstance();
-            var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
             Point centerLocation = null;
+            var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
+
             if (latitude.HasValue && longitude.HasValue && range.HasValue)
             {
                 centerLocation = geometryFactory.CreatePoint(new Coordinate(longitude.GetValueOrDefault(), latitude.GetValueOrDefault()));
@@ -77,6 +78,13 @@ namespace MiSmart.API.Controllers
             ((centerLocation != null) ? (ww.Location.Distance(centerLocation) < range.GetValueOrDefault()) : true)
             : ww.FileName.ToLower().Contains(search.ToLower()));
             var listResponse = planRepository.GetListResponseView<SmallPlanViewModel>(pageCommand, query);
+            if (centerLocation is not null)
+            {
+                foreach (var item in listResponse.Data)
+                {
+                    item.CalculateDistance(centerLocation);
+                }
+            }
             listResponse.SetResponse(response);
 
             return response.ToIActionResult();

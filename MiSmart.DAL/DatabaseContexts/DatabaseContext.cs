@@ -26,6 +26,7 @@ namespace MiSmart.DAL.DatabaseContexts
         public DbSet<Plan> Plans { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
             modelBuilder.HasPostgresExtension("postgis");
             modelBuilder.Entity<Customer>(ww =>
             {
