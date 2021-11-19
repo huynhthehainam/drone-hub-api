@@ -35,16 +35,19 @@ namespace MiSmart.API.Controllers
             var validated = true;
 
             var plan = planRepository.Get(ww => ww.FileName == command.File.FileName);
-            if (plan is null)
+            if (plan is not null)
             {
-                plan = new Plan { FileName = command.File.FileName };
+                validated = false;
+                response.AddExistedErr("Plan");
             }
-            var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
-            plan.Location = geometryFactory.CreatePoint(new Coordinate(command.Longitude.GetValueOrDefault(), command.Latitude.GetValueOrDefault()));
-            plan.FileName = command.File.FileName;
-            plan.FileBytes = command.GetFileBytes();
             if (validated)
             {
+                plan = new Plan { FileName = command.File.FileName };
+                var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
+                plan.Location = geometryFactory.CreatePoint(new Coordinate(command.Longitude.GetValueOrDefault(), command.Latitude.GetValueOrDefault()));
+                plan.FileName = command.File.FileName;
+                plan.FileBytes = command.GetFileBytes();
+
                 if (plan.ID == 0)
                 {
                     planRepository.Create(plan);
