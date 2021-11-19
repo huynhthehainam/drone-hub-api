@@ -264,6 +264,9 @@ namespace MiSmart.API.Migrations
                     b.Property<Point>("Location")
                         .HasColumnType("geography (point)");
 
+                    b.Property<string>("Prefix")
+                        .HasColumnType("text");
+
                     b.HasKey("ID");
 
                     b.ToTable("Plans");

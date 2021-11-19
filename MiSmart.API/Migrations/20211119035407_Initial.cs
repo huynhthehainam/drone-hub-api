@@ -45,6 +45,7 @@ namespace MiSmart.API.Migrations
                 {
                     ID = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Prefix = table.Column<string>(type: "text", nullable: true),
                     Location = table.Column<Point>(type: "geography (point)", nullable: true),
                     FileBytes = table.Column<byte[]>(type: "bytea", nullable: true),
                     FileName = table.Column<string>(type: "text", nullable: true)

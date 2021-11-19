@@ -11,7 +11,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MiSmart.API.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20211118101002_Initial")]
+    [Migration("20211119035407_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -265,6 +265,9 @@ namespace MiSmart.API.Migrations
 
                     b.Property<Point>("Location")
                         .HasColumnType("geography (point)");
+
+                    b.Property<string>("Prefix")
+                        .HasColumnType("text");
 
                     b.HasKey("ID");
 

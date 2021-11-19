@@ -13,6 +13,8 @@ namespace MiSmart.API.Commands
         [Required]
         public IFormFile File { get; set; }
         [Required]
+        public String Predix { get; set; }
+        [Required]
         public Double? Latitude { get; set; }
         [Required]
         public Double? Longitude { get; set; }

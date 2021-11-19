@@ -34,7 +34,7 @@ namespace MiSmart.API.Controllers
             var response = actionResponseFactory.CreateInstance();
             var validated = true;
 
-            var plan = planRepository.Get(ww => ww.FileName == command.File.FileName);
+            var plan = planRepository.Get(ww => ww.FileName == command.File.FileName && ww.Prefix == command.Predix);
             if (plan is not null)
             {
                 validated = false;
@@ -42,7 +42,7 @@ namespace MiSmart.API.Controllers
             }
             if (validated)
             {
-                plan = new Plan { FileName = command.File.FileName };
+                plan = new Plan { FileName = command.File.FileName, Prefix = command.Predix };
                 var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
                 plan.Location = geometryFactory.CreatePoint(new Coordinate(command.Longitude.GetValueOrDefault(), command.Latitude.GetValueOrDefault()));
                 plan.FileName = command.File.FileName;
