@@ -46,6 +46,7 @@ namespace MiSmart.DAL.DatabaseContexts
             modelBuilder.Entity<Device>(ww =>
             {
                 ww.HasOne(ww => ww.Team).WithMany(ww => ww.Devices).HasForeignKey(ww => ww.TeamID).OnDelete(DeleteBehavior.Cascade);
+                ww.Property(ww => ww.LastPoint).HasColumnType("geography (point)");
                 ww.HasOne(ww => ww.Customer).WithMany(ww => ww.Devices).HasForeignKey(ww => ww.CustomerID).OnDelete(DeleteBehavior.Cascade);
                 ww.HasOne(ww => ww.DeviceModel).WithMany(ww => ww.Devices).HasForeignKey(ww => ww.DeviceModelID).OnDelete(DeleteBehavior.Cascade);
             });
@@ -59,16 +60,24 @@ namespace MiSmart.DAL.DatabaseContexts
             modelBuilder.Entity<TelemetryRecord>(ww =>
             {
                 ww.HasOne(ww => ww.Device).WithMany(ww => ww.Records).HasForeignKey(ww => ww.DeviceID).OnDelete(DeleteBehavior.Cascade);
+                
             });
             modelBuilder.Entity<Field>(ww =>
             {
                 ww.HasOne(ww => ww.Customer).WithMany(ww => ww.Fields).HasForeignKey(ww => ww.CustomerID).OnDelete(DeleteBehavior.Cascade);
+                ww.Property(ww => ww.Border).HasColumnType("geography (polygon)");
+                ww.Property(ww => ww.Flyway).HasColumnType("geography (linestring)");
+                ww.Property(ww => ww.GPSPoints).HasColumnType("geography (multipoint)");
+                ww.Property(ww => ww.LocationPoint).HasColumnType("geography (point)");
+                ww.Property(ww => ww.CalibrationPoints).HasColumnType("geography (multipoint)");
             });
 
             modelBuilder.Entity<FlightStat>(ww =>
             {
                 ww.HasOne(ww => ww.Device).WithMany(ww => ww.FlightStats).HasForeignKey(ww => ww.DeviceID).OnDelete(DeleteBehavior.Cascade);
                 ww.HasOne(ww => ww.Customer).WithMany(ww => ww.FlightStats).HasForeignKey(ww => ww.CustomerID).OnDelete(DeleteBehavior.Cascade);
+                ww.Property(ww => ww.FlywayPoints).HasColumnType("geography (linestring)");
+
             });
 
             modelBuilder.Entity<Plan>(ww =>

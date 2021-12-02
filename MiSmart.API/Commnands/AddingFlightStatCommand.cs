@@ -9,6 +9,13 @@ using MiSmart.DAL.Models;
 
 namespace MiSmart.API.Commands
 {
+    public class LocationPoint
+    {
+        [Required]
+        public Double? Longitude { get; set; }
+        [Required]
+        public Double? Latitude { get; set; }
+    }
     public class AddingFlightStatCommand
     {
         [Required]

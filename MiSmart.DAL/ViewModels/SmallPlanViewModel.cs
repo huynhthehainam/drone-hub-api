@@ -44,7 +44,7 @@ namespace MiSmart.DAL.ViewModels
 
         public void CalculateDistance(Point point)
         {
-            this.Distance = Location.ProjectTo(3857).Distance(point.ProjectTo(3857));
+            this.Distance = Location.ProjectTo(2855).Distance(point.ProjectTo(2855));
         }
 
         public void LoadFrom(Plan entity)

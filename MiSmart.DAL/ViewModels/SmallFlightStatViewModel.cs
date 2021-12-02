@@ -1,6 +1,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using MiSmart.DAL.Models;
 using MiSmart.Infrastructure.ViewModels;
 
@@ -16,7 +17,7 @@ namespace MiSmart.DAL.ViewModels
         public Int32 Flights { get; set; }
         public DateTime FlightTime { get; set; }
         public String FieldName { get; set; }
-        public List<LocationPoint> FlywayPoints { get; set; }
+        public List<Object> FlywayPoints { get; set; }
         public String TaskLocation { get; set; }
         public String TeamName { get; set; }
         public Double TaskArea { get; set; }
@@ -31,7 +32,7 @@ namespace MiSmart.DAL.ViewModels
             Flights = entity.Flights;
             FlightTime = entity.FlightTime;
             FieldName = entity.FieldName;
-            FlywayPoints = entity.FlywayPoints;
+            // FlywayPoints = entity.FlywayPoints.Coordinates.Select(ww => new { Longitude = ww.X, Latitude = ww.Y }).ToList();
             TaskLocation = entity.TaskLocation;
             TeamName = entity.Device.Team?.Name;
             TaskArea = entity.TaskArea;

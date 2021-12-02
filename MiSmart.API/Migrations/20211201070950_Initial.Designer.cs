@@ -11,7 +11,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MiSmart.API.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20211119035407_Initial")]
+    [Migration("20211201070950_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -78,6 +78,9 @@ namespace MiSmart.API.Migrations
                     b.Property<int>("DeviceModelID")
                         .HasColumnType("integer");
 
+                    b.Property<Point>("LastPoint")
+                        .HasColumnType("geography (point)");
+
                     b.Property<string>("Name")
                         .HasColumnType("text");
 
@@ -126,6 +129,12 @@ namespace MiSmart.API.Migrations
                         .HasColumnType("bigint")
                         .UseIdentityByDefaultColumn();
 
+                    b.Property<Polygon>("Border")
+                        .HasColumnType("geography (polygon)");
+
+                    b.Property<MultiPoint>("CalibrationPoints")
+                        .HasColumnType("geography (multipoint)");
+
                     b.Property<DateTime>("CreatedTime")
                         .HasColumnType("timestamp without time zone");
 
@@ -135,20 +144,17 @@ namespace MiSmart.API.Migrations
                     b.Property<double>("EdgeOffset")
                         .HasColumnType("double precision");
 
-                    b.Property<string>("EdgedLocationPointsString")
-                        .HasColumnType("text");
-
                     b.Property<string>("FieldLocation")
                         .HasColumnType("text");
 
                     b.Property<string>("FieldName")
                         .HasColumnType("text");
 
-                    b.Property<string>("FlywayPointsString")
-                        .HasColumnType("text");
+                    b.Property<LineString>("Flyway")
+                        .HasColumnType("geography (linestring)");
 
-                    b.Property<string>("GPSPointsString")
-                        .HasColumnType("text");
+                    b.Property<MultiPoint>("GPSPoints")
+                        .HasColumnType("geography (multipoint)");
 
                     b.Property<double>("InnerArea")
                         .HasColumnType("double precision");
@@ -156,8 +162,8 @@ namespace MiSmart.API.Migrations
                     b.Property<bool>("IsLargeFarm")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("LocationPointString")
-                        .HasColumnType("text");
+                    b.Property<Point>("LocationPoint")
+                        .HasColumnType("geography (point)");
 
                     b.Property<double>("MappingArea")
                         .HasColumnType("double precision");
@@ -226,8 +232,8 @@ namespace MiSmart.API.Migrations
                     b.Property<int>("Flights")
                         .HasColumnType("integer");
 
-                    b.Property<string>("FlywayPointsString")
-                        .HasColumnType("text");
+                    b.Property<LineString>("FlywayPoints")
+                        .HasColumnType("geography (linestring)");
 
                     b.Property<string>("PilotName")
                         .HasColumnType("text");

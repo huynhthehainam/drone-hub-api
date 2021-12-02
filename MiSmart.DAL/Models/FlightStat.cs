@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using NetTopologySuite.Geometries;
 
 namespace MiSmart.DAL.Models
 {
@@ -27,13 +28,7 @@ namespace MiSmart.DAL.Models
         public AreaUnit TaskAreaUnit { get; set; } = AreaUnit.Hectare;
         public Double FlightDuration { get; set; }
         public String PilotName { get; set; }
-        public String FlywayPointsString { get; set; }
-        [NotMapped]
-        public List<LocationPoint> FlywayPoints
-        {
-            get => JsonSerializer.Deserialize<List<LocationPoint>>(FlywayPointsString);
-            set => FlywayPointsString = JsonSerializer.Serialize(value);
-        }
+        public LineString FlywayPoints { get; set; }
         private Device device;
         [JsonIgnore]
         public Device Device

@@ -18,7 +18,7 @@ services:
     image: huynhthehainam/dronehub_db
     build:
       context: .
-      dockerfile: db.Dockerfile
+      dockerfile: database.Dockerfile
     environment:
       - POSTGRES_PASSWORD=mismart123@123
     volumes:
@@ -26,7 +26,6 @@ services:
     restart: unless-stopped
     networks:
       - mismart
-
 
   mismartapi:
     image: mismartapi

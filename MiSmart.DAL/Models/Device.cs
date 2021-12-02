@@ -7,6 +7,7 @@ using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using MiSmart.Infrastructure.Data;
 using MiSmart.Infrastructure.Helpers;
+using NetTopologySuite.Geometries;
 
 namespace MiSmart.DAL.Models
 {
@@ -71,18 +72,7 @@ namespace MiSmart.DAL.Models
             set => deviceModel = value;
         }
         public Int32 DeviceModelID { get; set; }
-        public LocationPoint LastLocation
-        {
-            get
-            {
-                var lastRecord = Records.OrderByDescending(ww => ww.CreatedTime).FirstOrDefault();
-                if (lastRecord is not null)
-                {
-                    return new LocationPoint { Latitude = lastRecord.Latitude, Longitude = lastRecord.Longitude };
-                }
-                return null;
-            }
-        }
+        public Point LastPoint { get; set; }
     }
 
 }

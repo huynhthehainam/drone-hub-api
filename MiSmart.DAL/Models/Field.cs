@@ -7,21 +7,23 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using System.Text.Json;
 using MiSmart.Infrastructure.Data;
 using System.ComponentModel.DataAnnotations.Schema;
+using NetTopologySuite.Geometries;
+
 
 namespace MiSmart.DAL.Models
 {
-    public class GPSPoint
-    {
-        public Double Longitude { get; set; }
-        public Double Latitude { get; set; }
-        public Double Accuracy { get; set; }
-        public Double Yaw { get; set; }
-    }
-    public class LocationPoint
-    {
-        public Double Longitude { get; set; }
-        public Double Latitude { get; set; }
-    }
+    // public class GPSPoint
+    // {
+    //     public Double Longitude { get; set; }
+    //     public Double Latitude { get; set; }
+    //     public Double Accuracy { get; set; }
+    //     public Double Yaw { get; set; }
+    // }
+    // public class LocationPoint
+    // {
+    //     public Double Longitude { get; set; }
+    //     public Double Latitude { get; set; }
+    // }
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum LengthUnit
     {
@@ -50,7 +52,6 @@ namespace MiSmart.DAL.Models
         public AreaUnit Unit { get; set; } = AreaUnit.Hectare;
         public Double MappingTime { get; set; }
         public DateTime? UpdatedTime { get; set; } = null;
-
         private Customer customer;
         [JsonIgnore]
         public Customer Customer
@@ -59,37 +60,11 @@ namespace MiSmart.DAL.Models
             set => customer = value;
         }
         public Int32 CustomerID { get; set; }
-
-        public String EdgedLocationPointsString { get; set; }
-        [NotMapped]
-        public List<LocationPoint> EdgedLocationPoints
-        {
-            get => JsonSerializer.Deserialize<List<LocationPoint>>(EdgedLocationPointsString);
-            set => EdgedLocationPointsString = JsonSerializer.Serialize(value);
-        }
-
-        public String FlywayPointsString { get; set; }
-        [NotMapped]
-        public List<LocationPoint> FlywayPoints
-        {
-            get => JsonSerializer.Deserialize<List<LocationPoint>>(FlywayPointsString);
-            set => FlywayPointsString = JsonSerializer.Serialize(value);
-        }
-        public String GPSPointsString { get; set; }
-        [NotMapped]
-        public List<GPSPoint> GPSPoints
-        {
-            get => JsonSerializer.Deserialize<List<GPSPoint>>(GPSPointsString);
-            set => GPSPointsString = JsonSerializer.Serialize(value);
-        }
-
-        public String LocationPointString { get; set; }
-        [NotMapped]
-        public LocationPoint LocationPoint
-        {
-            get => JsonSerializer.Deserialize<LocationPoint>(LocationPointString);
-            set => LocationPointString = JsonSerializer.Serialize(value);
-        }
+        public Polygon Border { get; set; } = Polygon.Empty;
+        public LineString Flyway { get; set; } = LineString.Empty;
+        public MultiPoint GPSPoints { get; set; } = MultiPoint.Empty;
+        public Point LocationPoint { get; set; } = Point.Empty;
+        public MultiPoint CalibrationPoints { get; set; } = MultiPoint.Empty;
 
         public Double WorkSpeed { get; set; }
         public Double WorkArea { get; set; }
@@ -98,12 +73,5 @@ namespace MiSmart.DAL.Models
         public Double SprayDir { get; set; }
         public Boolean IsLargeFarm { get; set; } = false;
         public Double EdgeOffset { get; set; }
-        private String CalibrationPointsString { get; set; }
-        [NotMapped]
-        public List<LocationPoint> CalibrationPoints
-        {
-            get => JsonSerializer.Deserialize<List<LocationPoint>>(CalibrationPointsString);
-            set => CalibrationPointsString = JsonSerializer.Serialize(value);
-        }
     }
 }

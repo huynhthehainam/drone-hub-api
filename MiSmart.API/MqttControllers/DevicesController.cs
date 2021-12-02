@@ -13,6 +13,9 @@ using System.Text.Json;
 using MiSmart.DAL.Repositories;
 using System.Collections.Generic;
 using Microsoft.AspNet.SignalR;
+using NetTopologySuite;
+using NetTopologySuite.Geometries;
+using System.Linq;
 
 namespace MiSmart.API.MqttControllers
 {
@@ -28,8 +31,6 @@ namespace MiSmart.API.MqttControllers
 
             this.telemetryRecordRepository = telemetryRecordRepository;
             this.flightStatRepository = flightStatRepository;
-
-
         }
 
         [MqttRoute("me/TelemetryRecords")]
@@ -85,13 +86,16 @@ namespace MiSmart.API.MqttControllers
                 {
                     if (command.TaskArea.HasValue && command.Flights.HasValue && command.FlightDuration.HasValue)
                     {
+                        var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
+
+
                         var stat = new FlightStat
                         {
                             FlightDuration = command.FlightDuration.GetValueOrDefault(),
                             FieldName = command.FieldName,
                             Flights = command.Flights.GetValueOrDefault(),
                             FlightTime = command.FlightTime ?? DateTime.Now,
-                            FlywayPoints = command.FlywayPoints,
+                            FlywayPoints = geometryFactory.CreateLineString(command.FlywayPoints.Select(ww => new Coordinate(ww.Longitude.GetValueOrDefault(), ww.Latitude.GetValueOrDefault())).ToArray()),
                             PilotName = command.PilotName,
                             CreateTime = DateTime.Now,
                             CustomerID = device.CustomerID,

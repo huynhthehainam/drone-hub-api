@@ -92,10 +92,11 @@ namespace MiSmart.API.Migrations
                     MappingTime = table.Column<double>(type: "double precision", nullable: false),
                     UpdatedTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     CustomerID = table.Column<int>(type: "integer", nullable: false),
-                    EdgedLocationPointsString = table.Column<string>(type: "text", nullable: true),
-                    FlywayPointsString = table.Column<string>(type: "text", nullable: true),
-                    GPSPointsString = table.Column<string>(type: "text", nullable: true),
-                    LocationPointString = table.Column<string>(type: "text", nullable: true),
+                    Border = table.Column<Polygon>(type: "geography (polygon)", nullable: true),
+                    Flyway = table.Column<LineString>(type: "geography (linestring)", nullable: true),
+                    GPSPoints = table.Column<MultiPoint>(type: "geography (multipoint)", nullable: true),
+                    LocationPoint = table.Column<Point>(type: "geography (point)", nullable: true),
+                    CalibrationPoints = table.Column<MultiPoint>(type: "geography (multipoint)", nullable: true),
                     WorkSpeed = table.Column<double>(type: "double precision", nullable: false),
                     WorkArea = table.Column<double>(type: "double precision", nullable: false),
                     InnerArea = table.Column<double>(type: "double precision", nullable: false),
@@ -147,7 +148,8 @@ namespace MiSmart.API.Migrations
                     Status = table.Column<int>(type: "integer", nullable: false),
                     TeamID = table.Column<long>(type: "bigint", nullable: true),
                     CustomerID = table.Column<int>(type: "integer", nullable: false),
-                    DeviceModelID = table.Column<int>(type: "integer", nullable: false)
+                    DeviceModelID = table.Column<int>(type: "integer", nullable: false),
+                    LastPoint = table.Column<Point>(type: "geography (point)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -208,7 +210,7 @@ namespace MiSmart.API.Migrations
                     TaskAreaUnit = table.Column<int>(type: "integer", nullable: false),
                     FlightDuration = table.Column<double>(type: "double precision", nullable: false),
                     PilotName = table.Column<string>(type: "text", nullable: true),
-                    FlywayPointsString = table.Column<string>(type: "text", nullable: true),
+                    FlywayPoints = table.Column<LineString>(type: "geography (linestring)", nullable: true),
                     DeviceID = table.Column<int>(type: "integer", nullable: false),
                     CustomerID = table.Column<int>(type: "integer", nullable: false)
                 },
