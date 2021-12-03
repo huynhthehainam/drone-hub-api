@@ -152,7 +152,7 @@ namespace MiSmart.API
 
             #region AddingCors
 
-            var customCorsUrls = new List<String>() { "http://localhost:4200" };
+            var customCorsUrls = new List<String>() { "http://localhost:4200", "http://localhost:3000" };
             services.AddCors(options =>
             {
                 options.AddPolicy(name: Keys.AllowedOrigin, builder =>
