@@ -6,6 +6,7 @@ using MiSmart.Infrastructure.Data;
 using System.Text.Json.Serialization;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json;
+using NetTopologySuite.Geometries;
 
 namespace MiSmart.DAL.Models
 {
@@ -20,9 +21,7 @@ namespace MiSmart.DAL.Models
         }
 
         public DateTime CreatedTime { get; set; } = DateTime.Now;
-        public Double Latitude { get; set; }
-        public Double Longitude { get; set; }
-
+        public Point LocationPoint { get; set; }
         public String AdditionalInformationString { get; set; }
         [NotMapped]
         public Object AdditionalInformation

@@ -206,7 +206,7 @@ namespace MiSmart.API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("CreateTime")
+                    b.Property<DateTime>("CreatedTime")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("CustomerID")
@@ -337,11 +337,8 @@ namespace MiSmart.API.Migrations
                     b.Property<int>("DeviceID")
                         .HasColumnType("integer");
 
-                    b.Property<double>("Latitude")
-                        .HasColumnType("double precision");
-
-                    b.Property<double>("Longitude")
-                        .HasColumnType("double precision");
+                    b.Property<Point>("LocationPoint")
+                        .HasColumnType("geography (point)");
 
                     b.HasKey("ID");
 

@@ -49,10 +49,10 @@ namespace MiSmart.API.MqttControllers
                 {
                     if (command.Latitude.HasValue && command.Longitude.HasValue)
                     {
+                        var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
                         TelemetryRecord record = new TelemetryRecord
                         {
-                            Latitude = command.Latitude.GetValueOrDefault(),
-                            Longitude = command.Longitude.GetValueOrDefault(),
+                            LocationPoint = geometryFactory.CreatePoint(new Coordinate(command.Longitude.GetValueOrDefault(), command.Latitude.GetValueOrDefault())),
                             AdditionalInformation = command.AdditionalInformation,
                             CreatedTime = DateTime.Now,
                             DeviceID = device.ID,
@@ -97,7 +97,7 @@ namespace MiSmart.API.MqttControllers
                             FlightTime = command.FlightTime ?? DateTime.Now,
                             FlywayPoints = geometryFactory.CreateLineString(command.FlywayPoints.Select(ww => new Coordinate(ww.Longitude.GetValueOrDefault(), ww.Latitude.GetValueOrDefault())).ToArray()),
                             PilotName = command.PilotName,
-                            CreateTime = DateTime.Now,
+                            CreatedTime = DateTime.Now,
                             CustomerID = device.CustomerID,
                             DeviceID = device.ID,
                             DeviceName = device.Name,

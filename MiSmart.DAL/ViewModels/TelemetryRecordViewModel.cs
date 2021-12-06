@@ -9,16 +9,14 @@ namespace MiSmart.DAL.ViewModels
     {
         public Guid ID { get; set; }
         public DateTime CreatedTime { get; set; }
-        public Double Latitude { get; set; }
-        public Double Longitude { get; set; }
+        public CoordinateViewModel LocationPoint { get; set; }
         public Int32 DeviceID { get; set; }
 
         public void LoadFrom(TelemetryRecord entity)
         {
             ID = entity.ID;
             CreatedTime = entity.CreatedTime;
-            Latitude = entity.Latitude;
-            Longitude = entity.Longitude;
+            LocationPoint = new CoordinateViewModel(entity.LocationPoint.Coordinate);
             DeviceID = entity.DeviceID;
         }
     }

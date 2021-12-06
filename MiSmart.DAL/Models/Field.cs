@@ -60,11 +60,11 @@ namespace MiSmart.DAL.Models
             set => customer = value;
         }
         public Int32 CustomerID { get; set; }
-        public Polygon Border { get; set; } = Polygon.Empty;
-        public LineString Flyway { get; set; } = LineString.Empty;
-        public MultiPoint GPSPoints { get; set; } = MultiPoint.Empty;
-        public Point LocationPoint { get; set; } = Point.Empty;
-        public MultiPoint CalibrationPoints { get; set; } = MultiPoint.Empty;
+        public Polygon Border { get; set; } 
+        public LineString Flyway { get; set; }
+        public MultiPoint GPSPoints { get; set; } 
+        public Point LocationPoint { get; set; }
+        public MultiPoint CalibrationPoints { get; set; }
 
         public Double WorkSpeed { get; set; }
         public Double WorkArea { get; set; }

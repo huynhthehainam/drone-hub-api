@@ -60,7 +60,9 @@ namespace MiSmart.DAL.DatabaseContexts
             modelBuilder.Entity<TelemetryRecord>(ww =>
             {
                 ww.HasOne(ww => ww.Device).WithMany(ww => ww.Records).HasForeignKey(ww => ww.DeviceID).OnDelete(DeleteBehavior.Cascade);
-                
+                ww.Property(ww => ww.LocationPoint).HasColumnType("geography (point)");
+
+
             });
             modelBuilder.Entity<Field>(ww =>
             {

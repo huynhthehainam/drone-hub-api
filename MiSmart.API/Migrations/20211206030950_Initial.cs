@@ -200,7 +200,7 @@ namespace MiSmart.API.Migrations
                 columns: table => new
                 {
                     ID = table.Column<Guid>(type: "uuid", nullable: false),
-                    CreateTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    CreatedTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     FlightTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     TaskLocation = table.Column<string>(type: "text", nullable: true),
                     Flights = table.Column<int>(type: "integer", nullable: false),
@@ -237,8 +237,7 @@ namespace MiSmart.API.Migrations
                 {
                     ID = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatedTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    Latitude = table.Column<double>(type: "double precision", nullable: false),
-                    Longitude = table.Column<double>(type: "double precision", nullable: false),
+                    LocationPoint = table.Column<Point>(type: "geography (point)", nullable: true),
                     AdditionalInformationString = table.Column<string>(type: "text", nullable: true),
                     DeviceID = table.Column<int>(type: "integer", nullable: false)
                 },

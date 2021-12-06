@@ -164,7 +164,7 @@ namespace MiSmart.API.Controllers
                 }
                 else
                 {
-                    var listResponse = flightStatRepository.GetListFlightStatsView<SmallFlightStatViewModel>(pageCommand, query, ww => ww.CreateTime, false);
+                    var listResponse = flightStatRepository.GetListFlightStatsView<SmallFlightStatViewModel>(pageCommand, query, ww => ww.CreatedTime, false);
                     listResponse.SetResponse(response);
                 }
             }
