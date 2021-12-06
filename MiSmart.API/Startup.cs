@@ -244,54 +244,79 @@ namespace MiSmart.API
 
                 context.Customers.AddRange(new Customer[] { customer1 });
                 context.SaveChanges();
+            }
 
-                var customerUser1 = new CustomerUser { UserID = 1, Customer = customer1, Type = CustomerMemberType.Owner };
-                context.CustomerUsers.AddRange(new CustomerUser[] { customerUser1 });
-                context.SaveChanges();
-
-                var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
-
-                var deviceModel = context.DeviceModels.FirstOrDefault(ww => ww.ID == 1);
-                if (deviceModel is not null)
+            if (!context.CustomerUsers.Any())
+            {
+                var customer = context.Customers.FirstOrDefault(ww => ww.ID == 1);
+                if (customer is not null)
                 {
-                    var device1 = new Device { Customer = customer1, DeviceModel = deviceModel, Name = "Test drone 1",  };
-                    context.Devices.AddRange(new Device[] { device1 });
+                    var customerUser1 = new CustomerUser { UserID = 1, Customer = customer, Type = CustomerMemberType.Owner };
+                    context.CustomerUsers.AddRange(new CustomerUser[] { customerUser1 });
                     context.SaveChanges();
+                }
+            }
+            var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
 
-                    var random = new Random();
-                    var flightStats = new List<FlightStat>();
-                    for (var i = 0; i < 50; i++)
+
+            if (!context.Devices.Any())
+            {
+                var customer = context.Customers.FirstOrDefault(ww => ww.ID == 1);
+                if (customer is not null)
+                {
+                    var deviceModel = context.DeviceModels.FirstOrDefault(ww => ww.ID == 1);
+                    if (deviceModel is not null)
                     {
-                        FlightStat flightStat = new FlightStat
-                        {
-                            CreatedTime = DateTime.Now,
-                            Customer = customer1,
-                            Device = device1,
-                            DeviceName = device1.Name,
-                            FieldName = "Long An",
-                            Flights = random.Next(0, 20),
-                            TaskArea = random.NextDouble() * 1000,
-                            PilotName = "",
-                            TaskAreaUnit = AreaUnit.Hectare,
-                            TaskLocation = "Bến Lức",
-                            FlightDuration = random.NextDouble() * 100,
-                            FlywayPoints = geometryFactory.CreateLineString(new Coordinate[]{new Coordinate(106.090684,10.711697),
-                            new Coordinate(106.099201 +( random.NextDouble()/100),10.712229 + ( random.NextDouble()/100)),
-                            new Coordinate( 106.099237+( random.NextDouble()/100),10.711200+( random.NextDouble()/100)),
-                            new Coordinate( 106.095195+( random.NextDouble()/100),10.710917+( random.NextDouble()/100)),
-    new Coordinate( 106.093679,10.709746)
-                            }),
-                        };
-                        flightStats.Add(flightStat);
+                        var device1 = new Device { Customer = customer, DeviceModel = deviceModel, Name = "Test drone 1", };
+                        context.Devices.AddRange(new Device[] { device1 });
+                        context.SaveChanges();
                     }
-
-                    context.FlightStats.AddRange(flightStats);
-                    context.SaveChanges();
-
                 }
 
             }
+            var random = new Random();
+            if (!context.FlightStats.Any())
+            {
+                var customer = context.Customers.FirstOrDefault(ww => ww.ID == 1);
+                if (customer is not null)
+                {
+                    var device = context.Devices.FirstOrDefault(ww => ww.ID == 1);
+                    if (device is not null)
+                    {
+                        var flightStats = new List<FlightStat>();
+                        for (var i = 0; i < 50; i++)
+                        {
+                            FlightStat flightStat = new FlightStat
+                            {
+                                CreatedTime = DateTime.Now,
+                                Customer = customer,
+                                Device = device,
+                                DeviceName = device.Name,
+                                FieldName = "Long An",
+                                Flights = random.Next(0, 20),
+                                TaskArea = random.NextDouble() * 1000,
+                                PilotName = "",
+                                TaskAreaUnit = AreaUnit.Hectare,
+                                TaskLocation = "Bến Lức",
+                                FlightDuration = random.NextDouble() * 100,
+                                FlywayPoints = geometryFactory.CreateLineString(new Coordinate[]{new Coordinate(106.090684,10.711697),
+                                    new Coordinate(106.099201 +( random.NextDouble()/100),10.712229 + ( random.NextDouble()/100)),
+                                    new Coordinate( 106.099237+( random.NextDouble()/100),10.711200+( random.NextDouble()/100)),
+                                    new Coordinate( 106.095195+( random.NextDouble()/100),10.710917+( random.NextDouble()/100)),
+                                    new Coordinate( 106.093679,10.709746)
+                            }),
+                            };
+                            flightStats.Add(flightStat);
+                        }
+
+                        context.FlightStats.AddRange(flightStats);
+                        context.SaveChanges();
+                    }
+                }
+            }
 
         }
+
     }
+
 }
