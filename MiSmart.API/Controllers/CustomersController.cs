@@ -17,6 +17,7 @@ using MiSmart.DAL.ViewModels;
 using MiSmart.Infrastructure.Permissions;
 using MiSmart.API.Permissions;
 using MiSmart.DAL.Responses;
+using MiSmart.Infrastructure.ViewModels;
 
 namespace MiSmart.API.Controllers
 {
@@ -183,7 +184,7 @@ namespace MiSmart.API.Controllers
         [HttpGet("{id:int}/FlightStats/{flightStatID:Guid}")]
         public IActionResult GetFlightStatByID([FromServices] FlightStatRepository flightStatRepository, [FromRoute] Int32 id, [FromRoute] Guid flightStatID)
         {
-            var response = new FlightStatsActionResponse();
+            var response = actionResponseFactory.CreateInstance();
             response.ApplySettings(actionResponseFactory.Settings);
             var validated = true;
             if (!customerRepository.HasMemberPermission(id, CurrentUser))
@@ -191,11 +192,16 @@ namespace MiSmart.API.Controllers
                 validated = false;
                 response.AddNotAllowedErr();
             }
+            var flightStat = flightStatRepository.Get(ww => ww.ID == flightStatID);
+            if (flightStat is null)
+            {
+                validated = false;
+                response.AddNotFoundErr("FlightStat");
+            }
 
             if (validated)
             {
-                var flightStat = flightStatRepository.GetView<LargeFlightStatViewModel>(ww => ww.ID == flightStatID);
-                response.SetData(flightStat);
+                response.SetData(ViewModelHelpers.ConvertToViewModel<FlightStat, LargeFlightStatViewModel>(flightStat));
             }
 
             return response.ToIActionResult();

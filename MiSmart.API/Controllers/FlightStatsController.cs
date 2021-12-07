@@ -12,7 +12,7 @@ using MiSmart.DAL.Repositories;
 using System.Linq;
 using MiSmart.Infrastructure.Commands;
 using MiSmart.DAL.ViewModels;
-
+using MiSmart.Infrastructure.ViewModels;
 
 namespace MiSmart.API.Controllers
 {
@@ -26,9 +26,19 @@ namespace MiSmart.API.Controllers
         public IActionResult GetByID([FromServices] FlightStatRepository flightStatRepository, [FromRoute] Guid id)
         {
             var response = actionResponseFactory.CreateInstance();
-            var flightStat = flightStatRepository.GetView<LargeFlightStatViewModel>(ww => ww.ID == id);
+            var flightStat = flightStatRepository.Get(ww => ww.ID == id);
+            var validated = true;
+            if (flightStat is null)
+            {
+                validated = false;
+                response.AddNotFoundErr("FlightStat");
+            }
 
-            response.SetData(flightStat);
+            if (validated)
+            {
+                response.SetData(ViewModelHelpers.ConvertToViewModel<FlightStat, LargeFlightStatViewModel>(flightStat));
+
+            }
 
             return response.ToIActionResult();
         }

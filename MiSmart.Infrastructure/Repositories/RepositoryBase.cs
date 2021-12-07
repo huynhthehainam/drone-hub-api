@@ -20,7 +20,10 @@ namespace MiSmart.Infrastructure.Repositories
         }
         public virtual TView GetView<TView>(Expression<Func<T, Boolean>> expression) where TView : class, IViewModel<T>, new()
         {
-            return ViewModelHelpers.ConvertToViewModel<T, TView>(context.Set<T>().FirstOrDefault(expression));
+            var entity = context.Set<T>().FirstOrDefault(expression);
+            if (entity is not null)
+                return ViewModelHelpers.ConvertToViewModel<T, TView>(entity);
+            return null;
         }
         public virtual ListResponse<TView> GetListResponseView<TView>(PageCommand pageCommand, Expression<Func<T, Boolean>> expression, Func<T, Object> order = null, Boolean ascending = true) where TView : class, IViewModel<T>, new()
         {
