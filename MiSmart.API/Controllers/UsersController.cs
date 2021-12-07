@@ -29,7 +29,11 @@ namespace MiSmart.API.Controllers
             var customerUser = customerUserRepository.Get(ww => ww.UserID == CurrentUser.ID);
             if (customerUser is not null)
             {
-                response.Data = new { ID = CurrentUser.ID, Customer = ViewModelHelpers.ConvertToViewModel<Customer, SmallCustomerViewModel>(customerUser.Customer) };
+                response.SetData(new
+                {
+                    ID = CurrentUser.ID,
+                    Customer = ViewModelHelpers.ConvertToViewModel<Customer, SmallCustomerViewModel>(customerUser.Customer)
+                });
             }
             else
             {

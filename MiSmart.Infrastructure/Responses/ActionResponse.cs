@@ -71,6 +71,12 @@ namespace MiSmart.Infrastructure.Responses
             this.fileName = fileName;
             this.responseType = ResponseType.File;
         }
+
+        public void SetData(Object data)
+        {
+            this.Data = data;
+            this.responseType = ResponseType.Json;
+        }
         public Int32 StatusCode { get; set; } = 200;
         public Object Data { get; set; }
         public OrderedDictionary Errors

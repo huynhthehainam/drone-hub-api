@@ -18,12 +18,12 @@ namespace MiSmart.API.Controllers
         {
             var response = actionResponseFactory.CreateInstance();
 
-            response.Data = new
+            response.SetData(new
             {
                 CreatedBy = "MiSmart",
                 Service = "App Sync",
                 Description = "MiSmart is the best drone company in VN"
-            };
+            });
             return response.ToIActionResult();
         }
     }
