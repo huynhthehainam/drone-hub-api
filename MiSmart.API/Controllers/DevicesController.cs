@@ -13,6 +13,7 @@ using MiSmart.DAL.Repositories;
 using System.Linq;
 using MiSmart.Infrastructure.Commands;
 using MiSmart.DAL.ViewModels;
+using System.Linq.Expressions;
 
 namespace MiSmart.API.Controllers
 {
@@ -83,18 +84,20 @@ namespace MiSmart.API.Controllers
         public IActionResult GetList([FromQuery] PageCommand pageCommand, [FromQuery] String mode = "Small")
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
+            Expression<Func<Device, Boolean>> query = ww => true;
             if (mode == "Large")
             {
 
             }
+            else if (mode == "Medium")
+            {
+                var listResponse = deviceRepository.GetListResponseView<MediumDeviceViewModel>(pageCommand, query);
+            }
             else
             {
-                var listResponse = deviceRepository.GetListResponseView<SmallDeviceViewModel>(pageCommand, ww => true);
+                var listResponse = deviceRepository.GetListResponseView<SmallDeviceViewModel>(pageCommand, query);
                 listResponse.SetResponse(response);
             }
-
-
-
             return response.ToIActionResult();
         }
     }

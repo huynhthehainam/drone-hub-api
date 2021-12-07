@@ -24,6 +24,7 @@ namespace MiSmart.DAL.DatabaseContexts
         public DbSet<DeviceModel> DeviceModels { get; set; }
         public DbSet<CustomerUser> CustomerUsers { get; set; }
         public DbSet<Plan> Plans { get; set; }
+        public DbSet<DeviceHistory> DeviceHistories { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -49,6 +50,12 @@ namespace MiSmart.DAL.DatabaseContexts
                 ww.Property(ww => ww.LastPoint).HasColumnType("geography (point)");
                 ww.HasOne(ww => ww.Customer).WithMany(ww => ww.Devices).HasForeignKey(ww => ww.CustomerID).OnDelete(DeleteBehavior.Cascade);
                 ww.HasOne(ww => ww.DeviceModel).WithMany(ww => ww.Devices).HasForeignKey(ww => ww.DeviceModelID).OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<DeviceHistory>(ww =>
+            {
+                ww.HasOne(ww => ww.Device).WithMany(ww => ww.DeviceHistories).HasForeignKey(ww => ww.DeviceID).OnDelete(DeleteBehavior.Cascade);
+                ww.Property(ww => ww.LocationPoint).HasColumnType("geography (point)");
             });
 
             modelBuilder.Entity<CustomerUser>(ww =>

@@ -196,6 +196,26 @@ namespace MiSmart.API.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "DeviceHistories",
+                columns: table => new
+                {
+                    ID = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    LocationPoint = table.Column<Point>(type: "geography (point)", nullable: true),
+                    DeviceID = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DeviceHistories", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_DeviceHistories_Devices_DeviceID",
+                        column: x => x.DeviceID,
+                        principalTable: "Devices",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "FlightStats",
                 columns: table => new
                 {
@@ -259,6 +279,11 @@ namespace MiSmart.API.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_DeviceHistories_DeviceID",
+                table: "DeviceHistories",
+                column: "DeviceID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Devices_CustomerID",
                 table: "Devices",
                 column: "CustomerID");
@@ -309,6 +334,9 @@ namespace MiSmart.API.Migrations
         {
             migrationBuilder.DropTable(
                 name: "CustomerUsers");
+
+            migrationBuilder.DropTable(
+                name: "DeviceHistories");
 
             migrationBuilder.DropTable(
                 name: "Fields");

@@ -108,6 +108,11 @@ namespace MiSmart.API.Controllers
             }
             else
             {
+                if (customerUserRepository.Any(ww => ww.CustomerID != id && ww.UserID == command.UserID))
+                {
+                    validated = false;
+                    response.AddExistedErr("UserID");
+                }
                 var team = teamRepository.Get(ww => ww.ID == teamID && ww.CustomerID == id);
                 if (team is not null)
                 {
@@ -126,8 +131,10 @@ namespace MiSmart.API.Controllers
 
             if (validated)
             {
+
                 var teamUser = new TeamUser { UserID = command.UserID.Value, TeamID = teamID, Type = command.Type };
                 teamUserRepository.Create(teamUser);
+
                 if (!customerUserRepository.Any(ww => ww.CustomerID == id && ww.UserID == command.UserID))
                 {
                     var customerUser = new CustomerUser { CustomerID = id, UserID = command.UserID.Value, Type = CustomerMemberType.Member };
@@ -170,6 +177,26 @@ namespace MiSmart.API.Controllers
             }
 
 
+
+            return response.ToIActionResult();
+        }
+        [HttpGet("{id:int}/FlightStats/{flightStatID:Guid}")]
+        public IActionResult GetFlightStatByID([FromServices] FlightStatRepository flightStatRepository, [FromRoute] Int32 id, [FromRoute] Guid flightStatID)
+        {
+            var response = new FlightStatsActionResponse();
+            response.ApplySettings(actionResponseFactory.Settings);
+            var validated = true;
+            if (!customerRepository.HasMemberPermission(id, CurrentUser))
+            {
+                validated = false;
+                response.AddNotAllowedErr();
+            }
+
+            if (validated)
+            {
+                var flightStat = flightStatRepository.GetView<LargeFlightStatViewModel>(ww => ww.ID == flightStatID);
+                response.SetData(flightStat);
+            }
 
             return response.ToIActionResult();
         }
@@ -263,6 +290,32 @@ namespace MiSmart.API.Controllers
                     var listResponse = teamRepository.GetListResponseView<SmallTeamViewModel>(pageCommand, query);
                     listResponse.SetResponse(response);
                 }
+            }
+
+
+
+            return response.ToIActionResult();
+        }
+        [HttpGet("{id:int}/Teams/{teamID:long}")]
+        public IActionResult GetTeamByID([FromServices] TeamRepository teamRepository, [FromRoute] Int32 id, [FromRoute] Int64 teamID)
+        {
+            var response = actionResponseFactory.CreateInstance();
+            var validated = true;
+            if (!customerRepository.Any(ww => ww.ID == id))
+            {
+                validated = false;
+                response.AddNotFoundErr("Customer");
+            }
+            if (!customerRepository.HasMemberPermission(id, CurrentUser))
+            {
+                validated = false;
+                response.AddNotAllowedErr();
+            }
+
+            if (validated)
+            {
+                var team = teamRepository.GetView<LargeTeamViewModel>(ww => ww.ID == teamID);
+                response.SetData(team);
             }
 
 
