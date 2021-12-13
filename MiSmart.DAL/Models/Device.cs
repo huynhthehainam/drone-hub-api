@@ -56,15 +56,6 @@ namespace MiSmart.DAL.Models
             set => customer = value;
         }
         public Int32 CustomerID { get; set; }
-
-        private ICollection<DeviceHistory> deviceHistories;
-        [JsonIgnore]
-        public ICollection<DeviceHistory> DeviceHistories
-        {
-            get => lazyLoader.Load(this, ref deviceHistories);
-            set => deviceHistories = value;
-        }
-
         private ICollection<FlightStat> flightStats;
         [JsonIgnore]
         public ICollection<FlightStat> FlightStats

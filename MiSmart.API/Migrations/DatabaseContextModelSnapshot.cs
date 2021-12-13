@@ -105,26 +105,6 @@ namespace MiSmart.API.Migrations
                     b.ToTable("Devices");
                 });
 
-            modelBuilder.Entity("MiSmart.DAL.Models.DeviceHistory", b =>
-                {
-                    b.Property<long>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .UseIdentityByDefaultColumn();
-
-                    b.Property<int>("DeviceID")
-                        .HasColumnType("integer");
-
-                    b.Property<Point>("LocationPoint")
-                        .HasColumnType("geography (point)");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("DeviceID");
-
-                    b.ToTable("DeviceHistories");
-                });
-
             modelBuilder.Entity("MiSmart.DAL.Models.DeviceModel", b =>
                 {
                     b.Property<int>("ID")
@@ -404,17 +384,6 @@ namespace MiSmart.API.Migrations
                     b.Navigation("Team");
                 });
 
-            modelBuilder.Entity("MiSmart.DAL.Models.DeviceHistory", b =>
-                {
-                    b.HasOne("MiSmart.DAL.Models.Device", "Device")
-                        .WithMany("DeviceHistories")
-                        .HasForeignKey("DeviceID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Device");
-                });
-
             modelBuilder.Entity("MiSmart.DAL.Models.Field", b =>
                 {
                     b.HasOne("MiSmart.DAL.Models.Customer", "Customer")
@@ -493,8 +462,6 @@ namespace MiSmart.API.Migrations
 
             modelBuilder.Entity("MiSmart.DAL.Models.Device", b =>
                 {
-                    b.Navigation("DeviceHistories");
-
                     b.Navigation("FlightStats");
 
                     b.Navigation("Records");

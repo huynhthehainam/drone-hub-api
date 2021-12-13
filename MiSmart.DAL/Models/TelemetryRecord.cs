@@ -26,8 +26,8 @@ namespace MiSmart.DAL.Models
         [NotMapped]
         public Object AdditionalInformation
         {
-            get => JsonSerializer.Deserialize<Object>(AdditionalInformationString);
-            set => AdditionalInformationString = JsonSerializer.Serialize(value);
+            get => JsonSerializer.Deserialize<Object>(AdditionalInformationString, JsonOptions.CamelOptions);
+            set => AdditionalInformationString = JsonSerializer.Serialize(value, JsonOptions.CamelOptions);
         }
 
         private Device device;

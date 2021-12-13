@@ -38,6 +38,8 @@ using Microsoft.EntityFrameworkCore.Storage;
 using MiSmart.DAL.Models;
 using NetTopologySuite;
 using NetTopologySuite.Geometries;
+using MiSmart.API.Models;
+
 namespace MiSmart.API
 {
     public class Startup
@@ -311,7 +313,161 @@ namespace MiSmart.API
 
                         context.FlightStats.AddRange(flightStats);
                         context.SaveChanges();
+
+
+
+
+
+
                     }
+                }
+            }
+            if (!context.TelemetryRecords.Any())
+            {
+                var customer = context.Customers.FirstOrDefault(ww => ww.ID == 1);
+                if (customer is not null)
+                {
+                    var device = context.Devices.FirstOrDefault(ww => ww.ID == 1);
+                    if (device is not null)
+                    {
+                        var samples = new List<LocationSample>(){
+                           new LocationSample {Latitude = 20.991331, Longitude= 105.803306},
+                            new LocationSample {Latitude = 20.990926, Longitude= 105.803625},
+                            new LocationSample {Latitude = 20.990418, Longitude= 105.803871},
+                            new LocationSample {Latitude = 20.989956, Longitude= 105.804079},
+                            new LocationSample {Latitude = 20.989868, Longitude= 105.80393},
+                            new LocationSample {Latitude = 20.989829, Longitude= 105.803878},
+                            new LocationSample {Latitude = 20.989617, Longitude= 105.803545},
+                            new LocationSample {Latitude = 20.989517, Longitude= 105.803379},
+                            new LocationSample {Latitude = 20.989414, Longitude= 105.803188},
+                            new LocationSample {Latitude = 20.989293, Longitude= 105.803},
+                            new LocationSample {Latitude = 20.989195, Longitude= 105.802838},
+                            new LocationSample {Latitude = 20.989143, Longitude= 105.802641},
+                            new LocationSample {Latitude = 20.989189, Longitude= 105.802412},
+                            new LocationSample {Latitude = 20.989215, Longitude= 105.802256},
+                            new LocationSample {Latitude = 20.989246, Longitude= 105.802038},
+                            new LocationSample {Latitude = 20.989281, Longitude= 105.801827},
+                            new LocationSample {Latitude = 20.989337, Longitude= 105.801753},
+                            new LocationSample {Latitude = 20.989495, Longitude= 105.801948},
+                            new LocationSample {Latitude = 20.98963, Longitude= 105.802107},
+                            new LocationSample {Latitude = 20.98978, Longitude= 105.802249},
+                            new LocationSample {Latitude = 20.989985, Longitude= 105.802109},
+                            new LocationSample {Latitude = 20.990153, Longitude= 105.802023},
+                            new LocationSample {Latitude = 20.990339, Longitude= 105.801903},
+                            new LocationSample {Latitude = 20.990479, Longitude= 105.802099},
+                            new LocationSample {Latitude = 20.990697, Longitude= 105.802412},
+                            new LocationSample {Latitude = 20.990895, Longitude= 105.802726},
+                            new LocationSample {Latitude = 20.991, Longitude= 105.802887},
+                            new LocationSample {Latitude = 20.991135, Longitude= 105.803118}
+                        };
+
+                        var telemetryRecords = new List<TelemetryRecord>();
+                        foreach (var sample in samples)
+                        {
+                            var record = new TelemetryRecord
+                            {
+                                Device = device,
+                                CreatedTime = DateTime.Now,
+                                LocationPoint = geometryFactory.CreatePoint(new Coordinate(sample.Longitude, sample.Latitude)),
+                                AdditionalInformation = new { Speed = 2.0 },
+                            };
+                            telemetryRecords.Add(record);
+                        }
+                        context.TelemetryRecords.AddRange(telemetryRecords);
+                        context.SaveChanges();
+                    }
+                }
+            }
+            if (!context.Fields.Any())
+            {
+                var customer = context.Customers.FirstOrDefault(ww => ww.ID == 1);
+                if (customer is not null)
+                {
+                    var samples = new List<LocationSample>(){
+                        new LocationSample{
+                            Latitude = 10.667356525074577,
+                            Longitude = 105.53553301447937
+                        },
+
+new LocationSample{
+                            Latitude = 10.667569635345581,
+                            Longitude =  105.53340716277171,
+                        },new LocationSample{
+                            Latitude = 10.668470393848125,
+                            Longitude =105.53359234574434,
+                        },new LocationSample{
+                            Latitude = 10.66834022041227,
+                            Longitude = 105.53570373793264,
+                        }, new LocationSample{
+                            Latitude = 10.667356525074577,
+                            Longitude = 105.53553301447937
+                        },
+                    };
+
+                    var samples2 = new List<LocationSample>(){
+                       new LocationSample {
+                         Latitude= 10.655949865583352,
+                        Longitude= 105.56631240606391,
+
+                    },
+                        new LocationSample {
+                                Latitude= 10.655771875351734,
+                                Longitude= 105.56736843238615,
+
+                            },
+                        new LocationSample {
+                                Latitude= 10.654762013237915,
+                                Longitude= 105.56733991624013,
+
+                            },
+                        new LocationSample {
+                                Latitude= 10.654708835812956,
+                                Longitude= 105.56669797113786,
+
+                            },
+                        new LocationSample {
+                                Latitude= 10.654944207304224,
+                                Longitude= 105.56668806266627,
+
+                            },
+                        new LocationSample {
+                                Latitude= 10.655010570279309,
+                                Longitude= 105.56661847908566,
+
+                            },
+                        new LocationSample {
+                                Latitude= 10.655058048827712,
+                                Longitude= 105.56625073949712,
+
+                            },new LocationSample {
+                         Latitude= 10.655949865583352,
+                        Longitude= 105.56631240606391,
+
+                    },
+                                            };
+                    var coordinates = samples.Select(sample => new Coordinate(sample.Longitude, sample.Latitude)).ToArray();
+                    var field1 = new Field
+                    {
+                        Border = geometryFactory.CreatePolygon(coordinates),
+                        Flyway = geometryFactory.CreateLineString(samples.Select(sample => new Coordinate(sample.Longitude, sample.Latitude)).ToArray()),
+                        CreatedTime = DateTime.Now,
+                        Customer = customer,
+                        EdgeOffset = 0,
+                        LocationPoint = geometryFactory.CreatePoint(new Coordinate(samples[0].Longitude, samples[0].Latitude)),
+                    };
+                    var field2 = new Field
+                    {
+                        Border = geometryFactory.CreatePolygon(samples2.Select(sample => new Coordinate(sample.Longitude, sample.Latitude)).ToArray()),
+                        Flyway = geometryFactory.CreateLineString(samples.Select(sample => new Coordinate(sample.Longitude, sample.Latitude)).ToArray()),
+                        CreatedTime = DateTime.Now,
+                        Customer = customer,
+                        EdgeOffset = 0,
+                        LocationPoint = geometryFactory.CreatePoint(new Coordinate(samples2[0].Longitude, samples2[0].Latitude)),
+                    };
+
+                    context.Fields.AddRange(new Field[] { field1, field2 });
+                    context.SaveChanges();
+
                 }
             }
 
