@@ -237,6 +237,29 @@ namespace MiSmart.API.Controllers
             return response.ToIActionResult();
         }
 
+        [HttpGet("{id:int}/Fields/{fieldID:long}")]
+        public IActionResult GetFields([FromServices] FieldRepository fieldRepository, [FromRoute] Int32 id, [FromRoute] Int64 fieldID)
+        {
+            var response = actionResponseFactory.CreateInstance();
+            var validated = true;
+            if (!customerRepository.HasMemberPermission(id, CurrentUser))
+            {
+                validated = false;
+                response.AddNotAllowedErr();
+            }
+            var field = fieldRepository.Get(ww => ww.ID == fieldID);
+            if (field is null)
+            {
+                validated = false;
+                response.AddNotFoundErr("Field");
+            }
+            if (validated)
+            {
+                response.SetData(ViewModelHelpers.ConvertToViewModel<Field, LargeFieldViewModel>(field));
+            }
+            return response.ToIActionResult();
+        }
+
         [HttpPost("{id:int}/Teams")]
         public IActionResult CreateTeam([FromServices] TeamRepository teamRepository, [FromRoute] Int32 id, [FromBody] AddingTeamCommand command)
         {
