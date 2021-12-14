@@ -29,15 +29,9 @@ namespace MiSmart.API.Controllers
         public IActionResult Create([FromBody] AddingDeviceModelCommand command)
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
-            var validated = true;
-            if (validated)
-            {
-                var model = new DeviceModel() { Name = command.Name };
-                deviceModelRepository.Create(model);
-                response.SetCreatedObject(model);
-            }
-
-
+            var model = new DeviceModel() { Name = command.Name };
+            deviceModelRepository.Create(model);
+            response.SetCreatedObject(model);
 
             return response.ToIActionResult();
         }
@@ -45,15 +39,9 @@ namespace MiSmart.API.Controllers
         public IActionResult GetActionResult([FromBody] PageCommand pageCommand)
         {
             var response = actionResponseFactory.CreateInstance();
-            var validated = true;
-            if (validated)
-            {
-                Expression<Func<DeviceModel, Boolean>> query = ww => true;
-                var listResponse = deviceModelRepository.GetListResponseView<SmallDeviceModelVieModel>(pageCommand, query);
-                listResponse.SetResponse(response);
-            }
-
-
+            Expression<Func<DeviceModel, Boolean>> query = ww => true;
+            var listResponse = deviceModelRepository.GetListResponseView<SmallDeviceModelVieModel>(pageCommand, query);
+            listResponse.SetResponse(response);
 
             return response.ToIActionResult();
         }

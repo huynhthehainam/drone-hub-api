@@ -33,58 +33,59 @@ namespace MiSmart.API.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create([FromBody] AddingDeviceCommand command)
+        public IActionResult Create([FromServices] CustomerUserRepository customerUserRepository, [FromServices] TeamRepository teamRepository, [FromBody] AddingDeviceCommand command)
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
-            var validated = true;
-
-            var customer = customerRepository.Get(ww => ww.ID == command.CustomerID.Value);
-            if (customer is not null)
+            Int32? customerID = command.CustomerID;
+             if (!CurrentUser.IsAdmin || customerID is null)
             {
-                if (command.TeamID.HasValue)
-                {
-                    var team = customer.Teams.FirstOrDefault(ww => ww.ID == command.TeamID.Value);
-                    if (team is null)
-                    {
-                        validated = false;
-                        response.AddInvalidErr("TeamID");
-                    }
-                }
+                customerID = customerUserRepository.HasOwnerPermission(CurrentUser);
             }
-            else
+            if (customerID is null)
             {
-                validated = false;
                 response.AddInvalidErr("CustomerID");
+            }
+
+            var team = teamRepository.Get(ww => ww.ID == command.TeamID.GetValueOrDefault() && ww.CustomerID == customerID.GetValueOrDefault());
+            if (team is null)
+            {
+                response.AddInvalidErr("TeamID");
             }
 
             if (!deviceModelRepository.Any(ww => ww.ID == command.DeviceModelID))
             {
-                validated = false;
                 response.AddInvalidErr("ModelDeviceID");
             }
-            if (validated)
-            {
-                var device = new Device
-                {
-                    Name = command.Name,
-                    CustomerID = command.CustomerID.Value,
-                    TeamID = command.TeamID,
-                    DeviceModelID = command.DeviceModelID.Value,
 
-                };
-                deviceRepository.Create(device);
-                response.SetCreatedObject(device);
-            }
+            var device = new Device
+            {
+                Name = command.Name,
+                CustomerID = command.CustomerID.Value,
+                TeamID = command.TeamID,
+                DeviceModelID = command.DeviceModelID.Value,
+
+            };
+            deviceRepository.Create(device);
+            response.SetCreatedObject(device);
+
 
             return response.ToIActionResult();
 
         }
 
         [HttpGet]
-        public IActionResult GetList([FromQuery] PageCommand pageCommand, [FromQuery] String mode = "Small")
+        public IActionResult GetList([FromServices] CustomerUserRepository customerUserRepository, [FromQuery] PageCommand pageCommand, [FromQuery] Int32? customerID, [FromQuery] String mode = "Small")
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
-            Expression<Func<Device, Boolean>> query = ww => true;
+             if (!CurrentUser.IsAdmin || customerID is null)
+            {
+                customerID = customerUserRepository.HasMemberPermission(CurrentUser);
+            }
+            if (customerID is null)
+            {
+                response.AddNotAllowedErr();
+            }
+            Expression<Func<Device, Boolean>> query = ww => ww.CustomerID == customerID.GetValueOrDefault();
             if (mode == "Large")
             {
 

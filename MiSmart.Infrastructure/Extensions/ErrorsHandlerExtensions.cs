@@ -5,6 +5,8 @@ using Microsoft.Extensions.DependencyInjection;
 using MiSmart.Infrastructure.Services;
 using Microsoft.AspNetCore.Diagnostics;
 using System;
+using System.Text.Json;
+using System.Collections.Generic;
 
 namespace MiSmart.Infrastructure.Extensions
 {
@@ -18,11 +20,16 @@ namespace MiSmart.Infrastructure.Extensions
                 var response = actionResponseFactory.CreateInstance();
                 if (context.HttpContext.Response.StatusCode == 403)
                 {
-                    response.AddNotAllowedErr();
+                    response.AddNotAllowedErr(false);
                 }
                 else if (context.HttpContext.Response.StatusCode == 401)
                 {
-                    response.AddMessageErr("Authorization", "Invalid");
+                    response.AddAuthorizationErr(false);
+                }
+                else if (context.HttpContext.Response.StatusCode == 404)
+                {
+                    response.AddNotFoundErr("Url", false);
+
                 }
                 await context.HttpContext.Response.WriteAsJsonAsync(response);
             });
@@ -30,11 +37,29 @@ namespace MiSmart.Infrastructure.Extensions
             {
                 errorApp.Run(async context =>
                 {
-                    context.Response.StatusCode = 500;
                     var exceptionHandlerPathFeature =
                         context.Features.Get<IExceptionHandlerPathFeature>();
-                    EmailService emailService = context.RequestServices.GetService<EmailService>();
-                    await emailService.SendMailAsync(new String[] { "huynhthehainam@gmail.com" }, new String[] { }, new String[] { }, $"Bugggggg {appName}", $"{exceptionHandlerPathFeature?.Error.ToString()}");
+                    // EmailService emailService = context.RequestServices.GetService<EmailService>();
+                    // await emailService.SendMailAsync(new String[] { "huynhthehainam@gmail.com" }, new String[] { }, new String[] { }, $"Bugggggg {appName}", $"{exceptionHandlerPathFeature?.Error.ToString()}");
+                    var message = exceptionHandlerPathFeature?.Error.Message;
+
+                    try
+                    {
+                        ErrorException exception = JsonSerializer.Deserialize<ErrorException>(message);
+                        context.Response.StatusCode = exception.StatusCode;
+                        await context.Response.WriteAsJsonAsync(exception);
+                    }
+                    catch (Exception)
+                    {
+                        await context.Response.WriteAsJsonAsync(new ErrorException
+                        {
+                            StatusCode = context.Response.StatusCode,
+                            Errors = new
+                            {
+                                Unknown = new List<String>() { message }
+                            }
+                        });
+                    }
                 });
             });
         }

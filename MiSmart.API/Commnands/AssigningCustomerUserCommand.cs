@@ -12,6 +12,7 @@ namespace MiSmart.API.Commands
     {
         [Required]
         public Int64? UserID { get; set; }
+        public Int32? CustomerID { get; set; }
 
         public CustomerMemberType Type { get; set; } = CustomerMemberType.Member;
     }

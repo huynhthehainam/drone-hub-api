@@ -5,6 +5,7 @@ using System;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using MiSmart.Infrastructure.Data;
+using System.Text.Json;
 
 namespace MiSmart.Infrastructure.Responses
 {
@@ -28,6 +29,12 @@ namespace MiSmart.Infrastructure.Responses
         EN,
         VI
     }
+    public class ErrorException
+    {
+        public Int32 StatusCode { get; set; }
+        public Object Errors { get; set; }
+    }
+
     public class ActionResponse
     {
         public ActionResponse()
@@ -122,49 +129,56 @@ namespace MiSmart.Infrastructure.Responses
             }
             return errMessage;
         }
-        public void AddMessageErr(String name, String enMessage = "", String viMessage = "")
+        public void AddMessageErr(String name, String enMessage = "", String viMessage = "", Int32 statusCode = 400, Boolean raiseException = true)
         {
-            StatusCode = 400;
+            StatusCode = statusCode;
             ErrMessage errMessage = GetErrMessage(name);
             if (Language == ResponseLanguage.EN)
                 errMessage.Errs.Add(enMessage);
             else
                 errMessage.Errs.Add(viMessage);
+            if (raiseException)
+                RaiseException();
         }
-        public void AddRequirementErr(String name)
+
+        public void RaiseException()
         {
-            AddMessageErr(name, $"The {name} field is required", $"Trường {name} bị thiếu");
+            throw new Exception(JsonSerializer.Serialize(new ErrorException() { StatusCode = this.StatusCode, Errors = this.Errors }));
         }
-        public void AddNotAllowedErr()
+        public void AddRequirementErr(String name, Boolean raiseException = true)
+        {
+            AddMessageErr(name, $"The {name} field is required", $"Trường {name} bị thiếu", 400, raiseException);
+        }
+        public void AddNotAllowedErr(Boolean raiseException = true)
         {
 
-            StatusCode = 403;
-            AddMessageErr("Permission", $"Your permission's denied", $"Không có quyền truy cập");
+            AddMessageErr("Permission", $"Your permission's denied", $"Không có quyền truy cập", 403, raiseException);
         }
-        public void AddNotFoundErr(String name)
+        public void AddNotFoundErr(String name, Boolean raiseException = true)
         {
-            StatusCode = 404;
-            AddMessageErr(name, $"The {name} field's not found", $"Trường {name} không được tìm thấy");
+            AddMessageErr(name, $"The {name} field's not found", $"Trường {name} không được tìm thấy", 404, raiseException);
+        }
+        public void AddAuthorizationErr(Boolean raiseException = true)
+        {
+            AddMessageErr("Authorization", $"The authorization field's invalid", $"Không được xác thực", 404, raiseException);
+
         }
         public void SetNoContent()
         {
             StatusCode = 204;
             Data = null;
         }
-        public void AddExpiredErr(String name)
+        public void AddExpiredErr(String name, Boolean raiseException = true)
         {
-            StatusCode = 400;
-            AddMessageErr(name, $"The {name} field exceeds expiring time", $"Trường {name} vượt quá thời gian cho phép");
+            AddMessageErr(name, $"The {name} field exceeds expiring time", $"Trường {name} vượt quá thời gian cho phép", 400, raiseException);
         }
-        public void AddInvalidErr(String name)
+        public void AddInvalidErr(String name, Boolean raiseException = true)
         {
-            StatusCode = 400;
-            AddMessageErr(name, $"The {name} field's invalid", $"Trường {name} không hợp lệ");
+            AddMessageErr(name, $"The {name} field's invalid", $"Trường {name} không hợp lệ", 400, raiseException);
         }
-        public void AddExistedErr(String name)
+        public void AddExistedErr(String name, Boolean raiseException = true)
         {
-            StatusCode = 400;
-            AddMessageErr(name, $"The {name} field already exists", $"Trường {name} đã được tồn tại");
+            AddMessageErr(name, $"The {name} field already exists", $"Trường {name} đã được tồn tại", 400, raiseException);
         }
         public IActionResult ToIActionResult()
         {

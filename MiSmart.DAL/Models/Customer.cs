@@ -65,6 +65,8 @@ namespace MiSmart.DAL.Models
             set => customerUsers = value;
         }
 
+       
+
     }
 
 

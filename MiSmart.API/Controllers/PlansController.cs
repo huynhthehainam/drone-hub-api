@@ -33,30 +33,29 @@ namespace MiSmart.API.Controllers
         public IActionResult Create([FromServices] PlanRepository planRepository, [FromForm] AddingPlanCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
-            var validated = true;
+
 
             var plan = planRepository.Get(ww => ww.FileName == command.File.FileName && ww.Prefix == command.Prefix);
             if (plan is null)
             {
                 plan = new Plan { FileName = command.File.FileName, Prefix = command.Prefix };
             }
-            if (validated)
-            {
-                var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
-                plan.Location = geometryFactory.CreatePoint(new Coordinate(command.Longitude.GetValueOrDefault(), command.Latitude.GetValueOrDefault()));
-                plan.FileName = command.File.FileName;
-                plan.FileBytes = command.GetFileBytes();
 
-                if (plan.ID == 0)
-                {
-                    planRepository.Create(plan);
-                }
-                else
-                {
-                    planRepository.Update(plan);
-                }
-                response.SetCreatedObject(plan);
+            var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
+            plan.Location = geometryFactory.CreatePoint(new Coordinate(command.Longitude.GetValueOrDefault(), command.Latitude.GetValueOrDefault()));
+            plan.FileName = command.File.FileName;
+            plan.FileBytes = command.GetFileBytes();
+
+            if (plan.ID == 0)
+            {
+                planRepository.Create(plan);
             }
+            else
+            {
+                planRepository.Update(plan);
+            }
+            response.SetCreatedObject(plan);
+
 
 
             return response.ToIActionResult();
@@ -96,18 +95,16 @@ namespace MiSmart.API.Controllers
         public IActionResult GetFile([FromServices] PlanRepository planRepository, [FromRoute] Int64 id)
         {
             var response = actionResponseFactory.CreateInstance();
-            var validated = true;
+
             var plan = planRepository.Get(ww => ww.ID == id);
             if (plan is null)
             {
-                validated = false;
 
                 response.AddNotFoundErr("Plan");
             }
-            if (validated)
-            {
-                response.SetFile(plan.FileBytes, "application/octet-stream", plan.FileName);
-            }
+
+            response.SetFile(plan.FileBytes, "application/octet-stream", plan.FileName);
+
 
 
             return response.ToIActionResult();
@@ -117,18 +114,16 @@ namespace MiSmart.API.Controllers
         public IActionResult Delete([FromServices] PlanRepository planRepository, [FromRoute] Int64 id)
         {
             var response = actionResponseFactory.CreateInstance();
-            var validated = true;
+
             var plan = planRepository.Get(ww => ww.ID == id);
             if (plan is null)
             {
-                validated = false;
                 response.AddNotFoundErr("Plan");
             }
-            if (validated)
-            {
-                planRepository.Delete(plan);
-                response.SetNoContent();
-            }
+
+            planRepository.Delete(plan);
+            response.SetNoContent();
+
 
 
             return response.ToIActionResult();
