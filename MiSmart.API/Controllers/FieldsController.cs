@@ -27,7 +27,7 @@ namespace MiSmart.API.Controllers
         public IActionResult GetFields([FromServices] FieldRepository fieldRepository, [FromServices] CustomerUserRepository customerUserRepository, [FromQuery] Int32? customerID, [FromQuery] PageCommand pageCommand, [FromQuery] DateTime? from, [FromQuery] DateTime? to, [FromQuery] String search, [FromQuery] String mode = "Small")
         {
             var response = actionResponseFactory.CreateInstance();
-             if (!CurrentUser.IsAdmin || customerID is null)
+            if (!CurrentUser.IsAdmin || customerID is null)
             {
                 customerID = customerUserRepository.HasMemberPermission(CurrentUser);
             }
@@ -61,7 +61,7 @@ namespace MiSmart.API.Controllers
             var response = actionResponseFactory.CreateInstance();
 
             Int32? customerID = null;
-             if (!CurrentUser.IsAdmin || customerID is null)
+            if (!CurrentUser.IsAdmin || customerID is null)
             {
                 customerID = customerUserRepository.HasMemberPermission(CurrentUser);
             }
@@ -69,7 +69,7 @@ namespace MiSmart.API.Controllers
             {
                 response.AddNotAllowedErr();
             }
-            var field = fieldRepository.Get(ww => ww.ID == fieldID);
+            var field = fieldRepository.Get(ww => ww.ID == fieldID && ww.CustomerID == customerID.GetValueOrDefault());
             if (field is null)
             {
                 response.AddNotFoundErr("Field");

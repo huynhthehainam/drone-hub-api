@@ -116,7 +116,7 @@ namespace MiSmart.API.Controllers
             {
                 response.AddNotAllowedErr();
             }
-            var device = deviceRepository.Get(ww => ww.ID == id);
+            var device = deviceRepository.Get(ww => ww.ID == id && ww.CustomerID == customerID.GetValueOrDefault());
             if (device is null)
             {
                 response.AddNotFoundErr("Device");

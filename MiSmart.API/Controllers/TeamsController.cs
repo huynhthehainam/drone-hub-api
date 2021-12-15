@@ -98,7 +98,7 @@ namespace MiSmart.API.Controllers
             {
                 response.AddNotAllowedErr();
             }
-            var team = teamRepository.GetView<LargeTeamViewModel>(ww => ww.ID == id);
+            var team = teamRepository.GetView<LargeTeamViewModel>(ww => ww.ID == id && ww.CustomerID == customerID.GetValueOrDefault());
             response.SetData(team);
             return response.ToIActionResult();
         }
