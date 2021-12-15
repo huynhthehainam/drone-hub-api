@@ -25,11 +25,13 @@ namespace MiSmart.API.MqttControllers
     {
         private readonly TelemetryRecordRepository telemetryRecordRepository;
         private readonly FlightStatRepository flightStatRepository;
+        private readonly DeviceRepository deviceRepository;
 
-        public DevicesController(TelemetryRecordRepository telemetryRecordRepository, FlightStatRepository flightStatRepository) : base()
+        public DevicesController(TelemetryRecordRepository telemetryRecordRepository, FlightStatRepository flightStatRepository, DeviceRepository deviceRepository) : base()
         {
 
             this.telemetryRecordRepository = telemetryRecordRepository;
+            this.deviceRepository = deviceRepository;
             this.flightStatRepository = flightStatRepository;
         }
 
@@ -59,6 +61,10 @@ namespace MiSmart.API.MqttControllers
 
                         };
                         telemetryRecordRepository.Create(record);
+
+                        var device1 = deviceRepository.Get(ww => ww.ID == device.ID);
+                        device1.LastPoint = geometryFactory.CreatePoint(new Coordinate(command.Longitude.GetValueOrDefault(), command.Latitude.GetValueOrDefault()));
+                        deviceRepository.Update(device1);
                         return Ok();
                     }
                 }

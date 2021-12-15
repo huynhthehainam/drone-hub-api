@@ -14,6 +14,7 @@ using System.Linq;
 using MiSmart.Infrastructure.Commands;
 using MiSmart.DAL.ViewModels;
 using System.Linq.Expressions;
+using MiSmart.Infrastructure.ViewModels;
 
 namespace MiSmart.API.Controllers
 {
@@ -37,7 +38,7 @@ namespace MiSmart.API.Controllers
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
             Int32? customerID = command.CustomerID;
-             if (!CurrentUser.IsAdmin || customerID is null)
+            if (!CurrentUser.IsAdmin || customerID is null)
             {
                 customerID = customerUserRepository.HasOwnerPermission(CurrentUser);
             }
@@ -77,7 +78,7 @@ namespace MiSmart.API.Controllers
         public IActionResult GetList([FromServices] CustomerUserRepository customerUserRepository, [FromQuery] PageCommand pageCommand, [FromQuery] Int32? customerID, [FromQuery] String mode = "Small")
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
-             if (!CurrentUser.IsAdmin || customerID is null)
+            if (!CurrentUser.IsAdmin || customerID is null)
             {
                 customerID = customerUserRepository.HasMemberPermission(CurrentUser);
             }
@@ -99,6 +100,30 @@ namespace MiSmart.API.Controllers
                 var listResponse = deviceRepository.GetListResponseView<SmallDeviceViewModel>(pageCommand, query);
                 listResponse.SetResponse(response);
             }
+            return response.ToIActionResult();
+        }
+        [HttpGet("{id:int}/GetToken")]
+        public IActionResult GetToken([FromServices] CustomerUserRepository customerUserRepository, [FromServices] DeviceRepository deviceRepository, [FromRoute] Int32 id)
+        {
+            ActionResponse response = actionResponseFactory.CreateInstance();
+
+            Int32? customerID = null;
+            if (!CurrentUser.IsAdmin || customerID is null)
+            {
+                customerID = customerUserRepository.HasMemberPermission(CurrentUser);
+            }
+            if (customerID is null)
+            {
+                response.AddNotAllowedErr();
+            }
+            var device = deviceRepository.Get(ww => ww.ID == id);
+            if (device is null)
+            {
+                response.AddNotFoundErr("Device");
+            }
+
+            response.SetData(ViewModelHelpers.ConvertToViewModel<Device, SuperSmallDeviceViewModel>(device));
+
             return response.ToIActionResult();
         }
     }

@@ -11,10 +11,11 @@ namespace MiSmart.DAL.ViewModels
         public Int64? TeamID { get; set; }
         public Int32 CustomerID { get; set; }
         public String Name { get; set; }
-        public String Token { get; set; }
         public DeviceStatus Status { get; set; }
         public Guid UUID { get; set; }
         public String TeamName { get; set; }
+        public CoordinateViewModel LastPoint { get; set; }
+
 
         public void LoadFrom(Device entity)
         {
@@ -22,10 +23,10 @@ namespace MiSmart.DAL.ViewModels
             TeamID = entity.TeamID;
             CustomerID = entity.CustomerID;
             Name = entity.Name;
-            Token = entity.Token;
             Status = entity.Status;
             UUID = entity.UUID;
             TeamName = entity.Team?.Name;
+            LastPoint = entity.LastPoint is not null ? new CoordinateViewModel(entity.LastPoint.Coordinate) : null;
         }
     }
 }

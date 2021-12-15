@@ -71,7 +71,7 @@ namespace MiSmart.DAL.Models
             set => deviceModel = value;
         }
         public Int32 DeviceModelID { get; set; }
-        public Point LastPoint { get; set; }
+        public Point LastPoint { get; set; } 
     }
 
 }
