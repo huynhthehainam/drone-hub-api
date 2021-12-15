@@ -46,11 +46,13 @@ namespace MiSmart.API.Controllers
             {
                 response.AddInvalidErr("CustomerID");
             }
-
-            var team = teamRepository.Get(ww => ww.ID == command.TeamID.GetValueOrDefault() && ww.CustomerID == customerID.GetValueOrDefault());
-            if (team is null)
+            if (command.TeamID is not null)
             {
-                response.AddInvalidErr("TeamID");
+                var team = teamRepository.Get(ww => ww.ID == command.TeamID.GetValueOrDefault() && ww.CustomerID == customerID.GetValueOrDefault());
+                if (team is null)
+                {
+                    response.AddInvalidErr("TeamID");
+                }
             }
 
             if (!deviceModelRepository.Any(ww => ww.ID == command.DeviceModelID))
