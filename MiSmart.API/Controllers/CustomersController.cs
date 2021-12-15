@@ -35,7 +35,7 @@ namespace MiSmart.API.Controllers
         {
             var response = actionResponseFactory.CreateInstance();
 
-             if (!CurrentUser.IsAdmin )
+            if (!CurrentUser.IsAdmin)
             {
                 response.AddNotAllowedErr();
             }
@@ -69,7 +69,7 @@ namespace MiSmart.API.Controllers
         {
             var response = actionResponseFactory.CreateInstance();
             Int32? customerID = command.CustomerID;
-             if (!CurrentUser.IsAdmin || customerID is null)
+            if (!CurrentUser.IsAdmin || customerID is null)
             {
                 customerID = customerUserRepository.HasOwnerPermission(CurrentUser);
             }
