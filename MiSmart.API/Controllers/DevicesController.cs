@@ -77,7 +77,7 @@ namespace MiSmart.API.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetList([FromServices] CustomerUserRepository customerUserRepository, [FromQuery] PageCommand pageCommand, [FromQuery] Int32? customerID, [FromQuery] String mode = "Small")
+        public IActionResult GetList([FromServices] CustomerUserRepository customerUserRepository, [FromQuery] PageCommand pageCommand, [FromQuery] Int32? customerID, [FromQuery] String search, [FromQuery] String mode = "Small")
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
             if (!CurrentUser.IsAdmin || customerID is null)
@@ -88,7 +88,7 @@ namespace MiSmart.API.Controllers
             {
                 response.AddNotAllowedErr();
             }
-            Expression<Func<Device, Boolean>> query = ww => ww.CustomerID == customerID.GetValueOrDefault();
+            Expression<Func<Device, Boolean>> query = ww => (ww.CustomerID == customerID.GetValueOrDefault()) && (!String.IsNullOrWhiteSpace(search) ? ww.Name.ToLower().Contains(search.ToLower()) : true);
             if (mode == "Large")
             {
 
