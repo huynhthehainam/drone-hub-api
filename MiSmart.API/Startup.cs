@@ -156,7 +156,7 @@ namespace MiSmart.API
 
             #region AddingCors
 
-            var customCorsUrls = new List<String>() { "http://localhost:4200", "http://localhost:3000" };
+            var customCorsUrls = new List<String>() { "http://localhost:4200", "http://localhost:3000", "https://dronehub.mismart.ai" };
             services.AddCors(options =>
             {
                 options.AddPolicy(name: Keys.AllowedOrigin, builder =>
@@ -191,7 +191,7 @@ namespace MiSmart.API
             // }
             // else
             // {
-                app.CustomizeErrorHandler("App flighthub");
+            app.CustomizeErrorHandler("App flighthub");
             // }
 
 
