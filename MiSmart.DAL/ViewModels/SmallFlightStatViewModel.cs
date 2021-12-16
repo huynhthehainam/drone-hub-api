@@ -14,6 +14,7 @@ namespace MiSmart.DAL.ViewModels
         public DateTime CreatedTime { get; set; }
         // public Int32 CustomerID { get; set; }
         // public Int32 DeviceID { get; set; }
+        public String AircraftName { get; set; }
         public Int32 Flights { get; set; }
         public DateTime FlightTime { get; set; }
         public String FieldName { get; set; }
@@ -33,6 +34,7 @@ namespace MiSmart.DAL.ViewModels
             FieldName = entity.FieldName;
             TaskLocation = entity.TaskLocation;
             TeamName = entity.Device.Team?.Name;
+            AircraftName = entity.Device.Name;
             TaskArea = entity.TaskArea;
             TaskAreaUnit = entity.TaskAreaUnit;
         }
