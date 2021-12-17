@@ -36,7 +36,7 @@ namespace MiSmart.API.Controllers
             return response.ToIActionResult();
         }
         [HttpGet]
-        public IActionResult GetActionResult([FromBody] PageCommand pageCommand)
+        public IActionResult GetActionResult([FromQuery] PageCommand pageCommand)
         {
             var response = actionResponseFactory.CreateInstance();
             Expression<Func<DeviceModel, Boolean>> query = ww => true;
