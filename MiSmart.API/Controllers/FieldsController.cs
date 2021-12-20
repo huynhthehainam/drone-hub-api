@@ -55,8 +55,8 @@ namespace MiSmart.API.Controllers
             return response.ToIActionResult();
         }
 
-        [HttpGet("{id:int}/Fields/{fieldID:long}")]
-        public IActionResult GetFields([FromServices] FieldRepository fieldRepository, [FromServices] CustomerUserRepository customerUserRepository, [FromRoute] Int32 id, [FromRoute] Int64 fieldID)
+        [HttpGet("{id:int}")]
+        public IActionResult GetFields([FromServices] FieldRepository fieldRepository, [FromServices] CustomerUserRepository customerUserRepository, [FromRoute] Int64 id)
         {
             var response = actionResponseFactory.CreateInstance();
 
@@ -69,7 +69,7 @@ namespace MiSmart.API.Controllers
             {
                 response.AddNotAllowedErr();
             }
-            var field = fieldRepository.Get(ww => ww.ID == fieldID && ww.CustomerID == customerID.GetValueOrDefault());
+            var field = fieldRepository.Get(ww => ww.ID == id && ww.CustomerID == customerID.GetValueOrDefault());
             if (field is null)
             {
                 response.AddNotFoundErr("Field");
