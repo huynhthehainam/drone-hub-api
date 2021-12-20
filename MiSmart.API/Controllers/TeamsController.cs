@@ -103,7 +103,7 @@ namespace MiSmart.API.Controllers
             return response.ToIActionResult();
         }
 
-        [HttpPost("Teams/{id:long}/AssignUser")]
+        [HttpPost("{id:long}/AssignUser")]
         public IActionResult AssignTeamUser([FromServices] TeamRepository teamRepository, [FromServices] TeamUserRepository teamUserRepository, [FromServices] CustomerUserRepository customerUserRepository, [FromRoute] Int64 id, [FromBody] AssigningTeamUserCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
