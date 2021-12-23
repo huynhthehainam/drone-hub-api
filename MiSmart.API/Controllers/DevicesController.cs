@@ -143,7 +143,7 @@ namespace MiSmart.API.Controllers
         {
             var response = actionResponseFactory.CreateInstance();
             var device = deviceRepository.Get(ww => ww.ID == CurrentDevice.ID);
-            if (command.FlywayPoints.Count > 0)
+            if (command.FlywayPoints.Count == 0)
             {
                 response.AddInvalidErr("FlywayPoints");
             }
