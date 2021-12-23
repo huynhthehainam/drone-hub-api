@@ -18,6 +18,7 @@ using System.Text.RegularExpressions;
 using MiSmart.Infrastructure.Commands;
 using System.Threading.Tasks;
 using MiSmart.API.Services;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace MiSmart.API.Controllers
 {
@@ -36,11 +37,13 @@ namespace MiSmart.API.Controllers
             {
                 response.AddNotFoundErr("Device");
             }
-            if (device.AccessToken is null)
+            if (device.AccessToken is null || device.NextGeneratingAccessTokenTime.GetValueOrDefault() < DateTime.Now)
             {
                 device.AccessToken = device.GenerateDeviceAccessToken(options.Value.AuthSecret);
+                device.NextGeneratingAccessTokenTime = DateTime.Now.AddMonths(1);
                 deviceRepository.Update(device);
             }
+
 
             response.SetData(new { AccessToken = device.AccessToken });
 

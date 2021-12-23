@@ -76,6 +76,7 @@ namespace MiSmart.DAL.Models
             set => deviceModel = value;
         }
         public String AccessToken { get; set; }
+        public DateTime? NextGeneratingAccessTokenTime { get; set; }
         public Int32 DeviceModelID { get; set; }
         public Point LastPoint { get; set; }
         public String GenerateDeviceAccessToken(String secretKey)
