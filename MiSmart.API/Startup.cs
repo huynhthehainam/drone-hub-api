@@ -39,6 +39,7 @@ using MiSmart.DAL.Models;
 using NetTopologySuite;
 using NetTopologySuite.Geometries;
 using MiSmart.API.Models;
+using Microsoft.Extensions.Options;
 
 namespace MiSmart.API
 {
@@ -183,7 +184,7 @@ namespace MiSmart.API
             #endregion
         }
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, DatabaseContext databaseContext, HashService hashService)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             // if (env.IsDevelopment())
             // {
@@ -212,7 +213,7 @@ namespace MiSmart.API
             {
                 c.SwaggerEndpoint($"/swagger/v1/swagger.json", "Flighthub.API V1");
             });
-            SeedData(databaseContext, hashService);
+            SeedData(app);
 
             app.UseRouting();
             app.UseCors("AllowedOrigin");
@@ -228,8 +229,10 @@ namespace MiSmart.API
             app.UseMqttServer(server =>
                app.ApplicationServices.GetRequiredService<IMqttService>().ConfigureMqttServer(server));
         }
-        public void SeedData(DatabaseContext context, HashService hashService)
+        public void SeedData(IApplicationBuilder app)
         {
+            var scope = app.ApplicationServices.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
             context.Database.Migrate();
             if (!context.DeviceModels.Any())
             {
@@ -263,6 +266,7 @@ namespace MiSmart.API
 
             if (!context.Devices.Any())
             {
+                AuthSettings authSettings = scope.ServiceProvider.GetRequiredService<IOptions<AuthSettings>>().Value;
                 var customer = context.Customers.FirstOrDefault(ww => ww.ID == 1);
                 if (customer is not null)
                 {
@@ -270,6 +274,7 @@ namespace MiSmart.API
                     if (deviceModel is not null)
                     {
                         var device1 = new Device { Customer = customer, DeviceModel = deviceModel, Name = "Test drone 1", };
+                        device1.AccessToken = device1.GenerateDeviceAccessToken(authSettings.AuthSecret);
                         context.Devices.AddRange(new Device[] { device1 });
                         context.SaveChanges();
                     }

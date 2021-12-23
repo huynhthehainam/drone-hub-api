@@ -2,9 +2,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
+using System.Text;
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.IdentityModel.Tokens;
+using MiSmart.Infrastructure.Constants;
 using MiSmart.Infrastructure.Data;
 using MiSmart.Infrastructure.Helpers;
 using NetTopologySuite.Geometries;
@@ -70,8 +75,18 @@ namespace MiSmart.DAL.Models
             get => lazyLoader.Load(this, ref deviceModel);
             set => deviceModel = value;
         }
+        public String AccessToken { get; set; }
         public Int32 DeviceModelID { get; set; }
-        public Point LastPoint { get; set; } 
+        public Point LastPoint { get; set; }
+        public String GenerateDeviceAccessToken(String secretKey)
+        {
+            var claims = new[] { new Claim(Keys.JWTAuthKey, ID.ToString()) };
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var token = new JwtSecurityToken(claims: claims, signingCredentials: creds, expires: DateTime.Now.AddMonths(2));
+            var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+            return tokenString;
+        }
     }
 
 }

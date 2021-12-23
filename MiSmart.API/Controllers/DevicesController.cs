@@ -15,6 +15,9 @@ using MiSmart.Infrastructure.Commands;
 using MiSmart.DAL.ViewModels;
 using System.Linq.Expressions;
 using MiSmart.Infrastructure.ViewModels;
+using MiSmart.API.ControllerBases;
+using NetTopologySuite;
+using NetTopologySuite.Geometries;
 
 namespace MiSmart.API.Controllers
 {
@@ -125,6 +128,51 @@ namespace MiSmart.API.Controllers
             }
 
             response.SetData(ViewModelHelpers.ConvertToViewModel<Device, SuperSmallDeviceViewModel>(device));
+
+            return response.ToIActionResult();
+        }
+    }
+    public class AuthorizedDevicesController : AuthorizedDeviceAPIControllerBase
+    {
+        public AuthorizedDevicesController(IActionResponseFactory actionResponseFactory) : base(actionResponseFactory)
+        {
+        }
+
+        [HttpPost("me/FlightStats")]
+        public IActionResult CreateFlightStat([FromServices] DeviceRepository deviceRepository, [FromServices] FlightStatRepository flightStatRepository, [FromBody] AddingFlightStatCommand command)
+        {
+            var response = actionResponseFactory.CreateInstance();
+            var device = deviceRepository.Get(ww => ww.ID == CurrentDevice.ID);
+            if (command.FlywayPoints.Count > 0)
+            {
+                response.AddInvalidErr("FlywayPoints");
+            }
+            if (device is null)
+            {
+                response.AddNotFoundErr("Device");
+            }
+            var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
+
+            var stat = new FlightStat
+            {
+                FlightDuration = command.FlightDuration.GetValueOrDefault(),
+                FieldName = command.FieldName,
+                Flights = command.Flights.GetValueOrDefault(),
+                FlightTime = command.FlightTime ?? DateTime.Now,
+                FlywayPoints = geometryFactory.CreateLineString(command.FlywayPoints.Select(ww => new Coordinate(ww.Longitude.GetValueOrDefault(), ww.Latitude.GetValueOrDefault())).ToArray()),
+                PilotName = command.PilotName,
+                CreatedTime = DateTime.Now,
+                CustomerID = device.CustomerID,
+                DeviceID = device.ID,
+                DeviceName = device.Name,
+                TaskLocation = command.TaskLocation,
+                TaskArea = command.TaskArea.GetValueOrDefault(),
+                TaskAreaUnit = command.TaskAreaUnit,
+
+            };
+            flightStatRepository.Create(stat);
+
+            response.SetCreatedObject(stat);
 
             return response.ToIActionResult();
         }

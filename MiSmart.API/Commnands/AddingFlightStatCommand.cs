@@ -18,7 +18,6 @@ namespace MiSmart.API.Commands
     }
     public class AddingFlightStatCommand
     {
-        [Required]
         public DateTime? FlightTime { get; set; }
         [Required(AllowEmptyStrings = false)]
         public String TaskLocation { get; set; }

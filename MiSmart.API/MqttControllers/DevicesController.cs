@@ -90,7 +90,7 @@ namespace MiSmart.API.MqttControllers
                 }
                 if (command is not null)
                 {
-                    if (command.TaskArea.HasValue && command.Flights.HasValue && command.FlightDuration.HasValue)
+                    if (command.TaskArea.HasValue && command.Flights.HasValue && command.FlightDuration.HasValue && command.FlywayPoints.Count > 0)
                     {
                         var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
 
