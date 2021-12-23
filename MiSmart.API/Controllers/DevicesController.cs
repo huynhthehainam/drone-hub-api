@@ -66,7 +66,7 @@ namespace MiSmart.API.Controllers
             var device = new Device
             {
                 Name = command.Name,
-                CustomerID = command.CustomerID.Value,
+                CustomerID = customerID.GetValueOrDefault(),
                 TeamID = command.TeamID,
                 DeviceModelID = command.DeviceModelID.Value,
 
