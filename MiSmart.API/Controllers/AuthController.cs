@@ -36,11 +36,11 @@ namespace MiSmart.API.Controllers
             {
                 response.AddNotFoundErr("Device");
             }
-            // if (device.AccessToken is null)
-            // {
+            if (device.AccessToken is null)
+            {
                 device.AccessToken = device.GenerateDeviceAccessToken(options.Value.AuthSecret);
                 deviceRepository.Update(device);
-            // }
+            }
 
             response.SetData(new { AccessToken = device.AccessToken });
 
