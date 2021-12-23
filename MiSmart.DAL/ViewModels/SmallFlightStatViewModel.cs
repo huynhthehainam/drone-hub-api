@@ -22,6 +22,7 @@ namespace MiSmart.DAL.ViewModels
         public String TeamName { get; set; }
         public Double TaskArea { get; set; }
         public AreaUnit TaskAreaUnit { get; set; }
+        public String PilotName { get; set; }
         public void LoadFrom(FlightStat entity)
         {
             ID = entity.ID;
@@ -29,6 +30,7 @@ namespace MiSmart.DAL.ViewModels
             CreatedTime = entity.CreatedTime;
             // CustomerID = entity.CustomerID;
             // DeviceID = entity.DeviceID;
+            PilotName = entity.PilotName;
             Flights = entity.Flights;
             FlightTime = entity.FlightTime;
             FieldName = entity.FieldName;
