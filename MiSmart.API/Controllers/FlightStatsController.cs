@@ -30,7 +30,7 @@ namespace MiSmart.API.Controllers
             var response = new FlightStatsActionResponse();
             response.ApplySettings(actionResponseFactory.Settings);
 
-             if (!CurrentUser.IsAdmin || customerID is null)
+            if (!CurrentUser.IsAdmin || customerID is null)
             {
                 customerID = customerUserRepository.HasMemberPermission(CurrentUser);
             }
@@ -67,7 +67,7 @@ namespace MiSmart.API.Controllers
         {
             var response = actionResponseFactory.CreateInstance();
             Int32? customerID = null;
-             if (!CurrentUser.IsAdmin || customerID is null)
+            if (!CurrentUser.IsAdmin || customerID is null)
             {
                 customerID = customerUserRepository.HasMemberPermission(CurrentUser);
             }
@@ -83,6 +83,30 @@ namespace MiSmart.API.Controllers
                 response.AddNotFoundErr("FlightStat");
             }
             response.SetData(ViewModelHelpers.ConvertToViewModel<FlightStat, LargeFlightStatViewModel>(flightStat));
+            return response.ToIActionResult();
+        }
+        [HttpDelete("{id:Guid}")]
+        public IActionResult DeleteByID([FromServices] FlightStatRepository flightStatRepository, [FromServices] CustomerUserRepository customerUserRepository, [FromRoute] Guid id)
+        {
+            var response = actionResponseFactory.CreateInstance();
+            Int32? customerID = null;
+            if (!CurrentUser.IsAdmin || customerID is null)
+            {
+                customerID = customerUserRepository.HasMemberPermission(CurrentUser);
+            }
+            if (customerID is null)
+            {
+                response.AddNotAllowedErr();
+            }
+
+            var flightStat = flightStatRepository.Get(ww => ww.ID == id);
+
+            if (flightStat is null)
+            {
+                response.AddNotFoundErr("FlightStat");
+            }
+            flightStatRepository.Delete(flightStat);
+            response.SetNoContent();
             return response.ToIActionResult();
         }
     }
