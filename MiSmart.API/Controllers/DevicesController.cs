@@ -138,6 +138,34 @@ namespace MiSmart.API.Controllers
         {
         }
 
+        [HttpPost("me/TelemetryRecords")]
+        public IActionResult CreateTelemetryRecord([FromServices] DeviceRepository deviceRepository, [FromServices] TelemetryRecordRepository telemetryRecordRepository, [FromBody] AddingTelemetryRecordCommand command)
+        {
+            var response = actionResponseFactory.CreateInstance();
+            var device = deviceRepository.Get(ww => ww.ID == CurrentDevice.ID);
+
+            if (device is null)
+            {
+                response.AddNotFoundErr("Device");
+            }
+
+            var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
+            TelemetryRecord record = new TelemetryRecord
+            {
+                LocationPoint = geometryFactory.CreatePoint(new Coordinate(command.Longitude.GetValueOrDefault(), command.Latitude.GetValueOrDefault())),
+                AdditionalInformation = command.AdditionalInformation,
+                CreatedTime = DateTime.Now,
+                DeviceID = device.ID,
+
+            };
+            telemetryRecordRepository.Create(record);
+            device.LastPoint = geometryFactory.CreatePoint(new Coordinate(command.Longitude.GetValueOrDefault(), command.Latitude.GetValueOrDefault()));
+            deviceRepository.Update(device);
+
+            response.SetCreatedObject(record);
+            return response.ToIActionResult();
+        }
+
         [HttpPost("me/FlightStats")]
         public IActionResult CreateFlightStat([FromServices] DeviceRepository deviceRepository, [FromServices] FlightStatRepository flightStatRepository, [FromBody] AddingFlightStatCommand command)
         {
