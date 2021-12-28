@@ -463,7 +463,7 @@ namespace MiSmart.API
                             Longitude = 105.53553301447937
                         },
 
-new LocationSample{
+                        new LocationSample{
                             Latitude = 10.667569635345581,
                             Longitude =  105.53340716277171,
                         },new LocationSample{
@@ -522,6 +522,21 @@ new LocationSample{
                     var coordinates = samples.Select(sample => new Coordinate(sample.Longitude, sample.Latitude)).ToArray();
                     var field1 = new Field
                     {
+                        FieldName = "Cô bảy",
+                        FieldLocation = "Long An",
+                        MappingArea = 1000,
+                        MappingTime = 120,
+                        IsLargeFarm = true,
+                        Unit = AreaUnit.Hectare,
+                        WorkArea = 1200,
+                        UpdatedTime = DateTime.Now,
+                        Name = "Cô bảy long an",
+                        WorkSpeed = 12,
+                        InnerArea = 800,
+                        PilotName = "Thanh Hà",
+                        SprayWidth = 5,
+                        SprayDir = 5,
+
                         Border = geometryFactory.CreatePolygon(coordinates),
                         Flyway = geometryFactory.CreateLineString(samples.Select(sample => new Coordinate(sample.Longitude, sample.Latitude)).ToArray()),
                         CreatedTime = DateTime.Now,
@@ -531,6 +546,21 @@ new LocationSample{
                     };
                     var field2 = new Field
                     {
+                        FieldName = "Cô tám",
+                        FieldLocation = "Long Điền",
+                        MappingArea = 1100,
+                        MappingTime = 130,
+                        IsLargeFarm = true,
+                        Unit = AreaUnit.Hectare,
+                        WorkArea = 1400,
+                        UpdatedTime = DateTime.Now,
+                        Name = "Cô bảy long điền",
+                        WorkSpeed = 10,
+                        InnerArea = 900,
+                        PilotName = "Thanh Trúc",
+                        SprayWidth = 5,
+                        SprayDir = 5,
+
                         Border = geometryFactory.CreatePolygon(samples2.Select(sample => new Coordinate(sample.Longitude, sample.Latitude)).ToArray()),
                         Flyway = geometryFactory.CreateLineString(samples.Select(sample => new Coordinate(sample.Longitude, sample.Latitude)).ToArray()),
                         CreatedTime = DateTime.Now,
