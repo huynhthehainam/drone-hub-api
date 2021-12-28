@@ -15,7 +15,8 @@ namespace MiSmart.DAL.ViewModels
         public Guid UUID { get; set; }
         public String TeamName { get; set; }
         public CoordinateViewModel LastPoint { get; set; }
-
+        public Double LastDirection { get; set; }
+        public Object LastAdditionalInformation { get; set; }
 
         public void LoadFrom(Device entity)
         {
@@ -27,6 +28,8 @@ namespace MiSmart.DAL.ViewModels
             UUID = entity.UUID;
             TeamName = entity.Team?.Name;
             LastPoint = entity.LastPoint is not null ? new CoordinateViewModel(entity.LastPoint.Coordinate) : null;
+            LastDirection = entity.LastDirection;
+            LastAdditionalInformation = entity.LastAdditionalInformation;
         }
     }
 }
