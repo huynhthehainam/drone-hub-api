@@ -40,6 +40,8 @@ using NetTopologySuite;
 using NetTopologySuite.Geometries;
 using MiSmart.API.Models;
 using Microsoft.Extensions.Options;
+using MiSmart.Infrastructure.RabbitMQ;
+using MiSmart.Microservices.OrderService.RabbitMQ;
 
 namespace MiSmart.API
 {
@@ -150,6 +152,13 @@ namespace MiSmart.API
             services.AddScoped<DeviceModelRepository, DeviceModelRepository>();
             services.AddScoped<FlightStatRepository, FlightStatRepository>();
             services.AddScoped<FieldRepository, FieldRepository>();
+
+
+            #endregion
+
+            #region RabbitMQ
+            services.AddRabbit(Configuration);
+            services.AddHostedService<ConsumeAuthRabbitMQHostedService>();
 
 
             #endregion
