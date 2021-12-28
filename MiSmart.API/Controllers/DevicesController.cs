@@ -39,6 +39,35 @@ namespace MiSmart.API.Controllers
             this.customerRepository = customerRepository;
         }
 
+        [HttpPost("{id:int}/AssignTeam")]
+        public IActionResult AssignTeam([FromServices] CustomerUserRepository customerUserRepository, [FromServices] TeamRepository teamRepository, [FromServices] TeamUserRepository teamUserRepository, [FromRoute] Int32 id, [FromBody] AssingingDeviceCommand command)
+        {
+            var response = actionResponseFactory.CreateInstance();
+            CustomerUserPermission customerUserPermission = customerUserRepository.GetMemberPermission(CurrentUser, CustomerMemberType.Owner);
+
+            if (customerUserPermission is null)
+            {
+                response.AddNotAllowedErr();
+            }
+
+            var team = teamRepository.Get(ww => ww.ID == command.TeamID.GetValueOrDefault() && ww.CustomerID == customerUserPermission.CustomerID);
+            if (team is null)
+            {
+                response.AddInvalidErr("TeamID");
+            }
+            Expression<Func<Device, Boolean>> query = ww => (ww.ID == id) && (ww.CustomerID == customerUserPermission.CustomerID);
+            var device = deviceRepository.Get(query);
+            if (device is null)
+            {
+                response.AddNotFoundErr("Device");
+            }
+            device.Team = team;
+            deviceRepository.Update(device);
+            response.SetMessage("Updated", "Đã cập nhật");
+
+            return response.ToIActionResult();
+        }
+
         // [HttpPost]
         // public IActionResult Create([FromServices] CustomerUserRepository customerUserRepository, [FromServices] TeamRepository teamRepository, [FromBody] AddingDeviceCommand command)
         // {

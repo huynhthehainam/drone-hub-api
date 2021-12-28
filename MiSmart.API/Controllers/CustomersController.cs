@@ -107,12 +107,5 @@ namespace MiSmart.API.Controllers
             response.SetData(new { UserIDs = userIDs });
             return response.ToIActionResult();
         }
-
-
-
-
-
-
-
     }
 }
