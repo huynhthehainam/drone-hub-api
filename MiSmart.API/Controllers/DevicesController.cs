@@ -18,6 +18,9 @@ using MiSmart.Infrastructure.ViewModels;
 using MiSmart.API.ControllerBases;
 using NetTopologySuite;
 using NetTopologySuite.Geometries;
+using MiSmart.Infrastructure.QueuedBackgroundTasks;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace MiSmart.API.Controllers
 {
@@ -36,62 +39,59 @@ namespace MiSmart.API.Controllers
             this.customerRepository = customerRepository;
         }
 
-        [HttpPost]
-        public IActionResult Create([FromServices] CustomerUserRepository customerUserRepository, [FromServices] TeamRepository teamRepository, [FromBody] AddingDeviceCommand command)
-        {
-            ActionResponse response = actionResponseFactory.CreateInstance();
-            Int32? customerID = command.CustomerID;
-            if (!CurrentUser.IsAdmin || customerID is null)
-            {
-                customerID = customerUserRepository.HasOwnerPermission(CurrentUser);
-            }
-            if (customerID is null)
-            {
-                response.AddInvalidErr("CustomerID");
-            }
-            if (command.TeamID is not null)
-            {
-                var team = teamRepository.Get(ww => ww.ID == command.TeamID.GetValueOrDefault() && ww.CustomerID == customerID.GetValueOrDefault());
-                if (team is null)
-                {
-                    response.AddInvalidErr("TeamID");
-                }
-            }
+        // [HttpPost]
+        // public IActionResult Create([FromServices] CustomerUserRepository customerUserRepository, [FromServices] TeamRepository teamRepository, [FromBody] AddingDeviceCommand command)
+        // {
+        //     ActionResponse response = actionResponseFactory.CreateInstance();
+        //     CustomerUserPermission customerUserPermission = customerUserRepository.GetMemberPermission(CurrentUser, CustomerMemberType.Owner);
 
-            if (!deviceModelRepository.Any(ww => ww.ID == command.DeviceModelID))
-            {
-                response.AddInvalidErr("ModelDeviceID");
-            }
+        //     if (customerUserPermission is null)
+        //     {
+        //         response.AddNotAllowedErr();
+        //     }
+        //     if (command.TeamID is not null)
+        //     {
+        //         var team = teamRepository.Get(ww => ww.ID == command.TeamID.GetValueOrDefault() && ww.CustomerID == customerUserPermission.CustomerID);
+        //         if (team is null)
+        //         {
+        //             response.AddInvalidErr("TeamID");
+        //         }
+        //     }
 
-            var device = new Device
-            {
-                Name = command.Name,
-                CustomerID = customerID.GetValueOrDefault(),
-                TeamID = command.TeamID,
-                DeviceModelID = command.DeviceModelID.Value,
+        //     if (!deviceModelRepository.Any(ww => ww.ID == command.DeviceModelID))
+        //     {
+        //         response.AddInvalidErr("ModelDeviceID");
+        //     }
 
-            };
-            deviceRepository.Create(device);
-            response.SetCreatedObject(device);
+        //     var device = new Device
+        //     {
+        //         Name = command.Name,
+        //         CustomerID = customerUserPermission.CustomerID,
+        //         TeamID = command.TeamID,
+        //         DeviceModelID = command.DeviceModelID.Value,
+
+        //     };
+        //     deviceRepository.Create(device);
+        //     response.SetCreatedObject(device);
 
 
-            return response.ToIActionResult();
+        //     return response.ToIActionResult();
 
-        }
+        // }
 
         [HttpGet]
-        public IActionResult GetList([FromServices] CustomerUserRepository customerUserRepository, [FromQuery] PageCommand pageCommand, [FromQuery] Int32? customerID, [FromQuery] String search, [FromQuery] String mode = "Small")
+        public IActionResult GetList([FromServices] CustomerUserRepository customerUserRepository, [FromServices] TeamUserRepository teamUserRepository, [FromQuery] PageCommand pageCommand, [FromQuery] String search, [FromQuery] String mode = "Small")
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
-            if (!CurrentUser.IsAdmin || customerID is null)
-            {
-                customerID = customerUserRepository.HasMemberPermission(CurrentUser);
-            }
-            if (customerID is null)
+            CustomerUserPermission customerUserPermission = customerUserRepository.GetMemberPermission(CurrentUser);
+
+            if (customerUserPermission is null)
             {
                 response.AddNotAllowedErr();
             }
-            Expression<Func<Device, Boolean>> query = ww => (ww.CustomerID == customerID.GetValueOrDefault()) && (!String.IsNullOrWhiteSpace(search) ? ww.Name.ToLower().Contains(search.ToLower()) : true);
+            var teamIDs = teamUserRepository.GetListEntities(new PageCommand(), ww => ww.UserID == CurrentUser.ID).Select(ww => ww.TeamID).ToList();
+            Expression<Func<Device, Boolean>> query = ww => (customerUserPermission.Type == CustomerMemberType.Owner ? (ww.CustomerID == customerUserPermission.CustomerID) : (teamIDs.Contains(ww.TeamID.GetValueOrDefault())))
+            && (!String.IsNullOrWhiteSpace(search) ? ww.Name.ToLower().Contains(search.ToLower()) : true);
             if (mode == "Large")
             {
 
@@ -108,20 +108,20 @@ namespace MiSmart.API.Controllers
             return response.ToIActionResult();
         }
         [HttpGet("{id:int}/GetToken")]
-        public IActionResult GetToken([FromServices] CustomerUserRepository customerUserRepository, [FromServices] DeviceRepository deviceRepository, [FromRoute] Int32 id)
+        public IActionResult GetToken([FromServices] CustomerUserRepository customerUserRepository, [FromServices] TeamUserRepository teamUserRepository, [FromServices] DeviceRepository deviceRepository, [FromRoute] Int32 id)
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
 
-            Int32? customerID = null;
-            if (!CurrentUser.IsAdmin || customerID is null)
-            {
-                customerID = customerUserRepository.HasMemberPermission(CurrentUser);
-            }
-            if (customerID is null)
+            CustomerUserPermission customerUserPermission = customerUserRepository.GetMemberPermission(CurrentUser);
+            if (customerUserPermission is null)
             {
                 response.AddNotAllowedErr();
             }
-            var device = deviceRepository.Get(ww => ww.ID == id && ww.CustomerID == customerID.GetValueOrDefault());
+            var teamIDs = teamUserRepository.GetListEntities(new PageCommand(), ww => ww.UserID == CurrentUser.ID).Select(ww => ww.TeamID).ToList();
+
+            Expression<Func<Device, Boolean>> query = ww => (ww.ID == id)
+             && (customerUserPermission.Type == CustomerMemberType.Owner ? ww.CustomerID == customerUserPermission.CustomerID : (teamIDs.Contains(ww.TeamID.GetValueOrDefault())));
+            var device = deviceRepository.Get(query);
             if (device is null)
             {
                 response.AddNotFoundErr("Device");
@@ -138,6 +138,8 @@ namespace MiSmart.API.Controllers
         {
         }
 
+
+
         [HttpPost("me/TelemetryRecords")]
         public IActionResult CreateTelemetryRecord([FromServices] DeviceRepository deviceRepository, [FromServices] TelemetryRecordRepository telemetryRecordRepository, [FromBody] AddingTelemetryRecordCommand command)
         {
@@ -149,7 +151,10 @@ namespace MiSmart.API.Controllers
                 response.AddNotFoundErr("Device");
             }
 
+
             var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
+
+
             TelemetryRecord record = new TelemetryRecord
             {
                 LocationPoint = geometryFactory.CreatePoint(new Coordinate(command.Longitude.GetValueOrDefault(), command.Latitude.GetValueOrDefault())),

@@ -25,23 +25,20 @@ namespace MiSmart.API.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetFlightStats([FromServices] FlightStatRepository flightStatRepository, [FromServices] CustomerUserRepository customerUserRepository, [FromQuery] PageCommand pageCommand, [FromQuery] Int32? customerID, [FromQuery] DateTime? from, [FromQuery] DateTime? to, [FromQuery] Int64? teamID, [FromQuery] Int32? deviceID, [FromQuery] Int32? deviceModelID, [FromQuery] String mode = "Small")
+        public IActionResult GetFlightStats([FromServices] FlightStatRepository flightStatRepository, [FromServices] CustomerUserRepository customerUserRepository, [FromQuery] PageCommand pageCommand, [FromQuery] DateTime? from, [FromQuery] DateTime? to, [FromQuery] Int64? teamID, [FromQuery] Int32? deviceID, [FromQuery] Int32? deviceModelID, [FromQuery] String mode = "Small")
         {
             var response = new FlightStatsActionResponse();
             response.ApplySettings(actionResponseFactory.Settings);
 
-            if (!CurrentUser.IsAdmin || customerID is null)
-            {
-                customerID = customerUserRepository.HasMemberPermission(CurrentUser);
-            }
-            if (customerID is null)
+            CustomerUserPermission customerUserPermission = customerUserRepository.GetMemberPermission(CurrentUser);
+            if (customerUserPermission is null)
             {
                 response.AddNotAllowedErr();
             }
 
 
 
-            Expression<Func<FlightStat, Boolean>> query = ww => (ww.CustomerID == customerID.GetValueOrDefault())
+            Expression<Func<FlightStat, Boolean>> query = ww => (ww.CustomerID == customerUserPermission.CustomerID)
                 && (teamID.HasValue ? (ww.Device.TeamID == teamID.Value) : true)
                 && (deviceID.HasValue ? (ww.DeviceID == deviceID.Value) : true)
                 && (from.HasValue ? (ww.FlightTime >= from.Value) : true)
@@ -66,16 +63,11 @@ namespace MiSmart.API.Controllers
         public IActionResult GetByID([FromServices] FlightStatRepository flightStatRepository, [FromServices] CustomerUserRepository customerUserRepository, [FromRoute] Guid id)
         {
             var response = actionResponseFactory.CreateInstance();
-            Int32? customerID = null;
-            if (!CurrentUser.IsAdmin || customerID is null)
-            {
-                customerID = customerUserRepository.HasMemberPermission(CurrentUser);
-            }
-            if (customerID is null)
+            CustomerUserPermission customerUserPermission = customerUserRepository.GetMemberPermission(CurrentUser);
+            if (customerUserPermission is null)
             {
                 response.AddNotAllowedErr();
             }
-
             var flightStat = flightStatRepository.Get(ww => ww.ID == id);
 
             if (flightStat is null)
@@ -89,12 +81,8 @@ namespace MiSmart.API.Controllers
         public IActionResult DeleteByID([FromServices] FlightStatRepository flightStatRepository, [FromServices] CustomerUserRepository customerUserRepository, [FromRoute] Guid id)
         {
             var response = actionResponseFactory.CreateInstance();
-            Int32? customerID = null;
-            if (!CurrentUser.IsAdmin || customerID is null)
-            {
-                customerID = customerUserRepository.HasMemberPermission(CurrentUser);
-            }
-            if (customerID is null)
+            CustomerUserPermission customerUserPermission = customerUserRepository.GetMemberPermission(CurrentUser);
+            if (customerUserPermission is null)
             {
                 response.AddNotAllowedErr();
             }

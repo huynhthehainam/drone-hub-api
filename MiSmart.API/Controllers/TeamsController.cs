@@ -32,19 +32,13 @@ namespace MiSmart.API.Controllers
         public IActionResult CreateTeam([FromServices] TeamRepository teamRepository, [FromServices] CustomerUserRepository customerUserRepository, [FromBody] AddingTeamCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
-            Int32? customerID = command.CustomerID;
-            if (!CurrentUser.IsAdmin || customerID is null)
-            {
-                customerID = customerUserRepository.HasMemberPermission(CurrentUser);
-            }
-            if (customerID is null)
+            CustomerUserPermission customerUserPermission = customerUserRepository.GetMemberPermission(CurrentUser);
+            if (customerUserPermission is null)
             {
                 response.AddNotAllowedErr();
             }
 
-
-
-            var team = new Team { Name = command.Name, CustomerID = customerID.GetValueOrDefault() };
+            var team = new Team { Name = command.Name, CustomerID = customerUserPermission.CustomerID };
             teamRepository.Create(team);
             response.SetCreatedObject(team);
 
@@ -55,20 +49,18 @@ namespace MiSmart.API.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetTeams([FromServices] TeamRepository teamRepository, [FromServices] CustomerUserRepository customerUserRepository, [FromQuery] PageCommand pageCommand, [FromQuery] Int32? customerID, [FromQuery] String search, [FromQuery] String mode = "Small")
+        public IActionResult GetTeams([FromServices] TeamRepository teamRepository, [FromServices] CustomerUserRepository customerUserRepository, [FromServices] TeamUserRepository teamUserRepository, [FromQuery] PageCommand pageCommand, [FromQuery] String search, [FromQuery] String mode = "Small")
         {
             var response = actionResponseFactory.CreateInstance();
 
-            if (!CurrentUser.IsAdmin || customerID is null)
-            {
-                customerID = customerUserRepository.HasMemberPermission(CurrentUser);
-            }
-            if (customerID is null)
+            CustomerUserPermission customerUserPermission = customerUserRepository.GetMemberPermission(CurrentUser);
+            if (customerUserPermission is null)
             {
                 response.AddNotAllowedErr();
             }
+            var teamIDs = teamUserRepository.GetListEntities(new PageCommand(), ww => ww.UserID == CurrentUser.ID).Select(ww => ww.TeamID).ToList();
 
-            Expression<Func<Team, Boolean>> query = ww => (ww.CustomerID == customerID.GetValueOrDefault())
+            Expression<Func<Team, Boolean>> query = ww => (customerUserPermission.Type == CustomerMemberType.Owner ? ww.CustomerID == customerUserPermission.CustomerID : (teamIDs.Contains(ww.ID)))
               && (!String.IsNullOrWhiteSpace(search) ? (ww.Name.ToLower().Contains(search.ToLower())) : true);
             if (mode == "Large")
             {
@@ -86,19 +78,22 @@ namespace MiSmart.API.Controllers
             return response.ToIActionResult();
         }
         [HttpGet("{id:int}")]
-        public IActionResult GetTeamByID([FromServices] TeamRepository teamRepository, [FromServices] CustomerUserRepository customerUserRepository, [FromRoute] Int32 id)
+        public IActionResult GetTeamByID([FromServices] TeamRepository teamRepository, [FromServices] TeamUserRepository teamUserRepository, [FromServices] CustomerUserRepository customerUserRepository, [FromRoute] Int32 id)
         {
             var response = actionResponseFactory.CreateInstance();
-            Int32? customerID = null;
-            if (!CurrentUser.IsAdmin || customerID is null)
-            {
-                customerID = customerUserRepository.HasMemberPermission(CurrentUser);
-            }
-            if (customerID is null)
+            CustomerUserPermission customerUserPermission = customerUserRepository.GetMemberPermission(CurrentUser);
+            if (customerUserPermission is null)
             {
                 response.AddNotAllowedErr();
             }
-            var team = teamRepository.GetView<LargeTeamViewModel>(ww => ww.ID == id && ww.CustomerID == customerID.GetValueOrDefault());
+            var teamIDs = teamUserRepository.GetListEntities(new PageCommand(), ww => ww.UserID == CurrentUser.ID).Select(ww => ww.TeamID).ToList();
+
+            var team = teamRepository.GetView<LargeTeamViewModel>(ww => ww.ID == id && (customerUserPermission.Type == CustomerMemberType.Owner ? ww.CustomerID == customerUserPermission.CustomerID : (teamIDs.Contains(ww.ID))));
+            if (team is null)
+            {
+                response.AddNotFoundErr("Team");
+
+            }
             response.SetData(team);
             return response.ToIActionResult();
         }
@@ -108,8 +103,8 @@ namespace MiSmart.API.Controllers
         {
             var response = actionResponseFactory.CreateInstance();
 
-            var customerID = customerUserRepository.HasMemberPermission(CurrentUser);
-            if (customerID is null)
+            CustomerUserPermission customerUserPermission = customerUserRepository.GetMemberPermission(CurrentUser);
+            if (customerUserPermission is null || customerUserPermission.Type != CustomerMemberType.Owner)
             {
                 response.AddNotAllowedErr();
             }
@@ -118,12 +113,13 @@ namespace MiSmart.API.Controllers
                 response.AddExistedErr("UserID");
             }
 
+
             var teamUser = new TeamUser { UserID = command.UserID.Value, TeamID = id, Type = command.Type };
             teamUserRepository.Create(teamUser);
 
             if (!customerUserRepository.Any(ww => ww.CustomerID == id && ww.UserID == command.UserID))
             {
-                var customerUser = new CustomerUser { CustomerID = customerID.GetValueOrDefault(), UserID = command.UserID.Value, Type = CustomerMemberType.Member };
+                var customerUser = new CustomerUser { CustomerID = customerUserPermission.CustomerID, UserID = command.UserID.Value, Type = CustomerMemberType.Member };
                 customerUserRepository.Create(customerUser);
             }
             response.SetCreatedObject(teamUser);

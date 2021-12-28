@@ -11,32 +11,40 @@ using MiSmart.Infrastructure.ViewModels;
 
 namespace MiSmart.DAL.Repositories
 {
+    public class CustomerUserPermission
+    {
+        public Int32 CustomerID { get; set; }
+        public CustomerMemberType Type { get; set; }
+
+    }
     public class CustomerUserRepository : RepositoryBase<CustomerUser>
     {
         public CustomerUserRepository(DatabaseContext context) : base(context)
         {
         }
-        public Int32? HasOwnerPermission(UserCacheViewModel currentUser)
+        public CustomerUserPermission GetMemberPermission(UserCacheViewModel currentUser, CustomerMemberType type = CustomerMemberType.Member)
         {
             var customerUser = Get(ww => ww.UserID == currentUser.ID);
             if (customerUser is not null)
             {
-                if (customerUser.Type == CustomerMemberType.Owner)
+                switch (type)
                 {
-                    return customerUser.CustomerID;
+                    case CustomerMemberType.Owner:
+                        if (customerUser.Type == CustomerMemberType.Owner)
+                        {
+                            return new CustomerUserPermission { CustomerID = customerUser.CustomerID, Type = customerUser.Type };
+                        }
+                        break;
+                    case CustomerMemberType.Member:
+                        if (customerUser.Type == CustomerMemberType.Owner || customerUser.Type == CustomerMemberType.Member)
+                        {
+                            return new CustomerUserPermission { CustomerID = customerUser.CustomerID, Type = customerUser.Type };
+                        }
+                        break;
+                    default:
+                        break;
                 }
-            }
-            return null;
-        }
-        public Int32? HasMemberPermission(UserCacheViewModel currentUser)
-        {
-            var customerUser = Get(ww => ww.UserID == currentUser.ID);
-            if (customerUser is not null)
-            {
-                if (customerUser.Type == CustomerMemberType.Owner || customerUser.Type == CustomerMemberType.Member)
-                {
-                    return customerUser.CustomerID;
-                }
+
             }
             return null;
         }

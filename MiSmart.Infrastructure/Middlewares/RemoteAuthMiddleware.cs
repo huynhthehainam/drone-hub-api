@@ -23,7 +23,7 @@ namespace MiSmart.Infrastructure.Middlewares
         {
             this.next = next;
         }
-        public async Task Invoke(HttpContext context, JWTService jwtService, CacheService cacheService)
+        public async Task Invoke(HttpContext context, JWTService jwtService)
         {
             var cc = context.Request.Headers["Connection"];
             if (context.Request.Headers["Connection"] == "Upgrade")

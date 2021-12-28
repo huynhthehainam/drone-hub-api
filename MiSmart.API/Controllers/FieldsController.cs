@@ -24,19 +24,16 @@ namespace MiSmart.API.Controllers
         {
         }
         [HttpGet]
-        public IActionResult GetFields([FromServices] FieldRepository fieldRepository, [FromServices] CustomerUserRepository customerUserRepository, [FromQuery] Int32? customerID, [FromQuery] PageCommand pageCommand, [FromQuery] DateTime? from, [FromQuery] DateTime? to, [FromQuery] String search, [FromQuery] String mode = "Small")
+        public IActionResult GetFields([FromServices] FieldRepository fieldRepository, [FromServices] CustomerUserRepository customerUserRepository, [FromQuery] PageCommand pageCommand, [FromQuery] DateTime? from, [FromQuery] DateTime? to, [FromQuery] String search, [FromQuery] String mode = "Small")
         {
             var response = actionResponseFactory.CreateInstance();
-            if (!CurrentUser.IsAdmin || customerID is null)
-            {
-                customerID = customerUserRepository.HasMemberPermission(CurrentUser);
-            }
-            if (customerID is null)
+            CustomerUserPermission customerUserPermission = customerUserRepository.GetMemberPermission(CurrentUser);
+            if (customerUserPermission is null)
             {
                 response.AddNotAllowedErr();
             }
 
-            Expression<Func<Field, Boolean>> query = ww => (ww.CustomerID == customerID.GetValueOrDefault())
+            Expression<Func<Field, Boolean>> query = ww => (ww.CustomerID == customerUserPermission.CustomerID)
                 && (from.HasValue ? (ww.CreatedTime >= from.Value) : true)
                 && (to.HasValue ? (ww.CreatedTime <= to.Value) : true)
                 && (!String.IsNullOrWhiteSpace(search) ? (ww.Name.ToLower().Contains(search.ToLower()) || ww.FieldLocation.ToLower().Contains(search.ToLower()) || ww.FieldName.ToLower().Contains(search.ToLower())) : true);
@@ -60,16 +57,12 @@ namespace MiSmart.API.Controllers
         {
             var response = actionResponseFactory.CreateInstance();
 
-            Int32? customerID = null;
-            if (!CurrentUser.IsAdmin || customerID is null)
-            {
-                customerID = customerUserRepository.HasMemberPermission(CurrentUser);
-            }
-            if (customerID is null)
+            CustomerUserPermission customerUserPermission = customerUserRepository.GetMemberPermission(CurrentUser);
+            if (customerUserPermission is null)
             {
                 response.AddNotAllowedErr();
             }
-            var field = fieldRepository.Get(ww => ww.ID == id && ww.CustomerID == customerID.GetValueOrDefault());
+            var field = fieldRepository.Get(ww => ww.ID == id && ww.CustomerID == customerUserPermission.CustomerID);
             if (field is null)
             {
                 response.AddNotFoundErr("Field");

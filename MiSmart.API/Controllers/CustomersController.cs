@@ -68,28 +68,43 @@ namespace MiSmart.API.Controllers
         public IActionResult AssignCustomerUser([FromServices] CustomerUserRepository customerUserRepository, [FromBody] AssigningCustomerUserCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
-            Int32? customerID = command.CustomerID;
-            if (!CurrentUser.IsAdmin || customerID is null)
-            {
-                customerID = customerUserRepository.HasOwnerPermission(CurrentUser);
-            }
-            if (customerID is null)
-            {
-                response.AddNotFoundErr("Company");
+            CustomerUserPermission customerUserPermission = customerUserRepository.GetMemberPermission(CurrentUser, CustomerMemberType.Owner);
 
+            if (customerUserPermission is null)
+            {
+                response.AddNotAllowedErr();
             }
 
-            if (customerUserRepository.Any(ww => ww.CustomerID == customerID.GetValueOrDefault() && ww.UserID == command.UserID))
+            if (customerUserRepository.Any(ww => ww.CustomerID == customerUserPermission.CustomerID && ww.UserID == command.UserID))
             {
                 response.AddExistedErr("UserID");
             }
 
-            CustomerUser customerUser = new CustomerUser { CustomerID = customerID.GetValueOrDefault(), UserID = command.UserID.Value, Type = command.Type };
+            CustomerUser customerUser = new CustomerUser { CustomerID = customerUserPermission.CustomerID, UserID = command.UserID.Value, Type = command.Type };
             customerUserRepository.Create(customerUser);
             response.SetCreatedObject(customerUser);
 
 
 
+            return response.ToIActionResult();
+        }
+
+        [HttpGet("me/Users")]
+        public IActionResult GetCurrentCustomerUsers([FromServices] CustomerUserRepository customerUserRepository, [FromServices] TeamUserRepository teamUserRepository)
+        {
+            var response = actionResponseFactory.CreateInstance();
+
+            CustomerUserPermission customerUserPermission = customerUserRepository.GetMemberPermission(CurrentUser, CustomerMemberType.Owner);
+
+            if (customerUserPermission is null)
+            {
+                response.AddNotAllowedErr();
+            }
+
+            var assignedUserIDs = teamUserRepository.GetListEntities(new PageCommand(), ww => true).Select(ww => ww.UserID).ToList();
+            Expression<Func<CustomerUser, Boolean>> query = ww => ww.CustomerID == customerUserPermission.CustomerID && !assignedUserIDs.Contains(ww.UserID);
+            var userIDs = customerUserRepository.GetListEntities(new PageCommand(), query).Select(ww => ww.UserID).ToList();
+            response.SetData(new { UserIDs = userIDs });
             return response.ToIActionResult();
         }
 

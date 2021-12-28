@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
 using System;
+using MiSmart.Infrastructure.QueuedBackgroundTasks;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace MiSmart.API.Controllers
 {
@@ -13,6 +16,7 @@ namespace MiSmart.API.Controllers
         {
             this.actionResponseFactory = actionResponseFactory;
         }
+
         [HttpGet]
         public IActionResult Index()
         {

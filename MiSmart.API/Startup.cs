@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.AspNetCore.Http;
@@ -23,18 +22,11 @@ using MiSmart.API.Protos;
 using System.Net.Http;
 
 using MQTTnet.AspNetCore.Extensions;
-using MQTTnet.AspNetCore;
 using MQTTnet.AspNetCore.AttributeRouting;
 using MiSmart.API.Services;
-using MiSmart.API.MqttControllers;
 using MiSmart.Infrastructure.Mqtt;
 using MiSmart.DAL.Repositories;
-
-using Microsoft.AspNetCore.SignalR;
-using System.Reflection;
 using MiSmart.API.Settings;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal;
-using Microsoft.EntityFrameworkCore.Storage;
 using MiSmart.DAL.Models;
 using NetTopologySuite;
 using NetTopologySuite.Geometries;
@@ -42,6 +34,8 @@ using MiSmart.API.Models;
 using Microsoft.Extensions.Options;
 using MiSmart.Infrastructure.RabbitMQ;
 using MiSmart.Microservices.OrderService.RabbitMQ;
+using MiSmart.Infrastructure.QueuedBackgroundTasks;
+using MiSmart.API.QueuedServices;
 
 namespace MiSmart.API
 {
@@ -67,6 +61,8 @@ namespace MiSmart.API
             {
                 option.Configuration = Configuration["RedisSettings:Host"] + ":" + Configuration["RedisSettings:Port"] + ",connectTimeout=10000,syncTimeout=10000";
             });
+
+
             services.AddMvc().AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.IgnoreNullValues = true;
@@ -94,9 +90,22 @@ namespace MiSmart.API
                .AddConnections()
                .AddMqttWebSocketServerAdapter();
             services.AddMqttControllers();
-            // services.AddScoped<MqttBaseController, MqttController>();
-            // services.AddScoped<MqttBaseController, DevicesController>();
 
+
+            #endregion
+
+            #region QueuedTasks
+
+            // services.AddHostedService<QueuedHostedService1>();
+            // services.AddHostedService<QueuedHostedService2>();
+
+
+            // services.AddSingleton<IBackgroundTaskQueue>(ctx =>
+            // {
+            //     if (!int.TryParse(Configuration["QueueCapacity"], out var queueCapacity))
+            //         queueCapacity = 1000;
+            //     return new BackgroundTaskQueue(queueCapacity);
+            // });
             #endregion
 
 
@@ -129,7 +138,6 @@ namespace MiSmart.API
             #region AddingServices
             services.AddSingleton<HashService, HashService>();
             services.AddScoped<JWTService, JWTService>();
-            services.AddScoped<CacheService, CacheService>();
             services.AddScoped<EmailService, EmailService>();
 
             #endregion
@@ -266,10 +274,48 @@ namespace MiSmart.API
                 if (customer is not null)
                 {
                     var customerUser1 = new CustomerUser { UserID = 1, Customer = customer, Type = CustomerMemberType.Owner };
-                    context.CustomerUsers.AddRange(new CustomerUser[] { customerUser1 });
+                    var customerUser2 = new CustomerUser { UserID = 2, Customer = customer, Type = CustomerMemberType.Member };
+                    var customerUser3 = new CustomerUser { UserID = 3, Customer = customer, Type = CustomerMemberType.Member };
+                    var customerUser4 = new CustomerUser { UserID = 4, Customer = customer, Type = CustomerMemberType.Member };
+
+                    context.CustomerUsers.AddRange(new CustomerUser[] { customerUser1, customerUser2, customerUser3, customerUser4 });
+                    context.SaveChanges();
+
+
+                }
+            }
+            if (!context.Teams.Any())
+            {
+                var customer = context.Customers.FirstOrDefault(ww => ww.ID == 1);
+                if (customer is not null)
+                {
+                    var team1 = new Team { Customer = customer, Name = "Team 1", };
+                    var team2 = new Team { Customer = customer, Name = "Team 2", };
+                    var team3 = new Team { Customer = customer, Name = "Team 3", };
+
+                    context.Teams.AddRange(new Team[] { team1, team2, team3 });
                     context.SaveChanges();
                 }
             }
+
+            if (!context.TeamUsers.Any())
+            {
+                var team1 = context.Teams.FirstOrDefault(ww => ww.ID == 1);
+                var team2 = context.Teams.FirstOrDefault(ww => ww.ID == 2);
+                var team3 = context.Teams.FirstOrDefault(ww => ww.ID == 3);
+                if (team1 is not null && team2 is not null && team3 is not null)
+                {
+                    TeamUser teamUser1 = new TeamUser { UserID = 1, Team = team1 };
+                    TeamUser teamUser2 = new TeamUser { UserID = 2, Team = team2 };
+                    TeamUser teamUser3 = new TeamUser { UserID = 3, Team = team3 };
+                    TeamUser teamUser4 = new TeamUser { UserID = 4, Team = team2 };
+                    context.TeamUsers.AddRange(new TeamUser[] { teamUser1, teamUser2, teamUser3, teamUser4 });
+                    context.SaveChanges();
+                }
+            }
+
+
+
             var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
 
 
@@ -282,13 +328,27 @@ namespace MiSmart.API
                     var deviceModel = context.DeviceModels.FirstOrDefault(ww => ww.ID == 1);
                     if (deviceModel is not null)
                     {
-                        var device1 = new Device { Customer = customer, DeviceModel = deviceModel, Name = "Test drone 1", };
-                        device1.AccessToken = device1.GenerateDeviceAccessToken(authSettings.AuthSecret);
-                        context.Devices.AddRange(new Device[] { device1 });
-                        context.SaveChanges();
-                    }
-                }
+                        var team1 = context.Teams.FirstOrDefault(ww => ww.ID == 1);
+                        var team2 = context.Teams.FirstOrDefault(ww => ww.ID == 2);
+                        var team3 = context.Teams.FirstOrDefault(ww => ww.ID == 3);
+                        if (team1 is not null && team2 is not null && team3 is not null)
+                        {
+                            var device1 = new Device { Customer = customer, DeviceModel = deviceModel, Name = "Test drone 1", Team = team1 };
+                            var device2 = new Device { Customer = customer, DeviceModel = deviceModel, Name = "Test drone 2", Team = team2 };
+                            var device3 = new Device { Customer = customer, DeviceModel = deviceModel, Name = "Test drone 3", Team = team3 };
 
+                            device1.AccessToken = device1.GenerateDeviceAccessToken(authSettings.AuthSecret);
+                            device2.AccessToken = device2.GenerateDeviceAccessToken(authSettings.AuthSecret);
+                            device3.AccessToken = device3.GenerateDeviceAccessToken(authSettings.AuthSecret);
+
+                            context.Devices.AddRange(new Device[] { device1, device2, device3 });
+                            context.SaveChanges();
+                        }
+                    }
+
+
+
+                }
             }
             var random = new Random();
             if (!context.FlightStats.Any())
