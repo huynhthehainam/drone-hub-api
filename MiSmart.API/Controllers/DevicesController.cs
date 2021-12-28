@@ -217,6 +217,7 @@ namespace MiSmart.API.Controllers
                 response.AddNotFoundErr("Device");
             }
             var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
+            command.FlywayPoints.Add(JsonSerializer.Deserialize<LocationPoint>(JsonSerializer.Serialize(command.FlywayPoints[0])));
 
             var stat = new FlightStat
             {
