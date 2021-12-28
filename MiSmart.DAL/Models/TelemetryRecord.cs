@@ -22,6 +22,7 @@ namespace MiSmart.DAL.Models
 
         public DateTime CreatedTime { get; set; } = DateTime.Now;
         public Point LocationPoint { get; set; }
+        public Double Direction { get; set; }
         public String AdditionalInformationString { get; set; }
         [NotMapped]
         public Object AdditionalInformation

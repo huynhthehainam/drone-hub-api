@@ -2,10 +2,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.IdentityModel.Tokens;
@@ -79,6 +81,14 @@ namespace MiSmart.DAL.Models
         public DateTime? NextGeneratingAccessTokenTime { get; set; }
         public Int32 DeviceModelID { get; set; }
         public Point LastPoint { get; set; }
+        public Double LastDirection { get; set; }
+        public String LastAdditionalInformationString { get; set; }
+        [NotMapped]
+        public Object LastAdditionalInformation
+        {
+            get => LastAdditionalInformationString != null ? JsonSerializer.Deserialize<Object>(LastAdditionalInformationString, JsonOptions.CamelOptions) : null;
+            set => LastAdditionalInformationString = JsonSerializer.Serialize(value, JsonOptions.CamelOptions);
+        }
         public String GenerateDeviceAccessToken(String secretKey)
         {
             var claims = new[] { new Claim(Keys.JWTAuthKey, ID.ToString()) };

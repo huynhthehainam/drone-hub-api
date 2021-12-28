@@ -190,10 +190,13 @@ namespace MiSmart.API.Controllers
                 AdditionalInformation = command.AdditionalInformation,
                 CreatedTime = DateTime.Now,
                 DeviceID = device.ID,
+                Direction = command.Direction.GetValueOrDefault(),
 
             };
             telemetryRecordRepository.Create(record);
             device.LastPoint = geometryFactory.CreatePoint(new Coordinate(command.Longitude.GetValueOrDefault(), command.Latitude.GetValueOrDefault()));
+            device.LastDirection = command.Direction.GetValueOrDefault();
+            device.LastAdditionalInformation = command.AdditionalInformation;
             deviceRepository.Update(device);
 
             response.SetCreatedObject(record);

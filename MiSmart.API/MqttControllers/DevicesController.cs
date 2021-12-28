@@ -49,7 +49,7 @@ namespace MiSmart.API.MqttControllers
                 catch (Exception) { }
                 if (command is not null)
                 {
-                    if (command.Latitude.HasValue && command.Longitude.HasValue)
+                    if (command.Latitude.HasValue && command.Longitude.HasValue && (command.Direction.HasValue && command.Direction >= 0 && command.Direction <= 360))
                     {
                         var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
                         TelemetryRecord record = new TelemetryRecord
@@ -57,6 +57,7 @@ namespace MiSmart.API.MqttControllers
                             LocationPoint = geometryFactory.CreatePoint(new Coordinate(command.Longitude.GetValueOrDefault(), command.Latitude.GetValueOrDefault())),
                             AdditionalInformation = command.AdditionalInformation,
                             CreatedTime = DateTime.Now,
+                            Direction = command.Direction.GetValueOrDefault(),
                             DeviceID = device.ID,
 
                         };
@@ -64,6 +65,8 @@ namespace MiSmart.API.MqttControllers
 
                         var device1 = deviceRepository.Get(ww => ww.ID == device.ID);
                         device1.LastPoint = geometryFactory.CreatePoint(new Coordinate(command.Longitude.GetValueOrDefault(), command.Latitude.GetValueOrDefault()));
+                        device1.LastDirection = command.Direction.GetValueOrDefault();
+                        device1.LastAdditionalInformation = command.AdditionalInformation;
                         deviceRepository.Update(device1);
                         return Ok();
                     }

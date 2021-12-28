@@ -11,6 +11,10 @@ namespace MiSmart.API.Commands
         public Double? Latitude { get; set; }
         [Required]
         public Double? Longitude { get; set; }
+
+        [Required]
+        [Range(0, 360)]
+        public Double? Direction { get; set; }
         public Object AdditionalInformation { get; set; } = new Object();
     }
 }
