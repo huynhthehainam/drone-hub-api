@@ -112,7 +112,6 @@ namespace MiSmart.API.MqttControllers
                             DeviceName = device.Name,
                             TaskLocation = command.TaskLocation,
                             TaskArea = command.TaskArea.GetValueOrDefault(),
-                            TaskAreaUnit = command.TaskAreaUnit,
 
                         };
                         flightStatRepository.Create(stat);

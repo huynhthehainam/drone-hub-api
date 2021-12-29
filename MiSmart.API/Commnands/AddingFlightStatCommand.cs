@@ -27,7 +27,6 @@ namespace MiSmart.API.Commands
         public String FieldName { get; set; }
         [Required]
         public Double? TaskArea { get; set; }
-        public AreaUnit TaskAreaUnit { get; set; } = AreaUnit.Hectare;
         [Required]
         public Double? FlightDuration { get; set; }
         [Required(AllowEmptyStrings = false)]

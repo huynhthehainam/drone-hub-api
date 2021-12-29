@@ -25,7 +25,6 @@ namespace MiSmart.DAL.Models
         public String FieldName { get; set; }
         public String DeviceName { get; set; }
         public Double TaskArea { get; set; }
-        public AreaUnit TaskAreaUnit { get; set; } = AreaUnit.Hectare;
         public Double FlightDuration { get; set; }
         public String PilotName { get; set; }
         public LineString FlywayPoints { get; set; }

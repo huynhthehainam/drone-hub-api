@@ -233,7 +233,6 @@ namespace MiSmart.API.Controllers
                 DeviceName = device.Name,
                 TaskLocation = command.TaskLocation,
                 TaskArea = command.TaskArea.GetValueOrDefault(),
-                TaskAreaUnit = command.TaskAreaUnit,
 
             };
             flightStatRepository.Create(stat);

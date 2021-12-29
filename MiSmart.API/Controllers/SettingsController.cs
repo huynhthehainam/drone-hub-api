@@ -27,7 +27,7 @@ namespace MiSmart.API.Controllers
         {
             var response = actionResponseFactory.CreateInstance();
             ConversionSettings settings = options.Value;
-            response.Data = settings;
+            response.SetData(settings);
             return response.ToIActionResult();
         }
     }

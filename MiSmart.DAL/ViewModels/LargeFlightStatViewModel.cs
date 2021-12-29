@@ -21,7 +21,6 @@ namespace MiSmart.DAL.ViewModels
         public String TaskLocation { get; set; }
         public String TeamName { get; set; }
         public Double TaskArea { get; set; }
-        public AreaUnit TaskAreaUnit { get; set; }
         public void LoadFrom(FlightStat entity)
         {
             ID = entity.ID;
@@ -36,7 +35,6 @@ namespace MiSmart.DAL.ViewModels
             TaskLocation = entity.TaskLocation;
             TeamName = entity.Device.Team?.Name;
             TaskArea = entity.TaskArea;
-            TaskAreaUnit = entity.TaskAreaUnit;
         }
     }
 }

@@ -27,7 +27,6 @@ namespace MiSmart.DAL.ViewModels
         public String PilotName { get; set; }
         public Double SprayDir { get; set; }
         public Double SprayWidth { get; set; }
-        public AreaUnit Unit { get; set; }
         public DateTime? UpdatedTime { get; set; }
         public Double WorkArea { get; set; }
         public Double WorkSpeed { get; set; }
@@ -53,7 +52,6 @@ namespace MiSmart.DAL.ViewModels
             PilotName = entity.PilotName;
             SprayDir = entity.SprayDir;
             SprayWidth = entity.SprayWidth;
-            Unit = entity.Unit;
             UpdatedTime = entity.UpdatedTime;
             WorkArea = entity.WorkArea;
             WorkSpeed = entity.WorkSpeed;

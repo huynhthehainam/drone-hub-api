@@ -12,18 +12,7 @@ using NetTopologySuite.Geometries;
 
 namespace MiSmart.DAL.Models
 {
-    // public class GPSPoint
-    // {
-    //     public Double Longitude { get; set; }
-    //     public Double Latitude { get; set; }
-    //     public Double Accuracy { get; set; }
-    //     public Double Yaw { get; set; }
-    // }
-    // public class LocationPoint
-    // {
-    //     public Double Longitude { get; set; }
-    //     public Double Latitude { get; set; }
-    // }
+
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum LengthUnit
     {
@@ -49,7 +38,6 @@ namespace MiSmart.DAL.Models
         public String FieldLocation { get; set; }
         public String PilotName { get; set; }
         public Double MappingArea { get; set; }
-        public AreaUnit Unit { get; set; } = AreaUnit.Hectare;
         public Double MappingTime { get; set; }
         public DateTime? UpdatedTime { get; set; } = null;
         private Customer customer;
@@ -60,9 +48,9 @@ namespace MiSmart.DAL.Models
             set => customer = value;
         }
         public Int32 CustomerID { get; set; }
-        public Polygon Border { get; set; } 
+        public Polygon Border { get; set; }
         public LineString Flyway { get; set; }
-        public MultiPoint GPSPoints { get; set; } 
+        public MultiPoint GPSPoints { get; set; }
         public Point LocationPoint { get; set; }
         public MultiPoint CalibrationPoints { get; set; }
 
