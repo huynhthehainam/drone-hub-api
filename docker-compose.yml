@@ -13,6 +13,11 @@ services:
     restart: unless-stopped
     depends_on:
       - postgres_image
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
 
   postgres_image:
     image: huynhthehainam/dronehub_db
@@ -26,6 +31,12 @@ services:
     restart: unless-stopped
     networks:
       - mismart
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    
 
   mismartapi:
     image: mismartapi
@@ -41,5 +52,7 @@ services:
       - ASPNETCORE_URLS=http://+:80
       - ASPNETCORE_ENVIRONMENT=Docker
     depends_on:
-      - postgres_image
-      - redis_image
+      postgres_image:
+        condition: service_healthy      
+      redis_image:
+        condition: service_healthy  
