@@ -11,16 +11,18 @@ namespace MiSmart.Infrastructure.QueuedBackgroundTasks
     public class QueuedHostedService : BackgroundService
     {
         private readonly ILogger<QueuedHostedService> logger;
+        private readonly IServiceProvider serviceProvider;
         protected Int32 index = 0;
 
-        public QueuedHostedService(IBackgroundTaskQueue taskQueue,
+        public QueuedHostedService(IBackgroundTaskQueue taskQueue, IServiceProvider serviceProvider,
             ILogger<QueuedHostedService> logger)
         {
-            TaskQueue = taskQueue;
+            this.taskQueue = taskQueue;
+            this.serviceProvider = serviceProvider;
             this.logger = logger;
         }
 
-        public IBackgroundTaskQueue TaskQueue { get; }
+        public IBackgroundTaskQueue taskQueue { get; }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
@@ -37,12 +39,12 @@ namespace MiSmart.Infrastructure.QueuedBackgroundTasks
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                var workItem = await TaskQueue.DequeueAsync(stoppingToken);
+                var workItem = await taskQueue.DequeueAsync(stoppingToken);
 
                 // try
                 // {
                 Console.WriteLine($"Executing {nameof(workItem)} of {index}");
-                await workItem(stoppingToken);
+                await workItem(serviceProvider, stoppingToken);
                 // }
                 // catch (Exception ex)
                 // {

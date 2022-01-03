@@ -36,6 +36,7 @@ using MiSmart.Infrastructure.RabbitMQ;
 using MiSmart.Microservices.OrderService.RabbitMQ;
 using MiSmart.Infrastructure.QueuedBackgroundTasks;
 using MiSmart.API.QueuedServices;
+using Microsoft.Extensions.Hosting;
 
 namespace MiSmart.API
 {
@@ -50,7 +51,6 @@ namespace MiSmart.API
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            // services.AddSingleton<IRelationalTypeMappingSource,NpgsqlTypeMappingSource>();
             services.AddEntityFrameworkNpgsqlNetTopologySuite().AddEntityFrameworkNpgsql().AddDbContext<DatabaseContext>((sp, opt) => opt.UseNpgsql(Configuration.GetConnectionString(DbConnection.DatabaseKey), b =>
             {
                 b.UseNetTopologySuite();
@@ -203,14 +203,15 @@ namespace MiSmart.API
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            // if (env.IsDevelopment())
-            // {
-            //     app.UseDeveloperExceptionPage();
-            // }
-            // else
-            // {
-            app.CustomizeErrorHandler("App flighthub");
-            // }
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+            else
+            {
+                app.CustomizeErrorHandler("App dronehub");
+            }
+
 
 
             if (!Directory.Exists(FolderPaths.StaticFilePath))

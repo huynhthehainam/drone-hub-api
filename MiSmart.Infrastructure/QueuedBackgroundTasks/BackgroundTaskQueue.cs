@@ -9,15 +9,15 @@ namespace MiSmart.Infrastructure.QueuedBackgroundTasks
 {
     public interface IBackgroundTaskQueue
     {
-        ValueTask QueueBackgroundWorkItemAsync(Func<CancellationToken, ValueTask> workItem);
+        ValueTask QueueBackgroundWorkItemAsync(Func<IServiceProvider, CancellationToken, ValueTask> workItem);
 
-        ValueTask<Func<CancellationToken, ValueTask>> DequeueAsync(
+        ValueTask<Func<IServiceProvider, CancellationToken, ValueTask>> DequeueAsync(
             CancellationToken cancellationToken);
     }
 
     public class BackgroundTaskQueue : IBackgroundTaskQueue
     {
-        private readonly Channel<Func<CancellationToken, ValueTask>> queue;
+        private readonly Channel<Func<IServiceProvider, CancellationToken, ValueTask>> queue;
 
         public BackgroundTaskQueue(Int32 capacity)
         {
@@ -30,11 +30,11 @@ namespace MiSmart.Infrastructure.QueuedBackgroundTasks
             {
                 FullMode = BoundedChannelFullMode.Wait
             };
-            queue = Channel.CreateBounded<Func<CancellationToken, ValueTask>>(options);
+            queue = Channel.CreateBounded<Func<IServiceProvider, CancellationToken, ValueTask>>(options);
         }
 
         public ValueTask QueueBackgroundWorkItemAsync(
-            Func<CancellationToken, ValueTask> workItem)
+            Func<IServiceProvider, CancellationToken, ValueTask> workItem)
         {
             if (workItem == null)
             {
@@ -44,7 +44,7 @@ namespace MiSmart.Infrastructure.QueuedBackgroundTasks
             return queue.Writer.WriteAsync(workItem);
         }
 
-        public ValueTask<Func<CancellationToken, ValueTask>> DequeueAsync(
+        public ValueTask<Func<IServiceProvider, CancellationToken, ValueTask>> DequeueAsync(
             CancellationToken cancellationToken)
         {
             var workItem = queue.Reader.ReadAsync(cancellationToken);

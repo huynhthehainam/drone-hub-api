@@ -6,6 +6,9 @@ using System;
 using MiSmart.Infrastructure.QueuedBackgroundTasks;
 using System.Threading.Tasks;
 using System.Threading;
+using Microsoft.Extensions.DependencyInjection;
+using MiSmart.DAL.DatabaseContexts;
+using System.Linq;
 
 namespace MiSmart.API.Controllers
 {
@@ -16,12 +19,10 @@ namespace MiSmart.API.Controllers
         {
             this.actionResponseFactory = actionResponseFactory;
         }
-
         [HttpGet]
         public IActionResult Index()
         {
             var response = actionResponseFactory.CreateInstance();
-
             response.SetData(new
             {
                 CreatedBy = "MiSmart",
