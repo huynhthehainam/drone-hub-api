@@ -14,6 +14,7 @@ using System.Linq;
 using MiSmart.Infrastructure.Commands;
 using MiSmart.DAL.ViewModels;
 using MiSmart.Infrastructure.ViewModels;
+using System.Collections.Generic;
 
 namespace MiSmart.API.Controllers
 {
@@ -38,6 +39,26 @@ namespace MiSmart.API.Controllers
             else
             {
                 response.AddNotFoundErr("User");
+            }
+
+
+
+            return response.ToIActionResult();
+        }
+        [HttpGet]
+        public IActionResult GetList([FromServices] CustomerUserRepository customerUserRepository, [FromQuery] Boolean? isAssigned)
+        {
+            var response = actionResponseFactory.CreateInstance();
+
+            if (isAssigned is not null && isAssigned.GetValueOrDefault() == true)
+            {
+                var customerUsers = customerUserRepository.GetListEntities(new PageCommand(), ww => true);
+                List<Int64> ids = customerUsers.Select(ww => ww.UserID).ToList().Distinct().ToList();
+                response.SetData(ids);
+            }
+            else
+            {
+                response.SetData(new List<Object> { });
             }
 
 

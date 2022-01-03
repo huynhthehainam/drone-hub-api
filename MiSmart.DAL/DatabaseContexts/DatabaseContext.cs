@@ -55,7 +55,7 @@ namespace MiSmart.DAL.DatabaseContexts
             modelBuilder.Entity<CustomerUser>(ww =>
             {
                 ww.HasOne(ww => ww.Customer).WithMany(ww => ww.CustomerUsers).OnDelete(DeleteBehavior.Cascade);
-                ww.HasIndex(ww => new { ww.CustomerID, ww.UserID }).IsUnique();
+                ww.HasIndex(ww => new { ww.UserID }).IsUnique();
             });
 
             modelBuilder.Entity<TelemetryRecord>(ww =>
