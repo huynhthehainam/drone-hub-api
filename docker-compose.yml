@@ -21,9 +21,9 @@ services:
 
   postgres_image:
     image: huynhthehainam/dronehub_db
-    build:
-      context: .
-      dockerfile: database.Dockerfile
+    # build:
+    #   context: .
+    #   dockerfile: database.Dockerfile
     environment:
       - POSTGRES_PASSWORD=mismart123@123
     volumes:
