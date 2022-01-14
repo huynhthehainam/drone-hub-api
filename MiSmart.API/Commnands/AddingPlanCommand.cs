@@ -29,4 +29,19 @@ namespace MiSmart.API.Commands
             return bytes;
         }
     }
+    public class RetrievingPlansCommand
+    {
+        public String Search { get; set; }
+        [Required]
+        public Double? Latitude { get; set; }
+        [Required]
+        public Double? Longitude { get; set; }
+        [Required]
+        public Double? Range { get; set; }
+    }
+    public class RetrievingPlanFileCommand
+    {
+        [Required]
+        public Int64? PlanID { get; set; }
+    }
 }

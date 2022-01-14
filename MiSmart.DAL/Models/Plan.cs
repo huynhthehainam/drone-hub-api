@@ -10,7 +10,7 @@ using NetTopologySuite.Geometries;
 
 namespace MiSmart.DAL.Models
 {
-    public class Plan : EntityBase<long>
+    public class Plan : EntityBase<Int64>
     {
         public Plan() : base()
         {
@@ -35,5 +35,13 @@ namespace MiSmart.DAL.Models
         public Point Location { get; set; }
         public Byte[] FileBytes { get; set; }
         public String FileName { get; set; }
+        private Device device;
+        [JsonIgnore]
+        public Device Device
+        {
+            get => lazyLoader.Load(this, ref device);
+            set => device = value;
+        }
+        public Int32 DeviceID { get; set; }
     }
 }

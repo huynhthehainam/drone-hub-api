@@ -241,5 +241,85 @@ namespace MiSmart.API.Controllers
 
             return response.ToIActionResult();
         }
+        [HttpPost("me/Plans")]
+        public IActionResult CreatePlan([FromServices] DeviceRepository deviceRepository, [FromServices] PlanRepository planRepository, [FromForm] AddingPlanCommand command)
+        {
+            var response = actionResponseFactory.CreateInstance();
+            var device = deviceRepository.Get(ww => ww.ID == CurrentDevice.ID);
+
+            if (device is null)
+            {
+                response.AddNotFoundErr("Device");
+            }
+            var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
+            var plan = planRepository.Get(ww => ww.FileName == command.File.FileName && ww.Prefix == command.Prefix && ww.Device == device);
+            if (plan is null)
+            {
+                plan = new Plan { FileName = command.File.FileName, Prefix = command.Prefix, Device = device };
+            }
+
+            plan.Location = geometryFactory.CreatePoint(new Coordinate(command.Longitude.GetValueOrDefault(), command.Latitude.GetValueOrDefault()));
+            plan.FileName = command.File.FileName;
+            plan.FileBytes = command.GetFileBytes();
+
+            if (plan.ID == 0)
+            {
+                planRepository.Create(plan);
+            }
+            else
+            {
+                planRepository.Update(plan);
+            }
+            response.SetCreatedObject(plan);
+
+            return response.ToIActionResult();
+        }
+        [HttpGet("RetrivePlans")]
+        public IActionResult GetPlans([FromServices] PlanRepository planRepository, [FromQuery] PageCommand pageCommand, [FromQuery] String search, [FromQuery] Double? latitude, [FromQuery] Double? longitude, [FromQuery] Double? range)
+        {
+            var response = actionResponseFactory.CreateInstance();
+            Point centerLocation = null;
+            var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
+
+            if (latitude.HasValue && longitude.HasValue && range.HasValue)
+            {
+                centerLocation = geometryFactory.CreatePoint(new Coordinate(longitude.GetValueOrDefault(), latitude.GetValueOrDefault()));
+            }
+            Expression<Func<Plan, Boolean>> query = ww => (String.IsNullOrWhiteSpace(search) ?
+            ((centerLocation != null) ? (ww.Location.Distance(centerLocation) < range.GetValueOrDefault()) : true)
+            : ww.FileName.ToLower().Contains(search.ToLower()));
+            var listResponse = planRepository.GetListResponseView<SmallPlanViewModel>(pageCommand, query);
+            if (centerLocation is not null)
+            {
+                foreach (var item in listResponse.Data)
+                {
+                    item.CalculateDistance(centerLocation);
+                }
+            }
+            listResponse.SetResponse(response);
+
+            return response.ToIActionResult();
+
+        }
+
+        [HttpPost("RetrivePlanFile")]
+        public IActionResult GetFile([FromServices] PlanRepository planRepository, [FromBody] RetrievingPlanFileCommand command)
+        {
+            var response = actionResponseFactory.CreateInstance();
+
+            var plan = planRepository.Get(ww => ww.ID == command.PlanID);
+            if (plan is null)
+            {
+                response.AddNotFoundErr("Plan");
+            }
+
+            response.SetFile(plan.FileBytes, "application/octet-stream", plan.FileName);
+
+
+
+            return response.ToIActionResult();
+        }
+
+
     }
 }

@@ -86,6 +86,7 @@ namespace MiSmart.DAL.DatabaseContexts
             modelBuilder.Entity<Plan>(ww =>
             {
                 ww.Property(ww => ww.Location).HasColumnType("geography (point)");
+                ww.HasOne(ww => ww.Device).WithMany(ww => ww.Plans).HasForeignKey(ww => ww.DeviceID).OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

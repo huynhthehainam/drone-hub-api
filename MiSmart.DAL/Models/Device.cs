@@ -77,6 +77,14 @@ namespace MiSmart.DAL.Models
             get => lazyLoader.Load(this, ref deviceModel);
             set => deviceModel = value;
         }
+
+        private ICollection<Plan> plans;
+        [JsonIgnore]
+        public ICollection<Plan> Plans
+        {
+            get => lazyLoader.Load(this, ref plans);
+            set => plans = value;
+        }
         public String AccessToken { get; set; }
         public DateTime? NextGeneratingAccessTokenTime { get; set; }
         public Int32 DeviceModelID { get; set; }
