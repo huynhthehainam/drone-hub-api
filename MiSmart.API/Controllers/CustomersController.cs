@@ -89,22 +89,27 @@ namespace MiSmart.API.Controllers
             return response.ToIActionResult();
         }
 
-        [HttpGet("me/Users")]
+        [HttpGet("AssignedUsers")]
+        [HasPermission(typeof(AdminPermission))]
         public IActionResult GetCurrentCustomerUsers([FromServices] CustomerUserRepository customerUserRepository, [FromServices] TeamUserRepository teamUserRepository)
         {
             var response = actionResponseFactory.CreateInstance();
-
-            CustomerUserPermission customerUserPermission = customerUserRepository.GetMemberPermission(CurrentUser, CustomerMemberType.Owner);
-
-            if (customerUserPermission is null)
-            {
-                response.AddNotAllowedErr();
-            }
-
             var assignedUserIDs = teamUserRepository.GetListEntities(new PageCommand(), ww => true).Select(ww => ww.UserID).ToList();
-            Expression<Func<CustomerUser, Boolean>> query = ww => ww.CustomerID == customerUserPermission.CustomerID && !assignedUserIDs.Contains(ww.UserID);
-            var userIDs = customerUserRepository.GetListEntities(new PageCommand(), query).Select(ww => ww.UserID).ToList();
+            response.SetData(new { AssignedUserIDs = assignedUserIDs });
+            return response.ToIActionResult();
+        }
+
+        [HttpGet("{id:int}/Users")]
+        [HasPermission(typeof(AdminPermission))]
+        public IActionResult GetCustomerUsers([FromServices] CustomerUserRepository customerUserRepository, [FromQuery] PageCommand pageCommand, [FromRoute] Int32 id)
+        {
+            var response = actionResponseFactory.CreateInstance();
+
+            Expression<Func<CustomerUser, Boolean>> query = ww => ww.CustomerID == id;
+
+            var userIDs = customerUserRepository.GetListEntities(pageCommand, query).Select(ww => ww.UserID).ToList();
             response.SetData(new { UserIDs = userIDs });
+
             return response.ToIActionResult();
         }
     }
