@@ -65,23 +65,23 @@ namespace MiSmart.API.Controllers
             return response.ToIActionResult();
         }
 
-        [HttpPost("AssignUser")]
-        public IActionResult AssignCustomerUser([FromServices] CustomerUserRepository customerUserRepository, [FromBody] AssigningCustomerUserCommand command)
+        [HttpPost("{id:int}/AssignUser")]
+        [HasPermission(typeof(AdminPermission))]
+
+        public IActionResult AssignCustomerUser([FromServices] CustomerUserRepository customerUserRepository, [FromBody] AssigningCustomerUserCommand command, [FromRoute] Int32 id)
         {
             var response = actionResponseFactory.CreateInstance();
-            CustomerUserPermission customerUserPermission = customerUserRepository.GetMemberPermission(CurrentUser, CustomerMemberType.Owner);
-
-            if (customerUserPermission is null)
+            var customer = customerRepository.Get(ww => ww.ID == id);
+            if (customer is null)
             {
-                response.AddNotAllowedErr();
+                response.AddNotFoundErr("Customer");
             }
-
-            if (customerUserRepository.Any(ww => ww.CustomerID == customerUserPermission.CustomerID && ww.UserID == command.UserID))
+            var existedCustomerUser = customerUserRepository.Get(ww => ww.UserID == command.UserID.GetValueOrDefault());
+            if (existedCustomerUser is not null)
             {
-                response.AddExistedErr("UserID");
+                response.AddExistedErr("User");
             }
-
-            CustomerUser customerUser = new CustomerUser { CustomerID = customerUserPermission.CustomerID, UserID = command.UserID.Value, Type = command.Type };
+            CustomerUser customerUser = new CustomerUser { CustomerID = id, UserID = command.UserID.Value, Type = command.Type };
             customerUserRepository.Create(customerUser);
             response.SetCreatedObject(customerUser);
 
