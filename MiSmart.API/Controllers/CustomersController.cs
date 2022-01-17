@@ -46,6 +46,7 @@ namespace MiSmart.API.Controllers
             return response.ToIActionResult();
         }
         [HttpGet]
+        [HasPermission(typeof(AdminPermission))]
         public IActionResult GetList([FromQuery] PageCommand pageCommand, [FromQuery] String search, [FromQuery] String mode = "Small")
         {
             var response = actionResponseFactory.CreateInstance();
