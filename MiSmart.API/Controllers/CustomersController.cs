@@ -101,15 +101,33 @@ namespace MiSmart.API.Controllers
 
         [HttpGet("{id:int}/Users")]
         [HasPermission(typeof(AdminPermission))]
-        public IActionResult GetCustomerUsers([FromServices] CustomerUserRepository customerUserRepository, [FromQuery] PageCommand pageCommand, [FromRoute] Int32 id)
+        public IActionResult GetCustomerUsers([FromServices] CustomerUserRepository customerUserRepository, [FromServices] CustomerRepository customerRepository, [FromQuery] PageCommand pageCommand, [FromRoute] Int32 id)
         {
             var response = actionResponseFactory.CreateInstance();
+            var customer = customerRepository.Get(ww => ww.ID == id);
+            if (customer is null)
+            {
+                response.AddNotFoundErr("Customer");
+            }
 
             Expression<Func<CustomerUser, Boolean>> query = ww => ww.CustomerID == id;
 
             var userIDs = customerUserRepository.GetListEntities(pageCommand, query).Select(ww => ww.UserID).ToList();
             response.SetData(new { UserIDs = userIDs });
 
+            return response.ToIActionResult();
+        }
+        [HttpDelete("{id:int}")]
+        [HasPermission(typeof(AdminPermission))]
+        public IActionResult GetCustomerUsers([FromServices] CustomerUserRepository customerUserRepository, [FromQuery] PageCommand pageCommand, [FromRoute] Int32 id)
+        {
+            var response = actionResponseFactory.CreateInstance();
+            var customer = customerRepository.Get(ww => ww.ID == id);
+            if (customer is null)
+            {
+                response.AddNotFoundErr("Customer");
+            }
+            customerRepository.Delete(customer);
             return response.ToIActionResult();
         }
     }
