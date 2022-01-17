@@ -7,8 +7,16 @@ option csharp_namespace= "MiSmart.API.Protos";
 service AuthProtoService{
     rpc GetUserInfo (GetUserInfoProtoRequest) returns (UserProtoModel);
     rpc GetProfileInfo (GetProfileProtoRequest) returns (UserProtoModel);
+    rpc GetUserExistingInformation (GetUserExistingInformationRequest) returns (UserExistingInformationProtoModel);
 }
 
+message GetUserExistingInformationRequest {
+    int64 id =1;
+}
+
+message UserExistingInformationProtoModel {
+    bool isExist =1;
+}
 
 
 message GetUserInfoProtoRequest {
@@ -17,8 +25,7 @@ message GetUserInfoProtoRequest {
 
 message UserProtoModel {
     int64 id =1;
-    string username =2;
-    string email = 3;
+    string email = 2;
 }
 
 message GetProfileProtoRequest{

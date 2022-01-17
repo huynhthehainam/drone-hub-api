@@ -18,6 +18,7 @@ using MiSmart.Infrastructure.Permissions;
 using MiSmart.API.Permissions;
 using MiSmart.DAL.Responses;
 using MiSmart.Infrastructure.ViewModels;
+using MiSmart.API.GrpcServices;
 
 namespace MiSmart.API.Controllers
 {
@@ -68,10 +69,14 @@ namespace MiSmart.API.Controllers
         [HttpPost("{id:int}/AssignUser")]
         [HasPermission(typeof(AdminPermission))]
 
-        public IActionResult AssignCustomerUser([FromServices] CustomerUserRepository customerUserRepository, [FromBody] AssigningCustomerUserCommand command, [FromRoute] Int32 id)
+        public IActionResult AssignCustomerUser([FromServices] CustomerUserRepository customerUserRepository, [FromServices] AuthGrpcClientService authGrpcClientService, [FromBody] AssigningCustomerUserCommand command, [FromRoute] Int32 id)
         {
             var response = actionResponseFactory.CreateInstance();
             var customer = customerRepository.Get(ww => ww.ID == id);
+            // if (!authGrpcClientService.GetUserExistingInformation(command.UserID.GetValueOrDefault()).IsExist)
+            // {
+            //     response.AddInvalidErr("UserID");
+            // }
             if (customer is null)
             {
                 response.AddNotFoundErr("Customer");

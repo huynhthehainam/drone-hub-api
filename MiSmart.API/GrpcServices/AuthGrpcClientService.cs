@@ -23,5 +23,13 @@ namespace MiSmart.API.GrpcServices
             }
             return null;
         }
+        public UserExistingInformationProtoModel GetUserExistingInformation(Int64 id)
+        {
+            GetUserExistingInformationRequest request = new GetUserExistingInformationRequest { Id = id };
+            var resp = authProtoServiceClient.GetUserExistingInformation(request);
+
+            return resp;
+        }
+
     }
 }

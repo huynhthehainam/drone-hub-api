@@ -37,6 +37,7 @@ using MiSmart.Microservices.OrderService.RabbitMQ;
 using MiSmart.Infrastructure.QueuedBackgroundTasks;
 using MiSmart.API.QueuedServices;
 using Microsoft.Extensions.Hosting;
+using MiSmart.API.GrpcServices;
 
 namespace MiSmart.API
 {
@@ -117,6 +118,8 @@ namespace MiSmart.API
             {
                 return new HttpClientHandler { ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true };
             });
+
+            services.AddSingleton<AuthGrpcClientService, AuthGrpcClientService>();
 
 
             #endregion
