@@ -73,7 +73,8 @@ namespace MiSmart.API.Controllers
         {
             var response = actionResponseFactory.CreateInstance();
             var customer = customerRepository.Get(ww => ww.ID == id);
-            // if (!authGrpcClientService.GetUserExistingInformation(command.UserID.GetValueOrDefault()).IsExist)
+            // var userExistingInformation = authGrpcClientService.GetUserExistingInformation(command.UserID.GetValueOrDefault());
+            // if (!userExistingInformation.IsExist)
             // {
             //     response.AddInvalidErr("UserID");
             // }
@@ -97,10 +98,10 @@ namespace MiSmart.API.Controllers
 
         [HttpGet("AssignedUsers")]
         [HasPermission(typeof(AdminPermission))]
-        public IActionResult GetCurrentCustomerUsers([FromServices] CustomerUserRepository customerUserRepository, [FromServices] TeamUserRepository teamUserRepository)
+        public IActionResult GetCurrentCustomerUsers([FromServices] CustomerUserRepository customerUserRepository)
         {
             var response = actionResponseFactory.CreateInstance();
-            var assignedUserIDs = teamUserRepository.GetListEntities(new PageCommand(), ww => true).Select(ww => ww.UserID).ToList();
+            var assignedUserIDs = customerUserRepository.GetListEntities(new PageCommand(), ww => true).Select(ww => ww.UserID).ToList();
             response.SetData(new { AssignedUserIDs = assignedUserIDs });
             return response.ToIActionResult();
         }
