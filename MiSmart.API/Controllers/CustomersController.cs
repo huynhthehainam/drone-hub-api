@@ -118,8 +118,8 @@ namespace MiSmart.API.Controllers
 
             Expression<Func<CustomerUser, Boolean>> query = ww => ww.CustomerID == id;
 
-            var data = customerUserRepository.GetListEntities(pageCommand, query).Select(ww => new { UserID = ww.UserID, Type = ww.Type }).ToList();
-            response.SetData(data);
+            var listResponse = customerUserRepository.GetListResponseView<CustomerUserViewModel>(pageCommand, query);
+            listResponse.SetResponse(response);
 
             return response.ToIActionResult();
         }
