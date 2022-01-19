@@ -17,11 +17,13 @@ namespace MiSmart.DAL.ViewModels
         public CoordinateViewModel LastPoint { get; set; }
         public Double LastDirection { get; set; }
         public Object LastAdditionalInformation { get; set; }
+        public String DeviceModelName { get; set; }
 
         public void LoadFrom(Device entity)
         {
             ID = entity.ID;
             TeamID = entity.TeamID;
+            DeviceModelName = entity.DeviceModel.Name;
             CustomerID = entity.CustomerID;
             Name = entity.Name;
             Status = entity.Status;
