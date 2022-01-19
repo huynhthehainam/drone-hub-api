@@ -68,45 +68,7 @@ namespace MiSmart.API.Controllers
             return response.ToIActionResult();
         }
 
-        // [HttpPost]
-        // public IActionResult Create([FromServices] CustomerUserRepository customerUserRepository, [FromServices] TeamRepository teamRepository, [FromBody] AddingDeviceCommand command)
-        // {
-        //     ActionResponse response = actionResponseFactory.CreateInstance();
-        //     CustomerUserPermission customerUserPermission = customerUserRepository.GetMemberPermission(CurrentUser, CustomerMemberType.Owner);
 
-        //     if (customerUserPermission is null)
-        //     {
-        //         response.AddNotAllowedErr();
-        //     }
-        //     if (command.TeamID is not null)
-        //     {
-        //         var team = teamRepository.Get(ww => ww.ID == command.TeamID.GetValueOrDefault() && ww.CustomerID == customerUserPermission.CustomerID);
-        //         if (team is null)
-        //         {
-        //             response.AddInvalidErr("TeamID");
-        //         }
-        //     }
-
-        //     if (!deviceModelRepository.Any(ww => ww.ID == command.DeviceModelID))
-        //     {
-        //         response.AddInvalidErr("ModelDeviceID");
-        //     }
-
-        //     var device = new Device
-        //     {
-        //         Name = command.Name,
-        //         CustomerID = customerUserPermission.CustomerID,
-        //         TeamID = command.TeamID,
-        //         DeviceModelID = command.DeviceModelID.Value,
-
-        //     };
-        //     deviceRepository.Create(device);
-        //     response.SetCreatedObject(device);
-
-
-        //     return response.ToIActionResult();
-
-        // }
 
         [HttpGet]
         public IActionResult GetList([FromServices] CustomerUserRepository customerUserRepository, [FromServices] TeamUserRepository teamUserRepository, [FromQuery] PageCommand pageCommand, [FromQuery] String search, [FromQuery] String mode = "Small")
@@ -118,6 +80,7 @@ namespace MiSmart.API.Controllers
             {
                 response.AddNotAllowedErr();
             }
+            
             var teamIDs = teamUserRepository.GetListEntities(new PageCommand(), ww => ww.UserID == CurrentUser.ID).Select(ww => ww.TeamID).ToList();
             Expression<Func<Device, Boolean>> query = ww => (customerUserPermission.Type == CustomerMemberType.Owner ? (ww.CustomerID == customerUserPermission.CustomerID) : (teamIDs.Contains(ww.TeamID.GetValueOrDefault())))
             && (!String.IsNullOrWhiteSpace(search) ? ww.Name.ToLower().Contains(search.ToLower()) : true);

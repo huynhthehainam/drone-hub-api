@@ -68,7 +68,6 @@ namespace MiSmart.API.Controllers
 
         [HttpPost("{id:int}/AssignUser")]
         [HasPermission(typeof(AdminPermission))]
-
         public IActionResult AssignCustomerUser([FromServices] CustomerUserRepository customerUserRepository, [FromServices] AuthGrpcClientService authGrpcClientService, [FromBody] AssigningCustomerUserCommand command, [FromRoute] Int32 id)
         {
             var response = actionResponseFactory.CreateInstance();
@@ -119,8 +118,8 @@ namespace MiSmart.API.Controllers
 
             Expression<Func<CustomerUser, Boolean>> query = ww => ww.CustomerID == id;
 
-            var userIDs = customerUserRepository.GetListEntities(pageCommand, query).Select(ww => ww.UserID).ToList();
-            response.SetData(new { UserIDs = userIDs });
+            var data = customerUserRepository.GetListEntities(pageCommand, query).Select(ww => new { UserID = ww.UserID, Type = ww.Type }).ToList();
+            response.SetData(data);
 
             return response.ToIActionResult();
         }
@@ -151,6 +150,65 @@ namespace MiSmart.API.Controllers
                 response.AddNotFoundErr("Customer");
             }
             customerRepository.Delete(customer);
+            return response.ToIActionResult();
+        }
+
+        [HttpPost("RemoveUser")]
+        [HasPermission(typeof(AdminPermission))]
+        public IActionResult RemoveCustomerUser([FromServices] CustomerUserRepository customerUserRepository, [FromBody] RemovingCustomerUserCommand command)
+        {
+            var response = actionResponseFactory.CreateInstance();
+            var customerUser = customerUserRepository.Get(ww => ww.UserID == command.UserID);
+            if (customerUser is null)
+            {
+                response.AddInvalidErr("UserID");
+            }
+            customerUserRepository.Delete(customerUser);
+            response.SetNoContent();
+            return response.ToIActionResult();
+        }
+
+        [HttpPost("{id:int}/Devices")]
+        [HasPermission(typeof(AdminPermission))]
+        public IActionResult AddDevice([FromRoute] Int32 id, [FromServices] DeviceModelRepository deviceModelRepository, [FromBody] AddingDeviceCommand command)
+
+        {
+            var response = actionResponseFactory.CreateInstance();
+            var customer = customerRepository.Get(ww => ww.ID == id);
+            if (customer is null)
+            {
+                response.AddNotFoundErr("Customer");
+            }
+            var deviceModel = deviceModelRepository.Get(ww => ww.ID == command.DeviceModelID);
+            if (deviceModel is null)
+            {
+                response.AddInvalidErr("DeviceModelID");
+            }
+            var device = new Device
+            {
+                DeviceModel = deviceModel,
+                Name = command.Name,
+            };
+            customer.Devices.Add(device);
+            customerRepository.Update(customer);
+            response.SetCreatedObject(device);
+            return response.ToIActionResult();
+        }
+
+        [HttpPost("RemoveDevice")]
+        [HasPermission(typeof(AdminPermission))]
+        public IActionResult RemoveDevice([FromServices] DeviceRepository deviceRepository, [FromBody] RemovingDeviceCommand command)
+        {
+            var response = actionResponseFactory.CreateInstance();
+            var device = deviceRepository.Get(ww => ww.ID == command.DeviceID);
+            if (device is null)
+            {
+                response.AddInvalidErr("DeviceID");
+            }
+
+            deviceRepository.Delete(device);
+
+            response.SetNoContent();
             return response.ToIActionResult();
         }
     }
