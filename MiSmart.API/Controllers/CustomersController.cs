@@ -139,6 +139,22 @@ namespace MiSmart.API.Controllers
 
             return response.ToIActionResult();
         }
+        [HttpGet("{id:int}/Teams")]
+        [HasPermission(typeof(AdminPermission))]
+        public IActionResult GetCustomerTeams([FromServices] TeamRepository teamRepository, [FromServices] CustomerRepository customerRepository, [FromQuery] PageCommand pageCommand, [FromRoute] Int32 id)
+        {
+            var response = actionResponseFactory.CreateInstance();
+            var customer = customerRepository.Get(ww => ww.ID == id);
+            if (customer is null)
+            {
+                response.AddNotFoundErr("Customer");
+            }
+
+            var listResponse = teamRepository.GetListResponseView<SmallTeamViewModel>(pageCommand, ww => ww.CustomerID == customer.ID);
+            listResponse.SetResponse(response);
+
+            return response.ToIActionResult();
+        }
         [HttpDelete("{id:int}")]
         [HasPermission(typeof(AdminPermission))]
         public IActionResult GetCustomerUsers([FromServices] CustomerUserRepository customerUserRepository, [FromQuery] PageCommand pageCommand, [FromRoute] Int32 id)
