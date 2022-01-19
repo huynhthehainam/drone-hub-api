@@ -73,7 +73,7 @@ namespace MiSmart.API.Controllers
         {
             var response = actionResponseFactory.CreateInstance();
             var customer = customerRepository.Get(ww => ww.ID == id);
-            var userExistingInformation = authGrpcClientService.GetUserExistingInformation(command.UserID.GetValueOrDefault());
+            // var userExistingInformation = authGrpcClientService.GetUserExistingInformation(command.UserID.GetValueOrDefault());
             // if (!userExistingInformation.IsExist)
             // {
             //     response.AddInvalidErr("UserID");
