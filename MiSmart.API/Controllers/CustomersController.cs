@@ -155,7 +155,7 @@ namespace MiSmart.API.Controllers
 
         [HttpPost("RemoveUser")]
         [HasPermission(typeof(AdminPermission))]
-        public IActionResult RemoveCustomerUser([FromServices] CustomerUserRepository customerUserRepository, [FromBody] RemovingCustomerUserCommand command)
+        public IActionResult RemoveCustomerUser([FromServices] CustomerUserRepository customerUserRepository, [FromServices] TeamUserRepository teamUserRepository, [FromBody] RemovingCustomerUserCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
             var customerUser = customerUserRepository.Get(ww => ww.UserID == command.UserID);
@@ -163,8 +163,15 @@ namespace MiSmart.API.Controllers
             {
                 response.AddInvalidErr("UserID");
             }
+
             customerUserRepository.Delete(customerUser);
+            var teamUser = teamUserRepository.Get(ww => ww.UserID == command.UserID);
+            if (teamUser is not null)
+            {
+                teamUserRepository.Delete(teamUser);
+            }
             response.SetNoContent();
+
             return response.ToIActionResult();
         }
 
