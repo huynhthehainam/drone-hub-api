@@ -80,7 +80,7 @@ namespace MiSmart.API.Controllers
             {
                 response.AddNotAllowedErr();
             }
-            
+
             var teamIDs = teamUserRepository.GetListEntities(new PageCommand(), ww => ww.UserID == CurrentUser.ID).Select(ww => ww.TeamID).ToList();
             Expression<Func<Device, Boolean>> query = ww => (customerUserPermission.Type == CustomerMemberType.Owner ? (ww.CustomerID == customerUserPermission.CustomerID) : (teamIDs.Contains(ww.TeamID.GetValueOrDefault())))
             && (!String.IsNullOrWhiteSpace(search) ? ww.Name.ToLower().Contains(search.ToLower()) : true);
@@ -215,10 +215,10 @@ namespace MiSmart.API.Controllers
                 response.AddNotFoundErr("Device");
             }
             var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
-            var plan = planRepository.Get(ww => ww.FileName == command.File.FileName && ww.Prefix == command.Prefix && ww.Device == device);
+            var plan = planRepository.Get(ww => ww.FileName == command.File.FileName && ww.Device == device);
             if (plan is null)
             {
-                plan = new Plan { FileName = command.File.FileName, Prefix = command.Prefix, Device = device };
+                plan = new Plan { FileName = command.File.FileName, Device = device };
             }
 
             plan.Location = geometryFactory.CreatePoint(new Coordinate(command.Longitude.GetValueOrDefault(), command.Latitude.GetValueOrDefault()));

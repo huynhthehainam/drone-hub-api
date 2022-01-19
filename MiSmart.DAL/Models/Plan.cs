@@ -31,7 +31,6 @@ namespace MiSmart.DAL.Models
                 return null;
             }
         }
-        public String Prefix { get; set; }
         public Point Location { get; set; }
         public Byte[] FileBytes { get; set; }
         public String FileName { get; set; }
