@@ -33,7 +33,7 @@ namespace MiSmart.API.Controllers
         {
             var response = actionResponseFactory.CreateInstance();
             CustomerUserPermission customerUserPermission = customerUserRepository.GetMemberPermission(CurrentUser);
-            if (customerUserPermission is null)
+            if (customerUserPermission is null || customerUserPermission.Type != CustomerMemberType.Owner)
             {
                 response.AddNotAllowedErr();
             }
