@@ -32,8 +32,8 @@ namespace MiSmart.API.Controllers
         public IActionResult CreateTeam([FromServices] TeamRepository teamRepository, [FromServices] CustomerUserRepository customerUserRepository, [FromBody] AddingTeamCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
-            CustomerUserPermission customerUserPermission = customerUserRepository.GetMemberPermission(CurrentUser);
-            if (customerUserPermission is null || customerUserPermission.Type != CustomerMemberType.Owner)
+            CustomerUserPermission customerUserPermission = customerUserRepository.GetMemberPermission(CurrentUser, CustomerMemberType.Owner);
+            if (customerUserPermission is null)
             {
                 response.AddNotAllowedErr();
             }
@@ -98,13 +98,35 @@ namespace MiSmart.API.Controllers
             return response.ToIActionResult();
         }
 
+        [HttpPost("{id:int}/Disband")]
+        public IActionResult Disband([FromServices] TeamRepository teamRepository, [FromServices] CustomerUserRepository customerUserRepository, [FromRoute] Int32 id)
+        {
+            var response = actionResponseFactory.CreateInstance();
+            CustomerUserPermission customerUserPermission = customerUserRepository.GetMemberPermission(CurrentUser, CustomerMemberType.Owner);
+            if (customerUserPermission is null)
+            {
+                response.AddNotAllowedErr();
+            }
+            var team = teamRepository.Get(ww => ww.CustomerID == customerUserPermission.CustomerID && ww.ID == id);
+            if (team is null)
+            {
+                response.AddNotFoundErr("Team");
+
+            }
+            teamRepository.Delete(team);
+
+            response.SetMessage("Team is disbanded", "Nhóm đã giải tán");
+
+            return response.ToIActionResult();
+        }
+
         [HttpPost("{id:long}/AssignUser")]
         public IActionResult AssignTeamUser([FromServices] TeamRepository teamRepository, [FromServices] TeamUserRepository teamUserRepository, [FromServices] CustomerUserRepository customerUserRepository, [FromRoute] Int64 id, [FromBody] AssigningTeamUserCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
 
-            CustomerUserPermission customerUserPermission = customerUserRepository.GetMemberPermission(CurrentUser);
-            if (customerUserPermission is null || customerUserPermission.Type != CustomerMemberType.Owner)
+            CustomerUserPermission customerUserPermission = customerUserRepository.GetMemberPermission(CurrentUser, CustomerMemberType.Owner);
+            if (customerUserPermission is null)
             {
                 response.AddNotAllowedErr();
             }
@@ -112,16 +134,12 @@ namespace MiSmart.API.Controllers
             {
                 response.AddExistedErr("UserID");
             }
-
-
+            if (!customerUserRepository.Any(ww => ww.CustomerID == customerUserPermission.CustomerID && ww.UserID == command.UserID.GetValueOrDefault()))
+            {
+                response.AddInvalidErr("UserID");
+            }
             var teamUser = new TeamUser { UserID = command.UserID.Value, TeamID = id, Type = command.Type };
             teamUserRepository.Create(teamUser);
-
-            if (!customerUserRepository.Any(ww => ww.CustomerID == id && ww.UserID == command.UserID))
-            {
-                var customerUser = new CustomerUser { CustomerID = customerUserPermission.CustomerID, UserID = command.UserID.Value, Type = CustomerMemberType.Member };
-                customerUserRepository.Create(customerUser);
-            }
             response.SetCreatedObject(teamUser);
 
 
