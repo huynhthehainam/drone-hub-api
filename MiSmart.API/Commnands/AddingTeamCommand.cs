@@ -7,7 +7,5 @@ namespace MiSmart.API.Commands
     {
         [Required(AllowEmptyStrings = false)]
         public String Name { get; set; }
-
-        public Int32? CustomerID { get; set; }
     }
 }

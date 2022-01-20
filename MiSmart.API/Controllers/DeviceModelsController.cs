@@ -14,6 +14,8 @@ using System.Linq;
 using MiSmart.Infrastructure.Commands;
 using MiSmart.DAL.ViewModels;
 using System.Linq.Expressions;
+using MiSmart.Infrastructure.Permissions;
+using MiSmart.API.Permissions;
 
 namespace MiSmart.API.Controllers
 {
@@ -26,6 +28,7 @@ namespace MiSmart.API.Controllers
         }
 
         [HttpPost]
+        [HasPermission(typeof(AdminPermission))]
         public IActionResult Create([FromBody] AddingDeviceModelCommand command)
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
@@ -42,6 +45,22 @@ namespace MiSmart.API.Controllers
             Expression<Func<DeviceModel, Boolean>> query = ww => true;
             var listResponse = deviceModelRepository.GetListResponseView<SmallDeviceModelVieModel>(pageCommand, query);
             listResponse.SetResponse(response);
+
+            return response.ToIActionResult();
+        }
+        [HttpDelete("{id:int}")]
+        public IActionResult RemoveDeviceModel([FromRoute] Int32 id)
+        {
+            var response = actionResponseFactory.CreateInstance();
+            var deviceModel = deviceModelRepository.Get(ww => ww.ID == id);
+            if (deviceModel is null)
+            {
+                response.AddNotFoundErr("DeviceModel");
+            }
+
+
+            deviceModelRepository.Delete(deviceModel);
+            response.SetNoContent();
 
             return response.ToIActionResult();
         }
