@@ -115,8 +115,17 @@ namespace MiSmart.API.MqttControllers
 
                         };
                         flightStatRepository.Create(stat);
+                        if (device.Team is not null)
+                        {
+                            device.Team.TotalFlights += command.Flights.GetValueOrDefault();
+                            device.Team.TotalFlightDuration += command.FlightDuration.GetValueOrDefault();
+                            device.Team.TotalTaskArea += command.TaskArea.GetValueOrDefault();
+                        }
+                        deviceRepository.Update(device);
                         return Ok();
                     }
+
+
                 }
 
 

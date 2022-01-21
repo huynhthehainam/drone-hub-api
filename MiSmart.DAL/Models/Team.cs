@@ -19,6 +19,10 @@ namespace MiSmart.DAL.Models
         }
         public String Name { get; set; }
 
+        public Double TotalTaskArea { get; set; }
+        public Double TotalFlightDuration { get; set; }
+        public Int64 TotalFlights { get; set; }
+
 
         private Customer customer;
         [JsonIgnore]
@@ -46,5 +50,6 @@ namespace MiSmart.DAL.Models
             get => lazyLoader.Load(this, ref devices);
             set => devices = value;
         }
+
     }
 }
