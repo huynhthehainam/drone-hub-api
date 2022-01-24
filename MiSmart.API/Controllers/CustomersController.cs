@@ -19,6 +19,7 @@ using MiSmart.API.Permissions;
 using MiSmart.DAL.Responses;
 using MiSmart.Infrastructure.ViewModels;
 using MiSmart.API.GrpcServices;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MiSmart.API.Controllers
 {
@@ -96,7 +97,8 @@ namespace MiSmart.API.Controllers
         }
 
         [HttpPost("{id:int}/TestUser")]
-        [HasPermission(typeof(AdminPermission))]
+        [AllowAnonymous]
+        // [HasPermission(typeof(AdminPermission))]
         public IActionResult TestUser([FromServices] CustomerUserRepository customerUserRepository, [FromServices] AuthGrpcClientService authGrpcClientService, [FromBody] AssigningCustomerUserCommand command, [FromRoute] Int32 id)
         {
             var response = actionResponseFactory.CreateInstance();
