@@ -42,7 +42,8 @@ namespace MiSmart.API.Controllers
                 && (teamID.HasValue ? (ww.Device.TeamID == teamID.Value) : true)
                 && (deviceID.HasValue ? (ww.DeviceID == deviceID.Value) : true)
                 && (from.HasValue ? (ww.FlightTime >= from.Value) : true)
-                && (to.HasValue ? (ww.FlightTime <= to.Value) : true);
+                && (to.HasValue ? (ww.FlightTime <= to.Value) : true)
+                && (deviceModelID.HasValue ? (ww.Device.DeviceModelID == deviceModelID.Value) : true);
             if (mode == "Large")
             {
 
