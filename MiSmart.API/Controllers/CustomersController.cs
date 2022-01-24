@@ -95,6 +95,35 @@ namespace MiSmart.API.Controllers
             return response.ToIActionResult();
         }
 
+        [HttpPost("{id:int}/TestUser")]
+        [HasPermission(typeof(AdminPermission))]
+        public IActionResult TestUser([FromServices] CustomerUserRepository customerUserRepository, [FromServices] AuthGrpcClientService authGrpcClientService, [FromBody] AssigningCustomerUserCommand command, [FromRoute] Int32 id)
+        {
+            var response = actionResponseFactory.CreateInstance();
+            var customer = customerRepository.Get(ww => ww.ID == id);
+            var userExistingInformation = authGrpcClientService.GetUserExistingInformation(command.UserID.GetValueOrDefault());
+            if (!userExistingInformation.IsExist)
+            {
+                response.AddInvalidErr("UserID");
+            }
+            // if (customer is null)
+            // {
+            //     response.AddNotFoundErr("Customer");
+            // }
+            // var existedCustomerUser = customerUserRepository.Get(ww => ww.UserID == command.UserID.GetValueOrDefault());
+            // if (existedCustomerUser is not null)
+            // {
+            //     response.AddExistedErr("User");
+            // }
+            // CustomerUser customerUser = new CustomerUser { CustomerID = id, UserID = command.UserID.Value, Type = command.Type };
+            // customerUserRepository.Create(customerUser);
+            // response.SetCreatedObject(customerUser);
+
+
+
+            return response.ToIActionResult();
+        }
+
         [HttpGet("AssignedUsers")]
         [HasPermission(typeof(AdminPermission))]
         public IActionResult GetCurrentCustomerUsers([FromServices] CustomerUserRepository customerUserRepository)
