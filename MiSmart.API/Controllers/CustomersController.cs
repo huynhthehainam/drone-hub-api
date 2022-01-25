@@ -96,7 +96,7 @@ namespace MiSmart.API.Controllers
             return response.ToIActionResult();
         }
 
-        [HttpPost("{id:int}/TestUser")]
+        [HttpGet("{id:int}/TestUser")]
         [AllowAnonymous]
         // [HasPermission(typeof(AdminPermission))]
         public IActionResult TestUser([FromServices] CustomerUserRepository customerUserRepository, [FromServices] AuthGrpcClientService authGrpcClientService, [FromBody] AssigningCustomerUserCommand command, [FromRoute] Int32 id)
@@ -121,7 +121,7 @@ namespace MiSmart.API.Controllers
             // customerUserRepository.Create(customerUser);
             // response.SetCreatedObject(customerUser);
 
-
+            response.SetMessage("Hello", "Xin chào");
 
             return response.ToIActionResult();
         }
