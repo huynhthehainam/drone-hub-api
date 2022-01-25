@@ -10,10 +10,9 @@ namespace MiSmart.API.Permissions
         public Boolean HasPermission(ActionExecutingContext context)
         {
             var currentUser = UserCacheViewModel.GetUserCache(context.HttpContext.User);
-            Console.WriteLine(currentUser);
-            if (currentUser is Object)
+            if (currentUser is not null)
             {
-                return currentUser.IsAdmin;
+                return currentUser.IsAdmin || currentUser.RoleID == 1;
             }
             else
             {
