@@ -49,6 +49,7 @@ namespace MiSmart.API.Controllers
             return response.ToIActionResult();
         }
         [HttpDelete("{id:int}")]
+        [HasPermission(typeof(AdminPermission))]
         public IActionResult RemoveDeviceModel([FromRoute] Int32 id)
         {
             var response = actionResponseFactory.CreateInstance();
@@ -61,6 +62,24 @@ namespace MiSmart.API.Controllers
 
             deviceModelRepository.Delete(deviceModel);
             response.SetNoContent();
+
+            return response.ToIActionResult();
+        }
+        [HttpPatch("{id:int}")]
+        [HasPermission(typeof(AdminPermission))]
+        public IActionResult UpdateDeviceModel([FromRoute] Int32 id, [FromBody] PatchingDeviceModelCommand command)
+        {
+            var response = actionResponseFactory.CreateInstance();
+            var deviceModel = deviceModelRepository.Get(ww => ww.ID == id);
+            if (deviceModel is null)
+            {
+                response.AddNotFoundErr("DeviceModel");
+            }
+
+            deviceModel.Name = String.IsNullOrWhiteSpace(command.Name) ? deviceModel.Name : command.Name;
+
+            deviceModelRepository.Update(deviceModel);
+
 
             return response.ToIActionResult();
         }
