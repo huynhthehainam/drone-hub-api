@@ -45,12 +45,11 @@ services:
       dockerfile: MiSmart.API/Dockerfile
     ports:
       - 5024:5000
-      - 5025:5001
-      - 1886:1883
+      # - 1886:1883
     networks:
       - mismart
     environment:
-      - ASPNETCORE_URLS=http://+:80
+      - ASPNETCORE_URLS=http://+:5000
       - ASPNETCORE_ENVIRONMENT=Docker
     depends_on:
       postgres_image:
