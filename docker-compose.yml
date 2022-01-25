@@ -45,6 +45,7 @@ services:
       dockerfile: MiSmart.API/Dockerfile
     ports:
       - 5024:5000
+      - 5025:5001
       - 1886:1883
     networks:
       - mismart
