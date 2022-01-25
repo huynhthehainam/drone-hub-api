@@ -19,31 +19,33 @@ namespace MiSmart.Infrastructure.Services
         {
             this.authSettings = options1.Value;
         }
-        public Int64? GetUserID(String token)
+        public UserCacheViewModel GetUser(String token)
         {
             var validator = new JwtSecurityTokenHandler();
             var jwtToken = validator.ReadJwtToken(token);
             var userClaim = jwtToken.Claims.FirstOrDefault(ww => ww.Type == Keys.JWTAuthKey);
-            if (userClaim != null)
+            var adminClaim = jwtToken.Claims.FirstOrDefault(ww => ww.Type == Keys.JWTAdminKey);
+            var roleClaim = jwtToken.Claims.FirstOrDefault(ww => ww.Type == Keys.JWTRoleKey);
+            if (userClaim is not null && adminClaim is not null && roleClaim is not null)
             {
-                return Convert.ToInt64(userClaim.Value);
+
+                return new UserCacheViewModel
+                {
+                    ID = Convert.ToInt64(userClaim.Value),
+                    RoleID = Convert.ToInt32(roleClaim.Value),
+                    IsAdmin = Convert.ToBoolean(adminClaim.Value),
+                    IsActive = true,
+                };
             }
             return null;
         }
-        public Boolean IsUserAdmin(String token)
-        {
-            var validator = new JwtSecurityTokenHandler();
-            var jwtToken = validator.ReadJwtToken(token);
-            var claim = jwtToken.Claims.FirstOrDefault(ww => ww.Type == Keys.JWTAdminKey);
-            if (claim is not null)
-            {
-                return Convert.ToBoolean(claim.Value);
-            }
-            return false;
-        }
         public String GenerateAccessToken(UserCacheViewModel user, DateTime accessTokenExpiration)
         {
-            var claims = new[] { new Claim(Keys.JWTAuthKey, user.ID.ToString()), new Claim(Keys.JWTAdminKey, user.IsAdmin.ToString()) };
+            var claims = new[] {
+                new Claim(Keys.JWTAuthKey, user.ID.ToString()),
+                new Claim(Keys.JWTAdminKey, user.IsAdmin.ToString()),
+                new Claim(Keys.JWTRoleKey, user.RoleID.ToString()),
+             };
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(authSettings.AuthSecret));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             var token = new JwtSecurityToken(claims: claims, expires: accessTokenExpiration, signingCredentials: creds);

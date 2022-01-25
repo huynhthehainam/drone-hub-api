@@ -96,35 +96,6 @@ namespace MiSmart.API.Controllers
             return response.ToIActionResult();
         }
 
-        [HttpGet("{id:int}/TestUser")]
-        [AllowAnonymous]
-        // [HasPermission(typeof(AdminPermission))]
-        public IActionResult TestUser([FromServices] CustomerUserRepository customerUserRepository, [FromServices] AuthGrpcClientService authGrpcClientService, [FromRoute] Int32 id)
-        {
-            var response = actionResponseFactory.CreateInstance();
-            var customer = customerRepository.Get(ww => ww.ID == id);
-            var userExistingInformation = authGrpcClientService.GetUserExistingInformation(13);
-            if (!userExistingInformation.IsExist)
-            {
-                response.AddInvalidErr("UserID");
-            }
-            // if (customer is null)
-            // {
-            //     response.AddNotFoundErr("Customer");
-            // }
-            // var existedCustomerUser = customerUserRepository.Get(ww => ww.UserID == command.UserID.GetValueOrDefault());
-            // if (existedCustomerUser is not null)
-            // {
-            //     response.AddExistedErr("User");
-            // }
-            // CustomerUser customerUser = new CustomerUser { CustomerID = id, UserID = command.UserID.Value, Type = command.Type };
-            // customerUserRepository.Create(customerUser);
-            // response.SetCreatedObject(customerUser);
-
-            response.SetMessage("Hello", "Xin chào");
-
-            return response.ToIActionResult();
-        }
 
         [HttpGet("AssignedUsers")]
         [HasPermission(typeof(AdminPermission))]

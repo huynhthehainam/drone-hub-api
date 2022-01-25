@@ -43,32 +43,25 @@ namespace MiSmart.Infrastructure.Middlewares
             {
                 authHeader = authHeader.Replace(Keys.JWTPrefixKey, "").Trim();
                 var validator = new JwtSecurityTokenHandler();
-                if (validator.CanReadToken(authHeader))
-                {
-                    Int64? userID = jwtService.GetUserID(authHeader);
-                    var isAdmin = jwtService.IsUserAdmin(authHeader);
-                    if (!userID.HasValue)
-                    {
-                        context.Response.StatusCode = 401;
-                        return;
-                    }
-                    var user = new UserCacheViewModel
-                    {
-                        ID = userID.Value,
-                        IsAdmin = isAdmin,
-                    };
-                    ClaimsIdentity aa = new ClaimsIdentity();
-                    var claims = new[]{
-                        new Claim(Keys.IdentityClaim,JsonSerializer.Serialize(user))
-                    };
-                    var identity = new ClaimsIdentity(claims, "basic");
-                    context.User = new ClaimsPrincipal(identity);
-                }
-                else
+                if (!validator.CanReadToken(authHeader))
                 {
                     context.Response.StatusCode = 401;
                     return;
                 }
+                UserCacheViewModel user = jwtService.GetUser(authHeader);
+
+                if (user is null || !user.IsActive)
+                {
+                    context.Response.StatusCode = 401;
+                    return;
+                }
+                ClaimsIdentity aa = new ClaimsIdentity();
+                var claims = new[]{
+                        new Claim(Keys.IdentityClaim,JsonSerializer.Serialize(user))
+                    };
+                var identity = new ClaimsIdentity(claims, "basic");
+                context.User = new ClaimsPrincipal(identity);
+
             }
             await next(context);
         }
