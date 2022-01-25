@@ -116,7 +116,7 @@ namespace MiSmart.API
             services.AddGrpc();
             services.AddGrpcClient<AuthProtoService.AuthProtoServiceClient>(o => o.Address = new Uri(Configuration["GrpcConfigs:AuthUrl"])).ConfigurePrimaryHttpMessageHandler(() =>
             {
-                return new HttpClientHandler { ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true };
+                return new HttpClientHandler { ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true, };
             });
 
             services.AddSingleton<AuthGrpcClientService, AuthGrpcClientService>();

@@ -27,6 +27,10 @@ namespace MiSmart.API
                             kestrelServerOptions.ListenAnyIP(1883,
                                 listenOptions => listenOptions.UseMqtt());
                             kestrelServerOptions.ListenAnyIP(5000);
+                            kestrelServerOptions.ListenAnyIP(5001, o =>
+                            {
+                                o.UseHttps("/https/aspnetapp.pfx", "mismart@123");
+                            });
                         }
                     );
                     webBuilder.UseStartup<Startup>();

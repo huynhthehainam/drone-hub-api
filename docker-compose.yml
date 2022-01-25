@@ -56,3 +56,5 @@ services:
         condition: service_healthy      
       redis_image:
         condition: service_healthy  
+    volumes:
+      - ./certs/https:/https
