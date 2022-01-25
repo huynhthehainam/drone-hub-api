@@ -17,13 +17,16 @@ namespace MiSmart.DAL.ViewModels
         public Int32 CustomerID { get; set; }
         public String Name { get; set; }
         public List<TeamMemberViewModel> Members { get; set; }
+        public Int32 MembersCount { get; set; }
 
         public void LoadFrom(Team entity)
         {
             ID = entity.ID;
             CustomerID = entity.CustomerID;
             Name = entity.Name;
-            Members = entity.TeamUsers.Select(ww => new TeamMemberViewModel { UserID = ww.UserID, Type = ww.Type }).ToList();
+            var teamUsers = entity.TeamUsers.Select(ww => new TeamMemberViewModel { UserID = ww.UserID, Type = ww.Type });
+            Members = teamUsers.ToList();
+            MembersCount = teamUsers.Count();
         }
     }
 }
