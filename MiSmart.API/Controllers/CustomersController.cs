@@ -99,11 +99,11 @@ namespace MiSmart.API.Controllers
         [HttpGet("{id:int}/TestUser")]
         [AllowAnonymous]
         // [HasPermission(typeof(AdminPermission))]
-        public IActionResult TestUser([FromServices] CustomerUserRepository customerUserRepository, [FromServices] AuthGrpcClientService authGrpcClientService, [FromBody] AssigningCustomerUserCommand command, [FromRoute] Int32 id)
+        public IActionResult TestUser([FromServices] CustomerUserRepository customerUserRepository, [FromServices] AuthGrpcClientService authGrpcClientService, [FromRoute] Int32 id)
         {
             var response = actionResponseFactory.CreateInstance();
             var customer = customerRepository.Get(ww => ww.ID == id);
-            var userExistingInformation = authGrpcClientService.GetUserExistingInformation(command.UserID.GetValueOrDefault());
+            var userExistingInformation = authGrpcClientService.GetUserExistingInformation(13);
             if (!userExistingInformation.IsExist)
             {
                 response.AddInvalidErr("UserID");
