@@ -21,6 +21,8 @@ using NetTopologySuite.Geometries;
 using MiSmart.Infrastructure.QueuedBackgroundTasks;
 using System.Threading.Tasks;
 using System.Threading;
+using MiSmart.Infrastructure.Permissions;
+using MiSmart.API.Permissions;
 
 namespace MiSmart.API.Controllers
 {
@@ -120,6 +122,38 @@ namespace MiSmart.API.Controllers
             }
 
             response.SetData(ViewModelHelpers.ConvertToViewModel<Device, SuperSmallDeviceViewModel>(device));
+
+            return response.ToIActionResult();
+        }
+        [HttpPatch("{id:int}")]
+        [HasPermission(typeof(AdminPermission))]
+        public IActionResult PatchDevice([FromServices] DeviceRepository deviceRepository, [FromServices] DeviceModelRepository deviceModelRepository, [FromRoute] Int32 id, [FromBody] PatchingDeviceCommand command)
+        {
+            ActionResponse response = actionResponseFactory.CreateInstance();
+
+            var device = deviceRepository.Get(ww => ww.ID == id);
+            if (device is null)
+            {
+                response.AddNotFoundErr("Device");
+            }
+
+
+            device.Name = String.IsNullOrWhiteSpace(command.Name) ? device.Name : command.Name;
+
+            if (command.DeviceModelID.HasValue)
+            {
+                var deviceModel = deviceModelRepository.Get(ww => ww.ID == command.DeviceModelID.GetValueOrDefault());
+                if (deviceModel is null)
+                {
+                    response.AddInvalidErr("DeviceModelID");
+                }
+                device.DeviceModel = deviceModel;
+            }
+
+
+            deviceRepository.Update(device);
+
+            response.SetUpdatedMessage();
 
             return response.ToIActionResult();
         }
