@@ -45,19 +45,19 @@ namespace MiSmart.API.Controllers
         public IActionResult AssignTeam([FromServices] CustomerUserRepository customerUserRepository, [FromServices] TeamRepository teamRepository, [FromServices] TeamUserRepository teamUserRepository, [FromRoute] Int32 id, [FromBody] AssingingDeviceCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
-            CustomerUserPermission customerUserPermission = customerUserRepository.GetMemberPermission(CurrentUser, CustomerMemberType.Owner);
+            CustomerUser customerUser = customerUserRepository.GetByPermission(CurrentUser.ID, CustomerMemberType.Owner);
 
-            if (customerUserPermission is null)
+            if (customerUser is null)
             {
                 response.AddNotAllowedErr();
             }
 
-            var team = teamRepository.Get(ww => ww.ID == command.TeamID.GetValueOrDefault() && ww.CustomerID == customerUserPermission.CustomerID);
+            var team = teamRepository.Get(ww => ww.ID == command.TeamID.GetValueOrDefault() && ww.CustomerID == customerUser.CustomerID);
             if (team is null)
             {
                 response.AddInvalidErr("TeamID");
             }
-            Expression<Func<Device, Boolean>> query = ww => (ww.ID == id) && (ww.CustomerID == customerUserPermission.CustomerID);
+            Expression<Func<Device, Boolean>> query = ww => (ww.ID == id) && (ww.CustomerID == customerUser.CustomerID);
             var device = deviceRepository.Get(query);
             if (device is null)
             {
@@ -76,15 +76,15 @@ namespace MiSmart.API.Controllers
         public IActionResult GetList([FromServices] CustomerUserRepository customerUserRepository, [FromServices] TeamUserRepository teamUserRepository, [FromQuery] PageCommand pageCommand, [FromQuery] String search, [FromQuery] String mode = "Small")
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
-            CustomerUserPermission customerUserPermission = customerUserRepository.GetMemberPermission(CurrentUser);
+            CustomerUser customerUser = customerUserRepository.GetByPermission(CurrentUser.ID);
 
-            if (customerUserPermission is null)
+            if (customerUser is null)
             {
                 response.AddNotAllowedErr();
             }
 
-            var teamIDs = teamUserRepository.GetListEntities(new PageCommand(), ww => ww.UserID == CurrentUser.ID).Select(ww => ww.TeamID).ToList();
-            Expression<Func<Device, Boolean>> query = ww => (customerUserPermission.Type == CustomerMemberType.Owner ? (ww.CustomerID == customerUserPermission.CustomerID) : (teamIDs.Contains(ww.TeamID.GetValueOrDefault())))
+            var teamIDs = teamUserRepository.GetListEntities(new PageCommand(), ww => ww.CustomerUserID == customerUser.ID).Select(ww => ww.TeamID).ToList();
+            Expression<Func<Device, Boolean>> query = ww => (customerUser.Type == CustomerMemberType.Owner ? (ww.CustomerID == customerUser.CustomerID) : (teamIDs.Contains(ww.TeamID.GetValueOrDefault())))
             && (!String.IsNullOrWhiteSpace(search) ? ww.Name.ToLower().Contains(search.ToLower()) : true);
             if (mode == "Large")
             {
@@ -106,15 +106,15 @@ namespace MiSmart.API.Controllers
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
 
-            CustomerUserPermission customerUserPermission = customerUserRepository.GetMemberPermission(CurrentUser);
-            if (customerUserPermission is null)
+            CustomerUser customerUser = customerUserRepository.GetByPermission(CurrentUser.ID);
+            if (customerUser is null)
             {
                 response.AddNotAllowedErr();
             }
-            var teamIDs = teamUserRepository.GetListEntities(new PageCommand(), ww => ww.UserID == CurrentUser.ID).Select(ww => ww.TeamID).ToList();
+            var teamIDs = teamUserRepository.GetListEntities(new PageCommand(), ww => ww.CustomerUserID == customerUser.ID).Select(ww => ww.TeamID).ToList();
 
             Expression<Func<Device, Boolean>> query = ww => (ww.ID == id)
-             && (customerUserPermission.Type == CustomerMemberType.Owner ? ww.CustomerID == customerUserPermission.CustomerID : (teamIDs.Contains(ww.TeamID.GetValueOrDefault())));
+             && (customerUser.Type == CustomerMemberType.Owner ? ww.CustomerID == customerUser.CustomerID : (teamIDs.Contains(ww.TeamID.GetValueOrDefault())));
             var device = deviceRepository.Get(query);
             if (device is null)
             {

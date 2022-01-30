@@ -183,11 +183,7 @@ namespace MiSmart.API.Controllers
             }
 
             customerUserRepository.Delete(customerUser);
-            var teamUser = teamUserRepository.Get(ww => ww.UserID == command.UserID);
-            if (teamUser is not null)
-            {
-                teamUserRepository.Delete(teamUser);
-            }
+          
             response.SetNoContent();
 
             return response.ToIActionResult();

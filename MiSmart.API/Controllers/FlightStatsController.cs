@@ -30,15 +30,15 @@ namespace MiSmart.API.Controllers
             var response = new FlightStatsActionResponse();
             response.ApplySettings(actionResponseFactory.Settings);
 
-            CustomerUserPermission customerUserPermission = customerUserRepository.GetMemberPermission(CurrentUser);
-            if (customerUserPermission is null)
+            CustomerUser customerUser = customerUserRepository.GetByPermission(CurrentUser.ID);
+            if (customerUser is null)
             {
                 response.AddNotAllowedErr();
             }
 
 
 
-            Expression<Func<FlightStat, Boolean>> query = ww => (ww.CustomerID == customerUserPermission.CustomerID)
+            Expression<Func<FlightStat, Boolean>> query = ww => (ww.CustomerID == customerUser.CustomerID)
                 && (teamID.HasValue ? (ww.Device.TeamID == teamID.Value) : true)
                 && (deviceID.HasValue ? (ww.DeviceID == deviceID.Value) : true)
                 && (from.HasValue ? (ww.FlightTime >= from.Value) : true)
@@ -64,8 +64,8 @@ namespace MiSmart.API.Controllers
         public IActionResult GetByID([FromServices] FlightStatRepository flightStatRepository, [FromServices] CustomerUserRepository customerUserRepository, [FromRoute] Guid id)
         {
             var response = actionResponseFactory.CreateInstance();
-            CustomerUserPermission customerUserPermission = customerUserRepository.GetMemberPermission(CurrentUser);
-            if (customerUserPermission is null)
+            CustomerUser customerUser = customerUserRepository.GetByPermission(CurrentUser.ID);
+            if (customerUser is null)
             {
                 response.AddNotAllowedErr();
             }
@@ -82,8 +82,8 @@ namespace MiSmart.API.Controllers
         public IActionResult DeleteByID([FromServices] FlightStatRepository flightStatRepository, [FromServices] CustomerUserRepository customerUserRepository, [FromRoute] Guid id)
         {
             var response = actionResponseFactory.CreateInstance();
-            CustomerUserPermission customerUserPermission = customerUserRepository.GetMemberPermission(CurrentUser);
-            if (customerUserPermission is null)
+            CustomerUser customerUser = customerUserRepository.GetByPermission(CurrentUser.ID);
+            if (customerUser is null)
             {
                 response.AddNotAllowedErr();
             }

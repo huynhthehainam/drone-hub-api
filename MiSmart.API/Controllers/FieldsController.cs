@@ -27,13 +27,13 @@ namespace MiSmart.API.Controllers
         public IActionResult GetFields([FromServices] FieldRepository fieldRepository, [FromServices] CustomerUserRepository customerUserRepository, [FromQuery] PageCommand pageCommand, [FromQuery] DateTime? from, [FromQuery] DateTime? to, [FromQuery] String search, [FromQuery] String mode = "Small")
         {
             var response = actionResponseFactory.CreateInstance();
-            CustomerUserPermission customerUserPermission = customerUserRepository.GetMemberPermission(CurrentUser);
-            if (customerUserPermission is null)
+            CustomerUser customerUser = customerUserRepository.GetByPermission(CurrentUser.ID);
+            if (customerUser is null)
             {
                 response.AddNotAllowedErr();
             }
 
-            Expression<Func<Field, Boolean>> query = ww => (ww.CustomerID == customerUserPermission.CustomerID)
+            Expression<Func<Field, Boolean>> query = ww => (ww.CustomerID == customerUser.CustomerID)
                 && (from.HasValue ? (ww.CreatedTime >= from.Value) : true)
                 && (to.HasValue ? (ww.CreatedTime <= to.Value) : true)
                 && (!String.IsNullOrWhiteSpace(search) ? (ww.Name.ToLower().Contains(search.ToLower()) || ww.FieldLocation.ToLower().Contains(search.ToLower()) || ww.FieldName.ToLower().Contains(search.ToLower())) : true);
@@ -57,12 +57,12 @@ namespace MiSmart.API.Controllers
         {
             var response = actionResponseFactory.CreateInstance();
 
-            CustomerUserPermission customerUserPermission = customerUserRepository.GetMemberPermission(CurrentUser);
-            if (customerUserPermission is null)
+            CustomerUser customerUser = customerUserRepository.GetByPermission(CurrentUser.ID);
+            if (customerUser is null)
             {
                 response.AddNotAllowedErr();
             }
-            var field = fieldRepository.Get(ww => ww.ID == id && ww.CustomerID == customerUserPermission.CustomerID);
+            var field = fieldRepository.Get(ww => ww.ID == id && ww.CustomerID == customerUser.CustomerID);
             if (field is null)
             {
                 response.AddNotFoundErr("Field");

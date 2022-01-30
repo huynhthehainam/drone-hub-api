@@ -27,7 +27,14 @@ namespace MiSmart.DAL.Models
             set => team = value;
         }
         public Int64 TeamID { get; set; }
-        public Int64 UserID { get; set; }
+        private CustomerUser customerUser;
+        [JsonIgnore]
+        public CustomerUser CustomerUser
+        {
+            get => lazyLoader.Load(this, ref customerUser);
+            set => customerUser = value;
+        }
+        public Int64 CustomerUserID { get; set; }
 
         public TeamMemberType Type { get; set; } = TeamMemberType.Member;
     }

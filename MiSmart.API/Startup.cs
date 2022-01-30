@@ -307,12 +307,18 @@ namespace MiSmart.API
                 var team1 = context.Teams.FirstOrDefault(ww => ww.ID == 1);
                 var team2 = context.Teams.FirstOrDefault(ww => ww.ID == 2);
                 var team3 = context.Teams.FirstOrDefault(ww => ww.ID == 3);
-                if (team1 is not null && team2 is not null && team3 is not null)
+
+                var customerUser1 = context.CustomerUsers.FirstOrDefault(ww => ww.ID == 1);
+                var customerUser2 = context.CustomerUsers.FirstOrDefault(ww => ww.ID == 2);
+                var customerUser3 = context.CustomerUsers.FirstOrDefault(ww => ww.ID == 3);
+                var customerUser4 = context.CustomerUsers.FirstOrDefault(ww => ww.ID == 4);
+                if (team1 is not null && team2 is not null && team3 is not null && customerUser1 is not null
+                && customerUser2 is not null && customerUser3 is not null && customerUser4 is not null)
                 {
-                    TeamUser teamUser1 = new TeamUser { UserID = 1, Team = team1 };
-                    TeamUser teamUser2 = new TeamUser { UserID = 2, Team = team2 };
-                    TeamUser teamUser3 = new TeamUser { UserID = 3, Team = team3 };
-                    TeamUser teamUser4 = new TeamUser { UserID = 4, Team = team2 };
+                    TeamUser teamUser1 = new TeamUser { CustomerUser = customerUser1, Team = team1 };
+                    TeamUser teamUser2 = new TeamUser { CustomerUser = customerUser2, Team = team2 };
+                    TeamUser teamUser3 = new TeamUser { CustomerUser = customerUser3, Team = team3 };
+                    TeamUser teamUser4 = new TeamUser { CustomerUser = customerUser4, Team = team2 };
                     context.TeamUsers.AddRange(new TeamUser[] { teamUser1, teamUser2, teamUser3, teamUser4 });
                     context.SaveChanges();
                 }

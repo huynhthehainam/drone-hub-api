@@ -24,7 +24,7 @@ namespace MiSmart.DAL.ViewModels
             ID = entity.ID;
             CustomerID = entity.CustomerID;
             Name = entity.Name;
-            var teamUsers = entity.TeamUsers.Select(ww => new TeamMemberViewModel { UserID = ww.UserID, Type = ww.Type });
+            var teamUsers = entity.TeamUsers.Select(ww => new TeamMemberViewModel { UserID = ww.CustomerUser.UserID, Type = ww.Type });
             Members = teamUsers.ToList();
             MembersCount = teamUsers.Count();
         }

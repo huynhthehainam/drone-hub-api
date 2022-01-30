@@ -32,13 +32,13 @@ namespace MiSmart.API.Controllers
         public IActionResult CreateTeam([FromServices] TeamRepository teamRepository, [FromServices] CustomerUserRepository customerUserRepository, [FromBody] AddingTeamCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
-            CustomerUserPermission customerUserPermission = customerUserRepository.GetMemberPermission(CurrentUser, CustomerMemberType.Owner);
-            if (customerUserPermission is null)
+            CustomerUser customerUser = customerUserRepository.GetByPermission(CurrentUser.ID, CustomerMemberType.Owner);
+            if (customerUser is null)
             {
                 response.AddNotAllowedErr();
             }
 
-            var team = new Team { Name = command.Name, CustomerID = customerUserPermission.CustomerID };
+            var team = new Team { Name = command.Name, CustomerID = customerUser.CustomerID };
             teamRepository.Create(team);
             response.SetCreatedObject(team);
 
@@ -53,14 +53,14 @@ namespace MiSmart.API.Controllers
         {
             var response = actionResponseFactory.CreateInstance();
 
-            CustomerUserPermission customerUserPermission = customerUserRepository.GetMemberPermission(CurrentUser);
-            if (customerUserPermission is null)
+            CustomerUser customerUser = customerUserRepository.GetByPermission(CurrentUser.ID);
+            if (customerUser is null)
             {
                 response.AddNotAllowedErr();
             }
-            var teamIDs = teamUserRepository.GetListEntities(new PageCommand(), ww => ww.UserID == CurrentUser.ID).Select(ww => ww.TeamID).ToList();
+            var teamIDs = teamUserRepository.GetListEntities(new PageCommand(), ww => ww.CustomerUserID == customerUser.ID).Select(ww => ww.TeamID).ToList();
 
-            Expression<Func<Team, Boolean>> query = ww => (customerUserPermission.Type == CustomerMemberType.Owner ? ww.CustomerID == customerUserPermission.CustomerID : (teamIDs.Contains(ww.ID)))
+            Expression<Func<Team, Boolean>> query = ww => (customerUser.Type == CustomerMemberType.Owner ? ww.CustomerID == customerUser.CustomerID : (teamIDs.Contains(ww.ID)))
               && (!String.IsNullOrWhiteSpace(search) ? (ww.Name.ToLower().Contains(search.ToLower())) : true);
             if (mode == "Large")
             {
@@ -81,14 +81,14 @@ namespace MiSmart.API.Controllers
         public IActionResult GetTeamByID([FromServices] TeamRepository teamRepository, [FromServices] TeamUserRepository teamUserRepository, [FromServices] CustomerUserRepository customerUserRepository, [FromRoute] Int32 id)
         {
             var response = actionResponseFactory.CreateInstance();
-            CustomerUserPermission customerUserPermission = customerUserRepository.GetMemberPermission(CurrentUser);
-            if (customerUserPermission is null)
+            CustomerUser customerUser = customerUserRepository.GetByPermission(CurrentUser.ID);
+            if (customerUser is null)
             {
                 response.AddNotAllowedErr();
             }
-            var teamIDs = teamUserRepository.GetListEntities(new PageCommand(), ww => ww.UserID == CurrentUser.ID).Select(ww => ww.TeamID).ToList();
+            var teamIDs = teamUserRepository.GetListEntities(new PageCommand(), ww => ww.CustomerUserID == customerUser.ID).Select(ww => ww.TeamID).ToList();
 
-            var team = teamRepository.GetView<LargeTeamViewModel>(ww => ww.ID == id && (customerUserPermission.Type == CustomerMemberType.Owner ? ww.CustomerID == customerUserPermission.CustomerID : (teamIDs.Contains(ww.ID))));
+            var team = teamRepository.GetView<LargeTeamViewModel>(ww => ww.ID == id && (customerUser.Type == CustomerMemberType.Owner ? ww.CustomerID == customerUser.CustomerID : (teamIDs.Contains(ww.ID))));
             if (team is null)
             {
                 response.AddNotFoundErr("Team");
@@ -102,12 +102,12 @@ namespace MiSmart.API.Controllers
         public IActionResult Disband([FromServices] TeamRepository teamRepository, [FromServices] CustomerUserRepository customerUserRepository, [FromRoute] Int32 id)
         {
             var response = actionResponseFactory.CreateInstance();
-            CustomerUserPermission customerUserPermission = customerUserRepository.GetMemberPermission(CurrentUser, CustomerMemberType.Owner);
-            if (customerUserPermission is null)
+            CustomerUser customerUser = customerUserRepository.GetByPermission(CurrentUser.ID, CustomerMemberType.Owner);
+            if (customerUser is null)
             {
                 response.AddNotAllowedErr();
             }
-            var team = teamRepository.Get(ww => ww.CustomerID == customerUserPermission.CustomerID && ww.ID == id);
+            var team = teamRepository.Get(ww => ww.CustomerID == customerUser.CustomerID && ww.ID == id);
             if (team is null)
             {
                 response.AddNotFoundErr("Team");
@@ -125,20 +125,22 @@ namespace MiSmart.API.Controllers
         {
             var response = actionResponseFactory.CreateInstance();
 
-            CustomerUserPermission customerUserPermission = customerUserRepository.GetMemberPermission(CurrentUser, CustomerMemberType.Owner);
-            if (customerUserPermission is null)
+            CustomerUser customerUser = customerUserRepository.GetByPermission(CurrentUser.ID, CustomerMemberType.Owner);
+            if (customerUser is null)
             {
                 response.AddNotAllowedErr();
             }
-            if (!teamUserRepository.Any(ww => ww.UserID == CurrentUser.ID))
-            {
-                response.AddExistedErr("UserID");
-            }
-            if (!customerUserRepository.Any(ww => ww.CustomerID == customerUserPermission.CustomerID && ww.UserID == command.UserID.GetValueOrDefault()))
+
+            var targetCustomerUser = customerUserRepository.GetByPermission(command.UserID.GetValueOrDefault());
+            if (targetCustomerUser is null)
             {
                 response.AddInvalidErr("UserID");
             }
-            var teamUser = new TeamUser { UserID = command.UserID.Value, TeamID = id, Type = command.Type };
+            if (!teamUserRepository.Any(ww => ww.CustomerUserID == targetCustomerUser.ID))
+            {
+                response.AddExistedErr("UserID");
+            }
+            var teamUser = new TeamUser { CustomerUserID = targetCustomerUser.ID, TeamID = id, Type = command.Type };
             teamUserRepository.Create(teamUser);
             response.SetCreatedObject(teamUser);
 

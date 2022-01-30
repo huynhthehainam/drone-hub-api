@@ -40,7 +40,8 @@ namespace MiSmart.DAL.DatabaseContexts
             modelBuilder.Entity<TeamUser>(ww =>
             {
                 ww.HasOne(ww => ww.Team).WithMany(ww => ww.TeamUsers).HasForeignKey(ww => ww.TeamID).OnDelete(DeleteBehavior.Cascade);
-                ww.HasIndex(ww => new { ww.TeamID, ww.UserID }).IsUnique();
+                ww.HasOne(ww => ww.CustomerUser).WithMany(ww => ww.TeamUsers).HasForeignKey(ww => ww.CustomerUserID).OnDelete(DeleteBehavior.Cascade);
+                ww.HasIndex(ww => new { ww.TeamID, ww.CustomerUserID }).IsUnique();
             });
 
             modelBuilder.Entity<Device>(ww =>

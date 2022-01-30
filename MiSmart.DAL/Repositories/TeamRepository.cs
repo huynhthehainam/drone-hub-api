@@ -16,22 +16,5 @@ namespace MiSmart.DAL.Repositories
         public TeamRepository(DatabaseContext context) : base(context)
         {
         }
-        public Boolean HasOwnerPermission(Int64 teamID, UserCacheViewModel currentUser)
-        {
-            if (currentUser.IsAdmin)
-            {
-                return true;
-            }
-            var team = Get(ww => ww.ID == teamID);
-            if (team is not null)
-            {
-                var teamUser = team.TeamUsers.FirstOrDefault(ww => ww.UserID == currentUser.ID && ww.Type == TeamMemberType.Owner);
-                if (teamUser is not null)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
     }
 }
