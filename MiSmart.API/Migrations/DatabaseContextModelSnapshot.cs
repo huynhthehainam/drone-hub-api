@@ -324,18 +324,20 @@ namespace MiSmart.API.Migrations
                         .HasColumnType("bigint")
                         .UseIdentityByDefaultColumn();
 
+                    b.Property<long>("CustomerUserID")
+                        .HasColumnType("bigint");
+
                     b.Property<long>("TeamID")
                         .HasColumnType("bigint");
 
                     b.Property<int>("Type")
                         .HasColumnType("integer");
 
-                    b.Property<long>("UserID")
-                        .HasColumnType("bigint");
-
                     b.HasKey("ID");
 
-                    b.HasIndex("TeamID", "UserID")
+                    b.HasIndex("CustomerUserID");
+
+                    b.HasIndex("TeamID", "CustomerUserID")
                         .IsUnique();
 
                     b.ToTable("TeamUsers");
@@ -460,11 +462,19 @@ namespace MiSmart.API.Migrations
 
             modelBuilder.Entity("MiSmart.DAL.Models.TeamUser", b =>
                 {
+                    b.HasOne("MiSmart.DAL.Models.CustomerUser", "CustomerUser")
+                        .WithMany("TeamUsers")
+                        .HasForeignKey("CustomerUserID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("MiSmart.DAL.Models.Team", "Team")
                         .WithMany("TeamUsers")
                         .HasForeignKey("TeamID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("CustomerUser");
 
                     b.Navigation("Team");
                 });
@@ -491,6 +501,11 @@ namespace MiSmart.API.Migrations
                     b.Navigation("FlightStats");
 
                     b.Navigation("Teams");
+                });
+
+            modelBuilder.Entity("MiSmart.DAL.Models.CustomerUser", b =>
+                {
+                    b.Navigation("TeamUsers");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.Device", b =>

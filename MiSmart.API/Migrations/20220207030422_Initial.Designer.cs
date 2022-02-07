@@ -11,8 +11,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MiSmart.API.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20211223034338_AddDeviceAccessToken")]
-    partial class AddDeviceAccessToken
+    [Migration("20220207030422_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -59,7 +59,9 @@ namespace MiSmart.API.Migrations
 
                     b.HasKey("ID");
 
-                    b.HasIndex("CustomerID", "UserID")
+                    b.HasIndex("CustomerID");
+
+                    b.HasIndex("UserID")
                         .IsUnique();
 
                     b.ToTable("CustomerUsers");
@@ -81,11 +83,20 @@ namespace MiSmart.API.Migrations
                     b.Property<int>("DeviceModelID")
                         .HasColumnType("integer");
 
+                    b.Property<string>("LastAdditionalInformationString")
+                        .HasColumnType("text");
+
+                    b.Property<double>("LastDirection")
+                        .HasColumnType("double precision");
+
                     b.Property<Point>("LastPoint")
                         .HasColumnType("geography (point)");
 
                     b.Property<string>("Name")
                         .HasColumnType("text");
+
+                    b.Property<DateTime?>("NextGeneratingAccessTokenTime")
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
@@ -186,9 +197,6 @@ namespace MiSmart.API.Migrations
                     b.Property<double>("SprayWidth")
                         .HasColumnType("double precision");
 
-                    b.Property<int>("Unit")
-                        .HasColumnType("integer");
-
                     b.Property<DateTime?>("UpdatedTime")
                         .HasColumnType("timestamp without time zone");
 
@@ -244,9 +252,6 @@ namespace MiSmart.API.Migrations
                     b.Property<double>("TaskArea")
                         .HasColumnType("double precision");
 
-                    b.Property<int>("TaskAreaUnit")
-                        .HasColumnType("integer");
-
                     b.Property<string>("TaskLocation")
                         .HasColumnType("text");
 
@@ -266,6 +271,9 @@ namespace MiSmart.API.Migrations
                         .HasColumnType("bigint")
                         .UseIdentityByDefaultColumn();
 
+                    b.Property<int>("DeviceID")
+                        .HasColumnType("integer");
+
                     b.Property<byte[]>("FileBytes")
                         .HasColumnType("bytea");
 
@@ -275,10 +283,9 @@ namespace MiSmart.API.Migrations
                     b.Property<Point>("Location")
                         .HasColumnType("geography (point)");
 
-                    b.Property<string>("Prefix")
-                        .HasColumnType("text");
-
                     b.HasKey("ID");
+
+                    b.HasIndex("DeviceID");
 
                     b.ToTable("Plans");
                 });
@@ -296,6 +303,15 @@ namespace MiSmart.API.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("text");
 
+                    b.Property<double>("TotalFlightDuration")
+                        .HasColumnType("double precision");
+
+                    b.Property<long>("TotalFlights")
+                        .HasColumnType("bigint");
+
+                    b.Property<double>("TotalTaskArea")
+                        .HasColumnType("double precision");
+
                     b.HasKey("ID");
 
                     b.HasIndex("CustomerID");
@@ -310,18 +326,20 @@ namespace MiSmart.API.Migrations
                         .HasColumnType("bigint")
                         .UseIdentityByDefaultColumn();
 
+                    b.Property<long>("CustomerUserID")
+                        .HasColumnType("bigint");
+
                     b.Property<long>("TeamID")
                         .HasColumnType("bigint");
 
                     b.Property<int>("Type")
                         .HasColumnType("integer");
 
-                    b.Property<long>("UserID")
-                        .HasColumnType("bigint");
-
                     b.HasKey("ID");
 
-                    b.HasIndex("TeamID", "UserID")
+                    b.HasIndex("CustomerUserID");
+
+                    b.HasIndex("TeamID", "CustomerUserID")
                         .IsUnique();
 
                     b.ToTable("TeamUsers");
@@ -341,6 +359,9 @@ namespace MiSmart.API.Migrations
 
                     b.Property<int>("DeviceID")
                         .HasColumnType("integer");
+
+                    b.Property<double>("Direction")
+                        .HasColumnType("double precision");
 
                     b.Property<Point>("LocationPoint")
                         .HasColumnType("geography (point)");
@@ -419,6 +440,17 @@ namespace MiSmart.API.Migrations
                     b.Navigation("Device");
                 });
 
+            modelBuilder.Entity("MiSmart.DAL.Models.Plan", b =>
+                {
+                    b.HasOne("MiSmart.DAL.Models.Device", "Device")
+                        .WithMany("Plans")
+                        .HasForeignKey("DeviceID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Device");
+                });
+
             modelBuilder.Entity("MiSmart.DAL.Models.Team", b =>
                 {
                     b.HasOne("MiSmart.DAL.Models.Customer", "Customer")
@@ -432,11 +464,19 @@ namespace MiSmart.API.Migrations
 
             modelBuilder.Entity("MiSmart.DAL.Models.TeamUser", b =>
                 {
+                    b.HasOne("MiSmart.DAL.Models.CustomerUser", "CustomerUser")
+                        .WithMany("TeamUsers")
+                        .HasForeignKey("CustomerUserID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("MiSmart.DAL.Models.Team", "Team")
                         .WithMany("TeamUsers")
                         .HasForeignKey("TeamID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("CustomerUser");
 
                     b.Navigation("Team");
                 });
@@ -465,9 +505,16 @@ namespace MiSmart.API.Migrations
                     b.Navigation("Teams");
                 });
 
+            modelBuilder.Entity("MiSmart.DAL.Models.CustomerUser", b =>
+                {
+                    b.Navigation("TeamUsers");
+                });
+
             modelBuilder.Entity("MiSmart.DAL.Models.Device", b =>
                 {
                     b.Navigation("FlightStats");
+
+                    b.Navigation("Plans");
 
                     b.Navigation("Records");
                 });

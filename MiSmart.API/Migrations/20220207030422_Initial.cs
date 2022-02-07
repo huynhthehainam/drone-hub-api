@@ -40,22 +40,6 @@ namespace MiSmart.API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Plans",
-                columns: table => new
-                {
-                    ID = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Prefix = table.Column<string>(type: "text", nullable: true),
-                    Location = table.Column<Point>(type: "geography (point)", nullable: true),
-                    FileBytes = table.Column<byte[]>(type: "bytea", nullable: true),
-                    FileName = table.Column<string>(type: "text", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Plans", x => x.ID);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "CustomerUsers",
                 columns: table => new
                 {
@@ -88,7 +72,6 @@ namespace MiSmart.API.Migrations
                     FieldLocation = table.Column<string>(type: "text", nullable: true),
                     PilotName = table.Column<string>(type: "text", nullable: true),
                     MappingArea = table.Column<double>(type: "double precision", nullable: false),
-                    Unit = table.Column<int>(type: "integer", nullable: false),
                     MappingTime = table.Column<double>(type: "double precision", nullable: false),
                     UpdatedTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     CustomerID = table.Column<int>(type: "integer", nullable: false),
@@ -123,6 +106,9 @@ namespace MiSmart.API.Migrations
                     ID = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "text", nullable: true),
+                    TotalTaskArea = table.Column<double>(type: "double precision", nullable: false),
+                    TotalFlightDuration = table.Column<double>(type: "double precision", nullable: false),
+                    TotalFlights = table.Column<long>(type: "bigint", nullable: false),
                     CustomerID = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -148,8 +134,12 @@ namespace MiSmart.API.Migrations
                     Status = table.Column<int>(type: "integer", nullable: false),
                     TeamID = table.Column<long>(type: "bigint", nullable: true),
                     CustomerID = table.Column<int>(type: "integer", nullable: false),
+                    AccessToken = table.Column<string>(type: "text", nullable: true),
+                    NextGeneratingAccessTokenTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     DeviceModelID = table.Column<int>(type: "integer", nullable: false),
-                    LastPoint = table.Column<Point>(type: "geography (point)", nullable: true)
+                    LastPoint = table.Column<Point>(type: "geography (point)", nullable: true),
+                    LastDirection = table.Column<double>(type: "double precision", nullable: false),
+                    LastAdditionalInformationString = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -181,12 +171,18 @@ namespace MiSmart.API.Migrations
                     ID = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     TeamID = table.Column<long>(type: "bigint", nullable: false),
-                    UserID = table.Column<long>(type: "bigint", nullable: false),
+                    CustomerUserID = table.Column<long>(type: "bigint", nullable: false),
                     Type = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_TeamUsers", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_TeamUsers_CustomerUsers_CustomerUserID",
+                        column: x => x.CustomerUserID,
+                        principalTable: "CustomerUsers",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_TeamUsers_Teams_TeamID",
                         column: x => x.TeamID,
@@ -207,7 +203,6 @@ namespace MiSmart.API.Migrations
                     FieldName = table.Column<string>(type: "text", nullable: true),
                     DeviceName = table.Column<string>(type: "text", nullable: true),
                     TaskArea = table.Column<double>(type: "double precision", nullable: false),
-                    TaskAreaUnit = table.Column<int>(type: "integer", nullable: false),
                     FlightDuration = table.Column<double>(type: "double precision", nullable: false),
                     PilotName = table.Column<string>(type: "text", nullable: true),
                     FlywayPoints = table.Column<LineString>(type: "geography (linestring)", nullable: true),
@@ -232,12 +227,35 @@ namespace MiSmart.API.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Plans",
+                columns: table => new
+                {
+                    ID = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Location = table.Column<Point>(type: "geography (point)", nullable: true),
+                    FileBytes = table.Column<byte[]>(type: "bytea", nullable: true),
+                    FileName = table.Column<string>(type: "text", nullable: true),
+                    DeviceID = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Plans", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_Plans_Devices_DeviceID",
+                        column: x => x.DeviceID,
+                        principalTable: "Devices",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "TelemetryRecords",
                 columns: table => new
                 {
                     ID = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatedTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     LocationPoint = table.Column<Point>(type: "geography (point)", nullable: true),
+                    Direction = table.Column<double>(type: "double precision", nullable: false),
                     AdditionalInformationString = table.Column<string>(type: "text", nullable: true),
                     DeviceID = table.Column<int>(type: "integer", nullable: false)
                 },
@@ -253,9 +271,14 @@ namespace MiSmart.API.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_CustomerUsers_CustomerID_UserID",
+                name: "IX_CustomerUsers_CustomerID",
                 table: "CustomerUsers",
-                columns: new[] { "CustomerID", "UserID" },
+                column: "CustomerID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CustomerUsers_UserID",
+                table: "CustomerUsers",
+                column: "UserID",
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -289,14 +312,24 @@ namespace MiSmart.API.Migrations
                 column: "DeviceID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Plans_DeviceID",
+                table: "Plans",
+                column: "DeviceID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Teams_CustomerID",
                 table: "Teams",
                 column: "CustomerID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TeamUsers_TeamID_UserID",
+                name: "IX_TeamUsers_CustomerUserID",
                 table: "TeamUsers",
-                columns: new[] { "TeamID", "UserID" },
+                column: "CustomerUserID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TeamUsers_TeamID_CustomerUserID",
+                table: "TeamUsers",
+                columns: new[] { "TeamID", "CustomerUserID" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -307,9 +340,6 @@ namespace MiSmart.API.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "CustomerUsers");
-
             migrationBuilder.DropTable(
                 name: "Fields");
 
@@ -324,6 +354,9 @@ namespace MiSmart.API.Migrations
 
             migrationBuilder.DropTable(
                 name: "TelemetryRecords");
+
+            migrationBuilder.DropTable(
+                name: "CustomerUsers");
 
             migrationBuilder.DropTable(
                 name: "Devices");
