@@ -2,6 +2,7 @@ using System;
 using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.ObjectPool;
+using MiSmart.Infrastructure.Constants;
 using RabbitMQ.Client;
 
 namespace MiSmart.Infrastructure.RabbitMQ
@@ -45,7 +46,7 @@ namespace MiSmart.Infrastructure.RabbitMQ
 
             channel.ExchangeDeclare(exchangeName, exchangeType, true, false, null);
 
-            var sendBytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(message, JsonOptions.CamelOptions));
+            var sendBytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(message, JsonSerializerDefaultOptions.CamelOptions));
 
             var properties = channel.CreateBasicProperties();
             properties.Persistent = true;

@@ -16,6 +16,7 @@ using Microsoft.AspNet.SignalR;
 using NetTopologySuite;
 using NetTopologySuite.Geometries;
 using System.Linq;
+using MiSmart.Infrastructure.Constants;
 
 namespace MiSmart.API.MqttControllers
 {
@@ -44,7 +45,7 @@ namespace MiSmart.API.MqttControllers
                 AddingTelemetryRecordCommand command = null;
                 try
                 {
-                    command = JsonSerializer.Deserialize<AddingTelemetryRecordCommand>(Message.Payload, JsonOptions.CamelOptions);
+                    command = JsonSerializer.Deserialize<AddingTelemetryRecordCommand>(Message.Payload, JsonSerializerDefaultOptions.CamelOptions);
                 }
                 catch (Exception) { }
                 if (command is not null)
@@ -85,7 +86,7 @@ namespace MiSmart.API.MqttControllers
                 AddingFlightStatCommand command = null;
                 try
                 {
-                    command = JsonSerializer.Deserialize<AddingFlightStatCommand>(Message.Payload, JsonOptions.CamelOptions);
+                    command = JsonSerializer.Deserialize<AddingFlightStatCommand>(Message.Payload, JsonSerializerDefaultOptions.CamelOptions);
                 }
                 catch (Exception)
                 {

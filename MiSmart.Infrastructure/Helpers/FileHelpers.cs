@@ -18,6 +18,11 @@ namespace MiSmart.Infrastructure.Helpers
                 var fileName = String.Join(".", new String[] { aa, extension });
                 var filePaths = new List<String>() { FolderPaths.StaticFilePath };
                 filePaths.AddRange(paths);
+                var tempPath = Path.Combine(filePaths.ToArray()).Replace("\\", "/");
+                if (!Directory.Exists(tempPath))
+                {
+                    Directory.CreateDirectory(tempPath);
+                }
                 filePaths.Add(fileName);
                 var filePath = Path.Combine(filePaths.ToArray()).Replace("\\", "/");
                 using (Stream stream = new FileStream(filePath, FileMode.Create))

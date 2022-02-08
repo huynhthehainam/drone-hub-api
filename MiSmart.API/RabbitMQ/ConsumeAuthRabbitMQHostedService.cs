@@ -11,6 +11,7 @@ using MiSmart.API.RabbitMQ.Models;
 using MiSmart.DAL.DatabaseContexts;
 using Microsoft.Extensions.DependencyInjection;
 using System.Linq;
+using MiSmart.Infrastructure.Constants;
 
 namespace MiSmart.Microservices.OrderService.RabbitMQ
 {
@@ -73,10 +74,10 @@ namespace MiSmart.Microservices.OrderService.RabbitMQ
 
         private void HandleMessage(String content)
         {
-            ExchangeRequest<Object> contentModel = JsonSerializer.Deserialize<ExchangeRequest<Object>>(content, JsonOptions.CamelOptions);
+            ExchangeRequest<Object> contentModel = JsonSerializer.Deserialize<ExchangeRequest<Object>>(content, JsonSerializerDefaultOptions.CamelOptions);
             if (contentModel.Type == "RemoveUser")
             {
-                RemovingUserModel model = JsonSerializer.Deserialize<RemovingUserModel>(JsonSerializer.Serialize(contentModel.Data, JsonOptions.CamelOptions), JsonOptions.CamelOptions);
+                RemovingUserModel model = JsonSerializer.Deserialize<RemovingUserModel>(JsonSerializer.Serialize(contentModel.Data, JsonSerializerDefaultOptions.CamelOptions), JsonSerializerDefaultOptions.CamelOptions);
                 using (var context = serviceProvider.CreateScope().ServiceProvider.GetRequiredService<DatabaseContext>())
                 {
                     var customerUsers = context.CustomerUsers.Where(ww => ww.UserID == model.ID).ToList();

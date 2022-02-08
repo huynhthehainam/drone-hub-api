@@ -94,8 +94,8 @@ namespace MiSmart.DAL.Models
         [NotMapped]
         public Object LastAdditionalInformation
         {
-            get => LastAdditionalInformationString != null ? JsonSerializer.Deserialize<Object>(LastAdditionalInformationString, JsonOptions.CamelOptions) : null;
-            set => LastAdditionalInformationString = JsonSerializer.Serialize(value, JsonOptions.CamelOptions);
+            get => LastAdditionalInformationString != null ? JsonSerializer.Deserialize<Object>(LastAdditionalInformationString, JsonSerializerDefaultOptions.CamelOptions) : null;
+            set => LastAdditionalInformationString = JsonSerializer.Serialize(value, JsonSerializerDefaultOptions.CamelOptions);
         }
         public String GenerateDeviceAccessToken(String secretKey)
         {

@@ -7,6 +7,7 @@ using System.Text.Json.Serialization;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json;
 using NetTopologySuite.Geometries;
+using MiSmart.Infrastructure.Constants;
 
 namespace MiSmart.DAL.Models
 {
@@ -27,8 +28,8 @@ namespace MiSmart.DAL.Models
         [NotMapped]
         public Object AdditionalInformation
         {
-            get => JsonSerializer.Deserialize<Object>(AdditionalInformationString, JsonOptions.CamelOptions);
-            set => AdditionalInformationString = JsonSerializer.Serialize(value, JsonOptions.CamelOptions);
+            get => JsonSerializer.Deserialize<Object>(AdditionalInformationString, JsonSerializerDefaultOptions.CamelOptions);
+            set => AdditionalInformationString = JsonSerializer.Serialize(value, JsonSerializerDefaultOptions.CamelOptions);
         }
 
         private Device device;
