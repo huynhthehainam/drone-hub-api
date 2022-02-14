@@ -27,7 +27,7 @@ services:
     environment:
       - POSTGRES_PASSWORD=mismart123@123
     volumes:
-      - ./db_volumne:/var/lib/postgresql/data
+      - ./mydata/db_volumne:/var/lib/postgresql/data
     restart: unless-stopped
     networks:
       - mismart
@@ -58,3 +58,4 @@ services:
         condition: service_healthy  
     volumes:
       - ./certs/https:/https
+      - ./mydata/wwwroot_images:/app/wwwroot/images
