@@ -10,8 +10,16 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Options;
 using MiSmart.Infrastructure.Settings;
 using MiSmart.Infrastructure.ViewModels;
+using System.Text.Json.Serialization;
+
 namespace MiSmart.Infrastructure.Services
 {
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public enum JWTUserType
+    {
+        User,
+        Other
+    }
     public class JWTService
     {
         private AuthSettings authSettings;
@@ -26,16 +34,38 @@ namespace MiSmart.Infrastructure.Services
             var userClaim = jwtToken.Claims.FirstOrDefault(ww => ww.Type == Keys.JWTAuthKey);
             var adminClaim = jwtToken.Claims.FirstOrDefault(ww => ww.Type == Keys.JWTAdminKey);
             var roleClaim = jwtToken.Claims.FirstOrDefault(ww => ww.Type == Keys.JWTRoleKey);
-            if (userClaim is not null && adminClaim is not null && roleClaim is not null)
+            var type = jwtToken.Claims.FirstOrDefault(ww => ww.Type == Keys.JWTUserTypeKey);
+            JWTUserType jWTUserType = JWTUserType.User;
+            try
             {
-
-                return new UserCacheViewModel
+                var typeString = Convert.ToString(type.Value);
+                Enum.TryParse<JWTUserType>(typeString, true, out jWTUserType);
+            }
+            catch (Exception) { }
+            if (jWTUserType == JWTUserType.User)
+            {
+                if (userClaim is not null && adminClaim is not null && roleClaim is not null)
                 {
-                    ID = Convert.ToInt64(userClaim.Value),
-                    RoleID = Convert.ToInt32(roleClaim.Value),
-                    IsAdmin = Convert.ToBoolean(adminClaim.Value),
-                    IsActive = true,
-                };
+
+                    return new UserCacheViewModel
+                    {
+                        ID = Convert.ToInt64(userClaim.Value),
+                        RoleID = Convert.ToInt32(roleClaim.Value),
+                        IsAdmin = Convert.ToBoolean(adminClaim.Value),
+                        IsActive = true,
+                    };
+                }
+            }
+            else
+            {
+                if (userClaim is not null)
+                {
+                    return new UserCacheViewModel
+                    {
+                        ID = Convert.ToInt64(userClaim.Value),
+                        IsActive = true,
+                    };
+                }
             }
             return null;
         }

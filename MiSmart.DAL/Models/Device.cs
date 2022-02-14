@@ -14,6 +14,7 @@ using Microsoft.IdentityModel.Tokens;
 using MiSmart.Infrastructure.Constants;
 using MiSmart.Infrastructure.Data;
 using MiSmart.Infrastructure.Helpers;
+using MiSmart.Infrastructure.Services;
 using NetTopologySuite.Geometries;
 
 namespace MiSmart.DAL.Models
@@ -99,7 +100,7 @@ namespace MiSmart.DAL.Models
         }
         public String GenerateDeviceAccessToken(String secretKey)
         {
-            var claims = new[] { new Claim(Keys.JWTAuthKey, ID.ToString()) };
+            var claims = new[] { new Claim(Keys.JWTAuthKey, ID.ToString()), new Claim(Keys.JWTUserTypeKey, JWTUserType.Other.ToString()) };
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             var token = new JwtSecurityToken(claims: claims, signingCredentials: creds, expires: DateTime.Now.AddMonths(2));
