@@ -1,0 +1,3 @@
+[submodule "MiSmart.Infrastructure"]
+	path = MiSmart.Infrastructure
+	url = https://gitlab.com/huynhthehainam/mismart.infrastructure.git
