@@ -1,10 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text.Json;
 using MiSmart.DAL.Models;
-using MiSmart.Infrastructure.Helpers;
 using Microsoft.EntityFrameworkCore;
 namespace MiSmart.DAL.DatabaseContexts
 {
@@ -24,6 +18,7 @@ namespace MiSmart.DAL.DatabaseContexts
         public DbSet<DeviceModel> DeviceModels { get; set; }
         public DbSet<CustomerUser> CustomerUsers { get; set; }
         public DbSet<Plan> Plans { get; set; }
+        public DbSet<TelemetryGroup> TelemetryGroups { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -47,11 +42,14 @@ namespace MiSmart.DAL.DatabaseContexts
             modelBuilder.Entity<Device>(ww =>
             {
                 ww.HasOne(ww => ww.Team).WithMany(ww => ww.Devices).HasForeignKey(ww => ww.TeamID).OnDelete(DeleteBehavior.Cascade);
-                ww.Property(ww => ww.LastPoint).HasColumnType("geography (point)");
+                ww.HasOne(ww => ww.LastGroup).WithOne(ww => ww.LastDevice).HasForeignKey<Device>(ww => ww.LastGroupID).OnDelete(DeleteBehavior.Cascade);
                 ww.HasOne(ww => ww.Customer).WithMany(ww => ww.Devices).HasForeignKey(ww => ww.CustomerID).OnDelete(DeleteBehavior.Cascade);
                 ww.HasOne(ww => ww.DeviceModel).WithMany(ww => ww.Devices).HasForeignKey(ww => ww.DeviceModelID).OnDelete(DeleteBehavior.Cascade);
             });
-
+            modelBuilder.Entity<TelemetryGroup>(ww =>
+            {
+                ww.HasOne(ww => ww.Device).WithMany(ww => ww.TelemetryGroups).HasForeignKey(ww => ww.DeviceID).OnDelete(DeleteBehavior.Cascade);
+            });
 
             modelBuilder.Entity<CustomerUser>(ww =>
             {
@@ -61,10 +59,8 @@ namespace MiSmart.DAL.DatabaseContexts
 
             modelBuilder.Entity<TelemetryRecord>(ww =>
             {
-                ww.HasOne(ww => ww.Device).WithMany(ww => ww.Records).HasForeignKey(ww => ww.DeviceID).OnDelete(DeleteBehavior.Cascade);
+                ww.HasOne(ww => ww.Group).WithMany(ww => ww.Records).HasForeignKey(ww => ww.GroupID).OnDelete(DeleteBehavior.Cascade);
                 ww.Property(ww => ww.LocationPoint).HasColumnType("geography (point)");
-
-
             });
             modelBuilder.Entity<Field>(ww =>
             {

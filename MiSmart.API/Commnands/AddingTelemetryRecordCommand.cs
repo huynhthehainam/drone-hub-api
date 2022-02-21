@@ -1,6 +1,7 @@
 
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace MiSmart.API.Commands
@@ -16,5 +17,10 @@ namespace MiSmart.API.Commands
         [Range(0, 360)]
         public Double? Direction { get; set; }
         public Object AdditionalInformation { get; set; } = new Object();
+    }
+    public class AddingBulkTelemetryRecordCommand
+    {
+        [Required]
+        public List<AddingTelemetryRecordCommand> Data { get; set; }
     }
 }

@@ -34,8 +34,6 @@ using MiSmart.API.Models;
 using Microsoft.Extensions.Options;
 using MiSmart.Infrastructure.RabbitMQ;
 using MiSmart.Microservices.OrderService.RabbitMQ;
-using MiSmart.Infrastructure.QueuedBackgroundTasks;
-using MiSmart.API.QueuedServices;
 using Microsoft.Extensions.Hosting;
 using MiSmart.API.GrpcServices;
 
@@ -163,6 +161,7 @@ namespace MiSmart.API
             services.AddScoped<DeviceModelRepository, DeviceModelRepository>();
             services.AddScoped<FlightStatRepository, FlightStatRepository>();
             services.AddScoped<FieldRepository, FieldRepository>();
+            services.AddScoped<TelemetryGroupRepository, TelemetryGroupRepository>();
 
 
             #endregion
@@ -402,62 +401,6 @@ namespace MiSmart.API
 
 
 
-                    }
-                }
-            }
-            if (!context.TelemetryRecords.Any())
-            {
-                var customer = context.Customers.FirstOrDefault(ww => ww.ID == 1);
-                if (customer is not null)
-                {
-                    var device = context.Devices.FirstOrDefault(ww => ww.ID == 1);
-                    if (device is not null)
-                    {
-                        var samples = new List<LocationSample>(){
-                           new LocationSample {Latitude = 20.991331, Longitude= 105.803306},
-                            new LocationSample {Latitude = 20.990926, Longitude= 105.803625},
-                            new LocationSample {Latitude = 20.990418, Longitude= 105.803871},
-                            new LocationSample {Latitude = 20.989956, Longitude= 105.804079},
-                            new LocationSample {Latitude = 20.989868, Longitude= 105.80393},
-                            new LocationSample {Latitude = 20.989829, Longitude= 105.803878},
-                            new LocationSample {Latitude = 20.989617, Longitude= 105.803545},
-                            new LocationSample {Latitude = 20.989517, Longitude= 105.803379},
-                            new LocationSample {Latitude = 20.989414, Longitude= 105.803188},
-                            new LocationSample {Latitude = 20.989293, Longitude= 105.803},
-                            new LocationSample {Latitude = 20.989195, Longitude= 105.802838},
-                            new LocationSample {Latitude = 20.989143, Longitude= 105.802641},
-                            new LocationSample {Latitude = 20.989189, Longitude= 105.802412},
-                            new LocationSample {Latitude = 20.989215, Longitude= 105.802256},
-                            new LocationSample {Latitude = 20.989246, Longitude= 105.802038},
-                            new LocationSample {Latitude = 20.989281, Longitude= 105.801827},
-                            new LocationSample {Latitude = 20.989337, Longitude= 105.801753},
-                            new LocationSample {Latitude = 20.989495, Longitude= 105.801948},
-                            new LocationSample {Latitude = 20.98963, Longitude= 105.802107},
-                            new LocationSample {Latitude = 20.98978, Longitude= 105.802249},
-                            new LocationSample {Latitude = 20.989985, Longitude= 105.802109},
-                            new LocationSample {Latitude = 20.990153, Longitude= 105.802023},
-                            new LocationSample {Latitude = 20.990339, Longitude= 105.801903},
-                            new LocationSample {Latitude = 20.990479, Longitude= 105.802099},
-                            new LocationSample {Latitude = 20.990697, Longitude= 105.802412},
-                            new LocationSample {Latitude = 20.990895, Longitude= 105.802726},
-                            new LocationSample {Latitude = 20.991, Longitude= 105.802887},
-                            new LocationSample {Latitude = 20.991135, Longitude= 105.803118}
-                        };
-
-                        var telemetryRecords = new List<TelemetryRecord>();
-                        foreach (var sample in samples)
-                        {
-                            var record = new TelemetryRecord
-                            {
-                                Device = device,
-                                CreatedTime = DateTime.Now,
-                                LocationPoint = geometryFactory.CreatePoint(new Coordinate(sample.Longitude, sample.Latitude)),
-                                AdditionalInformation = new { Speed = 2.0 },
-                            };
-                            telemetryRecords.Add(record);
-                        }
-                        context.TelemetryRecords.AddRange(telemetryRecords);
-                        context.SaveChanges();
                     }
                 }
             }

@@ -3,7 +3,6 @@
 using System;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using MiSmart.Infrastructure.Data;
-using System.Text.Json.Serialization;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json;
 using NetTopologySuite.Geometries;
@@ -32,13 +31,12 @@ namespace MiSmart.DAL.Models
             set => AdditionalInformationString = JsonSerializer.Serialize(value, JsonSerializerDefaultOptions.CamelOptions);
         }
 
-        private Device device;
-        [JsonIgnore]
-        public Device Device
+        private TelemetryGroup group;
+        public TelemetryGroup Group
         {
-            get => lazyLoader.Load(this, ref device);
-            set => device = value;
+            get => lazyLoader.Load(this, ref group);
+            set => group = value;
         }
-        public Int32 DeviceID { get; set; }
+        public Int64 GroupID { get; set; }
     }
 }

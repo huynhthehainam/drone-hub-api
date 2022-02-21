@@ -4,10 +4,8 @@ using MiSmart.Infrastructure.Controllers;
 using MiSmart.Infrastructure.Responses;
 using MiSmart.API.Commands;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using System.Text.Json;
 using System;
-using MiSmart.Infrastructure.Helpers;
 using MiSmart.DAL.Models;
 using MiSmart.DAL.Repositories;
 using System.Linq;
@@ -18,11 +16,9 @@ using MiSmart.Infrastructure.ViewModels;
 using MiSmart.API.ControllerBases;
 using NetTopologySuite;
 using NetTopologySuite.Geometries;
-using MiSmart.Infrastructure.QueuedBackgroundTasks;
-using System.Threading.Tasks;
-using System.Threading;
 using MiSmart.Infrastructure.Permissions;
 using MiSmart.API.Permissions;
+using System.Collections.Generic;
 
 namespace MiSmart.API.Controllers
 {
@@ -92,7 +88,7 @@ namespace MiSmart.API.Controllers
             }
             else if (mode == "Medium")
             {
-                var listResponse = deviceRepository.GetListResponseView<MediumDeviceViewModel>(pageCommand, query);
+
             }
             else
             {
@@ -167,7 +163,7 @@ namespace MiSmart.API.Controllers
 
 
         [HttpPost("me/TelemetryRecords")]
-        public IActionResult CreateTelemetryRecord([FromServices] DeviceRepository deviceRepository, [FromServices] TelemetryRecordRepository telemetryRecordRepository, [FromBody] AddingTelemetryRecordCommand command)
+        public IActionResult CreateTelemetryRecord([FromServices] DeviceRepository deviceRepository, [FromServices] TelemetryGroupRepository telemetryGroupRepository, [FromBody] AddingBulkTelemetryRecordCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
             var device = deviceRepository.Get(ww => ww.ID == CurrentDevice.ID);
@@ -176,27 +172,44 @@ namespace MiSmart.API.Controllers
             {
                 response.AddNotFoundErr("Device");
             }
+            if (command.Data.Count == 0)
+            {
+                response.AddInvalidErr("Data");
+            }
 
 
             var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
 
-
-            TelemetryRecord record = new TelemetryRecord
+            TimeSpan span = new TimeSpan(0, 0, 0, 0, 5000);
+            TimeSpan eachSpan = span / command.Data.Count;
+            var records = new List<TelemetryRecord>();
+            var startedTime = DateTime.Now - span;
+            for (int i = 0; i < command.Data.Count; i++)
             {
-                LocationPoint = geometryFactory.CreatePoint(new Coordinate(command.Longitude.GetValueOrDefault(), command.Latitude.GetValueOrDefault())),
-                AdditionalInformation = command.AdditionalInformation,
-                CreatedTime = DateTime.Now,
-                DeviceID = device.ID,
-                Direction = command.Direction.GetValueOrDefault(),
+                var item = command.Data[i];
+                records.Add(new TelemetryRecord
+                {
+                    CreatedTime = startedTime.Add(eachSpan * i),
+                    AdditionalInformation = item.AdditionalInformation,
+                    Direction = item.Direction.GetValueOrDefault(),
+                    LocationPoint = geometryFactory.CreatePoint(new Coordinate(item.Longitude.GetValueOrDefault(), item.Latitude.GetValueOrDefault())),
 
+                });
+            }
+            TelemetryGroup group = new TelemetryGroup()
+            {
+                DeviceID = device.ID,
+                Records = records,
             };
-            telemetryRecordRepository.Create(record);
-            device.LastPoint = geometryFactory.CreatePoint(new Coordinate(command.Longitude.GetValueOrDefault(), command.Latitude.GetValueOrDefault()));
-            device.LastDirection = command.Direction.GetValueOrDefault();
-            device.LastAdditionalInformation = command.AdditionalInformation;
+
+            telemetryGroupRepository.Create(group);
+
+            device.LastGroupID = group.ID;
+
             deviceRepository.Update(device);
 
-            response.SetCreatedObject(record);
+
+            response.SetCreatedObject(group);
             return response.ToIActionResult();
         }
 

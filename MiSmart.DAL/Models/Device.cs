@@ -2,12 +2,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 using System.Text;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.IdentityModel.Tokens;
@@ -15,7 +12,6 @@ using MiSmart.Infrastructure.Constants;
 using MiSmart.Infrastructure.Data;
 using MiSmart.Infrastructure.Helpers;
 using MiSmart.Infrastructure.Services;
-using NetTopologySuite.Geometries;
 
 namespace MiSmart.DAL.Models
 {
@@ -39,13 +35,7 @@ namespace MiSmart.DAL.Models
         public String Name { get; set; }
         public Guid UUID { get; set; } = Guid.NewGuid();
         public String Token { get; set; } = TokenHelper.GenerateToken();
-        private ICollection<TelemetryRecord> records;
-        [JsonIgnore]
-        public ICollection<TelemetryRecord> Records
-        {
-            get => lazyLoader.Load(this, ref records);
-            set => records = value;
-        }
+
         public DeviceStatus Status { get; set; } = DeviceStatus.Active;
         private Team team;
         [JsonIgnore]
@@ -89,15 +79,25 @@ namespace MiSmart.DAL.Models
         public String AccessToken { get; set; }
         public DateTime? NextGeneratingAccessTokenTime { get; set; }
         public Int32 DeviceModelID { get; set; }
-        public Point LastPoint { get; set; }
-        public Double LastDirection { get; set; }
-        public String LastAdditionalInformationString { get; set; }
-        [NotMapped]
-        public Object LastAdditionalInformation
+
+        private ICollection<TelemetryGroup> telemetryGroups;
+        public ICollection<TelemetryGroup> TelemetryGroups
         {
-            get => LastAdditionalInformationString != null ? JsonSerializer.Deserialize<Object>(LastAdditionalInformationString, JsonSerializerDefaultOptions.CamelOptions) : null;
-            set => LastAdditionalInformationString = JsonSerializer.Serialize(value, JsonSerializerDefaultOptions.CamelOptions);
+            get => lazyLoader.Load(this, ref telemetryGroups);
+            set => telemetryGroups = value;
         }
+
+
+        private TelemetryGroup lastGroup;
+        public TelemetryGroup LastGroup
+        {
+            get => lazyLoader.Load(this, ref lastGroup);
+            set => lastGroup = value;
+        }
+        public Int64? LastGroupID { get; set; }
+
+
+
         public String GenerateDeviceAccessToken(String secretKey)
         {
             var claims = new[] { new Claim(Keys.JWTAuthKey, ID.ToString()), new Claim(Keys.JWTUserTypeKey, JWTUserType.Other.ToString()) };

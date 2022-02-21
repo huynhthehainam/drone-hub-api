@@ -81,14 +81,8 @@ namespace MiSmart.API.Migrations
                     b.Property<int>("DeviceModelID")
                         .HasColumnType("integer");
 
-                    b.Property<string>("LastAdditionalInformationString")
-                        .HasColumnType("text");
-
-                    b.Property<double>("LastDirection")
-                        .HasColumnType("double precision");
-
-                    b.Property<Point>("LastPoint")
-                        .HasColumnType("geography (point)");
+                    b.Property<long?>("LastGroupID")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Name")
                         .HasColumnType("text");
@@ -113,6 +107,9 @@ namespace MiSmart.API.Migrations
                     b.HasIndex("CustomerID");
 
                     b.HasIndex("DeviceModelID");
+
+                    b.HasIndex("LastGroupID")
+                        .IsUnique();
 
                     b.HasIndex("TeamID");
 
@@ -343,6 +340,23 @@ namespace MiSmart.API.Migrations
                     b.ToTable("TeamUsers");
                 });
 
+            modelBuilder.Entity("MiSmart.DAL.Models.TelemetryGroup", b =>
+                {
+                    b.Property<long>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .UseIdentityByDefaultColumn();
+
+                    b.Property<int>("DeviceID")
+                        .HasColumnType("integer");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("DeviceID");
+
+                    b.ToTable("TelemetryGroups");
+                });
+
             modelBuilder.Entity("MiSmart.DAL.Models.TelemetryRecord", b =>
                 {
                     b.Property<Guid>("ID")
@@ -355,18 +369,18 @@ namespace MiSmart.API.Migrations
                     b.Property<DateTime>("CreatedTime")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<int>("DeviceID")
-                        .HasColumnType("integer");
-
                     b.Property<double>("Direction")
                         .HasColumnType("double precision");
+
+                    b.Property<long>("GroupID")
+                        .HasColumnType("bigint");
 
                     b.Property<Point>("LocationPoint")
                         .HasColumnType("geography (point)");
 
                     b.HasKey("ID");
 
-                    b.HasIndex("DeviceID");
+                    b.HasIndex("GroupID");
 
                     b.ToTable("TelemetryRecords");
                 });
@@ -396,6 +410,11 @@ namespace MiSmart.API.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("MiSmart.DAL.Models.TelemetryGroup", "LastGroup")
+                        .WithOne("LastDevice")
+                        .HasForeignKey("MiSmart.DAL.Models.Device", "LastGroupID")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.HasOne("MiSmart.DAL.Models.Team", "Team")
                         .WithMany("Devices")
                         .HasForeignKey("TeamID")
@@ -404,6 +423,8 @@ namespace MiSmart.API.Migrations
                     b.Navigation("Customer");
 
                     b.Navigation("DeviceModel");
+
+                    b.Navigation("LastGroup");
 
                     b.Navigation("Team");
                 });
@@ -479,15 +500,26 @@ namespace MiSmart.API.Migrations
                     b.Navigation("Team");
                 });
 
-            modelBuilder.Entity("MiSmart.DAL.Models.TelemetryRecord", b =>
+            modelBuilder.Entity("MiSmart.DAL.Models.TelemetryGroup", b =>
                 {
                     b.HasOne("MiSmart.DAL.Models.Device", "Device")
-                        .WithMany("Records")
+                        .WithMany("TelemetryGroups")
                         .HasForeignKey("DeviceID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Device");
+                });
+
+            modelBuilder.Entity("MiSmart.DAL.Models.TelemetryRecord", b =>
+                {
+                    b.HasOne("MiSmart.DAL.Models.TelemetryGroup", "Group")
+                        .WithMany("Records")
+                        .HasForeignKey("GroupID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Group");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.Customer", b =>
@@ -514,7 +546,7 @@ namespace MiSmart.API.Migrations
 
                     b.Navigation("Plans");
 
-                    b.Navigation("Records");
+                    b.Navigation("TelemetryGroups");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.DeviceModel", b =>
@@ -527,6 +559,13 @@ namespace MiSmart.API.Migrations
                     b.Navigation("Devices");
 
                     b.Navigation("TeamUsers");
+                });
+
+            modelBuilder.Entity("MiSmart.DAL.Models.TelemetryGroup", b =>
+                {
+                    b.Navigation("LastDevice");
+
+                    b.Navigation("Records");
                 });
 #pragma warning restore 612, 618
         }

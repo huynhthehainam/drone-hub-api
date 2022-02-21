@@ -123,48 +123,6 @@ namespace MiSmart.API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Devices",
-                columns: table => new
-                {
-                    ID = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "text", nullable: true),
-                    UUID = table.Column<Guid>(type: "uuid", nullable: false),
-                    Token = table.Column<string>(type: "text", nullable: true),
-                    Status = table.Column<int>(type: "integer", nullable: false),
-                    TeamID = table.Column<long>(type: "bigint", nullable: true),
-                    CustomerID = table.Column<int>(type: "integer", nullable: false),
-                    AccessToken = table.Column<string>(type: "text", nullable: true),
-                    NextGeneratingAccessTokenTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
-                    DeviceModelID = table.Column<int>(type: "integer", nullable: false),
-                    LastPoint = table.Column<Point>(type: "geography (point)", nullable: true),
-                    LastDirection = table.Column<double>(type: "double precision", nullable: false),
-                    LastAdditionalInformationString = table.Column<string>(type: "text", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Devices", x => x.ID);
-                    table.ForeignKey(
-                        name: "FK_Devices_Customers_CustomerID",
-                        column: x => x.CustomerID,
-                        principalTable: "Customers",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Devices_DeviceModels_DeviceModelID",
-                        column: x => x.DeviceModelID,
-                        principalTable: "DeviceModels",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Devices_Teams_TeamID",
-                        column: x => x.TeamID,
-                        principalTable: "Teams",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "TeamUsers",
                 columns: table => new
                 {
@@ -185,6 +143,46 @@ namespace MiSmart.API.Migrations
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_TeamUsers_Teams_TeamID",
+                        column: x => x.TeamID,
+                        principalTable: "Teams",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Devices",
+                columns: table => new
+                {
+                    ID = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "text", nullable: true),
+                    UUID = table.Column<Guid>(type: "uuid", nullable: false),
+                    Token = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    TeamID = table.Column<long>(type: "bigint", nullable: true),
+                    CustomerID = table.Column<int>(type: "integer", nullable: false),
+                    AccessToken = table.Column<string>(type: "text", nullable: true),
+                    NextGeneratingAccessTokenTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    DeviceModelID = table.Column<int>(type: "integer", nullable: false),
+                    LastGroupID = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Devices", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_Devices_Customers_CustomerID",
+                        column: x => x.CustomerID,
+                        principalTable: "Customers",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Devices_DeviceModels_DeviceModelID",
+                        column: x => x.DeviceModelID,
+                        principalTable: "DeviceModels",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Devices_Teams_TeamID",
                         column: x => x.TeamID,
                         principalTable: "Teams",
                         principalColumn: "ID",
@@ -249,6 +247,25 @@ namespace MiSmart.API.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "TelemetryGroups",
+                columns: table => new
+                {
+                    ID = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    DeviceID = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TelemetryGroups", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_TelemetryGroups_Devices_DeviceID",
+                        column: x => x.DeviceID,
+                        principalTable: "Devices",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "TelemetryRecords",
                 columns: table => new
                 {
@@ -257,15 +274,15 @@ namespace MiSmart.API.Migrations
                     LocationPoint = table.Column<Point>(type: "geography (point)", nullable: true),
                     Direction = table.Column<double>(type: "double precision", nullable: false),
                     AdditionalInformationString = table.Column<string>(type: "text", nullable: true),
-                    DeviceID = table.Column<int>(type: "integer", nullable: false)
+                    GroupID = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_TelemetryRecords", x => x.ID);
                     table.ForeignKey(
-                        name: "FK_TelemetryRecords_Devices_DeviceID",
-                        column: x => x.DeviceID,
-                        principalTable: "Devices",
+                        name: "FK_TelemetryRecords_TelemetryGroups_GroupID",
+                        column: x => x.GroupID,
+                        principalTable: "TelemetryGroups",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -290,6 +307,12 @@ namespace MiSmart.API.Migrations
                 name: "IX_Devices_DeviceModelID",
                 table: "Devices",
                 column: "DeviceModelID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Devices_LastGroupID",
+                table: "Devices",
+                column: "LastGroupID",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Devices_TeamID",
@@ -333,13 +356,46 @@ namespace MiSmart.API.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_TelemetryRecords_DeviceID",
-                table: "TelemetryRecords",
+                name: "IX_TelemetryGroups_DeviceID",
+                table: "TelemetryGroups",
                 column: "DeviceID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TelemetryRecords_GroupID",
+                table: "TelemetryRecords",
+                column: "GroupID");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Devices_TelemetryGroups_LastGroupID",
+                table: "Devices",
+                column: "LastGroupID",
+                principalTable: "TelemetryGroups",
+                principalColumn: "ID",
+                onDelete: ReferentialAction.Cascade);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropForeignKey(
+                name: "FK_Devices_Customers_CustomerID",
+                table: "Devices");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_Teams_Customers_CustomerID",
+                table: "Teams");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_Devices_DeviceModels_DeviceModelID",
+                table: "Devices");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_Devices_Teams_TeamID",
+                table: "Devices");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_Devices_TelemetryGroups_LastGroupID",
+                table: "Devices");
+
             migrationBuilder.DropTable(
                 name: "Fields");
 
@@ -359,7 +415,7 @@ namespace MiSmart.API.Migrations
                 name: "CustomerUsers");
 
             migrationBuilder.DropTable(
-                name: "Devices");
+                name: "Customers");
 
             migrationBuilder.DropTable(
                 name: "DeviceModels");
@@ -368,7 +424,10 @@ namespace MiSmart.API.Migrations
                 name: "Teams");
 
             migrationBuilder.DropTable(
-                name: "Customers");
+                name: "TelemetryGroups");
+
+            migrationBuilder.DropTable(
+                name: "Devices");
         }
     }
 }

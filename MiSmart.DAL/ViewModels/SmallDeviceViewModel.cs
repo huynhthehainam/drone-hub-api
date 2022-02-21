@@ -1,5 +1,7 @@
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using MiSmart.DAL.Models;
 using MiSmart.Infrastructure.ViewModels;
 
@@ -14,10 +16,9 @@ namespace MiSmart.DAL.ViewModels
         public DeviceStatus Status { get; set; }
         public Guid UUID { get; set; }
         public String TeamName { get; set; }
-        public CoordinateViewModel LastPoint { get; set; }
-        public Double LastDirection { get; set; }
-        public Object LastAdditionalInformation { get; set; }
         public String DeviceModelName { get; set; }
+        public Int64? LastGroupID { get; set; }
+        public List<TelemetryRecordViewModel> LastGroupRecords { get; set; }
 
         public void LoadFrom(Device entity)
         {
@@ -29,9 +30,8 @@ namespace MiSmart.DAL.ViewModels
             Status = entity.Status;
             UUID = entity.UUID;
             TeamName = entity.Team?.Name;
-            LastPoint = entity.LastPoint is not null ? new CoordinateViewModel(entity.LastPoint.Coordinate) : null;
-            LastDirection = entity.LastDirection;
-            LastAdditionalInformation = entity.LastAdditionalInformation;
+            LastGroupID = entity.LastGroupID;
+            LastGroupRecords = entity.LastGroup?.Records.OrderBy(ww => ww.CreatedTime).Select(ww => ViewModelHelpers.ConvertToViewModel<TelemetryRecord, TelemetryRecordViewModel>(ww)).ToList();
         }
     }
 }
