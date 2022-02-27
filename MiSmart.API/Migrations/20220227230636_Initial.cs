@@ -164,7 +164,7 @@ namespace MiSmart.API.Migrations
                     AccessToken = table.Column<string>(type: "text", nullable: true),
                     NextGeneratingAccessTokenTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     DeviceModelID = table.Column<int>(type: "integer", nullable: false),
-                    LastGroupID = table.Column<long>(type: "bigint", nullable: true)
+                    LastGroupID = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -250,8 +250,7 @@ namespace MiSmart.API.Migrations
                 name: "TelemetryGroups",
                 columns: table => new
                 {
-                    ID = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    ID = table.Column<Guid>(type: "uuid", nullable: false),
                     DeviceID = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -274,7 +273,7 @@ namespace MiSmart.API.Migrations
                     LocationPoint = table.Column<Point>(type: "geography (point)", nullable: true),
                     Direction = table.Column<double>(type: "double precision", nullable: false),
                     AdditionalInformationString = table.Column<string>(type: "text", nullable: true),
-                    GroupID = table.Column<long>(type: "bigint", nullable: false)
+                    GroupID = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {

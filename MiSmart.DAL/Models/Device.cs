@@ -94,7 +94,7 @@ namespace MiSmart.DAL.Models
             get => lazyLoader.Load(this, ref lastGroup);
             set => lastGroup = value;
         }
-        public Int64? LastGroupID { get; set; }
+        public Guid? LastGroupID { get; set; }
 
 
 

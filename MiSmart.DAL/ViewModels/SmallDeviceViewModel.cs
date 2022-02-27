@@ -17,7 +17,7 @@ namespace MiSmart.DAL.ViewModels
         public Guid UUID { get; set; }
         public String TeamName { get; set; }
         public String DeviceModelName { get; set; }
-        public Int64? LastGroupID { get; set; }
+        public Guid? LastGroupID { get; set; }
         public List<TelemetryRecordViewModel> LastGroupRecords { get; set; }
 
         public void LoadFrom(Device entity)

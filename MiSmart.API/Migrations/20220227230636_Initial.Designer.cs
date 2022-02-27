@@ -11,7 +11,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MiSmart.API.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20220221133223_Initial")]
+    [Migration("20220227230636_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -83,8 +83,8 @@ namespace MiSmart.API.Migrations
                     b.Property<int>("DeviceModelID")
                         .HasColumnType("integer");
 
-                    b.Property<long?>("LastGroupID")
-                        .HasColumnType("bigint");
+                    b.Property<Guid?>("LastGroupID")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Name")
                         .HasColumnType("text");
@@ -344,10 +344,9 @@ namespace MiSmart.API.Migrations
 
             modelBuilder.Entity("MiSmart.DAL.Models.TelemetryGroup", b =>
                 {
-                    b.Property<long>("ID")
+                    b.Property<Guid>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .UseIdentityByDefaultColumn();
+                        .HasColumnType("uuid");
 
                     b.Property<int>("DeviceID")
                         .HasColumnType("integer");
@@ -374,8 +373,8 @@ namespace MiSmart.API.Migrations
                     b.Property<double>("Direction")
                         .HasColumnType("double precision");
 
-                    b.Property<long>("GroupID")
-                        .HasColumnType("bigint");
+                    b.Property<Guid>("GroupID")
+                        .HasColumnType("uuid");
 
                     b.Property<Point>("LocationPoint")
                         .HasColumnType("geography (point)");

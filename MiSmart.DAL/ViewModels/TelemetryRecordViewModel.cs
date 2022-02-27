@@ -9,7 +9,7 @@ namespace MiSmart.DAL.ViewModels
         public Guid ID { get; set; }
         public DateTime CreatedTime { get; set; }
         public CoordinateViewModel LocationPoint { get; set; }
-        public Int64 GroupID { get; set; }
+        public Guid GroupID { get; set; }
 
         public void LoadFrom(TelemetryRecord entity)
         {

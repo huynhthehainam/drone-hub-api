@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace MiSmart.DAL.Models
 {
-    public class TelemetryGroup : EntityBase<Int64>
+    public class TelemetryGroup : EntityBase<Guid>
     {
         public TelemetryGroup() : base()
         {

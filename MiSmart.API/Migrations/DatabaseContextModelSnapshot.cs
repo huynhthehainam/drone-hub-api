@@ -81,8 +81,8 @@ namespace MiSmart.API.Migrations
                     b.Property<int>("DeviceModelID")
                         .HasColumnType("integer");
 
-                    b.Property<long?>("LastGroupID")
-                        .HasColumnType("bigint");
+                    b.Property<Guid?>("LastGroupID")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Name")
                         .HasColumnType("text");
@@ -342,10 +342,9 @@ namespace MiSmart.API.Migrations
 
             modelBuilder.Entity("MiSmart.DAL.Models.TelemetryGroup", b =>
                 {
-                    b.Property<long>("ID")
+                    b.Property<Guid>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .UseIdentityByDefaultColumn();
+                        .HasColumnType("uuid");
 
                     b.Property<int>("DeviceID")
                         .HasColumnType("integer");
@@ -372,8 +371,8 @@ namespace MiSmart.API.Migrations
                     b.Property<double>("Direction")
                         .HasColumnType("double precision");
 
-                    b.Property<long>("GroupID")
-                        .HasColumnType("bigint");
+                    b.Property<Guid>("GroupID")
+                        .HasColumnType("uuid");
 
                     b.Property<Point>("LocationPoint")
                         .HasColumnType("geography (point)");

@@ -37,6 +37,6 @@ namespace MiSmart.DAL.Models
             get => lazyLoader.Load(this, ref group);
             set => group = value;
         }
-        public Int64 GroupID { get; set; }
+        public Guid GroupID { get; set; }
     }
 }
