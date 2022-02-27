@@ -10,12 +10,16 @@ namespace MiSmart.DAL.ViewModels
         public DateTime CreatedTime { get; set; }
         public CoordinateViewModel LocationPoint { get; set; }
         public Guid GroupID { get; set; }
+        public Double Direction { get; set; }
+        public Object AdditionalInformation { get; set; }
 
         public void LoadFrom(TelemetryRecord entity)
         {
             ID = entity.ID;
             CreatedTime = entity.CreatedTime;
             LocationPoint = new CoordinateViewModel(entity.LocationPoint.Coordinate);
+            Direction = entity.Direction;
+            AdditionalInformation = entity.AdditionalInformation;
             GroupID = entity.GroupID;
         }
     }
