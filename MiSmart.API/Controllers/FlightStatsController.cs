@@ -1,12 +1,8 @@
 
 using MiSmart.Infrastructure.Controllers;
 using MiSmart.Infrastructure.Responses;
-using MiSmart.API.Commands;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using System.Text.Json;
 using System;
-using MiSmart.Infrastructure.Helpers;
 using MiSmart.DAL.Models;
 using MiSmart.DAL.Repositories;
 using System.Linq;
@@ -25,7 +21,9 @@ namespace MiSmart.API.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetFlightStats([FromServices] FlightStatRepository flightStatRepository, [FromServices] CustomerUserRepository customerUserRepository, [FromQuery] PageCommand pageCommand, [FromQuery] DateTime? from, [FromQuery] DateTime? to, [FromQuery] Int64? teamID, [FromQuery] Int32? deviceID, [FromQuery] Int32? deviceModelID, [FromQuery] String mode = "Small")
+        public IActionResult GetFlightStats([FromServices] FlightStatRepository flightStatRepository,
+        [FromServices] TeamUserRepository teamUserRepository,
+        [FromServices] CustomerUserRepository customerUserRepository, [FromQuery] PageCommand pageCommand, [FromQuery] DateTime? from, [FromQuery] DateTime? to, [FromQuery] Int64? teamID, [FromQuery] Int32? deviceID, [FromQuery] Int32? deviceModelID, [FromQuery] String mode = "Small")
         {
             var response = new FlightStatsActionResponse();
             response.ApplySettings(actionResponseFactory.Settings);
@@ -36,6 +34,8 @@ namespace MiSmart.API.Controllers
                 response.AddNotAllowedErr();
             }
 
+            var teamIDs = teamUserRepository.GetListEntities(new PageCommand(), ww => ww.CustomerUserID == customerUser.ID).Select(ww => ww.TeamID).ToList();
+
 
 
             Expression<Func<FlightStat, Boolean>> query = ww => (ww.CustomerID == customerUser.CustomerID)
@@ -43,7 +43,7 @@ namespace MiSmart.API.Controllers
                 && (deviceID.HasValue ? (ww.DeviceID == deviceID.Value) : true)
                 && (from.HasValue ? (ww.FlightTime >= from.Value) : true)
                 && (to.HasValue ? (ww.FlightTime <= to.Value) : true)
-                && (deviceModelID.HasValue ? (ww.Device.DeviceModelID == deviceModelID.Value) : true);
+                && (customerUser.Type == CustomerMemberType.Owner ? ww.CustomerID == customerUser.CustomerID : (teamIDs.Contains(ww.Device.TeamID.GetValueOrDefault())));
             if (mode == "Large")
             {
 
