@@ -346,6 +346,9 @@ namespace MiSmart.API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime>("CreatedTime")
+                        .HasColumnType("timestamp without time zone");
+
                     b.Property<int>("DeviceID")
                         .HasColumnType("integer");
 

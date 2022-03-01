@@ -37,5 +37,6 @@ namespace MiSmart.DAL.Models
             set => device = value;
         }
         public Int32 DeviceID { get; set; }
+        public DateTime CreatedTime { get; set; } = DateTime.Now;
     }
 }

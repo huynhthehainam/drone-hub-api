@@ -251,7 +251,8 @@ namespace MiSmart.API.Migrations
                 columns: table => new
                 {
                     ID = table.Column<Guid>(type: "uuid", nullable: false),
-                    DeviceID = table.Column<int>(type: "integer", nullable: false)
+                    DeviceID = table.Column<int>(type: "integer", nullable: false),
+                    CreatedTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false)
                 },
                 constraints: table =>
                 {
