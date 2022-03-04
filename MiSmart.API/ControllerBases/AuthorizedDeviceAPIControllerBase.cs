@@ -5,7 +5,6 @@ using MiSmart.Infrastructure.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using MiSmart.Infrastructure.Responses;
 using MiSmart.Infrastructure.Controllers;
-using MiSmart.API.Models;
 
 namespace MiSmart.API.ControllerBases
 {
@@ -15,15 +14,19 @@ namespace MiSmart.API.ControllerBases
         protected AuthorizedDeviceAPIControllerBase(IActionResponseFactory actionResponseFactory) : base(actionResponseFactory)
         {
         }
-        public AuthorizedDeviceModel CurrentDevice
+        public UserCacheViewModel CurrentDevice
         {
             get
             {
                 var userClaims = HttpContext.User;
                 if (userClaims.Claims.FirstOrDefault(ww => ww.Type == Keys.IdentityClaim) != null)
                 {
-                    return JsonSerializer.Deserialize<AuthorizedDeviceModel>(userClaims.Claims.FirstOrDefault(ww => ww.Type == Keys.JWTAuthKey).Value);
+                    var vm = JsonSerializer.Deserialize<UserCacheViewModel>(userClaims.Claims.FirstOrDefault(ww => ww.Type == Keys.JWTAuthKey).Value);
+                    if (vm.Type == "Device")
+                        return vm;
                 }
+                ActionResponse actionResponse = actionResponseFactory.CreateInstance();
+                actionResponse.AddAuthorizationErr();
                 return null;
             }
         }
