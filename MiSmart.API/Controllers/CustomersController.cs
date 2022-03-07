@@ -4,10 +4,7 @@ using MiSmart.Infrastructure.Controllers;
 using MiSmart.Infrastructure.Responses;
 using MiSmart.API.Commands;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using System.Text.Json;
 using System;
-using MiSmart.Infrastructure.Helpers;
 using MiSmart.DAL.Models;
 using MiSmart.DAL.Repositories;
 using System.Linq;
@@ -16,10 +13,7 @@ using System.Linq.Expressions;
 using MiSmart.DAL.ViewModels;
 using MiSmart.Infrastructure.Permissions;
 using MiSmart.API.Permissions;
-using MiSmart.DAL.Responses;
-using MiSmart.Infrastructure.ViewModels;
 using MiSmart.API.GrpcServices;
-using Microsoft.AspNetCore.Authorization;
 
 namespace MiSmart.API.Controllers
 {
@@ -37,10 +31,7 @@ namespace MiSmart.API.Controllers
         {
             var response = actionResponseFactory.CreateInstance();
 
-            if (!CurrentUser.IsAdmin)
-            {
-                response.AddNotAllowedErr();
-            }
+          
             var customer = new Customer { Name = command.Name, Address = command.Address };
             customerRepository.Create(customer);
             response.SetCreatedObject(customer);
