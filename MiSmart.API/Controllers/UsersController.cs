@@ -30,7 +30,7 @@ namespace MiSmart.API.Controllers
             }
             response.SetData(new
             {
-                ID = CurrentUser.ID,
+                ID = customerUser.UserID,
                 Customer = ViewModelHelpers.ConvertToViewModel<Customer, SmallCustomerViewModel>(customerUser.Customer),
                 Type = customerUser.Type,
             });
