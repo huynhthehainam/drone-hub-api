@@ -23,6 +23,9 @@ namespace MiSmart.API.Controllers
         public IActionResult GetProfile([FromServices] CustomerUserRepository customerUserRepository)
         {
             var response = actionResponseFactory.CreateInstance();
+            Console.WriteLine(CurrentUser);
+
+            Console.WriteLine(CurrentUser.ID);
             var customerUser = customerUserRepository.Get(ww => ww.UserID == CurrentUser.ID);
             if (customerUser is null)
             {
