@@ -21,7 +21,7 @@ namespace MiSmart.API.ControllerBases
                 var userClaims = HttpContext.User;
                 if (userClaims.Claims.FirstOrDefault(ww => ww.Type == Keys.IdentityClaim) != null)
                 {
-                    var vm = JsonSerializer.Deserialize<UserCacheViewModel>(userClaims.Claims.FirstOrDefault(ww => ww.Type == Keys.JWTAuthKey).Value);
+                    var vm = JsonSerializer.Deserialize<UserCacheViewModel>(userClaims.Claims.FirstOrDefault(ww => ww.Type == Keys.IdentityClaim).Value);
                     if (vm.Type == "Device")
                         return vm;
                 }

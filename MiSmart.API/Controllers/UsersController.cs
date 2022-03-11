@@ -2,12 +2,8 @@
 
 using MiSmart.Infrastructure.Controllers;
 using MiSmart.Infrastructure.Responses;
-using MiSmart.API.Commands;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using System.Text.Json;
 using System;
-using MiSmart.Infrastructure.Helpers;
 using MiSmart.DAL.Models;
 using MiSmart.DAL.Repositories;
 using System.Linq;
@@ -28,19 +24,17 @@ namespace MiSmart.API.Controllers
         {
             var response = actionResponseFactory.CreateInstance();
             var customerUser = customerUserRepository.Get(ww => ww.UserID == CurrentUser.ID);
-            if (customerUser is not null)
-            {
-                response.SetData(new
-                {
-                    ID = CurrentUser.ID,
-                    Customer = ViewModelHelpers.ConvertToViewModel<Customer, SmallCustomerViewModel>(customerUser.Customer),
-                    Type = customerUser.Type,
-                });
-            }
-            else
+            if (customerUser is null)
             {
                 response.AddNotFoundErr("User");
             }
+            response.SetData(new
+            {
+                ID = CurrentUser.ID,
+                Customer = ViewModelHelpers.ConvertToViewModel<Customer, SmallCustomerViewModel>(customerUser.Customer),
+                Type = customerUser.Type,
+            });
+
 
 
 
