@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using MiSmart.Infrastructure.Data;
-using MiSmart.Infrastructure.Helpers;
 
 namespace MiSmart.DAL.Models
 {
@@ -20,6 +19,7 @@ namespace MiSmart.DAL.Models
         {
         }
         public String Name { get; set; }
+        public String FileUrl { get; set; }
         private ICollection<Device> devices;
         [JsonIgnore]
         public ICollection<Device> Devices
