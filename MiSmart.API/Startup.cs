@@ -36,6 +36,7 @@ using MiSmart.Infrastructure.RabbitMQ;
 using MiSmart.Microservices.OrderService.RabbitMQ;
 using Microsoft.Extensions.Hosting;
 using MiSmart.API.GrpcServices;
+using MiSmart.Infrastructure.Minio;
 
 namespace MiSmart.API
 {
@@ -93,6 +94,8 @@ namespace MiSmart.API
 
             #endregion
 
+
+            services.AddMinio(Configuration);
             #region QueuedTasks
 
             // services.AddHostedService<QueuedHostedService1>();

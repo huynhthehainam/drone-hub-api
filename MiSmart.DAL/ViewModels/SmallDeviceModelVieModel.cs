@@ -6,14 +6,18 @@ namespace MiSmart.DAL.ViewModels
 {
     public class SmallDeviceModelVieModel : IViewModel<DeviceModel>
     {
+        public DeviceModel Entity;
         public Int32 ID { get; set; }
         public String Name { get; set; }
         public Int32 DevicesCount { get; set; }
+        public String FileUrl { get; set; }
         public void LoadFrom(DeviceModel entity)
         {
             ID = entity.ID;
             Name = entity.Name;
             DevicesCount = entity.Devices.Count;
+            Entity = entity;
+
         }
     }
 }

@@ -4,18 +4,15 @@ using MiSmart.Infrastructure.Controllers;
 using MiSmart.Infrastructure.Responses;
 using MiSmart.API.Commands;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using System.Text.Json;
 using System;
-using MiSmart.Infrastructure.Helpers;
 using MiSmart.DAL.Models;
 using MiSmart.DAL.Repositories;
-using System.Linq;
 using MiSmart.Infrastructure.Commands;
 using MiSmart.DAL.ViewModels;
 using System.Linq.Expressions;
 using MiSmart.Infrastructure.Permissions;
 using MiSmart.API.Permissions;
+using MiSmart.Infrastructure.Minio;
 
 namespace MiSmart.API.Controllers
 {
@@ -39,12 +36,17 @@ namespace MiSmart.API.Controllers
             return response.ToIActionResult();
         }
         [HttpGet]
-        public IActionResult GetActionResult([FromQuery] PageCommand pageCommand)
+        public IActionResult GetActionResult([FromQuery] PageCommand pageCommand, [FromServices] MinioService minioService)
         {
             var response = actionResponseFactory.CreateInstance();
             Expression<Func<DeviceModel, Boolean>> query = ww => true;
             var listResponse = deviceModelRepository.GetListResponseView<SmallDeviceModelVieModel>(pageCommand, query);
+            foreach (var item in listResponse.Data)
+            {
+                item.FileUrl = minioService.GetFileUrl(item.Entity.FileUrl);
+            }
             listResponse.SetResponse(response);
+
 
             return response.ToIActionResult();
         }
@@ -62,6 +64,28 @@ namespace MiSmart.API.Controllers
 
             deviceModelRepository.Delete(deviceModel);
             response.SetNoContent();
+
+            return response.ToIActionResult();
+        }
+        [HttpPost("{id:int}/UploadImage")]
+        [HasPermission(typeof(AdminPermission))]
+        public IActionResult UpdateImage([FromRoute] Int32 id, [FromServices] DeviceModelRepository deviceModelRepository, [FromServices] MinioService minioService, [FromForm] UpdatingDeviceModelImageCommand command)
+        {
+            var response = actionResponseFactory.CreateInstance();
+            var deviceModel = deviceModelRepository.Get(ww => ww.ID == id);
+            if (deviceModel is null)
+            {
+                response.AddNotFoundErr("DeviceModel");
+            }
+
+            if (deviceModel.FileUrl is not null)
+            {
+                minioService.RemoveFileByUrl(deviceModel.FileUrl);
+            }
+
+            deviceModel.FileUrl = minioService.PutImage(command.File, new String[] { "drone-hub-api", "device-model" });
+            deviceModelRepository.Update(deviceModel);
+            response.SetUpdatedMessage();
 
             return response.ToIActionResult();
         }
