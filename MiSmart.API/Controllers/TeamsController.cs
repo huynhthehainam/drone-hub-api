@@ -4,21 +4,13 @@ using MiSmart.Infrastructure.Controllers;
 using MiSmart.Infrastructure.Responses;
 using MiSmart.API.Commands;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using System.Text.Json;
 using System;
-using MiSmart.Infrastructure.Helpers;
 using MiSmart.DAL.Models;
 using MiSmart.DAL.Repositories;
 using System.Linq;
 using MiSmart.Infrastructure.Commands;
 using MiSmart.DAL.ViewModels;
-using Microsoft.AspNetCore.Authorization;
-using System.IO;
 using System.Linq.Expressions;
-using NetTopologySuite.Geometries;
-using NetTopologySuite;
-using MiSmart.DAL.Extensions;
 
 namespace MiSmart.API.Controllers
 {
@@ -95,6 +87,26 @@ namespace MiSmart.API.Controllers
 
             }
             response.SetData(team);
+            return response.ToIActionResult();
+        }
+        [HttpPatch("{id:int}")]
+        public IActionResult PatchTeam([FromServices] TeamRepository teamRepository, [FromRoute] Int32 id
+        , [FromServices] CustomerUserRepository customerUserRepository, [FromBody] UpdatingTeamCommand command)
+        {
+            var response = actionResponseFactory.CreateInstance();
+            CustomerUser customerUser = customerUserRepository.GetByPermission(CurrentUser.ID, CustomerMemberType.Owner);
+            if (customerUser is null)
+            {
+                response.AddNotAllowedErr();
+            }
+            var team = teamRepository.Get(ww => ww.CustomerID == customerUser.CustomerID && ww.ID == id);
+            if (team is null)
+            {
+                response.AddNotFoundErr("Team");
+            }
+            team.Name = String.IsNullOrEmpty(command.Name) ? team.Name : command.Name;
+            teamRepository.Update(team);
+            response.SetUpdatedMessage();
             return response.ToIActionResult();
         }
 

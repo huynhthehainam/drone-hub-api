@@ -8,4 +8,8 @@ namespace MiSmart.API.Commands
         [Required(AllowEmptyStrings = false)]
         public String Name { get; set; }
     }
+    public class UpdatingTeamCommand
+    {
+        public String Name { get; set; }
+    }
 }
