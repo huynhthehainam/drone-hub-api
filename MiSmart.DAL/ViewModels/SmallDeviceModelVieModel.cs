@@ -12,6 +12,7 @@ namespace MiSmart.DAL.ViewModels
         public Int32 CustomerID { get; set; }
         public String CustomerName { get; set; }
         public Int32 Count { get; set; }
+        public List<OnlyNameDeviceViewModel> Devices { get; set; }
     }
     public class SmallDeviceModelVieModel : IViewModel<DeviceModel>
     {
@@ -28,7 +29,13 @@ namespace MiSmart.DAL.ViewModels
             DevicesCount = entity.Devices.Count;
             Entity = entity;
             var group = entity.Devices.GroupBy(ww => ww.Customer).ToList();
-            SpecificQuantities = group.Select(ww => new CustomerDeviceSpecificQuantity { Count = ww.Count(), CustomerID = ww.FirstOrDefault().CustomerID, CustomerName = ww.FirstOrDefault().Customer.Name }).ToList();
+            SpecificQuantities = group.Select(ww => new CustomerDeviceSpecificQuantity
+            {
+                Count = ww.Count(),
+                CustomerID = ww.FirstOrDefault().CustomerID,
+                CustomerName = ww.FirstOrDefault().Customer.Name,
+                Devices = ww.Select(d => ViewModelHelpers.ConvertToViewModel<Device, OnlyNameDeviceViewModel>(d)).ToList()
+            }).ToList();
         }
     }
 }

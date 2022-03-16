@@ -15,6 +15,18 @@ namespace MiSmart.DAL.ViewModels
         {
             ID = entity.ID;
             Token = entity.Token;
+
+        }
+    }
+    public class OnlyNameDeviceViewModel : IViewModel<Device>
+    {
+        public Int32 ID { get; set; }
+        public String Name { get; set; }
+
+        public void LoadFrom(Device entity)
+        {
+            ID = entity.ID;
+            Name = entity.Name;
         }
     }
 }
