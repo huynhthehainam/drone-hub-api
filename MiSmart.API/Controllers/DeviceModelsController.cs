@@ -83,7 +83,7 @@ namespace MiSmart.API.Controllers
                 minioService.RemoveFileByUrl(deviceModel.FileUrl);
             }
 
-            deviceModel.FileUrl = minioService.PutImage(command.File, new String[] { "drone-hub-api", "device-model" });
+            deviceModel.FileUrl = minioService.PutFile(command.File, new String[] { "drone-hub-api", "device-model" });
             deviceModelRepository.Update(deviceModel);
             response.SetUpdatedMessage();
 

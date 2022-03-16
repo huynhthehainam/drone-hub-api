@@ -95,7 +95,12 @@ namespace MiSmart.DAL.Models
         }
         public Guid? LastGroupID { get; set; }
 
-
+        private ICollection<LogFile> logFiles;
+        public ICollection<LogFile> LogFiles
+        {
+            get => lazyLoader.Load(this, ref logFiles);
+            set => logFiles = value;
+        }
 
         public String GenerateDeviceAccessToken(String secretKey)
         {

@@ -7,6 +7,12 @@ using MiSmart.Infrastructure.Validations;
 
 namespace MiSmart.API.Commands
 {
+    public class AddingLogFileCommand
+    {
+        [AllowedExtensions(new String[] { ".bin" })]
+        [Required]
+        public IFormFile File { get; set; }
+    }
     public class AddingPlanCommand
     {
         [AllowedExtensions(new String[] { ".plan" })]

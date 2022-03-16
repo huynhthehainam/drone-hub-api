@@ -19,6 +19,7 @@ namespace MiSmart.DAL.DatabaseContexts
         public DbSet<CustomerUser> CustomerUsers { get; set; }
         public DbSet<Plan> Plans { get; set; }
         public DbSet<TelemetryGroup> TelemetryGroups { get; set; }
+        public DbSet<LogFile> LogFiles { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -27,11 +28,16 @@ namespace MiSmart.DAL.DatabaseContexts
             {
 
             });
+
             modelBuilder.Entity<Team>(ww =>
             {
                 ww.HasOne(ww => ww.Customer).WithMany(ww => ww.Teams).HasForeignKey(ww => ww.CustomerID).OnDelete(DeleteBehavior.Cascade);
             });
 
+            modelBuilder.Entity<LogFile>(lf =>
+            {
+                lf.HasOne(lf => lf.Device).WithMany(d => d.LogFiles).HasForeignKey(lf => lf.DeviceID).OnDelete(DeleteBehavior.Cascade);
+            });
             modelBuilder.Entity<TeamUser>(ww =>
             {
                 ww.HasOne(ww => ww.Team).WithMany(ww => ww.TeamUsers).HasForeignKey(ww => ww.TeamID).OnDelete(DeleteBehavior.Cascade);

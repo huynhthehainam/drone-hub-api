@@ -19,6 +19,7 @@ using NetTopologySuite.Geometries;
 using MiSmart.Infrastructure.Permissions;
 using MiSmart.API.Permissions;
 using System.Collections.Generic;
+using MiSmart.Infrastructure.Minio;
 
 namespace MiSmart.API.Controllers
 {
@@ -212,6 +213,31 @@ namespace MiSmart.API.Controllers
             response.SetCreatedObject(group);
             return response.ToIActionResult();
         }
+        [HttpPost("me/Logs")]
+        public IActionResult UploadLogFile([FromServices] DeviceRepository deviceRepository, [FromServices] MinioService minioService, [FromForm] AddingLogFileCommand command)
+        {
+            var response = actionResponseFactory.CreateInstance();
+            var device = deviceRepository.Get(ww => ww.ID == CurrentDevice.ID);
+            if (device is null)
+            {
+                response.AddNotFoundErr("Device");
+            }
+
+
+            LogFile logFile = new LogFile
+            {
+                FileUrl = minioService.PutFile(command.File, new String[] { "drone-hub-api", "logs", $"{device.ID}_{device.Name}" }),
+            };
+
+            device.LogFiles.Add(logFile);
+
+            deviceRepository.Update(device);
+
+
+            response.SetCreatedObject(logFile);
+
+            return response.ToIActionResult();
+        }
 
         [HttpPost("me/FlightStats")]
         public IActionResult CreateFlightStat([FromServices] DeviceRepository deviceRepository, [FromServices] FlightStatRepository flightStatRepository, [FromBody] AddingFlightStatCommand command)
@@ -336,6 +362,7 @@ namespace MiSmart.API.Controllers
 
             return response.ToIActionResult();
         }
+
 
 
     }
