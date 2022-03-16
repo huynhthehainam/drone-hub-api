@@ -2,8 +2,17 @@
 using MiSmart.DAL.Models;
 using MiSmart.Infrastructure.ViewModels;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+
 namespace MiSmart.DAL.ViewModels
 {
+    public class CustomerDeviceSpecificQuantity
+    {
+        public Int32 CustomerID { get; set; }
+        public String CustomerName { get; set; }
+        public Int32 Count { get; set; }
+    }
     public class SmallDeviceModelVieModel : IViewModel<DeviceModel>
     {
         public DeviceModel Entity;
@@ -11,13 +20,15 @@ namespace MiSmart.DAL.ViewModels
         public String Name { get; set; }
         public Int32 DevicesCount { get; set; }
         public String FileUrl { get; set; }
+        public List<CustomerDeviceSpecificQuantity> SpecificQuantities { get; set; }
         public void LoadFrom(DeviceModel entity)
         {
             ID = entity.ID;
             Name = entity.Name;
             DevicesCount = entity.Devices.Count;
             Entity = entity;
-
+            var group = entity.Devices.GroupBy(ww => ww.Customer).ToList();
+            SpecificQuantities = group.Select(ww => new CustomerDeviceSpecificQuantity { Count = ww.Count(), CustomerID = ww.FirstOrDefault().CustomerID, CustomerName = ww.FirstOrDefault().Customer.Name }).ToList();
         }
     }
 }
