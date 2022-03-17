@@ -1,7 +1,5 @@
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using MiSmart.DAL.Models;
 using MiSmart.Infrastructure.ViewModels;
 
@@ -14,6 +12,7 @@ namespace MiSmart.DAL.ViewModels
         public DateTime CreatedTime { get; set; }
         // public Int32 CustomerID { get; set; }
         // public Int32 DeviceID { get; set; }
+        public String DeviceModelName { get; set; }
         public String AircraftName { get; set; }
         public Int32 Flights { get; set; }
         public DateTime FlightTime { get; set; }
@@ -37,6 +36,7 @@ namespace MiSmart.DAL.ViewModels
             TeamName = entity.Device.Team?.Name;
             AircraftName = entity.Device.Name;
             TaskArea = entity.TaskArea;
+            DeviceModelName = entity.Device.DeviceModel.Name;
         }
     }
 }
