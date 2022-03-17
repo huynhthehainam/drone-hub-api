@@ -41,10 +41,7 @@ namespace MiSmart.API.Controllers
             var response = actionResponseFactory.CreateInstance();
             Expression<Func<DeviceModel, Boolean>> query = ww => true;
             var listResponse = deviceModelRepository.GetListResponseView<SmallDeviceModelVieModel>(pageCommand, query);
-            foreach (var item in listResponse.Data)
-            {
-                item.FileUrl = minioService.GetFileUrl(item.Entity.FileUrl);
-            }
+           
             listResponse.SetResponse(response);
 
 
