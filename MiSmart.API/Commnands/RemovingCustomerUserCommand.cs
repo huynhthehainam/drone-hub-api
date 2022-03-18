@@ -10,6 +10,11 @@ namespace MiSmart.API.Commands
         [Required]
         public Int64? UserID { get; set; }
     }
+    public class RemovingExecutionCompanyUserCommand
+    {
+        [Required]
+        public Int64? UserID { get; set; }
+    }
     public class RemovingDeviceCommand
     {
         [Required]

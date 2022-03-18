@@ -20,19 +20,26 @@ namespace MiSmart.API.Controllers
         {
         }
         [HttpGet("me")]
-        public IActionResult GetProfile([FromServices] CustomerUserRepository customerUserRepository)
+        public IActionResult GetProfile([FromServices] CustomerUserRepository customerUserRepository, [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository)
         {
             var response = actionResponseFactory.CreateInstance();
             var customerUser = customerUserRepository.Get(ww => ww.UserID == CurrentUser.ID);
-            if (customerUser is null)
+            ExecutionCompanyUser executionCompanyUser = executionCompanyUserRepository.Get(ww => ww.UserID == CurrentUser.ID);
+            if (customerUser is null && executionCompanyUser is null)
             {
                 response.AddNotFoundErr("User");
             }
             response.SetData(new
             {
-                ID = customerUser.UserID,
-                Customer = ViewModelHelpers.ConvertToViewModel<Customer, SmallCustomerViewModel>(customerUser.Customer),
-                Type = customerUser.Type,
+                CustomerUser = customerUser is not null ? new
+                {
+                    Customer = ViewModelHelpers.ConvertToViewModel<Customer, SmallCustomerViewModel>(customerUser.Customer)
+                } : null,
+                ExecutionCompanyUser = executionCompanyUser is not null ? new
+                {
+                    ExecutionCompany = ViewModelHelpers.ConvertToViewModel<ExecutionCompany, ExecutionCompanyViewModel>(executionCompanyUser.ExecutionCompany),
+                    Type = executionCompanyUser.Type,
+                } : null
             });
 
 

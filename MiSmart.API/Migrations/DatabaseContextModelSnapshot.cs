@@ -49,9 +49,6 @@ namespace MiSmart.API.Migrations
                     b.Property<int>("CustomerID")
                         .HasColumnType("integer");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("integer");
-
                     b.Property<long>("UserID")
                         .HasColumnType("bigint");
 
@@ -81,6 +78,9 @@ namespace MiSmart.API.Migrations
                     b.Property<int>("DeviceModelID")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("ExecutionCompanyID")
+                        .HasColumnType("integer");
+
                     b.Property<Guid?>("LastGroupID")
                         .HasColumnType("uuid");
 
@@ -108,6 +108,8 @@ namespace MiSmart.API.Migrations
 
                     b.HasIndex("DeviceModelID");
 
+                    b.HasIndex("ExecutionCompanyID");
+
                     b.HasIndex("LastGroupID")
                         .IsUnique();
 
@@ -134,6 +136,50 @@ namespace MiSmart.API.Migrations
                     b.ToTable("DeviceModels");
                 });
 
+            modelBuilder.Entity("MiSmart.DAL.Models.ExecutionCompany", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .UseIdentityByDefaultColumn();
+
+                    b.Property<string>("Address")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("text");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("ExecutionCompanies");
+                });
+
+            modelBuilder.Entity("MiSmart.DAL.Models.ExecutionCompanyUser", b =>
+                {
+                    b.Property<long>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .UseIdentityByDefaultColumn();
+
+                    b.Property<int>("ExecutionCompanyID")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
+                    b.Property<long>("UserID")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("ExecutionCompanyID");
+
+                    b.HasIndex("UserID")
+                        .IsUnique();
+
+                    b.ToTable("ExecutionCompanyUsers");
+                });
+
             modelBuilder.Entity("MiSmart.DAL.Models.Field", b =>
                 {
                     b.Property<long>("ID")
@@ -155,6 +201,9 @@ namespace MiSmart.API.Migrations
 
                     b.Property<double>("EdgeOffset")
                         .HasColumnType("double precision");
+
+                    b.Property<int>("ExecutionCompanyID")
+                        .HasColumnType("integer");
 
                     b.Property<string>("FieldLocation")
                         .HasColumnType("text");
@@ -208,6 +257,8 @@ namespace MiSmart.API.Migrations
 
                     b.HasIndex("CustomerID");
 
+                    b.HasIndex("ExecutionCompanyID");
+
                     b.ToTable("Fields");
                 });
 
@@ -228,6 +279,9 @@ namespace MiSmart.API.Migrations
 
                     b.Property<string>("DeviceName")
                         .HasColumnType("text");
+
+                    b.Property<int>("ExecutionCompanyID")
+                        .HasColumnType("integer");
 
                     b.Property<string>("FieldName")
                         .HasColumnType("text");
@@ -258,6 +312,8 @@ namespace MiSmart.API.Migrations
                     b.HasIndex("CustomerID");
 
                     b.HasIndex("DeviceID");
+
+                    b.HasIndex("ExecutionCompanyID");
 
                     b.ToTable("FlightStats");
                 });
@@ -314,7 +370,7 @@ namespace MiSmart.API.Migrations
                         .HasColumnType("bigint")
                         .UseIdentityByDefaultColumn();
 
-                    b.Property<int>("CustomerID")
+                    b.Property<int>("ExecutionCompanyID")
                         .HasColumnType("integer");
 
                     b.Property<string>("Name")
@@ -331,7 +387,7 @@ namespace MiSmart.API.Migrations
 
                     b.HasKey("ID");
 
-                    b.HasIndex("CustomerID");
+                    b.HasIndex("ExecutionCompanyID");
 
                     b.ToTable("Teams");
                 });
@@ -343,7 +399,7 @@ namespace MiSmart.API.Migrations
                         .HasColumnType("bigint")
                         .UseIdentityByDefaultColumn();
 
-                    b.Property<long>("CustomerUserID")
+                    b.Property<long>("ExecutionCompanyUserID")
                         .HasColumnType("bigint");
 
                     b.Property<long>("TeamID")
@@ -354,9 +410,9 @@ namespace MiSmart.API.Migrations
 
                     b.HasKey("ID");
 
-                    b.HasIndex("CustomerUserID");
+                    b.HasIndex("ExecutionCompanyUserID");
 
-                    b.HasIndex("TeamID", "CustomerUserID")
+                    b.HasIndex("TeamID", "ExecutionCompanyUserID")
                         .IsUnique();
 
                     b.ToTable("TeamUsers");
@@ -434,6 +490,11 @@ namespace MiSmart.API.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("MiSmart.DAL.Models.ExecutionCompany", "ExecutionCompany")
+                        .WithMany("Devices")
+                        .HasForeignKey("ExecutionCompanyID")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("MiSmart.DAL.Models.TelemetryGroup", "LastGroup")
                         .WithOne("LastDevice")
                         .HasForeignKey("MiSmart.DAL.Models.Device", "LastGroupID")
@@ -442,15 +503,28 @@ namespace MiSmart.API.Migrations
                     b.HasOne("MiSmart.DAL.Models.Team", "Team")
                         .WithMany("Devices")
                         .HasForeignKey("TeamID")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Customer");
 
                     b.Navigation("DeviceModel");
 
+                    b.Navigation("ExecutionCompany");
+
                     b.Navigation("LastGroup");
 
                     b.Navigation("Team");
+                });
+
+            modelBuilder.Entity("MiSmart.DAL.Models.ExecutionCompanyUser", b =>
+                {
+                    b.HasOne("MiSmart.DAL.Models.ExecutionCompany", "ExecutionCompany")
+                        .WithMany("ExecutionCompanyUsers")
+                        .HasForeignKey("ExecutionCompanyID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ExecutionCompany");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.Field", b =>
@@ -461,7 +535,15 @@ namespace MiSmart.API.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("MiSmart.DAL.Models.ExecutionCompany", "ExecutionCompany")
+                        .WithMany("Fields")
+                        .HasForeignKey("ExecutionCompanyID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Customer");
+
+                    b.Navigation("ExecutionCompany");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.FlightStat", b =>
@@ -478,9 +560,17 @@ namespace MiSmart.API.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("MiSmart.DAL.Models.ExecutionCompany", "ExecutionCompany")
+                        .WithMany()
+                        .HasForeignKey("ExecutionCompanyID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Customer");
 
                     b.Navigation("Device");
+
+                    b.Navigation("ExecutionCompany");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.LogFile", b =>
@@ -507,20 +597,20 @@ namespace MiSmart.API.Migrations
 
             modelBuilder.Entity("MiSmart.DAL.Models.Team", b =>
                 {
-                    b.HasOne("MiSmart.DAL.Models.Customer", "Customer")
+                    b.HasOne("MiSmart.DAL.Models.ExecutionCompany", "ExecutionCompany")
                         .WithMany("Teams")
-                        .HasForeignKey("CustomerID")
+                        .HasForeignKey("ExecutionCompanyID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Customer");
+                    b.Navigation("ExecutionCompany");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.TeamUser", b =>
                 {
-                    b.HasOne("MiSmart.DAL.Models.CustomerUser", "CustomerUser")
+                    b.HasOne("MiSmart.DAL.Models.ExecutionCompanyUser", "ExecutionCompanyUser")
                         .WithMany("TeamUsers")
-                        .HasForeignKey("CustomerUserID")
+                        .HasForeignKey("ExecutionCompanyUserID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -530,7 +620,7 @@ namespace MiSmart.API.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("CustomerUser");
+                    b.Navigation("ExecutionCompanyUser");
 
                     b.Navigation("Team");
                 });
@@ -566,13 +656,6 @@ namespace MiSmart.API.Migrations
                     b.Navigation("Fields");
 
                     b.Navigation("FlightStats");
-
-                    b.Navigation("Teams");
-                });
-
-            modelBuilder.Entity("MiSmart.DAL.Models.CustomerUser", b =>
-                {
-                    b.Navigation("TeamUsers");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.Device", b =>
@@ -589,6 +672,22 @@ namespace MiSmart.API.Migrations
             modelBuilder.Entity("MiSmart.DAL.Models.DeviceModel", b =>
                 {
                     b.Navigation("Devices");
+                });
+
+            modelBuilder.Entity("MiSmart.DAL.Models.ExecutionCompany", b =>
+                {
+                    b.Navigation("Devices");
+
+                    b.Navigation("ExecutionCompanyUsers");
+
+                    b.Navigation("Fields");
+
+                    b.Navigation("Teams");
+                });
+
+            modelBuilder.Entity("MiSmart.DAL.Models.ExecutionCompanyUser", b =>
+                {
+                    b.Navigation("TeamUsers");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.Team", b =>

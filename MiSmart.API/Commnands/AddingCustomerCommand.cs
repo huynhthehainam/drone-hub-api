@@ -11,4 +11,11 @@ namespace MiSmart.API.Commands
 
         public String Address { get; set; }
     }
+    public class AddingExecutionCompanyCommand
+    {
+        [Required]
+        public String Name { get; set; }
+
+        public String Address { get; set; }
+    }
 }

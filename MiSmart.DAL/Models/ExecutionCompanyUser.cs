@@ -1,28 +1,28 @@
 
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using MiSmart.Infrastructure.Data;
 using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
-
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using MiSmart.Infrastructure.Data;
 namespace MiSmart.DAL.Models
 {
-    public class Team : EntityBase<Int64>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public enum ExecutionCompanyUserType
     {
-        public Team() : base()
+        Owner,
+        Member
+    }
+    public class ExecutionCompanyUser : EntityBase<Int64>
+    {
+        public ExecutionCompanyUser() : base()
         {
         }
 
-        public Team(ILazyLoader lazyLoader) : base(lazyLoader)
+        public ExecutionCompanyUser(ILazyLoader lazyLoader) : base(lazyLoader)
         {
         }
-        public String Name { get; set; }
 
-        public Double TotalTaskArea { get; set; }
-        public Double TotalFlightDuration { get; set; }
-        public Int64 TotalFlights { get; set; }
-
-
+        public Int64 UserID { get; set; }
         private ExecutionCompany executionCompany;
         [JsonIgnore]
         public ExecutionCompany ExecutionCompany
@@ -31,9 +31,7 @@ namespace MiSmart.DAL.Models
             set => executionCompany = value;
         }
         public Int32 ExecutionCompanyID { get; set; }
-
-
-
+        public ExecutionCompanyUserType Type { get; set; } = ExecutionCompanyUserType.Member;
         private ICollection<TeamUser> teamUsers;
         [JsonIgnore]
         public ICollection<TeamUser> TeamUsers
@@ -41,14 +39,5 @@ namespace MiSmart.DAL.Models
             get => lazyLoader.Load(this, ref teamUsers);
             set => teamUsers = value;
         }
-
-        private ICollection<Device> devices;
-        [JsonIgnore]
-        public ICollection<Device> Devices
-        {
-            get => lazyLoader.Load(this, ref devices);
-            set => devices = value;
-        }
-
     }
 }

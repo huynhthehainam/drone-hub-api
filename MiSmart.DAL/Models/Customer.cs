@@ -23,13 +23,6 @@ namespace MiSmart.DAL.Models
 
 
 
-        private ICollection<Team> teams;
-        [JsonIgnore]
-        public ICollection<Team> Teams
-        {
-            get => lazyLoader.Load(this, ref teams);
-            set => teams = value;
-        }
 
 
         private ICollection<Field> fields;

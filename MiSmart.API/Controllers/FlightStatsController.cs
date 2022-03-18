@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using MiSmart.DAL.Models;
 using MiSmart.DAL.Repositories;
-using System.Linq;
 using MiSmart.Infrastructure.Commands;
 using MiSmart.DAL.ViewModels;
 using MiSmart.Infrastructure.ViewModels;
@@ -34,7 +33,7 @@ namespace MiSmart.API.Controllers
                 response.AddNotAllowedErr();
             }
 
-            var teamIDs = teamUserRepository.GetListEntities(new PageCommand(), ww => ww.CustomerUserID == customerUser.ID).Select(ww => ww.TeamID).ToList();
+
 
 
 
@@ -43,7 +42,7 @@ namespace MiSmart.API.Controllers
                 && (deviceID.HasValue ? (ww.DeviceID == deviceID.Value) : true)
                 && (from.HasValue ? (ww.FlightTime >= from.Value) : true)
                 && (to.HasValue ? (ww.FlightTime <= to.Value) : true)
-                && (customerUser.Type == CustomerMemberType.Owner ? ww.CustomerID == customerUser.CustomerID : (teamIDs.Contains(ww.Device.TeamID.GetValueOrDefault())));
+                && (true);
             if (mode == "Large")
             {
 

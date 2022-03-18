@@ -165,6 +165,8 @@ namespace MiSmart.API
             services.AddScoped<FlightStatRepository, FlightStatRepository>();
             services.AddScoped<FieldRepository, FieldRepository>();
             services.AddScoped<TelemetryGroupRepository, TelemetryGroupRepository>();
+            services.AddScoped<ExecutionCompanyUserRepository, ExecutionCompanyUserRepository>();
+            services.AddScoped<ExecutionCompanyRepository, ExecutionCompanyRepository>();
 
 
             #endregion
@@ -262,42 +264,34 @@ namespace MiSmart.API
                 var deviceModel1 = new DeviceModel { Name = "VS20" };
                 context.DeviceModels.AddRange(new DeviceModel[] { deviceModel1 });
             }
-            if (!context.Customers.Any())
+            if (!context.ExecutionCompanies.Any())
             {
-                var customer1 = new Customer
+                ExecutionCompany executionCompany1 = new ExecutionCompany
                 {
-                    Name = "MiSmart",
-                    Address = "Quận 9, TP Thủ Đức",
+                    Name = "Công ty khai thác MiSmart",
+                    Address = "Thủ Đức"
                 };
-
-                context.Customers.AddRange(new Customer[] { customer1 });
+                context.ExecutionCompanies.AddRange(new ExecutionCompany[] { executionCompany1 });
                 context.SaveChanges();
             }
-
-            if (!context.CustomerUsers.Any())
+            if (!context.ExecutionCompanyUsers.Any())
             {
-                var customer = context.Customers.FirstOrDefault(ww => ww.ID == 1);
-                if (customer is not null)
+                var executionCompany = context.ExecutionCompanies.FirstOrDefault(ww => ww.ID == 1);
+                if (executionCompany is not null)
                 {
-                    var customerUser1 = new CustomerUser { UserID = 1, Customer = customer, Type = CustomerMemberType.Owner };
-                    var customerUser2 = new CustomerUser { UserID = 2, Customer = customer, Type = CustomerMemberType.Member };
-                    var customerUser3 = new CustomerUser { UserID = 3, Customer = customer, Type = CustomerMemberType.Member };
-                    var customerUser4 = new CustomerUser { UserID = 4, Customer = customer, Type = CustomerMemberType.Member };
-
-                    context.CustomerUsers.AddRange(new CustomerUser[] { customerUser1, customerUser2, customerUser3, customerUser4 });
+                    ExecutionCompanyUser executionCompanyUser1 = new ExecutionCompanyUser { ExecutionCompany = executionCompany, UserID = 1, Type = ExecutionCompanyUserType.Owner };
+                    context.ExecutionCompanyUsers.AddRange(new ExecutionCompanyUser[] { executionCompanyUser1 });
                     context.SaveChanges();
-
-
                 }
             }
             if (!context.Teams.Any())
             {
-                var customer = context.Customers.FirstOrDefault(ww => ww.ID == 1);
-                if (customer is not null)
+                var executionCompany = context.ExecutionCompanies.FirstOrDefault(ww => ww.ID == 1);
+                if (executionCompany is not null)
                 {
-                    var team1 = new Team { Customer = customer, Name = "Team 1", };
-                    var team2 = new Team { Customer = customer, Name = "Team 2", };
-                    var team3 = new Team { Customer = customer, Name = "Team 3", };
+                    var team1 = new Team { ExecutionCompany = executionCompany, Name = "Team 1", };
+                    var team2 = new Team { ExecutionCompany = executionCompany, Name = "Team 2", };
+                    var team3 = new Team { ExecutionCompany = executionCompany, Name = "Team 3", };
 
                     context.Teams.AddRange(new Team[] { team1, team2, team3 });
                     context.SaveChanges();
@@ -310,19 +304,44 @@ namespace MiSmart.API
                 var team2 = context.Teams.FirstOrDefault(ww => ww.ID == 2);
                 var team3 = context.Teams.FirstOrDefault(ww => ww.ID == 3);
 
-                var customerUser1 = context.CustomerUsers.FirstOrDefault(ww => ww.ID == 1);
-                var customerUser2 = context.CustomerUsers.FirstOrDefault(ww => ww.ID == 2);
-                var customerUser3 = context.CustomerUsers.FirstOrDefault(ww => ww.ID == 3);
-                var customerUser4 = context.CustomerUsers.FirstOrDefault(ww => ww.ID == 4);
-                if (team1 is not null && team2 is not null && team3 is not null && customerUser1 is not null
-                && customerUser2 is not null && customerUser3 is not null && customerUser4 is not null)
+                var executionCompanyUser1 = context.ExecutionCompanyUsers.FirstOrDefault(ww => ww.ID == 1);
+
+                if (team1 is not null && team2 is not null && team3 is not null && executionCompanyUser1 is not null)
                 {
-                    TeamUser teamUser1 = new TeamUser { CustomerUser = customerUser1, Team = team1 };
-                    TeamUser teamUser2 = new TeamUser { CustomerUser = customerUser2, Team = team2 };
-                    TeamUser teamUser3 = new TeamUser { CustomerUser = customerUser3, Team = team3 };
-                    TeamUser teamUser4 = new TeamUser { CustomerUser = customerUser4, Team = team2 };
-                    context.TeamUsers.AddRange(new TeamUser[] { teamUser1, teamUser2, teamUser3, teamUser4 });
+                    TeamUser teamUser1 = new TeamUser { ExecutionCompanyUser = executionCompanyUser1, Team = team1 };
+
+                    context.TeamUsers.AddRange(new TeamUser[] { teamUser1, });
                     context.SaveChanges();
+                }
+            }
+
+            if (!context.Customers.Any())
+            {
+                var customer1 = new Customer
+                {
+                    Name = "MiSmart",
+                    Address = "Quận 9, TP Thủ Đức",
+                };
+
+                context.Customers.AddRange(new Customer[] { customer1 });
+                context.SaveChanges();
+            }
+
+
+            if (!context.CustomerUsers.Any())
+            {
+                var customer = context.Customers.FirstOrDefault(ww => ww.ID == 1);
+                if (customer is not null)
+                {
+                    var customerUser1 = new CustomerUser { UserID = 1, Customer = customer, };
+                    var customerUser2 = new CustomerUser { UserID = 2, Customer = customer, };
+                    var customerUser3 = new CustomerUser { UserID = 3, Customer = customer, };
+                    var customerUser4 = new CustomerUser { UserID = 4, Customer = customer, };
+
+                    context.CustomerUsers.AddRange(new CustomerUser[] { customerUser1, customerUser2, customerUser3, customerUser4 });
+                    context.SaveChanges();
+
+
                 }
             }
 
@@ -366,7 +385,8 @@ namespace MiSmart.API
             if (!context.FlightStats.Any())
             {
                 var customer = context.Customers.FirstOrDefault(ww => ww.ID == 1);
-                if (customer is not null)
+                var executionCompany = context.ExecutionCompanies.FirstOrDefault(ww => ww.ID == 1);
+                if (customer is not null && executionCompany is not null)
                 {
                     var device = context.Devices.FirstOrDefault(ww => ww.ID == 1);
                     if (device is not null)
@@ -390,8 +410,11 @@ namespace MiSmart.API
                                     new Coordinate(106.099201 +( random.NextDouble()/100),10.712229 + ( random.NextDouble()/100)),
                                     new Coordinate( 106.099237+( random.NextDouble()/100),10.711200+( random.NextDouble()/100)),
                                     new Coordinate( 106.095195+( random.NextDouble()/100),10.710917+( random.NextDouble()/100)),
-                                    new Coordinate( 106.093679,10.709746)
-                            }),
+                                    new Coordinate( 106.093679,10.709746),
+
+                            }
+                            ),
+                                ExecutionCompany = executionCompany,
                             };
                             flightStats.Add(flightStat);
                         }
@@ -410,14 +433,15 @@ namespace MiSmart.API
             if (!context.Fields.Any())
             {
                 var customer = context.Customers.FirstOrDefault(ww => ww.ID == 1);
-                if (customer is not null)
+                var executionCompany = context.ExecutionCompanies.FirstOrDefault(ww => ww.ID == 1);
+
+                if (customer is not null && executionCompany is not null)
                 {
                     var samples = new List<LocationSample>(){
                         new LocationSample{
                             Latitude = 10.667356525074577,
                             Longitude = 105.53553301447937
                         },
-
                         new LocationSample{
                             Latitude = 10.667569635345581,
                             Longitude =  105.53340716277171,
@@ -497,6 +521,7 @@ namespace MiSmart.API
                         Customer = customer,
                         EdgeOffset = 0,
                         LocationPoint = geometryFactory.CreatePoint(new Coordinate(samples[0].Longitude, samples[0].Latitude)),
+                        ExecutionCompany = executionCompany,
                     };
                     var field2 = new Field
                     {
@@ -519,6 +544,7 @@ namespace MiSmart.API
                         CreatedTime = DateTime.Now,
                         Customer = customer,
                         EdgeOffset = 0,
+                        ExecutionCompany = executionCompany,
                         LocationPoint = geometryFactory.CreatePoint(new Coordinate(samples2[0].Longitude, samples2[0].Latitude)),
                     };
 

@@ -18,15 +18,14 @@ namespace MiSmart.API.Controllers
 {
     public class DeviceModelsController : AuthorizedAPIControllerBase
     {
-        private readonly DeviceModelRepository deviceModelRepository;
-        public DeviceModelsController(IActionResponseFactory actionResponseFactory, DeviceModelRepository deviceModelRepository) : base(actionResponseFactory)
+        public DeviceModelsController(IActionResponseFactory actionResponseFactory) : base(actionResponseFactory)
         {
-            this.deviceModelRepository = deviceModelRepository;
         }
 
         [HttpPost]
         [HasPermission(typeof(AdminPermission))]
-        public IActionResult Create([FromBody] AddingDeviceModelCommand command)
+        public IActionResult Create([FromBody] AddingDeviceModelCommand command,
+        [FromServices] DeviceModelRepository deviceModelRepository)
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
             var model = new DeviceModel() { Name = command.Name };
@@ -36,12 +35,12 @@ namespace MiSmart.API.Controllers
             return response.ToIActionResult();
         }
         [HttpGet]
-        public IActionResult GetActionResult([FromQuery] PageCommand pageCommand, [FromServices] MinioService minioService)
+        public IActionResult GetActionResult([FromQuery] PageCommand pageCommand, [FromServices] MinioService minioService, [FromServices] DeviceModelRepository deviceModelRepository)
         {
             var response = actionResponseFactory.CreateInstance();
             Expression<Func<DeviceModel, Boolean>> query = ww => true;
             var listResponse = deviceModelRepository.GetListResponseView<SmallDeviceModelVieModel>(pageCommand, query);
-           
+
             listResponse.SetResponse(response);
 
 
@@ -49,7 +48,7 @@ namespace MiSmart.API.Controllers
         }
         [HttpDelete("{id:int}")]
         [HasPermission(typeof(AdminPermission))]
-        public IActionResult RemoveDeviceModel([FromRoute] Int32 id)
+        public IActionResult RemoveDeviceModel([FromRoute] Int32 id, [FromServices] DeviceModelRepository deviceModelRepository)
         {
             var response = actionResponseFactory.CreateInstance();
             var deviceModel = deviceModelRepository.Get(ww => ww.ID == id);
@@ -88,7 +87,7 @@ namespace MiSmart.API.Controllers
         }
         [HttpPatch("{id:int}")]
         [HasPermission(typeof(AdminPermission))]
-        public IActionResult UpdateDeviceModel([FromRoute] Int32 id, [FromBody] PatchingDeviceModelCommand command)
+        public IActionResult UpdateDeviceModel([FromRoute] Int32 id, [FromServices] DeviceModelRepository deviceModelRepository, [FromBody] PatchingDeviceModelCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
             var deviceModel = deviceModelRepository.Get(ww => ww.ID == id);

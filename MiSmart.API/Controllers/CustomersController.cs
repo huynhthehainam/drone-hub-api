@@ -20,18 +20,16 @@ namespace MiSmart.API.Controllers
     public class CustomersController : AuthorizedAPIControllerBase
     {
 
-        private readonly CustomerRepository customerRepository;
-        public CustomersController(IActionResponseFactory actionResponseFactory, CustomerRepository customerRepository) : base(actionResponseFactory)
+        public CustomersController(IActionResponseFactory actionResponseFactory) : base(actionResponseFactory)
         {
-            this.customerRepository = customerRepository;
         }
         [HttpPost]
         [HasPermission(typeof(AdminPermission))]
-        public IActionResult Create([FromBody] AddingCustomerCommand command)
+        public IActionResult Create([FromServices] CustomerRepository customerRepository, [FromBody] AddingCustomerCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
 
-          
+
             var customer = new Customer { Name = command.Name, Address = command.Address };
             customerRepository.Create(customer);
             response.SetCreatedObject(customer);
@@ -40,7 +38,9 @@ namespace MiSmart.API.Controllers
         }
         [HttpGet]
         [HasPermission(typeof(AdminPermission))]
-        public IActionResult GetList([FromQuery] PageCommand pageCommand, [FromQuery] String search, [FromQuery] String mode = "Small")
+        public IActionResult GetList([FromQuery] PageCommand pageCommand,
+        [FromServices] CustomerRepository customerRepository,
+        [FromQuery] String search, [FromQuery] String mode = "Small")
         {
             var response = actionResponseFactory.CreateInstance();
             Expression<Func<Customer, Boolean>> query = ww => (!String.IsNullOrWhiteSpace(search) ? (ww.Name.ToLower().Contains(search.ToLower()) || ww.Address.ToLower().Contains(search.ToLower())) : true);
@@ -60,15 +60,12 @@ namespace MiSmart.API.Controllers
 
         [HttpPost("{id:int}/AssignUser")]
         [HasPermission(typeof(AdminPermission))]
-        public IActionResult AssignCustomerUser([FromServices] CustomerUserRepository customerUserRepository, [FromServices] AuthGrpcClientService authGrpcClientService, [FromBody] AssigningCustomerUserCommand command, [FromRoute] Int32 id)
+        public IActionResult AssignCustomerUser([FromServices] CustomerUserRepository customerUserRepository,
+        [FromServices] CustomerRepository customerRepository,
+        [FromServices] AuthGrpcClientService authGrpcClientService, [FromBody] AssigningCustomerUserCommand command, [FromRoute] Int32 id)
         {
             var response = actionResponseFactory.CreateInstance();
             var customer = customerRepository.Get(ww => ww.ID == id);
-            // var userExistingInformation = authGrpcClientService.GetUserExistingInformation(command.UserID.GetValueOrDefault());
-            // if (!userExistingInformation.IsExist)
-            // {
-            //     response.AddInvalidErr("UserID");
-            // }
             if (customer is null)
             {
                 response.AddNotFoundErr("Customer");
@@ -78,7 +75,7 @@ namespace MiSmart.API.Controllers
             {
                 response.AddExistedErr("User");
             }
-            CustomerUser customerUser = new CustomerUser { CustomerID = id, UserID = command.UserID.Value, Type = command.Type };
+            CustomerUser customerUser = new CustomerUser { CustomerID = id, UserID = command.UserID.Value };
             customerUserRepository.Create(customerUser);
             response.SetCreatedObject(customerUser);
 
@@ -132,25 +129,11 @@ namespace MiSmart.API.Controllers
 
             return response.ToIActionResult();
         }
-        [HttpGet("{id:int}/Teams")]
-        [HasPermission(typeof(AdminPermission))]
-        public IActionResult GetCustomerTeams([FromServices] TeamRepository teamRepository, [FromServices] CustomerRepository customerRepository, [FromQuery] PageCommand pageCommand, [FromRoute] Int32 id)
-        {
-            var response = actionResponseFactory.CreateInstance();
-            var customer = customerRepository.Get(ww => ww.ID == id);
-            if (customer is null)
-            {
-                response.AddNotFoundErr("Customer");
-            }
 
-            var listResponse = teamRepository.GetListResponseView<SmallTeamViewModel>(pageCommand, ww => ww.CustomerID == customer.ID);
-            listResponse.SetResponse(response);
-
-            return response.ToIActionResult();
-        }
         [HttpDelete("{id:int}")]
         [HasPermission(typeof(AdminPermission))]
-        public IActionResult GetCustomerUsers([FromServices] CustomerUserRepository customerUserRepository, [FromQuery] PageCommand pageCommand, [FromRoute] Int32 id)
+        public IActionResult DeleteCustomer([FromServices] CustomerUserRepository customerUserRepository, [FromServices] CustomerRepository customerRepository,
+        [FromQuery] PageCommand pageCommand, [FromRoute] Int32 id)
         {
             var response = actionResponseFactory.CreateInstance();
             var customer = customerRepository.Get(ww => ww.ID == id);
@@ -174,7 +157,7 @@ namespace MiSmart.API.Controllers
             }
 
             customerUserRepository.Delete(customerUser);
-          
+
             response.SetNoContent();
 
             return response.ToIActionResult();
@@ -182,7 +165,8 @@ namespace MiSmart.API.Controllers
 
         [HttpPost("{id:int}/Devices")]
         [HasPermission(typeof(AdminPermission))]
-        public IActionResult AddDevice([FromRoute] Int32 id, [FromServices] DeviceModelRepository deviceModelRepository, [FromBody] AddingDeviceCommand command)
+        public IActionResult AddDevice([FromRoute] Int32 id, [FromServices] DeviceModelRepository deviceModelRepository, [FromServices] CustomerRepository customerRepository,
+         [FromBody] AddingDeviceCommand command)
 
         {
             var response = actionResponseFactory.CreateInstance();

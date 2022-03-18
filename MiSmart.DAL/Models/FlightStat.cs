@@ -1,9 +1,6 @@
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using MiSmart.Infrastructure.Data;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 using NetTopologySuite.Geometries;
 
@@ -45,5 +42,13 @@ namespace MiSmart.DAL.Models
             set => customer = value;
         }
         public Int32 CustomerID { get; set; }
+
+        private ExecutionCompany executionCompany;
+        public ExecutionCompany ExecutionCompany
+        {
+            get => lazyLoader.Load(this, ref executionCompany);
+            set => executionCompany = value;
+        }
+        public Int32 ExecutionCompanyID { get; set; }
     }
 }

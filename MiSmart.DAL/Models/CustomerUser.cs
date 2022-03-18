@@ -1,17 +1,11 @@
 
 using System;
-using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using MiSmart.Infrastructure.Data;
 namespace MiSmart.DAL.Models
 {
-    [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum CustomerMemberType
-    {
-        Owner,
-        Member
-    }
+
     public class CustomerUser : EntityBase<Int64>
     {
         public CustomerUser() : base()
@@ -31,13 +25,5 @@ namespace MiSmart.DAL.Models
             set => customer = value;
         }
         public Int32 CustomerID { get; set; }
-        public CustomerMemberType Type { get; set; } = CustomerMemberType.Member;
-        private ICollection<TeamUser> teamUsers;
-        [JsonIgnore]
-        public ICollection<TeamUser> TeamUsers
-        {
-            get => lazyLoader.Load(this, ref teamUsers);
-            set => teamUsers = value;
-        }
     }
 }

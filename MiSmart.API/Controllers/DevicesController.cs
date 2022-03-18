@@ -26,33 +26,27 @@ namespace MiSmart.API.Controllers
     public class DevicesController : AuthorizedAPIControllerBase
     {
 
-        private readonly CustomerRepository customerRepository;
-        private readonly TeamRepository teamRepository;
-        private readonly DeviceRepository deviceRepository;
-        private readonly DeviceModelRepository deviceModelRepository;
-        public DevicesController(IActionResponseFactory actionResponseFactory, CustomerRepository customerRepository, TeamRepository teamRepository, DeviceRepository deviceRepository, DeviceModelRepository deviceModelRepository) : base(actionResponseFactory)
+        public DevicesController(IActionResponseFactory actionResponseFactory) : base(actionResponseFactory)
         {
-            this.teamRepository = teamRepository;
-            this.deviceModelRepository = deviceModelRepository;
-            this.deviceRepository = deviceRepository;
-            this.customerRepository = customerRepository;
+
         }
 
-        [HttpPost("{id:int}/AssignTeam")]
-        public IActionResult AssignTeam([FromServices] CustomerUserRepository customerUserRepository, [FromServices] TeamRepository teamRepository, [FromServices] TeamUserRepository teamUserRepository, [FromRoute] Int32 id, [FromBody] AssingingDeviceCommand command)
+        [HttpPost("{id:int}/AssignExecutionCompany")]
+        public IActionResult AssignExecutionCompany([FromServices] CustomerUserRepository customerUserRepository, [FromServices] ExecutionCompanyRepository executionCompanyRepository,
+        [FromServices] DeviceRepository deviceRepository,
+         [FromServices] TeamUserRepository teamUserRepository, [FromRoute] Int32 id, [FromBody] AssigningDeviceExecutionCompanyCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
-            CustomerUser customerUser = customerUserRepository.GetByPermission(CurrentUser.ID, CustomerMemberType.Owner);
-
+            CustomerUser customerUser = customerUserRepository.GetByPermission(CurrentUser.ID);
             if (customerUser is null)
             {
                 response.AddNotAllowedErr();
             }
 
-            var team = teamRepository.Get(ww => ww.ID == command.TeamID.GetValueOrDefault() && ww.CustomerID == customerUser.CustomerID);
-            if (team is null)
+            var executionCompany = executionCompanyRepository.Get(ww => ww.ID == command.ExecutionCompanyID.GetValueOrDefault());
+            if (executionCompany is null)
             {
-                response.AddInvalidErr("TeamID");
+                response.AddInvalidErr("ExecutionCompanyID");
             }
             Expression<Func<Device, Boolean>> query = ww => (ww.ID == id) && (ww.CustomerID == customerUser.CustomerID);
             var device = deviceRepository.Get(query);
@@ -60,17 +54,51 @@ namespace MiSmart.API.Controllers
             {
                 response.AddNotFoundErr("Device");
             }
+            device.ExecutionCompany = executionCompany;
+            deviceRepository.Update(device);
+            response.SetUpdatedMessage();
+
+            return response.ToIActionResult();
+        }
+
+        [HttpPost("{id:int}/AssignTeam")]
+        public IActionResult AssignTeam([FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, [FromRoute] Int32 id,
+        [FromServices] DeviceRepository deviceRepository,
+        [FromServices] TeamRepository teamRepository, [FromBody] AssigningDeviceTeamCommand command)
+        {
+            var response = actionResponseFactory.CreateInstance();
+            ExecutionCompanyUser executionCompanyUser = executionCompanyUserRepository.GetByPermission(CurrentUser.ID, ExecutionCompanyUserType.Owner);
+            if (executionCompanyUser is null)
+            {
+                response.AddNotAllowedErr();
+            }
+            var device = deviceRepository.Get(ww => ww.ID == id && ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID);
+            if (device is null)
+            {
+                response.AddNotFoundErr("Device");
+            }
+
+            var team = teamRepository.Get(ww => ww.ID == command.TeamID.GetValueOrDefault() && ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID);
+            if (team is null)
+            {
+                response.AddInvalidErr("TeamID");
+            }
+
             device.Team = team;
             deviceRepository.Update(device);
-            response.SetMessage("Updated", "Đã cập nhật");
+            response.SetUpdatedMessage();
 
             return response.ToIActionResult();
         }
 
 
 
+
         [HttpGet]
-        public IActionResult GetList([FromServices] CustomerUserRepository customerUserRepository, [FromServices] TeamUserRepository teamUserRepository, [FromQuery] PageCommand pageCommand, [FromQuery] String search, [FromQuery] String mode = "Small")
+        public IActionResult GetList([FromServices] CustomerUserRepository customerUserRepository,
+        [FromServices] DeviceRepository deviceRepository,
+
+         [FromServices] TeamUserRepository teamUserRepository, [FromQuery] PageCommand pageCommand, [FromQuery] String search, [FromQuery] String mode = "Small")
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
             CustomerUser customerUser = customerUserRepository.GetByPermission(CurrentUser.ID);
@@ -80,8 +108,7 @@ namespace MiSmart.API.Controllers
                 response.AddNotAllowedErr();
             }
 
-            var teamIDs = teamUserRepository.GetListEntities(new PageCommand(), ww => ww.CustomerUserID == customerUser.ID).Select(ww => ww.TeamID).ToList();
-            Expression<Func<Device, Boolean>> query = ww => (customerUser.Type == CustomerMemberType.Owner ? (ww.CustomerID == customerUser.CustomerID) : (teamIDs.Contains(ww.TeamID.GetValueOrDefault())))
+            Expression<Func<Device, Boolean>> query = ww => (true)
             && (!String.IsNullOrWhiteSpace(search) ? ww.Name.ToLower().Contains(search.ToLower()) : true);
             if (mode == "Large")
             {
@@ -108,10 +135,10 @@ namespace MiSmart.API.Controllers
             {
                 response.AddNotAllowedErr();
             }
-            var teamIDs = teamUserRepository.GetListEntities(new PageCommand(), ww => ww.CustomerUserID == customerUser.ID).Select(ww => ww.TeamID).ToList();
+
 
             Expression<Func<Device, Boolean>> query = ww => (ww.ID == id)
-             && (customerUser.Type == CustomerMemberType.Owner ? ww.CustomerID == customerUser.CustomerID : (teamIDs.Contains(ww.TeamID.GetValueOrDefault())));
+             && (true);
             var device = deviceRepository.Get(query);
             if (device is null)
             {

@@ -53,6 +53,14 @@ namespace MiSmart.DAL.Models
             set => customer = value;
         }
         public Int32 CustomerID { get; set; }
+
+        private ExecutionCompany executionCompany;
+        public ExecutionCompany ExecutionCompany
+        {
+            get => lazyLoader.Load(this, ref executionCompany);
+            set => executionCompany = value;
+        }
+        public Int32? ExecutionCompanyID { get; set; }
         private ICollection<FlightStat> flightStats;
         [JsonIgnore]
         public ICollection<FlightStat> FlightStats
