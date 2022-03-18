@@ -1,24 +1,11 @@
 using System;
-using System.Linq;
 using MiSmart.API.Commands;
-using MiSmart.DAL.Models;
 using MiSmart.DAL.Repositories;
-using MiSmart.Infrastructure.Constants;
 using MiSmart.Infrastructure.Controllers;
-using MiSmart.Infrastructure.Helpers;
 using MiSmart.Infrastructure.Responses;
-using MiSmart.Infrastructure.Services;
 using MiSmart.Infrastructure.Settings;
-using MiSmart.Infrastructure.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using MiSmart.DAL.ViewModels;
-using Microsoft.Extensions.Caching.Distributed;
-using System.Text.RegularExpressions;
-using MiSmart.Infrastructure.Commands;
-using System.Threading.Tasks;
-using MiSmart.API.Services;
-using System.IdentityModel.Tokens.Jwt;
 
 namespace MiSmart.API.Controllers
 {
