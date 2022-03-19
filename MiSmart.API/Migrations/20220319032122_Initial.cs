@@ -255,7 +255,7 @@ namespace MiSmart.API.Migrations
                     FlywayPoints = table.Column<LineString>(type: "geography (linestring)", nullable: true),
                     DeviceID = table.Column<int>(type: "integer", nullable: false),
                     CustomerID = table.Column<int>(type: "integer", nullable: false),
-                    ExecutionCompanyID = table.Column<int>(type: "integer", nullable: false)
+                    ExecutionCompanyID = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -277,7 +277,7 @@ namespace MiSmart.API.Migrations
                         column: x => x.ExecutionCompanyID,
                         principalTable: "ExecutionCompanies",
                         principalColumn: "ID",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(

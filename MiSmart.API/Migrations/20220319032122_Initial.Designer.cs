@@ -11,7 +11,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MiSmart.API.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20220318081920_Initial")]
+    [Migration("20220319032122_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -282,7 +282,7 @@ namespace MiSmart.API.Migrations
                     b.Property<string>("DeviceName")
                         .HasColumnType("text");
 
-                    b.Property<int>("ExecutionCompanyID")
+                    b.Property<int?>("ExecutionCompanyID")
                         .HasColumnType("integer");
 
                     b.Property<string>("FieldName")
@@ -564,9 +564,7 @@ namespace MiSmart.API.Migrations
 
                     b.HasOne("MiSmart.DAL.Models.ExecutionCompany", "ExecutionCompany")
                         .WithMany()
-                        .HasForeignKey("ExecutionCompanyID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ExecutionCompanyID");
 
                     b.Navigation("Customer");
 

@@ -49,6 +49,6 @@ namespace MiSmart.DAL.Models
             get => lazyLoader.Load(this, ref executionCompany);
             set => executionCompany = value;
         }
-        public Int32 ExecutionCompanyID { get; set; }
+        public Int32? ExecutionCompanyID { get; set; }
     }
 }

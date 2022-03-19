@@ -5,7 +5,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using MiSmart.DAL.Models;
 
 namespace MiSmart.API.Commands
 {
@@ -33,5 +32,14 @@ namespace MiSmart.API.Commands
         public String PilotName { get; set; }
         public List<LocationPoint> FlywayPoints { get; set; } = new List<LocationPoint>();
         public String TeamName { get; set; }
+    }
+    public class AddingOfflineFlightStatCommand : AddingFlightStatCommand
+    {
+        public String DeviceAccessToken { get; set; }
+    }
+
+    public class AddingBulkOfflineFlightStatsCommand
+    {
+        public List<AddingOfflineFlightStatCommand> Data { get; set; }
     }
 }

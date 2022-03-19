@@ -20,6 +20,8 @@ using MiSmart.Infrastructure.Permissions;
 using MiSmart.API.Permissions;
 using System.Collections.Generic;
 using MiSmart.Infrastructure.Minio;
+using Microsoft.AspNetCore.Authorization;
+using MiSmart.Infrastructure.Services;
 
 namespace MiSmart.API.Controllers
 {
@@ -179,6 +181,63 @@ namespace MiSmart.API.Controllers
 
             response.SetUpdatedMessage();
 
+            return response.ToIActionResult();
+        }
+        [HttpPost("UploadOfflineStats")]
+        [AllowAnonymous]
+        public IActionResult UploadOfflineStats([FromBody] AddingBulkOfflineFlightStatsCommand command,
+        [FromServices] FlightStatRepository flightStatRepository,
+         [FromServices] DeviceRepository deviceRepository, [FromServices] JWTService jwtService)
+        {
+            var response = actionResponseFactory.CreateInstance();
+            List<FlightStat> flightStats = new List<FlightStat>();
+            foreach (var item in command.Data)
+            {
+                var deviceJWT = jwtService.GetUser(item.DeviceAccessToken);
+                if (deviceJWT.Type == "Device")
+                {
+
+                    var device = deviceRepository.Get(ww => ww.ID == deviceJWT.ID);
+                    if (device is not null)
+                    {
+
+                        if (item.FlywayPoints.Count == 0)
+                        {
+                            response.AddInvalidErr("FlywayPoints");
+                        }
+                        var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
+                        item.FlywayPoints.Add(JsonSerializer.Deserialize<LocationPoint>(JsonSerializer.Serialize(item.FlywayPoints[0])));
+
+                        var stat = new FlightStat
+                        {
+                            FlightDuration = item.FlightDuration.GetValueOrDefault(),
+                            FieldName = item.FieldName,
+                            Flights = item.Flights.GetValueOrDefault(),
+                            FlightTime = item.FlightTime ?? DateTime.Now,
+                            FlywayPoints = geometryFactory.CreateLineString(item.FlywayPoints.Select(ww => new Coordinate(ww.Longitude.GetValueOrDefault(), ww.Latitude.GetValueOrDefault())).ToArray()),
+                            PilotName = item.PilotName,
+                            CreatedTime = DateTime.Now,
+                            CustomerID = device.CustomerID,
+                            DeviceID = device.ID,
+                            DeviceName = device.Name,
+                            TaskLocation = item.TaskLocation,
+                            TaskArea = item.TaskArea.GetValueOrDefault(),
+                        };
+                        flightStatRepository.Create(stat);
+                        if (device.Team is not null)
+                        {
+                            device.Team.TotalFlights += item.Flights.GetValueOrDefault();
+                            device.Team.TotalFlightDuration += item.FlightDuration.GetValueOrDefault();
+                            device.Team.TotalTaskArea += item.TaskArea.GetValueOrDefault();
+                        }
+
+                        deviceRepository.Update(device);
+                        flightStats.Add(stat);
+                    }
+                }
+
+            }
+            response.SetData(flightStats.Select(fs => new { ID = fs.ID }));
             return response.ToIActionResult();
         }
     }

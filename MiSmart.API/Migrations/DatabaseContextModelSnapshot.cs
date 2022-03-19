@@ -280,7 +280,7 @@ namespace MiSmart.API.Migrations
                     b.Property<string>("DeviceName")
                         .HasColumnType("text");
 
-                    b.Property<int>("ExecutionCompanyID")
+                    b.Property<int?>("ExecutionCompanyID")
                         .HasColumnType("integer");
 
                     b.Property<string>("FieldName")
@@ -562,9 +562,7 @@ namespace MiSmart.API.Migrations
 
                     b.HasOne("MiSmart.DAL.Models.ExecutionCompany", "ExecutionCompany")
                         .WithMany()
-                        .HasForeignKey("ExecutionCompanyID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ExecutionCompanyID");
 
                     b.Navigation("Customer");
 
