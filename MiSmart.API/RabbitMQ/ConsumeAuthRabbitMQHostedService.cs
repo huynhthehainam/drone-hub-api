@@ -83,6 +83,10 @@ namespace MiSmart.Microservices.OrderService.RabbitMQ
                     var customerUsers = context.CustomerUsers.Where(ww => ww.UserID == model.ID).ToList();
                     context.CustomerUsers.RemoveRange(customerUsers);
                     context.SaveChanges();
+
+                    var executionCompanyUsers = context.ExecutionCompanyUsers.Where(ww => ww.UserID == model.ID).ToList();
+                    context.ExecutionCompanyUsers.RemoveRange(executionCompanyUsers);
+                    context.SaveChanges();
                 }
             }
         }
