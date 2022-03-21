@@ -117,18 +117,7 @@ namespace MiSmart.API.Controllers
 
                 query = ww => (ww.CustomerID == customerUser.CustomerID)
                 && (!String.IsNullOrWhiteSpace(search) ? ww.Name.ToLower().Contains(search.ToLower()) : true);
-                if (mode == "Large")
-                {
 
-                }
-                else if (mode == "Medium")
-                {
-
-                }
-                else
-                {
-
-                }
             }
             else
             {
@@ -136,9 +125,10 @@ namespace MiSmart.API.Controllers
                 if (executionCompanyUser is null)
                 {
                     response.AddNotAllowedErr();
-
                 }
+                List<Int64> teamIDs = teamUserRepository.GetListEntities(new PageCommand(), ww => ww.ExecutionCompanyUserID == executionCompanyUser.ID).Select(ww => ww.TeamID).ToList();
                 query = ww => (ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID)
+                && (executionCompanyUser.Type == ExecutionCompanyUserType.Member ? (teamIDs.Contains(ww.TeamID.GetValueOrDefault())) : true)
                  && (!String.IsNullOrWhiteSpace(search) ? ww.Name.ToLower().Contains(search.ToLower()) : true);
             }
             var listResponse = deviceRepository.GetListResponseView<SmallDeviceViewModel>(pageCommand, query);
@@ -239,6 +229,7 @@ namespace MiSmart.API.Controllers
                             DeviceID = device.ID,
                             DeviceName = device.Name,
                             TaskLocation = item.TaskLocation,
+                            TeamID = device.TeamID,
                             TaskArea = item.TaskArea.GetValueOrDefault(),
                             ExecutionCompanyID = device.ExecutionCompanyID,
                         };
@@ -374,7 +365,8 @@ namespace MiSmart.API.Controllers
                 DeviceName = device.Name,
                 TaskLocation = command.TaskLocation,
                 TaskArea = command.TaskArea.GetValueOrDefault(),
-
+                TeamID = device.TeamID,
+                ExecutionCompanyID = device.ExecutionCompanyID,
             };
             flightStatRepository.Create(stat);
             if (device.Team is not null)

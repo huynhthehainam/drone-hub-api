@@ -92,6 +92,8 @@ namespace MiSmart.DAL.DatabaseContexts
             {
                 ww.HasOne(ww => ww.Device).WithMany(ww => ww.FlightStats).HasForeignKey(ww => ww.DeviceID).OnDelete(DeleteBehavior.Cascade);
                 ww.HasOne(ww => ww.Customer).WithMany(ww => ww.FlightStats).HasForeignKey(ww => ww.CustomerID).OnDelete(DeleteBehavior.Cascade);
+                ww.HasOne(ww => ww.ExecutionCompany).WithMany(ww => ww.FlightStats).HasForeignKey(ww => ww.ExecutionCompanyID).OnDelete(DeleteBehavior.SetNull);
+                ww.HasOne(ww => ww.Team).WithMany(ww => ww.FlightStats).HasForeignKey(ww => ww.TeamID).OnDelete(DeleteBehavior.SetNull);
                 ww.Property(ww => ww.FlywayPoints).HasColumnType("geography (linestring)");
 
             });

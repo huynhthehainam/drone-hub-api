@@ -53,6 +53,13 @@ namespace MiSmart.DAL.Models
         }
         public Int32 CustomerID { get; set; }
 
+        private Team team;
+        public Team Team
+        {
+            get => lazyLoader.Load(this, ref team);
+            set => team = value;
+        }
+        public Int64? TeamID { get; set; }
         private ExecutionCompany executionCompany;
         public ExecutionCompany ExecutionCompany
         {

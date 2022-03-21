@@ -9,7 +9,8 @@ using MiSmart.Infrastructure.Commands;
 using MiSmart.DAL.ViewModels;
 using MiSmart.Infrastructure.ViewModels;
 using System.Linq.Expressions;
-using MiSmart.DAL.Responses;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace MiSmart.API.Controllers
 {
@@ -22,37 +23,52 @@ namespace MiSmart.API.Controllers
         [HttpGet]
         public IActionResult GetFlightStats([FromServices] FlightStatRepository flightStatRepository,
         [FromServices] TeamUserRepository teamUserRepository,
-        [FromServices] CustomerUserRepository customerUserRepository, [FromQuery] PageCommand pageCommand, [FromQuery] DateTime? from, [FromQuery] DateTime? to, [FromQuery] Int32? executionCompanyID, [FromQuery] Int64? teamID, [FromQuery] Int32? deviceID, [FromQuery] Int32? deviceModelID, [FromQuery] String mode = "Small")
+        [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository,
+        [FromServices] CustomerUserRepository customerUserRepository, [FromQuery] PageCommand pageCommand,
+         [FromQuery] DateTime? from, [FromQuery] DateTime? to, [FromQuery] Int32? executionCompanyID,
+         [FromQuery] Int32? customerID,
+         [FromQuery] Int64? teamID, [FromQuery] Int32? deviceID, [FromQuery] Int32? deviceModelID,
+         [FromQuery] String relation = "Owner",
+         [FromQuery] String mode = "Small")
         {
-            var response = new FlightStatsActionResponse();
-            response.ApplySettings(actionResponseFactory.Settings);
+            var response = actionResponseFactory.CreateInstance();
+            Expression<Func<FlightStat, Boolean>> query = ww => false;
 
-            CustomerUser customerUser = customerUserRepository.GetByPermission(CurrentUser.ID);
-            if (customerUser is null)
-            {
-                response.AddNotAllowedErr();
-            }
-
-            Expression<Func<FlightStat, Boolean>> query = ww => (ww.CustomerID == customerUser.CustomerID)
-                && (teamID.HasValue ? (ww.Device.TeamID == teamID.Value) : true)
-                && (deviceID.HasValue ? (ww.DeviceID == deviceID.Value) : true)
-                && (from.HasValue ? (ww.FlightTime >= from.Value) : true)
-                && (to.HasValue ? (ww.FlightTime <= to.Value.AddDays(1)) : true)
-                && (executionCompanyID.HasValue ? (ww.ExecutionCompanyID == executionCompanyID.GetValueOrDefault()) : true)
-                && (true);
-            if (mode == "Large")
+            if (relation == "Owner")
             {
 
+                CustomerUser customerUser = customerUserRepository.GetByPermission(CurrentUser.ID);
+                if (customerUser is null)
+                {
+                    response.AddNotAllowedErr();
+                }
+
+                query = ww => (ww.CustomerID == customerUser.CustomerID)
+                    && (teamID.HasValue ? (ww.Device.TeamID == teamID.Value) : true)
+                    && (deviceID.HasValue ? (ww.DeviceID == deviceID.Value) : true)
+                    && (from.HasValue ? (ww.FlightTime >= from.Value) : true)
+                    && (to.HasValue ? (ww.FlightTime <= to.Value.AddDays(1)) : true)
+                    && (executionCompanyID.HasValue ? (ww.ExecutionCompanyID == executionCompanyID.GetValueOrDefault()) : true)
+                    && (true);
             }
             else
             {
-                var listResponse = flightStatRepository.GetListFlightStatsView<SmallFlightStatViewModel>(pageCommand, query, ww => ww.CreatedTime, false);
-                listResponse.SetResponse(response);
+                ExecutionCompanyUser executionCompanyUser = executionCompanyUserRepository.GetByPermission(CurrentUser.ID);
+                if (executionCompanyUser is null)
+                {
+                    response.AddNotAllowedErr();
+                }
+                List<Int64> teamIDs = teamUserRepository.GetListEntities(new PageCommand(), ww => ww.ExecutionCompanyUserID == executionCompanyUser.ID).Select(ww => ww.TeamID).ToList();
+                query = ww => (ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID)
+                   && (teamID.HasValue ? (ww.Device.TeamID == teamID.Value) : true)
+                   && (deviceID.HasValue ? (ww.DeviceID == deviceID.Value) : true)
+                   && (from.HasValue ? (ww.FlightTime >= from.Value) : true)
+                   && (to.HasValue ? (ww.FlightTime <= to.Value.AddDays(1)) : true)
+                   && (customerID.HasValue ? (ww.CustomerID == customerID.GetValueOrDefault()) : true)
+                   && (executionCompanyUser.Type == ExecutionCompanyUserType.Member ? (teamIDs.Contains(ww.TeamID.GetValueOrDefault())) : true);
             }
-
-
-
-
+            var listResponse = flightStatRepository.GetListFlightStatsView<SmallFlightStatViewModel>(pageCommand, query, ww => ww.FlightTime, false);
+            listResponse.SetResponse(response);
             return response.ToIActionResult();
         }
 

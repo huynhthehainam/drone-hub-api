@@ -1,20 +1,14 @@
 
 using MiSmart.Infrastructure.Controllers;
 using MiSmart.Infrastructure.Responses;
-using MiSmart.API.Commands;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using System.Text.Json;
 using System;
-using MiSmart.Infrastructure.Helpers;
 using MiSmart.DAL.Models;
 using MiSmart.DAL.Repositories;
-using System.Linq;
 using MiSmart.Infrastructure.Commands;
 using MiSmart.DAL.ViewModels;
 using MiSmart.Infrastructure.ViewModels;
 using System.Linq.Expressions;
-using MiSmart.DAL.Responses;
 
 namespace MiSmart.API.Controllers
 {
@@ -24,28 +18,44 @@ namespace MiSmart.API.Controllers
         {
         }
         [HttpGet]
-        public IActionResult GetFields([FromServices] FieldRepository fieldRepository, [FromServices] CustomerUserRepository customerUserRepository, [FromQuery] PageCommand pageCommand, [FromQuery] DateTime? from, [FromQuery] DateTime? to, [FromQuery] String search, [FromQuery] String mode = "Small")
+        public IActionResult GetFields([FromServices] FieldRepository fieldRepository,
+            [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository,
+         [FromServices] CustomerUserRepository customerUserRepository, [FromQuery] PageCommand pageCommand, [FromQuery] DateTime? from,
+         [FromQuery] DateTime? to, [FromQuery] String search,
+         [FromQuery] String relation = "Owner",
+         [FromQuery] String mode = "Small")
         {
             var response = actionResponseFactory.CreateInstance();
-            CustomerUser customerUser = customerUserRepository.GetByPermission(CurrentUser.ID);
-            if (customerUser is null)
-            {
-                response.AddNotAllowedErr();
-            }
 
-            Expression<Func<Field, Boolean>> query = ww => (ww.CustomerID == customerUser.CustomerID)
-                && (from.HasValue ? (ww.CreatedTime >= from.Value) : true)
-                && (to.HasValue ? (ww.CreatedTime <= to.Value) : true)
-                && (!String.IsNullOrWhiteSpace(search) ? (ww.Name.ToLower().Contains(search.ToLower()) || ww.FieldLocation.ToLower().Contains(search.ToLower()) || ww.FieldName.ToLower().Contains(search.ToLower())) : true);
-            if (mode == "Large")
+            Expression<Func<Field, Boolean>> query = ww => false;
+            if (relation == "Owner")
             {
+                CustomerUser customerUser = customerUserRepository.GetByPermission(CurrentUser.ID);
+                if (customerUser is null)
+                {
+                    response.AddNotAllowedErr();
+                }
+                query = ww => (ww.CustomerID == customerUser.CustomerID)
+                    && (from.HasValue ? (ww.CreatedTime >= from.Value) : true)
+                    && (to.HasValue ? (ww.CreatedTime <= to.Value) : true)
+                    && (!String.IsNullOrWhiteSpace(search) ? (ww.Name.ToLower().Contains(search.ToLower()) || ww.FieldLocation.ToLower().Contains(search.ToLower()) || ww.FieldName.ToLower().Contains(search.ToLower())) : true);
 
             }
             else
             {
-                var listResponse = fieldRepository.GetListResponseView<FieldViewModel>(pageCommand, query, ww => ww.CreatedTime, false);
-                listResponse.SetResponse(response);
+                ExecutionCompanyUser executionCompanyUser = executionCompanyUserRepository.GetByPermission(CurrentUser.ID);
+                if (executionCompanyUser is null)
+                {
+                    response.AddNotAllowedErr();
+                }
+                query = ww => (ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID)
+                                   && (from.HasValue ? (ww.CreatedTime >= from.Value) : true)
+                                   && (to.HasValue ? (ww.CreatedTime <= to.Value) : true)
+                                   && (!String.IsNullOrWhiteSpace(search) ? (ww.Name.ToLower().Contains(search.ToLower()) || ww.FieldLocation.ToLower().Contains(search.ToLower()) || ww.FieldName.ToLower().Contains(search.ToLower())) : true);
             }
+            var listResponse = fieldRepository.GetListResponseView<FieldViewModel>(pageCommand, query, ww => ww.CreatedTime, false);
+            listResponse.SetResponse(response);
+
 
 
 

@@ -49,6 +49,11 @@ namespace MiSmart.DAL.Models
             get => lazyLoader.Load(this, ref devices);
             set => devices = value;
         }
-
+        private ICollection<FlightStat> flightStats;
+        public ICollection<FlightStat> FlightStats
+        {
+            get => lazyLoader.Load(this, ref flightStats);
+            set => flightStats = value;
+        }
     }
 }
