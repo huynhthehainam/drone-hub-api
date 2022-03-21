@@ -37,7 +37,6 @@ namespace MiSmart.API.Controllers
         }
 
         [HttpGet]
-        [HasPermission(typeof(AdminPermission))]
         public IActionResult GetList([FromQuery] PageCommand pageCommand,
         [FromServices] ExecutionCompanyRepository executionCompanyRepository,
         [FromQuery] String search)
