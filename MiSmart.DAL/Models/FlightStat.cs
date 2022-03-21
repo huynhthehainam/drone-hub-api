@@ -6,6 +6,16 @@ using NetTopologySuite.Geometries;
 
 namespace MiSmart.DAL.Models
 {
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public enum FlightMode
+    {
+        Spraying,
+        Mapping,
+        Seeding,
+        Testing,
+        Other,
+
+    }
     public class FlightStat : EntityBase<Guid>
     {
         public FlightStat() : base()
@@ -50,5 +60,7 @@ namespace MiSmart.DAL.Models
             set => executionCompany = value;
         }
         public Int32? ExecutionCompanyID { get; set; }
+
+        public FlightMode Mode { get; set; } = FlightMode.Spraying;
     }
 }

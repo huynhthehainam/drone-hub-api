@@ -56,8 +56,12 @@ namespace MiSmart.API.Controllers
             {
                 response.AddNotFoundErr("Device");
             }
-            device.ExecutionCompany = executionCompany;
-            deviceRepository.Update(device);
+            if (executionCompany.ID != device.ExecutionCompanyID)
+            {
+                device.ExecutionCompanyID = executionCompany.ID;
+                device.TeamID = null;
+                deviceRepository.Update(device);
+            }
             response.SetUpdatedMessage();
 
             return response.ToIActionResult();
@@ -222,6 +226,7 @@ namespace MiSmart.API.Controllers
                             DeviceName = device.Name,
                             TaskLocation = item.TaskLocation,
                             TaskArea = item.TaskArea.GetValueOrDefault(),
+                            ExecutionCompanyID = device.ExecutionCompanyID,
                         };
                         flightStatRepository.Create(stat);
                         if (device.Team is not null)

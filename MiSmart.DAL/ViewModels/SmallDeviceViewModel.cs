@@ -16,6 +16,7 @@ namespace MiSmart.DAL.ViewModels
         public DeviceStatus Status { get; set; }
         public Guid UUID { get; set; }
         public String TeamName { get; set; }
+        public String ExecutionCompanyName { get; set; }
         public String DeviceModelName { get; set; }
         public Guid? LastGroupID { get; set; }
         public List<TelemetryRecordViewModel> LastGroupRecords { get; set; }
@@ -32,6 +33,7 @@ namespace MiSmart.DAL.ViewModels
             TeamName = entity.Team?.Name;
             LastGroupID = entity.LastGroupID;
             LastGroupRecords = entity.LastGroup?.Records.OrderBy(ww => ww.CreatedTime).Select(ww => ViewModelHelpers.ConvertToViewModel<TelemetryRecord, TelemetryRecordViewModel>(ww)).ToList();
+            ExecutionCompanyName = entity.ExecutionCompany?.Name;
         }
     }
 }
