@@ -22,7 +22,7 @@ namespace MiSmart.API.Controllers
         [HttpGet]
         public IActionResult GetFlightStats([FromServices] FlightStatRepository flightStatRepository,
         [FromServices] TeamUserRepository teamUserRepository,
-        [FromServices] CustomerUserRepository customerUserRepository, [FromQuery] PageCommand pageCommand, [FromQuery] DateTime? from, [FromQuery] DateTime? to, [FromQuery] Int64? teamID, [FromQuery] Int32? deviceID, [FromQuery] Int32? deviceModelID, [FromQuery] String mode = "Small")
+        [FromServices] CustomerUserRepository customerUserRepository, [FromQuery] PageCommand pageCommand, [FromQuery] DateTime? from, [FromQuery] DateTime? to, [FromQuery] Int32? executionCompanyID, [FromQuery] Int64? teamID, [FromQuery] Int32? deviceID, [FromQuery] Int32? deviceModelID, [FromQuery] String mode = "Small")
         {
             var response = new FlightStatsActionResponse();
             response.ApplySettings(actionResponseFactory.Settings);
@@ -33,15 +33,12 @@ namespace MiSmart.API.Controllers
                 response.AddNotAllowedErr();
             }
 
-
-
-
-
             Expression<Func<FlightStat, Boolean>> query = ww => (ww.CustomerID == customerUser.CustomerID)
                 && (teamID.HasValue ? (ww.Device.TeamID == teamID.Value) : true)
                 && (deviceID.HasValue ? (ww.DeviceID == deviceID.Value) : true)
                 && (from.HasValue ? (ww.FlightTime >= from.Value) : true)
-                && (to.HasValue ? (ww.FlightTime <= to.Value) : true)
+                && (to.HasValue ? (ww.FlightTime <= to.Value.AddDays(1)) : true)
+                && (executionCompanyID.HasValue ? (ww.ExecutionCompanyID == executionCompanyID.GetValueOrDefault()) : true)
                 && (true);
             if (mode == "Large")
             {

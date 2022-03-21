@@ -97,9 +97,6 @@ namespace MiSmart.API.Controllers
             return response.ToIActionResult();
         }
 
-
-
-
         [HttpGet]
         public IActionResult GetList([FromServices] CustomerUserRepository customerUserRepository,
         [FromServices] DeviceRepository deviceRepository,
