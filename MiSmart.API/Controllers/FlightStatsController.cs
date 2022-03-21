@@ -11,6 +11,8 @@ using MiSmart.Infrastructure.ViewModels;
 using System.Linq.Expressions;
 using System.Collections.Generic;
 using System.Linq;
+using MiSmart.DAL.Responses;
+using Microsoft.Extensions.Options;
 
 namespace MiSmart.API.Controllers
 {
@@ -23,6 +25,7 @@ namespace MiSmart.API.Controllers
         [HttpGet]
         public IActionResult GetFlightStats([FromServices] FlightStatRepository flightStatRepository,
         [FromServices] TeamUserRepository teamUserRepository,
+        [FromServices] IOptions<ActionResponseSettings> options,
         [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository,
         [FromServices] CustomerUserRepository customerUserRepository, [FromQuery] PageCommand pageCommand,
          [FromQuery] DateTime? from, [FromQuery] DateTime? to, [FromQuery] Int32? executionCompanyID,
@@ -31,7 +34,8 @@ namespace MiSmart.API.Controllers
          [FromQuery] String relation = "Owner",
          [FromQuery] String mode = "Small")
         {
-            var response = actionResponseFactory.CreateInstance();
+            FlightStatsActionResponse response = new FlightStatsActionResponse();
+            response.ApplySettings(options.Value);
             Expression<Func<FlightStat, Boolean>> query = ww => false;
 
             if (relation == "Owner")
