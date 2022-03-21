@@ -103,32 +103,49 @@ namespace MiSmart.API.Controllers
         [HttpGet]
         public IActionResult GetList([FromServices] CustomerUserRepository customerUserRepository,
         [FromServices] DeviceRepository deviceRepository,
-
-         [FromServices] TeamUserRepository teamUserRepository, [FromQuery] PageCommand pageCommand, [FromQuery] String search, [FromQuery] String mode = "Small")
+    [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository,
+         [FromServices] TeamUserRepository teamUserRepository, [FromQuery] PageCommand pageCommand, [FromQuery] String search,
+         [FromQuery] String relation = "Owner", [FromQuery] String mode = "Small")
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
-            CustomerUser customerUser = customerUserRepository.GetByPermission(CurrentUser.ID);
-
-            if (customerUser is null)
+            Expression<Func<Device, Boolean>> query = ww => false;
+            if (relation == "Owner")
             {
-                response.AddNotAllowedErr();
-            }
+                CustomerUser customerUser = customerUserRepository.GetByPermission(CurrentUser.ID);
 
-            Expression<Func<Device, Boolean>> query = ww => (true)
-            && (!String.IsNullOrWhiteSpace(search) ? ww.Name.ToLower().Contains(search.ToLower()) : true);
-            if (mode == "Large")
-            {
+                if (customerUser is null)
+                {
+                    response.AddNotAllowedErr();
+                }
 
-            }
-            else if (mode == "Medium")
-            {
+                query = ww => (ww.CustomerID == customerUser.CustomerID)
+                && (!String.IsNullOrWhiteSpace(search) ? ww.Name.ToLower().Contains(search.ToLower()) : true);
+                if (mode == "Large")
+                {
 
+                }
+                else if (mode == "Medium")
+                {
+
+                }
+                else
+                {
+
+                }
             }
             else
             {
-                var listResponse = deviceRepository.GetListResponseView<SmallDeviceViewModel>(pageCommand, query);
-                listResponse.SetResponse(response);
+                ExecutionCompanyUser executionCompanyUser = executionCompanyUserRepository.GetByPermission(CurrentUser.ID);
+                if (executionCompanyUser is null)
+                {
+                    response.AddNotAllowedErr();
+
+                }
+                query = ww => (ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID)
+                 && (!String.IsNullOrWhiteSpace(search) ? ww.Name.ToLower().Contains(search.ToLower()) : true);
             }
+            var listResponse = deviceRepository.GetListResponseView<SmallDeviceViewModel>(pageCommand, query);
+            listResponse.SetResponse(response);
             return response.ToIActionResult();
         }
         [HttpGet("{id:int}/GetToken")]
