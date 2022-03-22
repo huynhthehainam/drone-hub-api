@@ -8,10 +8,12 @@ namespace MiSmart.DAL.ViewModels
     {
         public Int32 ID { get; set; }
         public String Name { get; set; }
+        public String Address { get; set; }
         public void LoadFrom(ExecutionCompany entity)
         {
             ID = entity.ID;
             Name = entity.Name;
+            Address = entity.Address;
         }
     }
 }
