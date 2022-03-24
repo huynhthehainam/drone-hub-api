@@ -22,6 +22,9 @@ namespace MiSmart.DAL.DatabaseContexts
         public DbSet<LogFile> LogFiles { get; set; }
         public DbSet<ExecutionCompany> ExecutionCompanies { get; set; }
         public DbSet<ExecutionCompanyUser> ExecutionCompanyUsers { get; set; }
+        public DbSet<Battery> Batteries { get; set; }
+        public DbSet<BatteryGroupLog> BatteryGroupLogs { get; set; }
+        public DbSet<BatteryLog> BatteryLogs { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -102,6 +105,19 @@ namespace MiSmart.DAL.DatabaseContexts
             {
                 ww.Property(ww => ww.Location).HasColumnType("geography (point)");
                 ww.HasOne(ww => ww.Device).WithMany(ww => ww.Plans).HasForeignKey(ww => ww.DeviceID).OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<Battery>(b =>
+            {
+
+            });
+            modelBuilder.Entity<BatteryGroupLog>(bgl =>
+            {
+                bgl.HasOne(bgl => bgl.Battery).WithMany(b => b.GroupLogs).HasForeignKey(bgl => bgl.BatteryID).OnDelete(DeleteBehavior.Cascade);
+            });
+            modelBuilder.Entity<BatteryLog>(bl =>
+            {
+                bl.HasOne(bl => bl.GroupLog).WithMany(bgl => bgl.Logs).HasForeignKey(bl => bl.GroupLogID).OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

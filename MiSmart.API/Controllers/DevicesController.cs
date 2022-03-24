@@ -100,6 +100,7 @@ namespace MiSmart.API.Controllers
         [HttpGet]
         public IActionResult GetList([FromServices] CustomerUserRepository customerUserRepository,
         [FromServices] DeviceRepository deviceRepository,
+        [FromServices] BatteryGroupLogRepository batteryGroupLogRepository,
     [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository,
          [FromServices] TeamUserRepository teamUserRepository, [FromQuery] PageCommand pageCommand, [FromQuery] String search,
          [FromQuery] String relation = "Owner", [FromQuery] String mode = "Small")
@@ -132,6 +133,21 @@ namespace MiSmart.API.Controllers
                  && (!String.IsNullOrWhiteSpace(search) ? ww.Name.ToLower().Contains(search.ToLower()) : true);
             }
             var listResponse = deviceRepository.GetListResponseView<SmallDeviceViewModel>(pageCommand, query);
+            foreach (var item in listResponse.Data)
+            {
+                if (item.LastBatteryGroupIDs.Count > 0)
+                {
+                    item.BatteryGroupLogs = new List<BatteryGroupLogViewModel>();
+                    foreach (var groupID in item.LastBatteryGroupIDs)
+                    {
+                        var group = batteryGroupLogRepository.Get(ww => ww.ID == groupID);
+                        if (group is not null)
+                        {
+                            item.BatteryGroupLogs.Add(ViewModelHelpers.ConvertToViewModel<BatteryGroupLog, BatteryGroupLogViewModel>(group));
+                        }
+                    }
+                }
+            }
             listResponse.SetResponse(response);
             return response.ToIActionResult();
         }
@@ -260,7 +276,9 @@ namespace MiSmart.API.Controllers
 
 
         [HttpPost("me/TelemetryRecords")]
-        public IActionResult CreateTelemetryRecord([FromServices] DeviceRepository deviceRepository, [FromServices] TelemetryGroupRepository telemetryGroupRepository, [FromBody] AddingBulkTelemetryRecordCommand command)
+        public IActionResult CreateTelemetryRecord([FromServices] DeviceRepository deviceRepository,
+        [FromServices] BatteryGroupLogRepository batteryGroupLogRepository,
+        [FromServices] BatteryRepository batteryRepository, [FromServices] TelemetryGroupRepository telemetryGroupRepository, [FromBody] AddingBulkTelemetryRecordCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
             var device = deviceRepository.Get(ww => ww.ID == CurrentDevice.ID);
@@ -302,6 +320,54 @@ namespace MiSmart.API.Controllers
             telemetryGroupRepository.Create(group);
 
             device.LastGroupID = group.ID;
+
+            deviceRepository.Update(device);
+
+            var batteryLogGroups = command.BatteryLogs.GroupBy(bl => bl.ActualID);
+            List<Guid> lastGroupIDs = new List<Guid>();
+            foreach (var batteryGroup in batteryLogGroups)
+            {
+                var key = batteryGroup.Key;
+                var battery = batteryRepository.Get(b => b.ActualID == key);
+                if (battery is not null)
+                {
+
+                    TimeSpan span1 = new TimeSpan(0, 0, 0, 0, 5000);
+                    TimeSpan eachSpan1 = span1 / batteryGroup.Count();
+                    var startedTime1 = DateTime.Now - span1;
+                    var actualGroup = batteryGroup.ToList();
+                    var logs = new List<BatteryLog>();
+                    for (var i = 0; i < actualGroup.Count(); i++)
+                    {
+                        logs.Add(new BatteryLog
+                        {
+                            CellMaximumVoltage = actualGroup[i].CellMaximumVoltage,
+                            CellMaximumVoltageUnit = actualGroup[i].CellMaximumVoltageUnit,
+                            CellMinimumVoltage = actualGroup[i].CellMinimumVoltage,
+                            CellMinimumVoltageUnit = actualGroup[i].CellMinimumVoltageUnit,
+                            CreatedTime = startedTime1.Add(eachSpan1 * i),
+                            Current = actualGroup[i].Current,
+                            CurrentUnit = actualGroup[i].CurrentUnit,
+                            CycleCount = actualGroup[i].CycleCount,
+                            PercentRemaining = actualGroup[i].PercentRemaining,
+                            Temperature = actualGroup[i].Temperature,
+                            TemperatureUnit = actualGroup[i].TemperatureUnit,
+                        });
+                    }
+                    var groupLog = new BatteryGroupLog
+                    {
+                        Battery = battery,
+                        CreatedTime = DateTime.Now,
+                        Logs = logs,
+                    };
+                    batteryGroupLogRepository.Create(groupLog);
+
+                    lastGroupIDs.Add(groupLog.ID);
+                }
+            }
+
+            device.LastBatterGroupLogs = lastGroupIDs;
+
 
             deviceRepository.Update(device);
 

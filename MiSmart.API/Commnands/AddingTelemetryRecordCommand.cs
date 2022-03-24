@@ -6,6 +6,21 @@ using System.ComponentModel.DataAnnotations;
 
 namespace MiSmart.API.Commands
 {
+    public class AddingBatteryLogCommand
+    {
+        public String ActualID { get; set; }
+        public Double PercentRemaining { get; set; }
+        public Double Temperature { get; set; }
+        public String TemperatureUnit { get; set; }
+        public Double CellMinimumVoltage { get; set; }
+        public String CellMinimumVoltageUnit { get; set; }
+        public Double CellMaximumVoltage { get; set; }
+        public String CellMaximumVoltageUnit { get; set; }
+        public Int32 CycleCount { get; set; }
+        public Double Current { get; set; }
+        public String CurrentUnit { get; set; }
+    }
+
     public class AddingTelemetryRecordCommand
     {
         [Required]
@@ -22,5 +37,7 @@ namespace MiSmart.API.Commands
     {
         [Required]
         public List<AddingTelemetryRecordCommand> Data { get; set; }
+        public List<AddingBatteryLogCommand> BatteryLogs { get; set; } = new List<AddingBatteryLogCommand>();
+
     }
 }

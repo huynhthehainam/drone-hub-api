@@ -8,7 +8,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace MiSmart.API.Commands
 {
-    public class LocationPoint
+       public class LocationPoint
     {
         [Required]
         public Double? Longitude { get; set; }
