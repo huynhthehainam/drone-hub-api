@@ -240,10 +240,9 @@ namespace MiSmart.API
             {
                 c.SwaggerEndpoint($"/swagger/v1/swagger.json", "Flighthub.API V1");
             });
-            if (env.IsDevelopment())
-            {
-                SeedData(app);
-            }
+
+            SeedData(app);
+
 
             app.UseRouting();
             app.UseCors("AllowedOrigin");
