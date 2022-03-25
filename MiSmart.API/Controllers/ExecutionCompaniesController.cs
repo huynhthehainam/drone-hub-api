@@ -117,6 +117,24 @@ namespace MiSmart.API.Controllers
             return response.ToIActionResult();
         }
 
+
+        [HttpGet("{id:int}/Batteries")]
+        [HasPermission(typeof(AdminPermission))]
+        public IActionResult GetBatteries([FromServices] BatteryRepository batteryRepository, [FromServices] ExecutionCompanyRepository executionCompanyRepository, [FromQuery] PageCommand pageCommand, [FromRoute] Int32 id)
+        {
+            var response = actionResponseFactory.CreateInstance();
+            var executionCompany = executionCompanyRepository.Get(ww => ww.ID == id);
+            if (executionCompany is null)
+            {
+                response.AddNotFoundErr("ExecutionCompany");
+            }
+
+            var listResponse = batteryRepository.GetListResponseView<BatteryViewModel>(pageCommand, ww => ww.ExecutionCompanyID == executionCompany.ID);
+            listResponse.SetResponse(response);
+
+            return response.ToIActionResult();
+        }
+
         [HttpDelete("{id:int}")]
         [HasPermission(typeof(AdminPermission))]
         public IActionResult DeleteExecutionCompany([FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, [FromServices] ExecutionCompanyRepository executionCompanyRepository,
