@@ -8,4 +8,9 @@ namespace MiSmart.API.Commands
     {
         public String Name { get; set; }
     }
+    public class PatchingBatterModelCommand
+    {
+        public String Name { get; set; }
+        public String ManufacturerName { get; set; }
+    }
 }

@@ -20,4 +20,18 @@ namespace MiSmart.DAL.ViewModels
             LastGroup = entity.LastGroup is null ? null : ViewModelHelpers.ConvertToViewModel<BatteryGroupLog, BatteryGroupLogViewModel>(entity.LastGroup);
         }
     }
+    public class SmallBatteryModelViewModel : IViewModel<BatteryModel>
+    {
+        public Int32 ID { get; set; }
+        public String Name { get; set; }
+        public String ManufacturerName { get; set; }
+        public Int32 BatteriesCount { get; set; }
+        public void LoadFrom(BatteryModel entity)
+        {
+            ID = entity.ID;
+            Name = entity.Name;
+            ManufacturerName = entity.ManufacturerName;
+            BatteriesCount = entity.Batteries.Count;
+        }
+    }
 }

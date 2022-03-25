@@ -169,6 +169,7 @@ namespace MiSmart.API
             services.AddScoped<ExecutionCompanyRepository, ExecutionCompanyRepository>();
             services.AddScoped<BatteryGroupLogRepository, BatteryGroupLogRepository>();
             services.AddScoped<BatteryRepository, BatteryRepository>();
+            services.AddScoped<BatteryModelRepository, BatteryModelRepository>();
 
 
             #endregion

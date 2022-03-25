@@ -17,7 +17,13 @@ namespace MiSmart.DAL.Models
 
         public String ActualID { get; set; }
 
-
+        private BatteryModel batteryModel;
+        public BatteryModel BatteryModel
+        {
+            get => lazyLoader.Load(this, ref batteryModel);
+            set => batteryModel = value;
+        }
+        public Int32 BatteryModelID { get; set; }
 
         private ICollection<BatteryGroupLog> groupLogs;
         public ICollection<BatteryGroupLog> GroupLogs

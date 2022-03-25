@@ -25,6 +25,7 @@ namespace MiSmart.API.Controllers
         [HttpPost]
         [HasPermission(typeof(AdminPermission))]
         public IActionResult Create([FromBody] AddingBatteryCommand command,
+        [FromServices] BatteryModelRepository batteryModelRepository,
         [FromServices] ExecutionCompanyRepository executionCompanyRepository,
          [FromServices] BatteryRepository batteryRepository)
         {
@@ -37,7 +38,12 @@ namespace MiSmart.API.Controllers
                     response.AddInvalidErr("ExecutionCompanyID");
                 }
             }
-            Battery battery = new Battery { ActualID = command.ActualID, ExecutionCompanyID = command.ExecutionCompanyID };
+            BatteryModel batteryModel = batteryModelRepository.Get(ww => ww.ID == command.BatteryModelID.GetValueOrDefault());
+            if (batteryModel is null)
+            {
+                response.AddInvalidErr("BatteryModelID");
+            }
+            Battery battery = new Battery { ActualID = command.ActualID, ExecutionCompanyID = command.ExecutionCompanyID, BatteryModel = batteryModel };
 
             batteryRepository.Create(battery);
             response.SetCreatedObject(battery);

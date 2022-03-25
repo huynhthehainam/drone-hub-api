@@ -25,6 +25,7 @@ namespace MiSmart.DAL.DatabaseContexts
         public DbSet<Battery> Batteries { get; set; }
         public DbSet<BatteryGroupLog> BatteryGroupLogs { get; set; }
         public DbSet<BatteryLog> BatteryLogs { get; set; }
+        public DbSet<BatteryModel> BatteryModels { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -107,10 +108,16 @@ namespace MiSmart.DAL.DatabaseContexts
                 ww.HasOne(ww => ww.Device).WithMany(ww => ww.Plans).HasForeignKey(ww => ww.DeviceID).OnDelete(DeleteBehavior.Cascade);
             });
 
+            modelBuilder.Entity<BatteryModel>(bm =>
+            {
+
+            });
+
             modelBuilder.Entity<Battery>(b =>
             {
                 b.HasOne(b => b.ExecutionCompany).WithMany(c => c.Batteries).HasForeignKey(b => b.ExecutionCompanyID).OnDelete(DeleteBehavior.SetNull);
                 b.HasOne(b => b.LastGroup).WithMany(g => g.LastBatteries).HasForeignKey(b => b.LastGroupID).OnDelete(DeleteBehavior.SetNull);
+                b.HasOne(b => b.BatteryModel).WithMany(bm => bm.Batteries).HasForeignKey(b => b.BatteryModelID).OnDelete(DeleteBehavior.Cascade);
             });
             modelBuilder.Entity<BatteryGroupLog>(bgl =>
             {

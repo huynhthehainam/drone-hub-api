@@ -6,4 +6,8 @@ namespace MiSmart.API.Commands
     {
         public IFormFile File { get; set; }
     }
+     public class UpdatingBatteryModelImageCommand
+    {
+        public IFormFile File { get; set; }
+    }
 }
