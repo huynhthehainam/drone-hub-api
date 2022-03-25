@@ -120,6 +120,14 @@ namespace MiSmart.API.Controllers
                 && (!String.IsNullOrWhiteSpace(search) ? ww.Name.ToLower().Contains(search.ToLower()) : true);
 
             }
+            else if (relation == "Administrator")
+            {
+                if (!CurrentUser.IsAdmin && CurrentUser.RoleID != 1)
+                {
+                    response.AddNotAllowedErr();
+                }
+                query = fl => true;
+            }
             else
             {
                 ExecutionCompanyUser executionCompanyUser = executionCompanyUserRepository.GetByPermission(CurrentUser.ID);
@@ -278,6 +286,7 @@ namespace MiSmart.API.Controllers
         [HttpPost("me/TelemetryRecords")]
         public IActionResult CreateTelemetryRecord([FromServices] DeviceRepository deviceRepository,
         [FromServices] BatteryGroupLogRepository batteryGroupLogRepository,
+        [FromServices] EmailService emailService,
         [FromServices] BatteryRepository batteryRepository, [FromServices] TelemetryGroupRepository telemetryGroupRepository, [FromBody] AddingBulkTelemetryRecordCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
@@ -329,6 +338,12 @@ namespace MiSmart.API.Controllers
             {
                 var key = batteryGroup.Key;
                 var battery = batteryRepository.Get(b => b.ActualID == key);
+                if (battery is null)
+                {
+                    battery = new Battery { ActualID = key };
+                    batteryRepository.Create(battery);
+                    emailService.SendMailAsync(new String[] { "huynhthehainam@gmail.com" }, new String[] { }, new String[] { }, "New battery ID", $"Battery ID {key} is just registered.").Wait();
+                }
                 if (battery is not null)
                 {
 
@@ -361,9 +376,11 @@ namespace MiSmart.API.Controllers
                         Logs = logs,
                     };
                     batteryGroupLogRepository.Create(groupLog);
-
+                    battery.LastGroup = groupLog;
+                    batteryRepository.Update(battery);
                     lastGroupIDs.Add(groupLog.ID);
                 }
+
             }
 
             device.LastBatterGroupLogs = lastGroupIDs;

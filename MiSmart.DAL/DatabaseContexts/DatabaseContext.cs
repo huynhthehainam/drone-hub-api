@@ -109,7 +109,8 @@ namespace MiSmart.DAL.DatabaseContexts
 
             modelBuilder.Entity<Battery>(b =>
             {
-
+                b.HasOne(b => b.ExecutionCompany).WithMany(c => c.Batteries).HasForeignKey(b => b.ExecutionCompanyID).OnDelete(DeleteBehavior.SetNull);
+                b.HasOne(b => b.LastGroup).WithMany(g => g.LastBatteries).HasForeignKey(b => b.LastGroupID).OnDelete(DeleteBehavior.SetNull);
             });
             modelBuilder.Entity<BatteryGroupLog>(bgl =>
             {

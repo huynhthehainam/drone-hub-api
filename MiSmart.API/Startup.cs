@@ -263,6 +263,14 @@ namespace MiSmart.API
             var scope = app.ApplicationServices.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
             context.Database.Migrate();
+
+            var env = scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
+            if (!env.IsDevelopment())
+            {
+                Console.WriteLine("Not dev env");
+                return;
+            }
+
             if (!context.DeviceModels.Any())
             {
                 var deviceModel1 = new DeviceModel { Name = "VS20" };

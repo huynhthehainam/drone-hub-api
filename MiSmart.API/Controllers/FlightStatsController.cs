@@ -55,6 +55,14 @@ namespace MiSmart.API.Controllers
                     && (executionCompanyID.HasValue ? (ww.ExecutionCompanyID == executionCompanyID.GetValueOrDefault()) : true)
                     && (true);
             }
+            else if (relation == "Administrator")
+            {
+                if (!CurrentUser.IsAdmin && CurrentUser.RoleID != 1)
+                {
+                    response.AddNotAllowedErr();
+                }
+                query = fl => true;
+            }
             else
             {
                 ExecutionCompanyUser executionCompanyUser = executionCompanyUserRepository.GetByPermission(CurrentUser.ID);

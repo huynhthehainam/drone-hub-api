@@ -34,5 +34,13 @@ namespace MiSmart.DAL.Models
         }
         public Int32 BatteryID { get; set; }
         public DateTime CreatedTime { get; set; } = DateTime.Now;
+
+
+        private ICollection<Battery> lastBatteries;
+        public ICollection<Battery> LastBatteries
+        {
+            get => lazyLoader.Load(this, ref lastBatteries);
+            set => lastBatteries = value;
+        }
     }
 }

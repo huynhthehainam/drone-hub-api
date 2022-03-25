@@ -25,5 +25,24 @@ namespace MiSmart.DAL.Models
             get => lazyLoader.Load(this, ref groupLogs);
             set => groupLogs = value;
         }
+
+
+
+        private BatteryGroupLog lastGroup;
+        public BatteryGroupLog LastGroup
+        {
+            get => lazyLoader.Load(this, ref lastGroup);
+            set => lastGroup = value;
+        }
+        public Guid? LastGroupID { get; set; }
+
+
+        private ExecutionCompany executionCompany;
+        public ExecutionCompany ExecutionCompany
+        {
+            get => lazyLoader.Load(this, ref executionCompany);
+            set => executionCompany = value;
+        }
+        public Int32? ExecutionCompanyID { get; set; }
     }
 }

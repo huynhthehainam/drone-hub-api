@@ -52,6 +52,13 @@ namespace MiSmart.DAL.Models
             get => lazyLoader.Load(this, ref flightStats);
             set => flightStats = value;
         }
-        
+
+
+        private ICollection<Battery> batteries;
+        public ICollection<Battery> Batteries
+        {
+            get => lazyLoader.Load(this, ref batteries);
+            set => batteries = value;
+        }
     }
 }

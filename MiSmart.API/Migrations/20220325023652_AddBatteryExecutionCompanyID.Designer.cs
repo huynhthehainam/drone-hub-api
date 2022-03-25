@@ -3,6 +3,7 @@ using System;
 using MiSmart.DAL.DatabaseContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -10,9 +11,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MiSmart.API.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20220325023652_AddBatteryExecutionCompanyID")]
+    partial class AddBatteryExecutionCompanyID
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -34,14 +36,9 @@ namespace MiSmart.API.Migrations
                     b.Property<int?>("ExecutionCompanyID")
                         .HasColumnType("integer");
 
-                    b.Property<Guid?>("LastGroupID")
-                        .HasColumnType("uuid");
-
                     b.HasKey("ID");
 
                     b.HasIndex("ExecutionCompanyID");
-
-                    b.HasIndex("LastGroupID");
 
                     b.ToTable("Batteries");
                 });
@@ -576,14 +573,7 @@ namespace MiSmart.API.Migrations
                         .HasForeignKey("ExecutionCompanyID")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("MiSmart.DAL.Models.BatteryGroupLog", "LastGroup")
-                        .WithMany("LastBatteries")
-                        .HasForeignKey("LastGroupID")
-                        .OnDelete(DeleteBehavior.SetNull);
-
                     b.Navigation("ExecutionCompany");
-
-                    b.Navigation("LastGroup");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.BatteryGroupLog", b =>
@@ -803,8 +793,6 @@ namespace MiSmart.API.Migrations
 
             modelBuilder.Entity("MiSmart.DAL.Models.BatteryGroupLog", b =>
                 {
-                    b.Navigation("LastBatteries");
-
                     b.Navigation("Logs");
                 });
 
