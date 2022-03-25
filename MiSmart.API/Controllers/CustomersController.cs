@@ -123,7 +123,7 @@ namespace MiSmart.API.Controllers
                 response.AddNotFoundErr("Customer");
             }
 
-            var listResponse = deviceRepository.GetListResponseView<SmallDeviceViewModel>(pageCommand, ww => ww.CustomerID == customer.ID);
+            var listResponse = deviceRepository.GetListResponseView<LargeDeviceViewModel>(pageCommand, ww => ww.CustomerID == customer.ID);
             listResponse.SetResponse(response);
 
             return response.ToIActionResult();

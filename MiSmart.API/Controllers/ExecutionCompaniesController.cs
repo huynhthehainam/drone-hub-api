@@ -111,7 +111,7 @@ namespace MiSmart.API.Controllers
                 response.AddNotFoundErr("ExecutionCompany");
             }
 
-            var listResponse = deviceRepository.GetListResponseView<SmallDeviceViewModel>(pageCommand, ww => ww.ExecutionCompanyID == executionCompany.ID);
+            var listResponse = deviceRepository.GetListResponseView<LargeDeviceViewModel>(pageCommand, ww => ww.ExecutionCompanyID == executionCompany.ID);
             listResponse.SetResponse(response);
 
             return response.ToIActionResult();

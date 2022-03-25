@@ -85,4 +85,37 @@ namespace MiSmart.DAL.ViewModels
             LastBatteryGroupIDs = entity.LastBatterGroupLogs;
         }
     }
+    public class LargeDeviceViewModel : IViewModel<Device>
+    {
+        public Int32 ID { get; set; }
+        public Int64? TeamID { get; set; }
+        public Int32 CustomerID { get; set; }
+        public String Name { get; set; }
+        public DeviceStatus Status { get; set; }
+        public Guid UUID { get; set; }
+        public String TeamName { get; set; }
+        public String ExecutionCompanyName { get; set; }
+        public String DeviceModelName { get; set; }
+        public Guid? LastGroupID { get; set; }
+        public List<TelemetryRecordViewModel> LastGroupRecords { get; set; }
+        public List<Guid> LastBatteryGroupIDs;
+        public List<BatteryGroupLogViewModel> BatteryGroupLogs { get; set; }
+        public String Token { get; set; }
+        public void LoadFrom(Device entity)
+        {
+            ID = entity.ID;
+            TeamID = entity.TeamID;
+            DeviceModelName = entity.DeviceModel.Name;
+            CustomerID = entity.CustomerID;
+            Name = entity.Name;
+            Status = entity.Status;
+            UUID = entity.UUID;
+            TeamName = entity.Team?.Name;
+            LastGroupID = entity.LastGroupID;
+            LastGroupRecords = entity.LastGroup?.Records.OrderBy(ww => ww.CreatedTime).Select(ww => ViewModelHelpers.ConvertToViewModel<TelemetryRecord, TelemetryRecordViewModel>(ww)).ToList();
+            ExecutionCompanyName = entity.ExecutionCompany?.Name;
+            LastBatteryGroupIDs = entity.LastBatterGroupLogs;
+            Token = entity.Token;
+        }
+    }
 }
