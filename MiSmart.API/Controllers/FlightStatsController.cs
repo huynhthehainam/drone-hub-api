@@ -85,15 +85,39 @@ namespace MiSmart.API.Controllers
         }
 
         [HttpGet("{id:Guid}")]
-        public IActionResult GetByID([FromServices] FlightStatRepository flightStatRepository, [FromServices] CustomerUserRepository customerUserRepository, [FromRoute] Guid id)
+        public IActionResult GetByID([FromServices] FlightStatRepository flightStatRepository, [FromServices] CustomerUserRepository customerUserRepository,
+        [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, [FromRoute] Guid id,
+        [FromQuery] String relation = "Owner")
         {
             var response = actionResponseFactory.CreateInstance();
-            CustomerUser customerUser = customerUserRepository.GetByPermission(CurrentUser.ID);
-            if (customerUser is null)
+            Expression<Func<FlightStat, Boolean>> query = ww => false;
+            if (relation == "Owner")
             {
-                response.AddNotAllowedErr();
+                CustomerUser customerUser = customerUserRepository.GetByPermission(CurrentUser.ID);
+                if (customerUser is null)
+                {
+                    response.AddNotAllowedErr();
+                }
+                query = ww => ww.ID == id && ww.CustomerID == customerUser.CustomerID;
             }
-            var flightStat = flightStatRepository.Get(ww => ww.ID == id);
+            else if (relation == "Administrator")
+            {
+                if (!CurrentUser.IsAdmin && CurrentUser.RoleID != 1)
+                {
+                    response.AddNotAllowedErr();
+                }
+                query = ww => ww.ID == id;
+            }
+            else
+            {
+                ExecutionCompanyUser executionCompanyUser = executionCompanyUserRepository.GetByPermission(CurrentUser.ID);
+                if (executionCompanyUser is null)
+                {
+                    response.AddNotAllowedErr();
+                }
+                query = ww => ww.ID == id && ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID;
+            }
+            var flightStat = flightStatRepository.Get(query);
 
             if (flightStat is null)
             {
