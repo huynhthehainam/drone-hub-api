@@ -13,6 +13,8 @@ using System.Collections.Generic;
 using System.Linq;
 using MiSmart.DAL.Responses;
 using Microsoft.Extensions.Options;
+using MiSmart.Infrastructure.Permissions;
+using MiSmart.API.Permissions;
 
 namespace MiSmart.API.Controllers
 {
@@ -127,15 +129,10 @@ namespace MiSmart.API.Controllers
             return response.ToIActionResult();
         }
         [HttpDelete("{id:Guid}")]
+        [HasPermission(typeof(AdminPermission))]
         public IActionResult DeleteByID([FromServices] FlightStatRepository flightStatRepository, [FromServices] CustomerUserRepository customerUserRepository, [FromRoute] Guid id)
         {
             var response = actionResponseFactory.CreateInstance();
-            CustomerUser customerUser = customerUserRepository.GetByPermission(CurrentUser.ID);
-            if (customerUser is null)
-            {
-                response.AddNotAllowedErr();
-            }
-
             var flightStat = flightStatRepository.Get(ww => ww.ID == id);
 
             if (flightStat is null)
