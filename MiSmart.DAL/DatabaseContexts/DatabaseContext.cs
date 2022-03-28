@@ -54,7 +54,7 @@ namespace MiSmart.DAL.DatabaseContexts
             modelBuilder.Entity<Device>(ww =>
             {
                 ww.HasOne(ww => ww.Team).WithMany(ww => ww.Devices).HasForeignKey(ww => ww.TeamID).OnDelete(DeleteBehavior.SetNull);
-                ww.HasOne(ww => ww.LastGroup).WithOne(ww => ww.LastDevice).HasForeignKey<Device>(ww => ww.LastGroupID).OnDelete(DeleteBehavior.Cascade);
+                ww.HasOne(ww => ww.LastGroup).WithOne(ww => ww.LastDevice).HasForeignKey<Device>(ww => ww.LastGroupID).OnDelete(DeleteBehavior.SetNull);
                 ww.HasOne(ww => ww.Customer).WithMany(ww => ww.Devices).HasForeignKey(ww => ww.CustomerID).OnDelete(DeleteBehavior.Cascade);
                 ww.HasOne(ww => ww.DeviceModel).WithMany(ww => ww.Devices).HasForeignKey(ww => ww.DeviceModelID).OnDelete(DeleteBehavior.Cascade);
                 ww.HasOne(ww => ww.ExecutionCompany).WithMany(ww => ww.Devices).HasForeignKey(ww => ww.ExecutionCompanyID).OnDelete(DeleteBehavior.SetNull);
