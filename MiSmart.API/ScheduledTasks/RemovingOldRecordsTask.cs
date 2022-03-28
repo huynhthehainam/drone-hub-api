@@ -1,9 +1,12 @@
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using MiSmart.DAL.DatabaseContexts;
+using MiSmart.DAL.Models;
 using MiSmart.Infrastructure.ScheduledTasks;
 
 namespace MiSmart.API.ScheduledTasks
@@ -21,7 +24,10 @@ namespace MiSmart.API.ScheduledTasks
             {
                 using (DatabaseContext databaseContext = scope.ServiceProvider.GetRequiredService<DatabaseContext>())
                 {
-                    // List<TelemetryGroup> groups =  databaseContext.TelemetryGroups.Where(g=> g.CreatedTime < DateTime.Now)
+                    List<TelemetryGroup> groups = databaseContext.TelemetryGroups.Where(g => g.CreatedTime < DateTime.Now.AddDays(-7) && g.LastDevice == null).ToList();
+                    databaseContext.TelemetryGroups.RemoveRange(groups);
+                    databaseContext.SaveChanges();
+                  
                 }
             }
 

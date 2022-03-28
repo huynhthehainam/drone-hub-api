@@ -37,6 +37,8 @@ using MiSmart.API.Models;
 using MiSmart.DAL.Models;
 using NetTopologySuite;
 using Microsoft.Extensions.Options;
+using MiSmart.Infrastructure.ScheduledTasks;
+using MiSmart.API.ScheduledTasks;
 
 namespace MiSmart.API
 {
@@ -207,7 +209,11 @@ namespace MiSmart.API
 
             #region AddingCronJobs
 
-            
+            services.AddCronJob<RemovingOldRecordsTask>(o =>
+            {
+                o.CronExpression = "*/5 * * * * *";
+                o.TimeZoneInfo = TimeZoneInfo.Local;
+            });
             #endregion
         }
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
