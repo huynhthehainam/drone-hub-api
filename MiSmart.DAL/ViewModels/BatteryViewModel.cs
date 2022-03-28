@@ -26,12 +26,14 @@ namespace MiSmart.DAL.ViewModels
         public String Name { get; set; }
         public String ManufacturerName { get; set; }
         public Int32 BatteriesCount { get; set; }
+        public String FileUrl { get; set; }
         public void LoadFrom(BatteryModel entity)
         {
             ID = entity.ID;
             Name = entity.Name;
             ManufacturerName = entity.ManufacturerName;
             BatteriesCount = entity.Batteries.Count;
+            FileUrl = entity.FileUrl;
         }
     }
 }
