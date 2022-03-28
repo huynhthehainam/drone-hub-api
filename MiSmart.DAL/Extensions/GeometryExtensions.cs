@@ -1,5 +1,6 @@
 
 
+using System;
 using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 using ProjNet;
@@ -12,7 +13,7 @@ namespace MiSmart.DAL.Extensions
     {
         private static readonly CoordinateSystemServices _coordinateSystemServices
             = new CoordinateSystemServices(
-                new Dictionary<int, string>
+                new Dictionary<Int32, String>
                 {
                     [4326] = GeographicCoordinateSystem.WGS84.WKT,
                     [3857] = "PROJCS[\"WGS 84 / World Mercator\",GEOGCS[\"WGS 84 sphere\",DATUM[\"WGS_1984 sphere\",SPHEROID[\"WGS 84 sphere\",6378137,0.0]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.01745329251994328,AUTHORITY[\"EPSG\",\"9122\"]]],PROJECTION[\"Mercator_1SP\"],PARAMETER[\"latitude_of_origin\",0],PARAMETER[\"central_meridian\",0],PARAMETER[\"scale_factor\",1],PARAMETER[\"false_easting\",0],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH]]",
@@ -42,7 +43,7 @@ namespace MiSmart.DAL.Extensions
                 "
                 });
 
-        public static Geometry ProjectTo(this Geometry geometry, int srid)
+        public static Geometry ProjectTo(this Geometry geometry, Int32 srid)
         {
             CoordinateSystemFactory c = new CoordinateSystemFactory();
             var transformation = _coordinateSystemServices.CreateTransformation(geometry.SRID, srid);
@@ -60,10 +61,10 @@ namespace MiSmart.DAL.Extensions
             public MathTransformFilter(MathTransform transform)
                 => _transform = transform;
 
-            public bool Done => false;
-            public bool GeometryChanged => true;
+            public Boolean Done => false;
+            public Boolean GeometryChanged => true;
 
-            public void Filter(CoordinateSequence seq, int i)
+            public void Filter(CoordinateSequence seq, Int32 i)
             {
                 var x = seq.GetX(i);
                 var y = seq.GetY(i);

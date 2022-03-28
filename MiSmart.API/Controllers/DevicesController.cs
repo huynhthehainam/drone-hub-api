@@ -160,19 +160,41 @@ namespace MiSmart.API.Controllers
             return response.ToIActionResult();
         }
         [HttpGet("{id:int}/GetToken")]
-        public IActionResult GetToken([FromServices] CustomerUserRepository customerUserRepository, [FromServices] TeamUserRepository teamUserRepository, [FromServices] DeviceRepository deviceRepository, [FromRoute] Int32 id)
+        public IActionResult GetToken([FromServices] CustomerUserRepository customerUserRepository, [FromServices] TeamUserRepository teamUserRepository, [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository,
+         [FromServices] DeviceRepository deviceRepository, [FromRoute] Int32 id, [FromRoute] String relation = "Owner")
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
-
-            CustomerUser customerUser = customerUserRepository.GetByPermission(CurrentUser.ID);
-            if (customerUser is null)
+            Expression<Func<Device, Boolean>> query = ww => false;
+            if (relation == "Owner")
             {
-                response.AddNotAllowedErr();
+
+                CustomerUser customerUser = customerUserRepository.GetByPermission(CurrentUser.ID);
+                if (customerUser is null)
+                {
+                    response.AddNotAllowedErr();
+                }
+
+
+                query = ww => (ww.ID == id)
+                   && (ww.CustomerID == customerUser.CustomerID);
             }
-
-
-            Expression<Func<Device, Boolean>> query = ww => (ww.ID == id)
-             && (true);
+            else if (relation == "Administrator")
+            {
+                if (!CurrentUser.IsAdmin && CurrentUser.RoleID != 1)
+                {
+                    response.AddNotAllowedErr();
+                }
+                query = ww => (ww.ID == id);
+            }
+            else
+            {
+                ExecutionCompanyUser executionCompanyUser = executionCompanyUserRepository.GetByPermission(CurrentUser.ID);
+                if (executionCompanyUser is null)
+                {
+                    response.AddNotAllowedErr();
+                }
+                query = ww => (ww.ID == id) && (ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID);
+            }
             var device = deviceRepository.Get(query);
             if (device is null)
             {
@@ -309,7 +331,7 @@ namespace MiSmart.API.Controllers
             TimeSpan eachSpan = span / command.Data.Count;
             var records = new List<TelemetryRecord>();
             var startedTime = DateTime.Now - span;
-            for (int i = 0; i < command.Data.Count; i++)
+            for (Int32 i = 0; i < command.Data.Count; i++)
             {
                 var item = command.Data[i];
                 records.Add(new TelemetryRecord
