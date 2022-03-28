@@ -161,7 +161,7 @@ namespace MiSmart.API.Controllers
         }
         [HttpGet("{id:int}/GetToken")]
         public IActionResult GetToken([FromServices] CustomerUserRepository customerUserRepository, [FromServices] TeamUserRepository teamUserRepository, [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository,
-         [FromServices] DeviceRepository deviceRepository, [FromRoute] Int32 id, [FromRoute] String relation = "Owner")
+         [FromServices] DeviceRepository deviceRepository, [FromRoute] Int32 id, [FromQuery] String relation = "Owner")
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
             Expression<Func<Device, Boolean>> query = ww => false;
