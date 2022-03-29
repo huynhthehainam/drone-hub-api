@@ -21,7 +21,7 @@ namespace MiSmart.DAL.Models
     {
         Active,
         Inactive,
-
+        Offline
     }
     public class Device : EntityBase<Int32>
     {
@@ -37,7 +37,7 @@ namespace MiSmart.DAL.Models
         public Guid UUID { get; set; } = Guid.NewGuid();
         public String Token { get; set; } = TokenHelper.GenerateToken();
 
-        public DeviceStatus Status { get; set; } = DeviceStatus.Active;
+        public DeviceStatus Status { get; set; } = DeviceStatus.Offline;
         private Team team;
         [JsonIgnore]
         public Team Team

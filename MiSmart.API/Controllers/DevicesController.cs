@@ -352,6 +352,8 @@ namespace MiSmart.API.Controllers
             telemetryGroupRepository.Create(group);
 
             device.LastGroupID = group.ID;
+            if (device.Status != DeviceStatus.Active)
+                device.Status = DeviceStatus.Active;
 
             deviceRepository.Update(device);
 
