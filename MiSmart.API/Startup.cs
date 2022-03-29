@@ -211,7 +211,7 @@ namespace MiSmart.API
 
             services.AddCronJob<RemovingOldRecordsTask>(o =>
             {
-                o.CronExpression = "*/5 * * * * *";
+                o.CronExpression = "* */30 * * * *";
                 o.TimeZoneInfo = TimeZoneInfo.Local;
             });
             #endregion
