@@ -4,6 +4,7 @@
 
 using System;
 using System.ComponentModel.DataAnnotations;
+using MiSmart.DAL.Models;
 
 namespace MiSmart.API.Commands
 {
@@ -16,5 +17,6 @@ namespace MiSmart.API.Commands
     {
         [Required]
         public Int64? UserID { get; set; }
+        public ExecutionCompanyUserType Type { get; set; } = ExecutionCompanyUserType.Member;
     }
 }

@@ -64,7 +64,7 @@ namespace MiSmart.API.Controllers
             {
                 response.AddExistedErr("User");
             }
-            ExecutionCompanyUser executionCompanyUser = new ExecutionCompanyUser { ExecutionCompanyID = id, UserID = command.UserID.Value };
+            ExecutionCompanyUser executionCompanyUser = new ExecutionCompanyUser { ExecutionCompanyID = id, UserID = command.UserID.Value, Type = command.Type };
             executionCompanyUserRepository.Create(executionCompanyUser);
             response.SetCreatedObject(executionCompanyUser);
 
