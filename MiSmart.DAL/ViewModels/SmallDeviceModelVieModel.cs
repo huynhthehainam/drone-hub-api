@@ -13,6 +13,7 @@ namespace MiSmart.DAL.ViewModels
         public String CustomerName { get; set; }
         public Int32 Count { get; set; }
         public List<OnlyNameDeviceViewModel> Devices { get; set; }
+        public String ListNames { get; set; }
     }
     public class SmallDeviceModelVieModel : IViewModel<DeviceModel>
     {
@@ -35,7 +36,8 @@ namespace MiSmart.DAL.ViewModels
                 Count = ww.Count(),
                 CustomerID = ww.FirstOrDefault().CustomerID,
                 CustomerName = ww.FirstOrDefault().Customer.Name,
-                Devices = ww.Select(d => ViewModelHelpers.ConvertToViewModel<Device, OnlyNameDeviceViewModel>(d)).ToList()
+                Devices = ww.Select(d => ViewModelHelpers.ConvertToViewModel<Device, OnlyNameDeviceViewModel>(d)).ToList(),
+                ListNames = String.Join(",", ww.Select(d => d.Name).ToList()),
             }).ToList();
         }
     }
