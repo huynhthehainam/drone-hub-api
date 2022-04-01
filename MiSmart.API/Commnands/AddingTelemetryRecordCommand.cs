@@ -10,8 +10,6 @@ namespace MiSmart.API.Commands
     {
         [Required]
         public String ActualID { get; set; }
-        [Required]
-        public String Type { get; set; }
         public Double PercentRemaining { get; set; }
         public Double Temperature { get; set; }
         public String TemperatureUnit { get; set; }

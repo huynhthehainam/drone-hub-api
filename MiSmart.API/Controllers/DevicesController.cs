@@ -357,28 +357,22 @@ namespace MiSmart.API.Controllers
 
             deviceRepository.Update(device);
 
-            var batteryLogGroups = command.BatteryLogs.GroupBy(bl => new { bl.ActualID, bl.Type });
+            var batteryLogGroups = command.BatteryLogs.GroupBy(bl => bl.ActualID);
             List<Guid> lastGroupIDs = new List<Guid>();
             foreach (var batteryGroup in batteryLogGroups)
             {
                 var key = batteryGroup.Key;
-                var batteryModel = batteryModelRepository.Get(ww => ww.ManufacturerName == key.Type);
-                if (batteryModel is null)
-                {
-                    batteryModel = new BatteryModel
-                    {
-                        Name = key.Type,
-                        ManufacturerName = key.Type,
-                    };
-                    batteryModelRepository.Create(batteryModel);
-                    emailService.SendMailAsync(new String[] { "huynhthehainam@gmail.com" }, new String[] { }, new String[] { }, "New battery model", $"Battery model name {key.Type} is just registered.").Wait();
-                }
-                var battery = batteryRepository.Get(b => b.ActualID == key.ActualID && b.BatteryModelID == batteryModel.ID);
+
+                var battery = batteryRepository.Get(b => b.ActualID == key);
                 if (battery is null)
                 {
-                    battery = new Battery { ActualID = key.ActualID, BatteryModelID = batteryModel.ID };
-                    batteryRepository.Create(battery);
-                    emailService.SendMailAsync(new String[] { "huynhthehainam@gmail.com" }, new String[] { }, new String[] { }, "New battery", $"Battery name {key.ActualID} is just registered.").Wait();
+                    var batteryModel = batteryModelRepository.Get(ww => true);
+                    if (batteryModel is not null)
+                    {
+                        battery = new Battery { ActualID = key, BatteryModelID = batteryModel.ID };
+                        batteryRepository.Create(battery);
+                        emailService.SendMailAsync(new String[] { "huynhthehainam@gmail.com" }, new String[] { }, new String[] { }, "New battery", $"Battery name {battery.ActualID} is just registered.").Wait();
+                    }
                 }
                 if (battery is not null)
                 {
