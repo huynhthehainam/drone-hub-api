@@ -15,6 +15,7 @@ using MiSmart.DAL.Responses;
 using Microsoft.Extensions.Options;
 using MiSmart.Infrastructure.Permissions;
 using MiSmart.API.Permissions;
+using MiSmart.API.Commands;
 
 namespace MiSmart.API.Controllers
 {
@@ -128,6 +129,43 @@ namespace MiSmart.API.Controllers
             response.SetData(ViewModelHelpers.ConvertToViewModel<FlightStat, LargeFlightStatViewModel>(flightStat));
             return response.ToIActionResult();
         }
+        [HttpPost("{id:Guild}/UpdateFromExecutor")]
+        public IActionResult UpdateFromExecutor([FromRoute] Guid id, [FromServices] TeamRepository teamRepository, [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, [FromServices] FlightStatRepository flightStatRepository, [FromBody] UpdatingFlightStatFromExecutorCommand command)
+        {
+            var response = actionResponseFactory.CreateInstance();
+            ExecutionCompanyUser executionCompanyUser = executionCompanyUserRepository.GetByPermission(CurrentUser.ID, ExecutionCompanyUserType.Owner);
+            if (executionCompanyUser is null)
+            {
+                response.AddNotAllowedErr();
+            }
+
+
+            var flightStat = flightStatRepository.Get(ww => ww.ID == id && ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID);
+            if (flightStat is null)
+            {
+                response.AddNotFoundErr("FlightStat");
+            }
+
+            if (command.TeamID.HasValue)
+            {
+                var team = teamRepository.Get(ww => ww.ID == command.TeamID.GetValueOrDefault() && ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID);
+                if (team is null)
+                {
+                    response.AddInvalidErr("TeamID");
+                }
+                flightStat.Team = team;
+            }
+
+
+            flightStat.FieldName = String.IsNullOrEmpty(command.FieldName) ? flightStat.FieldName : command.FieldName;
+            flightStat.TaskLocation = String.IsNullOrEmpty(command.TaskLocation) ? flightStat.TaskLocation : command.TaskLocation;
+
+            flightStatRepository.Update(flightStat);
+            response.SetUpdatedMessage();
+
+            return response.ToIActionResult();
+        }
+
         [HttpDelete("{id:Guid}")]
         [HasPermission(typeof(AdminPermission))]
         public IActionResult DeleteByID([FromServices] FlightStatRepository flightStatRepository, [FromServices] CustomerUserRepository customerUserRepository, [FromRoute] Guid id)
