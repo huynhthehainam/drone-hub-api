@@ -129,7 +129,7 @@ namespace MiSmart.API.Controllers
             response.SetData(ViewModelHelpers.ConvertToViewModel<FlightStat, LargeFlightStatViewModel>(flightStat));
             return response.ToIActionResult();
         }
-        [HttpPost("{id:Guild}/UpdateFromExecutor")]
+        [HttpPost("{id:Guid}/UpdateFromExecutor")]
         public IActionResult UpdateFromExecutor([FromRoute] Guid id, [FromServices] TeamRepository teamRepository, [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, [FromServices] FlightStatRepository flightStatRepository, [FromBody] UpdatingFlightStatFromExecutorCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
