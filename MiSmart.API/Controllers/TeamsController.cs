@@ -145,21 +145,20 @@ namespace MiSmart.API.Controllers
                 response.AddNotAllowedErr();
             }
 
-            var targetExecutionCompanyUser = executionCompanyUserRepository.GetByPermission(command.UserID.GetValueOrDefault());
+            var targetExecutionCompanyUser = executionCompanyUserRepository.Get(ww => ww.UserID == command.UserID.GetValueOrDefault() && ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID);
             if (targetExecutionCompanyUser is null)
             {
-                response.AddInvalidErr("UserID");
+                targetExecutionCompanyUser = new ExecutionCompanyUser { ExecutionCompanyID = executionCompanyUser.ExecutionCompanyID, UserID = command.UserID.GetValueOrDefault(), Type = ExecutionCompanyUserType.Member };
+                executionCompanyUserRepository.Create(targetExecutionCompanyUser);
             }
-            if (!teamUserRepository.Any(ww => ww.ExecutionCompanyUserID == targetExecutionCompanyUser.ID))
+            var existedTeamUser = teamUserRepository.Get(ww => ww.ExecutionCompanyUserID == targetExecutionCompanyUser.ID && ww.TeamID == id);
+            if (existedTeamUser is not null)
             {
-                response.AddExistedErr("UserID");
+                response.AddExistedErr("TeamUser");
             }
             var teamUser = new TeamUser { ExecutionCompanyUserID = targetExecutionCompanyUser.ID, TeamID = id, Type = command.Type };
             teamUserRepository.Create(teamUser);
             response.SetCreatedObject(teamUser);
-
-
-
             return response.ToIActionResult();
         }
     }
