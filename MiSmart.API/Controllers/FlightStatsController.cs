@@ -130,7 +130,10 @@ namespace MiSmart.API.Controllers
             return response.ToIActionResult();
         }
         [HttpPost("{id:Guid}/UpdateFromExecutor")]
-        public IActionResult UpdateFromExecutor([FromRoute] Guid id, [FromServices] TeamRepository teamRepository, [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, [FromServices] FlightStatRepository flightStatRepository, [FromBody] UpdatingFlightStatFromExecutorCommand command)
+        public IActionResult UpdateFromExecutor([FromRoute] Guid id, [FromServices] TeamRepository teamRepository,
+         [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, [FromServices] FlightStatRepository flightStatRepository,
+         [FromServices] ExecutionCompanyUserFlightStatRepository executionCompanyUserFlightStatRepository,
+         [FromBody] UpdatingFlightStatFromExecutorCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
             ExecutionCompanyUser executionCompanyUser = executionCompanyUserRepository.GetByPermission(CurrentUser.ID, ExecutionCompanyUserType.Owner);
@@ -154,6 +157,21 @@ namespace MiSmart.API.Controllers
                     response.AddInvalidErr("TeamID");
                 }
                 flightStat.Team = team;
+                List<TeamUser> teamUsers = team.TeamUsers.ToList();
+
+                var executionCompanyUserFlightStats = executionCompanyUserFlightStatRepository.GetListEntities(new PageCommand(), ww => ww.FlightStatID == flightStat.ID);
+                executionCompanyUserFlightStatRepository.DeleteRange(executionCompanyUserFlightStats);
+
+                foreach (var teamUser in teamUsers)
+                {
+                    ExecutionCompanyUserFlightStat executionCompanyUserFlightStat = new ExecutionCompanyUserFlightStat
+                    {
+                        ExecutionCompanyUserID = teamUser.ExecutionCompanyUserID,
+                        FlightStatID = flightStat.ID,
+                        Type = teamUser.Type,
+                    };
+                    executionCompanyUserFlightStatRepository.Create(executionCompanyUserFlightStat);
+                }
             }
 
 

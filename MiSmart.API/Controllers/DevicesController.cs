@@ -449,7 +449,8 @@ namespace MiSmart.API.Controllers
         }
 
         [HttpPost("me/FlightStats")]
-        public IActionResult CreateFlightStat([FromServices] DeviceRepository deviceRepository, [FromServices] FlightStatRepository flightStatRepository, [FromBody] AddingFlightStatCommand command)
+        public IActionResult CreateFlightStat([FromServices] DeviceRepository deviceRepository, [FromServices] FlightStatRepository flightStatRepository,
+        [FromServices] ExecutionCompanyUserFlightStatRepository executionCompanyUserFlightStatRepository, [FromBody] AddingFlightStatCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
             var device = deviceRepository.Get(ww => ww.ID == CurrentDevice.ID);
@@ -484,9 +485,22 @@ namespace MiSmart.API.Controllers
             flightStatRepository.Create(stat);
             if (device.Team is not null)
             {
-                device.Team.TotalFlights += command.Flights.GetValueOrDefault();
-                device.Team.TotalFlightDuration += command.FlightDuration.GetValueOrDefault();
-                device.Team.TotalTaskArea += command.TaskArea.GetValueOrDefault();
+                var team = device.Team;
+                List<TeamUser> teamUsers = team.TeamUsers.ToList();
+
+                var executionCompanyUserFlightStats = executionCompanyUserFlightStatRepository.GetListEntities(new PageCommand(), ww => ww.FlightStatID == stat.ID);
+                executionCompanyUserFlightStatRepository.DeleteRange(executionCompanyUserFlightStats);
+
+                foreach (var teamUser in teamUsers)
+                {
+                    ExecutionCompanyUserFlightStat executionCompanyUserFlightStat = new ExecutionCompanyUserFlightStat
+                    {
+                        ExecutionCompanyUserID = teamUser.ExecutionCompanyUserID,
+                        FlightStatID = stat.ID,
+                        Type = teamUser.Type,
+                    };
+                    executionCompanyUserFlightStatRepository.Create(executionCompanyUserFlightStat);
+                }
             }
             deviceRepository.Update(device);
 

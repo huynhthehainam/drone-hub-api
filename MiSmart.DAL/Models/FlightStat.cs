@@ -3,6 +3,7 @@ using MiSmart.Infrastructure.Data;
 using System;
 using System.Text.Json.Serialization;
 using NetTopologySuite.Geometries;
+using System.Collections.Generic;
 
 namespace MiSmart.DAL.Models
 {
@@ -69,5 +70,14 @@ namespace MiSmart.DAL.Models
         public Int32? ExecutionCompanyID { get; set; }
 
         public FlightMode Mode { get; set; } = FlightMode.Spraying;
+
+
+
+        private ICollection<ExecutionCompanyUserFlightStat> executionCompanyUserFlightStats;
+        public ICollection<ExecutionCompanyUserFlightStat> ExecutionCompanyUserFlightStats
+        {
+            get => lazyLoader.Load(this, ref executionCompanyUserFlightStats);
+            set => executionCompanyUserFlightStats = value;
+        }
     }
 }

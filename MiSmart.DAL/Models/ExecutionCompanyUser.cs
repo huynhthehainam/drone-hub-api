@@ -39,5 +39,12 @@ namespace MiSmart.DAL.Models
             get => lazyLoader.Load(this, ref teamUsers);
             set => teamUsers = value;
         }
+
+        private ICollection<ExecutionCompanyUserFlightStat> executionCompanyUserFlightStats;
+        public ICollection<ExecutionCompanyUserFlightStat> ExecutionCompanyUserFlightStats
+        {
+            get => lazyLoader.Load(this, ref executionCompanyUserFlightStats);
+            set => executionCompanyUserFlightStats = value;
+        }
     }
 }
