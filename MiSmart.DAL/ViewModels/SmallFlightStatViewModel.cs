@@ -5,6 +5,21 @@ using MiSmart.Infrastructure.ViewModels;
 
 namespace MiSmart.DAL.ViewModels
 {
+    public class SuperSmallFlightStatViewmodel : IViewModel<FlightStat>
+    {
+        public Guid ID { get; set; }
+        public Int32 Flights { get; set; }
+        public Double FlightDuration { get; set; }
+        public Double TaskArea { get; set; }
+
+        public void LoadFrom(FlightStat entity)
+        {
+            ID = entity.ID;
+            Flights = entity.Flights;
+            FlightDuration = entity.FlightDuration;
+            TaskArea = entity.TaskArea;
+        }
+    }
     public class SmallFlightStatViewModel : IViewModel<FlightStat>
     {
         public Guid ID { get; set; }
