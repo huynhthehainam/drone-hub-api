@@ -13,7 +13,7 @@ using MiSmart.DAL.ViewModels;
 using MiSmart.Infrastructure.Permissions;
 using MiSmart.API.Permissions;
 using System.Linq;
-
+using MiSmart.API.Services;
 namespace MiSmart.API.Controllers
 {
     public class ExecutionCompaniesController : AuthorizedAPIControllerBase
@@ -50,10 +50,16 @@ namespace MiSmart.API.Controllers
         [HttpPost("{id:int}/AssignUser")]
         [HasPermission(typeof(AdminPermission))]
         public IActionResult AssignExecutionCompanyUser([FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository,
-     [FromServices] ExecutionCompanyRepository executionCompanyRepository,
+     [FromServices] ExecutionCompanyRepository executionCompanyRepository, [FromServices] AuthSystemService authSystemService,
       [FromBody] AssigningExecutionCompanyUserCommand command, [FromRoute] Int32 id)
         {
             var response = actionResponseFactory.CreateInstance();
+            var userExists = authSystemService.CheckUserIDExists(command.UserID.GetValueOrDefault());
+            if (!userExists)
+            {
+                response.AddInvalidErr("UserID");
+            }
+
             var executionCompany = executionCompanyRepository.Get(ww => ww.ID == id);
             if (executionCompany is null)
             {
