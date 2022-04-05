@@ -13,7 +13,7 @@ using System.Linq.Expressions;
 using MiSmart.DAL.ViewModels;
 using MiSmart.Infrastructure.Permissions;
 using MiSmart.API.Permissions;
-using MiSmart.API.GrpcServices;
+using MiSmart.API.Services;
 
 namespace MiSmart.API.Controllers
 {
@@ -61,10 +61,17 @@ namespace MiSmart.API.Controllers
         [HasPermission(typeof(AdminPermission))]
         public IActionResult AssignCustomerUser([FromServices] CustomerUserRepository customerUserRepository,
         [FromServices] CustomerRepository customerRepository,
-        [FromServices] AuthGrpcClientService authGrpcClientService, [FromBody] AssigningCustomerUserCommand command, [FromRoute] Int32 id)
+        [FromServices] AuthSystemService authSystemService,
+         [FromBody] AssigningCustomerUserCommand command, [FromRoute] Int32 id)
         {
             var response = actionResponseFactory.CreateInstance();
+            var userExists = authSystemService.CheckUserIDExists(command.UserID.GetValueOrDefault());
+            if (!userExists)
+            {
+                response.AddInvalidErr("UserID");
+            }
             var customer = customerRepository.Get(ww => ww.ID == id);
+
             if (customer is null)
             {
                 response.AddNotFoundErr("Customer");

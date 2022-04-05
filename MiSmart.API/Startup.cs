@@ -17,8 +17,6 @@ using MiSmart.Infrastructure.Swagger;
 using MiSmart.Infrastructure.Responses;
 using System;
 using MiSmart.Infrastructure.Middlewares;
-using MiSmart.API.Protos;
-using System.Net.Http;
 
 using MQTTnet.AspNetCore.Extensions;
 using MQTTnet.AspNetCore.AttributeRouting;
@@ -29,7 +27,6 @@ using MiSmart.API.Settings;
 using MiSmart.Infrastructure.RabbitMQ;
 using MiSmart.Microservices.OrderService.RabbitMQ;
 using Microsoft.Extensions.Hosting;
-using MiSmart.API.GrpcServices;
 using MiSmart.Infrastructure.Minio;
 using NetTopologySuite.Geometries;
 using System.Linq;
@@ -116,13 +113,13 @@ namespace MiSmart.API
 
 
             #region ConfiguringGrpc
-            services.AddGrpc();
-            services.AddGrpcClient<AuthProtoService.AuthProtoServiceClient>(o => o.Address = new Uri(Configuration["GrpcConfigs:AuthUrl"])).ConfigurePrimaryHttpMessageHandler(() =>
-            {
-                return new HttpClientHandler { ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true, };
-            });
+            // services.AddGrpc();
+            // services.AddGrpcClient<AuthProtoService.AuthProtoServiceClient>(o => o.Address = new Uri(Configuration["GrpcConfigs:AuthUrl"])).ConfigurePrimaryHttpMessageHandler(() =>
+            // {
+            //     return new HttpClientHandler { ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true, };
+            // });
 
-            services.AddSingleton<AuthGrpcClientService, AuthGrpcClientService>();
+            // services.AddSingleton<AuthGrpcClientService, AuthGrpcClientService>();
 
 
             #endregion
@@ -136,6 +133,7 @@ namespace MiSmart.API
             services.Configure<KeySettings>(Configuration.GetSection("KeySettings"));
             services.Configure<ExpiredTimeSettings>(Configuration.GetSection("ExpiredTimeSettings"));
             services.Configure<ConversionSettings>(Configuration.GetSection("ConversionSettings"));
+            services.Configure<AuthSystemSettings>(Configuration.GetSection("AuthSystemSettings"));
 
             #endregion
             #region ConfiguringJWT
@@ -145,6 +143,8 @@ namespace MiSmart.API
             services.AddSingleton<HashService, HashService>();
             services.AddScoped<JWTService, JWTService>();
             services.AddScoped<EmailService, EmailService>();
+
+            services.AddSingleton<AuthSystemService, AuthSystemService>();
 
             #endregion
             #region AddingFactories
