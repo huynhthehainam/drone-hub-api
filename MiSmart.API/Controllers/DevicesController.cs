@@ -241,6 +241,7 @@ namespace MiSmart.API.Controllers
         [AllowAnonymous]
         public IActionResult UploadOfflineStats([FromBody] AddingBulkOfflineFlightStatsCommand command,
         [FromServices] FlightStatRepository flightStatRepository,
+        [FromServices] ExecutionCompanySettingRepository executionCompanySettingRepository,
          [FromServices] DeviceRepository deviceRepository, [FromServices] JWTService jwtService)
         {
             var response = actionResponseFactory.CreateInstance();
@@ -279,6 +280,17 @@ namespace MiSmart.API.Controllers
                             TaskArea = item.TaskArea.GetValueOrDefault(),
                             ExecutionCompanyID = device.ExecutionCompanyID,
                         };
+
+                        // if (device.ExecutionCompanyID.HasValue)
+                        // {
+                        //     var latestSetting = executionCompanySettingRepository.GetLatestSetting(device.ExecutionCompanyID.GetValueOrDefault());
+                        //     if (latestSetting is not null)
+                        //     {
+                        //         stat.Cost = stat.TaskArea / 10000 * latestSetting.CostPerHectare;
+                        //     }
+                        // }
+
+
                         flightStatRepository.Create(stat);
                         if (device.Team is not null)
                         {

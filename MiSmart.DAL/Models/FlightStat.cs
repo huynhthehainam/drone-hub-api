@@ -72,7 +72,7 @@ namespace MiSmart.DAL.Models
         public FlightMode Mode { get; set; } = FlightMode.Spraying;
 
 
-
+        public Double Cost { get; set; }
         private ICollection<ExecutionCompanyUserFlightStat> executionCompanyUserFlightStats;
         public ICollection<ExecutionCompanyUserFlightStat> ExecutionCompanyUserFlightStats
         {
