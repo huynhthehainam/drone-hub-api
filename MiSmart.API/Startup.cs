@@ -216,6 +216,12 @@ namespace MiSmart.API
                 o.CronExpression = "* */30 * * * *";
                 o.TimeZoneInfo = TimeZoneInfo.Local;
             });
+
+            services.AddCronJob<UpdatingCostFlightStatsTask>(o =>
+           {
+               o.CronExpression = "*/50 * * * * *";
+               o.TimeZoneInfo = TimeZoneInfo.Local;
+           });
             #endregion
         }
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

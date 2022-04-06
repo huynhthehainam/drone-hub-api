@@ -1,14 +1,9 @@
-
-
-
-using Microsoft.EntityFrameworkCore;
 using System;
 using MiSmart.DAL.DatabaseContexts;
 using MiSmart.DAL.Models;
 using MiSmart.Infrastructure.Repositories;
 using System.Linq;
 using MiSmart.DAL.Responses;
-using Microsoft.AspNetCore.SignalR;
 using MiSmart.Infrastructure.Commands;
 using System.Linq.Expressions;
 using MiSmart.Infrastructure.ViewModels;
@@ -31,10 +26,12 @@ namespace MiSmart.DAL.Repositories
             Double totalFlightDuration = 0;
             Double totalTaskArea = 0;
             Int64 totalFlights = 0;
+            Double totalCost = 0;
             var originData = context.Set<FlightStat>().Where(expression);
             totalFlightDuration = originData.Sum(ww => ww.FlightDuration);
             totalTaskArea = originData.Sum(ww => ww.TaskArea);
             totalFlights = originData.Sum(ww => ww.Flights);
+            totalCost = originData.Sum(ww => ww.Cost);
 
             if (pageIndex.HasValue && pageSize.HasValue)
             {
@@ -61,7 +58,17 @@ namespace MiSmart.DAL.Repositories
                     data = originData.ToList().Select(ww => ViewModelHelpers.ConvertToViewModel<FlightStat, TView>(ww)).ToList();
                 }
             }
-            return new ListFlightStatsResponse<TView> { Data = data, PageIndex = pageIndex, PageSize = pageSize, TotalRecords = count, TotalFlightDuration = totalFlightDuration, TotalFlights = totalFlights, TotalTaskArea = totalTaskArea };
+            return new ListFlightStatsResponse<TView>
+            {
+                Data = data,
+                PageIndex = pageIndex,
+                PageSize = pageSize,
+                TotalRecords = count,
+                TotalFlightDuration = totalFlightDuration,
+                TotalFlights = totalFlights,
+                TotalTaskArea = totalTaskArea,
+                TotalCost = totalCost,
+            };
         }
     }
 }
