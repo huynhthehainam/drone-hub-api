@@ -39,7 +39,7 @@ namespace MiSmart.DAL.ViewModels
         public Double TotalTaskArea { get; set; }
         public Double TotalFlightDuration { get; set; }
         public Int32 TotalFlights { get; set; }
-
+        public List<SuperSmallFlightStatViewmodel> FlightStats { get; set; }
         public void LoadFrom(Team entity)
         {
             ID = entity.ID;
@@ -62,9 +62,11 @@ namespace MiSmart.DAL.ViewModels
             Members = teamUsers.ToList();
             MembersCount = teamUsers.Count();
 
-            TotalTaskArea = entity.FlightStats.Sum(ww=>ww.TaskArea);
-            TotalFlightDuration = entity.FlightStats.Sum(ww=>ww.FlightDuration);
-            TotalFlights = entity.FlightStats.Sum(ww=>ww.Flights);
+            TotalTaskArea = entity.FlightStats.Sum(ww => ww.TaskArea);
+            TotalFlightDuration = entity.FlightStats.Sum(ww => ww.FlightDuration);
+            TotalFlights = entity.FlightStats.Sum(ww => ww.Flights);
+
+            FlightStats = entity.FlightStats.Select(ww => ViewModelHelpers.ConvertToViewModel<FlightStat, SuperSmallFlightStatViewmodel>(ww)).ToList();
         }
     }
 }
