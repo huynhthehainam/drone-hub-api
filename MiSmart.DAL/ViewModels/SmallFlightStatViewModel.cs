@@ -38,6 +38,7 @@ namespace MiSmart.DAL.ViewModels
         public String PilotName { get; set; }
         public String ExecutionCompanyName { get; set; }
         public String CustomerName { get; set; }
+        public Double Cost { get; set; }
 
         public void LoadFrom(FlightStat entity)
         {
@@ -57,6 +58,7 @@ namespace MiSmart.DAL.ViewModels
             DeviceModelName = entity.Device.DeviceModel.Name;
             ExecutionCompanyName = entity.ExecutionCompany?.Name;
             CustomerName = entity.Customer.Name;
+            Cost = entity.Cost; 
         }
     }
 }
