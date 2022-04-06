@@ -60,5 +60,12 @@ namespace MiSmart.DAL.Models
             get => lazyLoader.Load(this, ref batteries);
             set => batteries = value;
         }
+
+        private ICollection<ExecutionCompanySetting> settings;
+        public ICollection<ExecutionCompanySetting> Settings
+        {
+            get => lazyLoader.Load(this, ref settings);
+            set => settings = value;
+        }
     }
 }
