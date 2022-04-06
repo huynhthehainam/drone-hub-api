@@ -18,9 +18,10 @@ namespace MiSmart.API.Controllers
         public ExecutionCompanySettingsController(IActionResponseFactory actionResponseFactory) : base(actionResponseFactory)
         {
         }
-
+        
+        [HttpPost]
         public IActionResult CreateSetting([FromServices] ExecutionCompanySettingRepository executionCompanySettingRepository,
-         [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, [FromBody] AddingExecutionCompanySettingCommand command)
+             [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, [FromBody] AddingExecutionCompanySettingCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
             var executionCompanyUser = executionCompanyUserRepository.GetByPermission(CurrentUser.ID, ExecutionCompanyUserType.Owner);
