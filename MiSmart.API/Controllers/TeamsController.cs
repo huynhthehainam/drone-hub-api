@@ -145,7 +145,21 @@ namespace MiSmart.API.Controllers
                 response.AddNotAllowedErr();
             }
 
-            var targetExecutionCompanyUser = executionCompanyUserRepository.Get(ww => ww.UserID == command.UserID.GetValueOrDefault() && ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID);
+            ExecutionCompanyUser targetExecutionCompanyUser = null;
+
+            var existedExecutionCompanyUser = executionCompanyUserRepository.Get(ww => ww.UserID == command.UserID.GetValueOrDefault());
+            if (existedExecutionCompanyUser is not null)
+            {
+                if (existedExecutionCompanyUser.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID)
+                {
+                    targetExecutionCompanyUser = existedExecutionCompanyUser;
+                }
+                else
+                {
+                    response.AddInvalidErr("UserID");
+                }
+            }
+
             if (targetExecutionCompanyUser is null)
             {
                 targetExecutionCompanyUser = new ExecutionCompanyUser { ExecutionCompanyID = executionCompanyUser.ExecutionCompanyID, UserID = command.UserID.GetValueOrDefault(), Type = ExecutionCompanyUserType.Member };
