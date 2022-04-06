@@ -39,6 +39,7 @@ namespace MiSmart.DAL.ViewModels
         public Double TotalTaskArea { get; set; }
         public Double TotalFlightDuration { get; set; }
         public Int32 TotalFlights { get; set; }
+        public Double TotalCost { get; set; }
         public List<SuperSmallFlightStatViewmodel> FlightStats { get; set; }
         public void LoadFrom(Team entity)
         {
@@ -65,7 +66,7 @@ namespace MiSmart.DAL.ViewModels
             TotalTaskArea = entity.FlightStats.Sum(ww => ww.TaskArea);
             TotalFlightDuration = entity.FlightStats.Sum(ww => ww.FlightDuration);
             TotalFlights = entity.FlightStats.Sum(ww => ww.Flights);
-
+            TotalCost = entity.FlightStats.Sum(ww => ww.Cost);
             FlightStats = entity.FlightStats.Select(ww => ViewModelHelpers.ConvertToViewModel<FlightStat, SuperSmallFlightStatViewmodel>(ww)).ToList();
         }
     }
