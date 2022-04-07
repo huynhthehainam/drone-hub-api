@@ -95,7 +95,7 @@ namespace MiSmart.API.Controllers
         , [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, [FromBody] UpdatingTeamCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
-            ExecutionCompanyUser executionCompanyUser = executionCompanyUserRepository.GetByPermission(CurrentUser.ID);
+            ExecutionCompanyUser executionCompanyUser = executionCompanyUserRepository.GetByPermission(CurrentUser.ID, ExecutionCompanyUserType.Owner);
             if (executionCompanyUser is null)
             {
                 response.AddNotAllowedErr();
@@ -165,7 +165,13 @@ namespace MiSmart.API.Controllers
                 targetExecutionCompanyUser = new ExecutionCompanyUser { ExecutionCompanyID = executionCompanyUser.ExecutionCompanyID, UserID = command.UserID.GetValueOrDefault(), Type = ExecutionCompanyUserType.Member };
                 executionCompanyUserRepository.Create(targetExecutionCompanyUser);
             }
-            var existedTeamUser = teamUserRepository.Get(ww => ww.ExecutionCompanyUserID == targetExecutionCompanyUser.ID && ww.TeamID == id);
+            var team = teamRepository.Get(ww => ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID && ww.ID == id);
+            if (team is null)
+            {
+                response.AddNotFoundErr("Team");
+
+            }
+            var existedTeamUser = teamUserRepository.Get(ww => ww.ExecutionCompanyUserID == targetExecutionCompanyUser.ID && ww.TeamID == team.ID);
             if (existedTeamUser is not null)
             {
                 response.AddExistedErr("TeamUser");
@@ -173,6 +179,30 @@ namespace MiSmart.API.Controllers
             var teamUser = new TeamUser { ExecutionCompanyUserID = targetExecutionCompanyUser.ID, TeamID = id, Type = command.Type };
             teamUserRepository.Create(teamUser);
             response.SetCreatedObject(teamUser);
+            return response.ToIActionResult();
+        }
+        [HttpGet("{id:long}/UnassignedUsers")]
+        public IActionResult GetUnassignedUsers([FromRoute] Int64 id, [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, [FromServices] TeamRepository teamRepository)
+        {
+            var response = actionResponseFactory.CreateInstance();
+            ExecutionCompanyUser executionCompanyUser = executionCompanyUserRepository.GetByPermission(CurrentUser.ID, ExecutionCompanyUserType.Owner);
+            if (executionCompanyUser is null)
+            {
+                response.AddNotAllowedErr();
+            }
+
+            var team = teamRepository.Get(ww => ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID && ww.ID == id);
+            if (team is null)
+            {
+                response.AddNotFoundErr("Team");
+            }
+
+            var userIDs = executionCompanyUser.ExecutionCompany.ExecutionCompanyUsers.Select(ww => ww.UserID).ToList();
+
+            var teamUserIDs = team.TeamUsers.Select(ww => ww.ExecutionCompanyUser.UserID).ToList();
+
+            var unassignedIDs = userIDs.Except(teamUserIDs).ToList();
+            response.SetData(unassignedIDs);
             return response.ToIActionResult();
         }
     }
