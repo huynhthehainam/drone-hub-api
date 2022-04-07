@@ -55,5 +55,7 @@ namespace MiSmart.DAL.Models
             get => lazyLoader.Load(this, ref flightStats);
             set => flightStats = value;
         }
+
+        public Boolean IsDisbanded { get; set; } = false;
     }
 }

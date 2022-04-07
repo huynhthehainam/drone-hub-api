@@ -53,7 +53,7 @@ namespace MiSmart.API.Controllers
             var teamIDs = teamUserRepository.GetListEntities(new PageCommand(), ww => ww.ExecutionCompanyUserID == executionCompanyUser.ID).Select(ww => ww.TeamID).ToList();
 
             Expression<Func<Team, Boolean>> query = ww => (executionCompanyUser.Type == ExecutionCompanyUserType.Owner ? ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID : (teamIDs.Contains(ww.ID)))
-              && (!String.IsNullOrWhiteSpace(search) ? (ww.Name.ToLower().Contains(search.ToLower())) : true);
+              && (!String.IsNullOrWhiteSpace(search) ? (ww.Name.ToLower().Contains(search.ToLower())) : true) && !ww.IsDisbanded;
             if (mode == "Large")
             {
 
@@ -81,7 +81,9 @@ namespace MiSmart.API.Controllers
             var teamIDs = teamUserRepository.GetListEntities(new PageCommand(), ww => ww.ExecutionCompanyUserID == executionCompanyUser.ID).Select(ww => ww.TeamID).ToList();
 
 
-            var team = teamRepository.GetView<LargeTeamViewModel>(ww => ww.ID == id && (executionCompanyUser.Type == ExecutionCompanyUserType.Owner ? ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID : (teamIDs.Contains(ww.ID))));
+            var team = teamRepository.GetView<LargeTeamViewModel>(ww => ww.ID == id
+            && (executionCompanyUser.Type == ExecutionCompanyUserType.Owner ? ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID : (teamIDs.Contains(ww.ID)))
+            && !ww.IsDisbanded);
             if (team is null)
             {
                 response.AddNotFoundErr("Team");
@@ -100,7 +102,7 @@ namespace MiSmart.API.Controllers
             {
                 response.AddNotAllowedErr();
             }
-            var team = teamRepository.Get(ww => ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID && ww.ID == id);
+            var team = teamRepository.Get(ww => ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID && ww.ID == id && !ww.IsDisbanded);
             if (team is null)
             {
                 response.AddNotFoundErr("Team");
@@ -120,13 +122,15 @@ namespace MiSmart.API.Controllers
             {
                 response.AddNotAllowedErr();
             }
-            var team = teamRepository.Get(ww => ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID && ww.ID == id);
+            var team = teamRepository.Get(ww => ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID && ww.ID == id && !ww.IsDisbanded);
             if (team is null)
             {
                 response.AddNotFoundErr("Team");
 
             }
-            teamRepository.Delete(team);
+
+            team.IsDisbanded = true;
+            teamRepository.Update(team);
 
             response.SetMessage("Team is disbanded", "Nhóm đã giải tán");
 
@@ -165,7 +169,7 @@ namespace MiSmart.API.Controllers
                 targetExecutionCompanyUser = new ExecutionCompanyUser { ExecutionCompanyID = executionCompanyUser.ExecutionCompanyID, UserID = command.UserID.GetValueOrDefault(), Type = ExecutionCompanyUserType.Member };
                 executionCompanyUserRepository.Create(targetExecutionCompanyUser);
             }
-            var team = teamRepository.Get(ww => ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID && ww.ID == id);
+            var team = teamRepository.Get(ww => ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID && ww.ID == id && !ww.IsDisbanded);
             if (team is null)
             {
                 response.AddNotFoundErr("Team");
@@ -191,7 +195,7 @@ namespace MiSmart.API.Controllers
                 response.AddNotAllowedErr();
             }
 
-            var team = teamRepository.Get(ww => ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID && ww.ID == id);
+            var team = teamRepository.Get(ww => ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID && ww.ID == id && !ww.IsDisbanded);
             if (team is null)
             {
                 response.AddNotFoundErr("Team");
