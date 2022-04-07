@@ -47,6 +47,8 @@ namespace MiSmart.API.Controllers
             listResponse.SetResponse(response);
             return response.ToIActionResult();
         }
+
+     
         [HttpPost("{id:int}/AssignUser")]
         [HasPermission(typeof(AdminPermission))]
         public IActionResult AssignExecutionCompanyUser([FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository,
@@ -173,6 +175,6 @@ namespace MiSmart.API.Controllers
 
             return response.ToIActionResult();
         }
-       
+
     }
 }

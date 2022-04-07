@@ -19,4 +19,5 @@ namespace MiSmart.API.Commands
         public Int64? UserID { get; set; }
         public ExecutionCompanyUserType Type { get; set; } = ExecutionCompanyUserType.Member;
     }
+
 }

@@ -136,6 +136,27 @@ namespace MiSmart.API.Controllers
 
             return response.ToIActionResult();
         }
+        [HttpPost("{id:long}/UnassignUser")]
+        public IActionResult UnassignUser([FromRoute] Int64 id, [FromServices] TeamUserRepository teamUserRepository, [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, [FromBody] RemovingTeamUserCommand command)
+        {
+            var response = actionResponseFactory.CreateInstance();
+            ExecutionCompanyUser executionCompanyUser = executionCompanyUserRepository.GetByPermission(CurrentUser.ID, ExecutionCompanyUserType.Owner);
+            if (executionCompanyUser is null)
+            {
+                response.AddNotAllowedErr();
+            }
+
+
+            var teamUser = teamUserRepository.Get(ww => ww.ExecutionCompanyUser.UserID == command.UserID.GetValueOrDefault() && ww.TeamID == id && ww.Team.ExecutionCompanyID == executionCompanyUser.ID);
+
+            if (teamUser is null)
+            {
+                response.AddInvalidErr("UserID");
+            }
+            teamUserRepository.Delete(teamUser);
+            response.SetNoContent();
+            return response.ToIActionResult();
+        }
 
         [HttpPost("{id:long}/AssignUser")]
         public IActionResult AssignTeamUser([FromServices] TeamRepository teamRepository, [FromServices] TeamUserRepository teamUserRepository,

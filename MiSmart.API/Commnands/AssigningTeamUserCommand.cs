@@ -14,4 +14,9 @@ namespace MiSmart.API.Commands
         public Int64? UserID { get; set; }
         public TeamMemberType Type { get; set; } = TeamMemberType.Member;
     }
+     public class RemovingTeamUserCommand
+    {
+        [Required]
+        public Int64? UserID { get; set; }
+    }
 }
