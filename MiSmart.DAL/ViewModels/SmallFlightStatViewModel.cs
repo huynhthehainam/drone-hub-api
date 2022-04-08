@@ -53,7 +53,7 @@ namespace MiSmart.DAL.ViewModels
             FlightTime = entity.FlightTime;
             FieldName = entity.FieldName;
             TaskLocation = entity.TaskLocation;
-            TeamName = entity.Device.Team?.Name;
+            TeamName = entity.Team?.Name;
             AircraftName = entity.Device.Name;
             TaskArea = entity.TaskArea;
             DeviceModelName = entity.Device.DeviceModel.Name;
