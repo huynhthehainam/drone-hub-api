@@ -14,6 +14,7 @@ using MiSmart.DAL.ViewModels;
 using MiSmart.Infrastructure.Permissions;
 using MiSmart.API.Permissions;
 using MiSmart.API.Services;
+using System.Threading.Tasks;
 
 namespace MiSmart.API.Controllers
 {
@@ -25,19 +26,18 @@ namespace MiSmart.API.Controllers
         }
         [HttpPost]
         [HasPermission(typeof(AdminPermission))]
-        public IActionResult Create([FromServices] CustomerRepository customerRepository, [FromBody] AddingCustomerCommand command)
+        public async Task<IActionResult> Create([FromServices] CustomerRepository customerRepository, [FromBody] AddingCustomerCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
 
 
-            var customer = new Customer { Name = command.Name, Address = command.Address };
-            customerRepository.Create(customer);
+            var customer = await customerRepository.CreateAsync(new Customer { Name = command.Name, Address = command.Address });
             response.SetCreatedObject(customer);
 
             return response.ToIActionResult();
         }
         [HttpGet]
-        public IActionResult GetList([FromQuery] PageCommand pageCommand,
+        public async Task<IActionResult> GetList([FromQuery] PageCommand pageCommand,
         [FromServices] CustomerRepository customerRepository,
         [FromQuery] String search, [FromQuery] String mode = "Small")
         {
@@ -50,7 +50,7 @@ namespace MiSmart.API.Controllers
             }
             else
             {
-                var listResponse = customerRepository.GetListResponseView<SmallCustomerViewModel>(pageCommand, query);
+                var listResponse = await customerRepository.GetListResponseViewAsync<SmallCustomerViewModel>(pageCommand, query);
                 listResponse.SetResponse(response);
             }
 
@@ -59,7 +59,7 @@ namespace MiSmart.API.Controllers
 
         [HttpPost("{id:int}/AssignUser")]
         [HasPermission(typeof(AdminPermission))]
-        public IActionResult AssignCustomerUser([FromServices] CustomerUserRepository customerUserRepository,
+        public async Task<IActionResult> AssignCustomerUser([FromServices] CustomerUserRepository customerUserRepository,
         [FromServices] CustomerRepository customerRepository,
         [FromServices] AuthSystemService authSystemService,
          [FromBody] AssigningCustomerUserCommand command, [FromRoute] Int32 id)
@@ -70,22 +70,19 @@ namespace MiSmart.API.Controllers
             {
                 response.AddInvalidErr("UserID");
             }
-            var customer = customerRepository.Get(ww => ww.ID == id);
+            var customer = await customerRepository.GetAsync(ww => ww.ID == id);
 
             if (customer is null)
             {
                 response.AddNotFoundErr("Customer");
             }
-            var existedCustomerUser = customerUserRepository.Get(ww => ww.UserID == command.UserID.GetValueOrDefault());
+            var existedCustomerUser = await customerUserRepository.GetAsync(ww => ww.UserID == command.UserID.GetValueOrDefault());
             if (existedCustomerUser is not null)
             {
                 response.AddExistedErr("User");
             }
-            CustomerUser customerUser = new CustomerUser { CustomerID = id, UserID = command.UserID.Value };
-            customerUserRepository.Create(customerUser);
+            CustomerUser customerUser = await customerUserRepository.CreateAsync(new CustomerUser { CustomerID = id, UserID = command.UserID.Value });
             response.SetCreatedObject(customerUser);
-
-
 
             return response.ToIActionResult();
         }
@@ -93,20 +90,20 @@ namespace MiSmart.API.Controllers
 
         [HttpGet("AssignedUsers")]
         [HasPermission(typeof(AdminPermission))]
-        public IActionResult GetCurrentCustomerUsers([FromServices] CustomerUserRepository customerUserRepository)
+        public Task<IActionResult> GetCurrentCustomerUsers([FromServices] CustomerUserRepository customerUserRepository)
         {
             var response = actionResponseFactory.CreateInstance();
-            var assignedUserIDs = customerUserRepository.GetListEntities(new PageCommand(), ww => true).Select(ww => ww.UserID).ToList();
+            var assignedUserIDs = customerUserRepository.GetListEntitiesAsync(new PageCommand(), ww => true).Result.Select(ww => ww.UserID).ToList();
             response.SetData(new { AssignedUserIDs = assignedUserIDs });
-            return response.ToIActionResult();
+            return Task.FromResult(response.ToIActionResult());
         }
 
         [HttpGet("{id:int}/Users")]
         [HasPermission(typeof(AdminPermission))]
-        public IActionResult GetCustomerUsers([FromServices] CustomerUserRepository customerUserRepository, [FromServices] CustomerRepository customerRepository, [FromQuery] PageCommand pageCommand, [FromRoute] Int32 id)
+        public async Task<IActionResult> GetCustomerUsers([FromServices] CustomerUserRepository customerUserRepository, [FromServices] CustomerRepository customerRepository, [FromQuery] PageCommand pageCommand, [FromRoute] Int32 id)
         {
             var response = actionResponseFactory.CreateInstance();
-            var customer = customerRepository.Get(ww => ww.ID == id);
+            var customer = await customerRepository.GetAsync(ww => ww.ID == id);
             if (customer is null)
             {
                 response.AddNotFoundErr("Customer");
@@ -114,23 +111,23 @@ namespace MiSmart.API.Controllers
 
             Expression<Func<CustomerUser, Boolean>> query = ww => ww.CustomerID == id;
 
-            var listResponse = customerUserRepository.GetListResponseView<CustomerUserViewModel>(pageCommand, query);
+            var listResponse = await customerUserRepository.GetListResponseViewAsync<CustomerUserViewModel>(pageCommand, query);
             listResponse.SetResponse(response);
 
             return response.ToIActionResult();
         }
         [HttpGet("{id:int}/Devices")]
         [HasPermission(typeof(AdminPermission))]
-        public IActionResult GetCustomerDevices([FromServices] DeviceRepository deviceRepository, [FromServices] CustomerRepository customerRepository, [FromQuery] PageCommand pageCommand, [FromRoute] Int32 id)
+        public async Task<IActionResult> GetCustomerDevices([FromServices] DeviceRepository deviceRepository, [FromServices] CustomerRepository customerRepository, [FromQuery] PageCommand pageCommand, [FromRoute] Int32 id)
         {
             var response = actionResponseFactory.CreateInstance();
-            var customer = customerRepository.Get(ww => ww.ID == id);
+            var customer = await customerRepository.GetAsync(ww => ww.ID == id);
             if (customer is null)
             {
                 response.AddNotFoundErr("Customer");
             }
 
-            var listResponse = deviceRepository.GetListResponseView<LargeDeviceViewModel>(pageCommand, ww => ww.CustomerID == customer.ID);
+            var listResponse = await deviceRepository.GetListResponseViewAsync<LargeDeviceViewModel>(pageCommand, ww => ww.CustomerID == customer.ID);
             listResponse.SetResponse(response);
 
             return response.ToIActionResult();
@@ -138,31 +135,31 @@ namespace MiSmart.API.Controllers
 
         [HttpDelete("{id:int}")]
         [HasPermission(typeof(AdminPermission))]
-        public IActionResult DeleteCustomer([FromServices] CustomerUserRepository customerUserRepository, [FromServices] CustomerRepository customerRepository,
+        public async Task<IActionResult> DeleteCustomer([FromServices] CustomerUserRepository customerUserRepository, [FromServices] CustomerRepository customerRepository,
         [FromQuery] PageCommand pageCommand, [FromRoute] Int32 id)
         {
             var response = actionResponseFactory.CreateInstance();
-            var customer = customerRepository.Get(ww => ww.ID == id);
+            var customer = await customerRepository.GetAsync(ww => ww.ID == id);
             if (customer is null)
             {
                 response.AddNotFoundErr("Customer");
             }
-            customerRepository.Delete(customer);
+            await customerRepository.DeleteAsync(customer);
             return response.ToIActionResult();
         }
 
         [HttpPost("RemoveUser")]
         [HasPermission(typeof(AdminPermission))]
-        public IActionResult RemoveCustomerUser([FromServices] CustomerUserRepository customerUserRepository, [FromServices] TeamUserRepository teamUserRepository, [FromBody] RemovingCustomerUserCommand command)
+        public async Task<IActionResult> RemoveCustomerUser([FromServices] CustomerUserRepository customerUserRepository, [FromServices] TeamUserRepository teamUserRepository, [FromBody] RemovingCustomerUserCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
-            var customerUser = customerUserRepository.Get(ww => ww.UserID == command.UserID);
+            var customerUser = await customerUserRepository.GetAsync(ww => ww.UserID == command.UserID);
             if (customerUser is null)
             {
                 response.AddInvalidErr("UserID");
             }
 
-            customerUserRepository.Delete(customerUser);
+            await customerUserRepository.DeleteAsync(customerUser);
 
             response.SetNoContent();
 
@@ -171,17 +168,17 @@ namespace MiSmart.API.Controllers
 
         [HttpPost("{id:int}/Devices")]
         [HasPermission(typeof(AdminPermission))]
-        public IActionResult AddDevice([FromRoute] Int32 id, [FromServices] DeviceModelRepository deviceModelRepository, [FromServices] CustomerRepository customerRepository,
+        public async Task<IActionResult> AddDevice([FromRoute] Int32 id, [FromServices] DeviceModelRepository deviceModelRepository, [FromServices] CustomerRepository customerRepository,
          [FromBody] AddingDeviceCommand command)
 
         {
             var response = actionResponseFactory.CreateInstance();
-            var customer = customerRepository.Get(ww => ww.ID == id);
+            var customer = await customerRepository.GetAsync(ww => ww.ID == id);
             if (customer is null)
             {
                 response.AddNotFoundErr("Customer");
             }
-            var deviceModel = deviceModelRepository.Get(ww => ww.ID == command.DeviceModelID);
+            var deviceModel = await deviceModelRepository.GetAsync(ww => ww.ID == command.DeviceModelID);
             if (deviceModel is null)
             {
                 response.AddInvalidErr("DeviceModelID");
@@ -192,23 +189,23 @@ namespace MiSmart.API.Controllers
                 Name = command.Name,
             };
             customer.Devices.Add(device);
-            customerRepository.Update(customer);
+            await customerRepository.UpdateAsync(customer);
             response.SetCreatedObject(device);
             return response.ToIActionResult();
         }
 
         [HttpPost("RemoveDevice")]
         [HasPermission(typeof(AdminPermission))]
-        public IActionResult RemoveDevice([FromServices] DeviceRepository deviceRepository, [FromBody] RemovingDeviceCommand command)
+        public async Task<IActionResult> RemoveDevice([FromServices] DeviceRepository deviceRepository, [FromBody] RemovingDeviceCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
-            var device = deviceRepository.Get(ww => ww.ID == command.DeviceID);
+            var device = await deviceRepository.GetAsync(ww => ww.ID == command.DeviceID);
             if (device is null)
             {
                 response.AddInvalidErr("DeviceID");
             }
 
-            deviceRepository.Delete(device);
+            await deviceRepository.DeleteAsync(device);
 
             response.SetNoContent();
             return response.ToIActionResult();

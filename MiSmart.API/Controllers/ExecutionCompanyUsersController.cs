@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using MiSmart.DAL.Models;
 using MiSmart.DAL.Repositories;
+using System.Threading.Tasks;
+
 namespace MiSmart.API.Controllers
 {
     public class ExecutionCompanyUsersController : AuthorizedAPIControllerBase
@@ -15,21 +17,21 @@ namespace MiSmart.API.Controllers
         {
         }
         [HttpPost("UnassignUser")]
-        public IActionResult UnassignUser([FromRoute] Int32 id, [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, [FromBody] RemovingExecutionCompanyUserCommand command)
+        public async Task<IActionResult> UnassignUser([FromRoute] Int32 id, [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, [FromBody] RemovingExecutionCompanyUserCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
-            ExecutionCompanyUser executionCompanyUser = executionCompanyUserRepository.GetByPermission(CurrentUser.ID, ExecutionCompanyUserType.Owner);
+            ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.ID, ExecutionCompanyUserType.Owner);
             if (executionCompanyUser is null)
             {
                 response.AddNotAllowedErr();
             }
 
-            var targetExecutionCompanyUser = executionCompanyUserRepository.Get(ww => ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID && ww.UserID == command.UserID.GetValueOrDefault());
+            var targetExecutionCompanyUser = await executionCompanyUserRepository.GetAsync(ww => ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID && ww.UserID == command.UserID.GetValueOrDefault());
             if (targetExecutionCompanyUser is null)
             {
                 response.AddInvalidErr("UserID");
             }
-            executionCompanyUserRepository.Delete(targetExecutionCompanyUser);
+            await executionCompanyUserRepository.DeleteAsync(targetExecutionCompanyUser);
 
             response.SetNoContent();
 

@@ -4,6 +4,7 @@ using MiSmart.Infrastructure.Responses;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using MiSmart.API.Settings;
+using System.Threading.Tasks;
 
 namespace MiSmart.API.Controllers
 {
@@ -14,12 +15,12 @@ namespace MiSmart.API.Controllers
         }
 
         [HttpGet("ConversionSettings")]
-        public IActionResult GetConversionSettings([FromServices] IOptions<ConversionSettings> options)
+        public Task<IActionResult> GetConversionSettings([FromServices] IOptions<ConversionSettings> options)
         {
             var response = actionResponseFactory.CreateInstance();
             ConversionSettings settings = options.Value;
             response.SetData(settings);
-            return response.ToIActionResult();
+            return Task.FromResult(response.ToIActionResult());
         }
     }
 }

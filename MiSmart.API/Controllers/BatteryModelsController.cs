@@ -13,6 +13,7 @@ using System.Linq.Expressions;
 using MiSmart.Infrastructure.Permissions;
 using MiSmart.API.Permissions;
 using MiSmart.Infrastructure.Minio;
+using System.Threading.Tasks;
 
 namespace MiSmart.API.Controllers
 {
@@ -24,22 +25,20 @@ namespace MiSmart.API.Controllers
 
         [HttpPost]
         [HasPermission(typeof(AdminPermission))]
-        public IActionResult Create([FromBody] AddingBatteryModelCommand command,
+        public async Task<IActionResult> Create([FromBody] AddingBatteryModelCommand command,
         [FromServices] BatteryModelRepository batteryModelRepository)
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
-            var model = new BatteryModel() { Name = command.Name, ManufacturerName = command.ManufacturerName };
-            batteryModelRepository.Create(model);
+            var model = await batteryModelRepository.CreateAsync(new BatteryModel() { Name = command.Name, ManufacturerName = command.ManufacturerName });
             response.SetCreatedObject(model);
-
             return response.ToIActionResult();
         }
         [HttpGet]
-        public IActionResult GetList([FromQuery] PageCommand pageCommand, [FromServices] BatteryModelRepository batteryModelRepository)
+        public async Task<IActionResult> GetList([FromQuery] PageCommand pageCommand, [FromServices] BatteryModelRepository batteryModelRepository)
         {
             var response = actionResponseFactory.CreateInstance();
             Expression<Func<BatteryModel, Boolean>> query = ww => true;
-            var listResponse = batteryModelRepository.GetListResponseView<SmallBatteryModelViewModel>(pageCommand, query);
+            var listResponse = await batteryModelRepository.GetListResponseViewAsync<SmallBatteryModelViewModel>(pageCommand, query);
 
             listResponse.SetResponse(response);
 
@@ -48,27 +47,26 @@ namespace MiSmart.API.Controllers
         }
         [HttpDelete("{id:int}")]
         [HasPermission(typeof(AdminPermission))]
-        public IActionResult RemoveBatteryModel([FromRoute] Int32 id, [FromServices] BatteryModelRepository batteryModelRepository)
+        public async Task<IActionResult> RemoveBatteryModel([FromRoute] Int32 id, [FromServices] BatteryModelRepository batteryModelRepository)
         {
             var response = actionResponseFactory.CreateInstance();
-            var batteryModel = batteryModelRepository.Get(ww => ww.ID == id);
+            var batteryModel = await batteryModelRepository.GetAsync(ww => ww.ID == id);
             if (batteryModel is null)
             {
                 response.AddNotFoundErr("BatteryModel");
             }
 
 
-            batteryModelRepository.Delete(batteryModel);
+            await batteryModelRepository.DeleteAsync(batteryModel);
             response.SetNoContent();
-
             return response.ToIActionResult();
         }
         [HttpPost("{id:int}/UploadImage")]
         [HasPermission(typeof(AdminPermission))]
-        public IActionResult UpdateImage([FromRoute] Int32 id, [FromServices] BatteryModelRepository batteryModelRepository, [FromServices] MinioService minioService, [FromForm] UpdatingBatteryModelImageCommand command)
+        public async Task<IActionResult> UpdateImage([FromRoute] Int32 id, [FromServices] BatteryModelRepository batteryModelRepository, [FromServices] MinioService minioService, [FromForm] UpdatingBatteryModelImageCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
-            var batteryModel = batteryModelRepository.Get(ww => ww.ID == id);
+            var batteryModel = await batteryModelRepository.GetAsync(ww => ww.ID == id);
             if (batteryModel is null)
             {
                 response.AddNotFoundErr("BatteryModel");
@@ -76,21 +74,21 @@ namespace MiSmart.API.Controllers
 
             if (batteryModel.FileUrl is not null)
             {
-                minioService.RemoveFileByUrl(batteryModel.FileUrl);
+                await minioService.RemoveFileByUrlAsync(batteryModel.FileUrl);
             }
 
-            batteryModel.FileUrl = minioService.PutFile(command.File, new String[] { "drone-hub-api", "battery-model" });
-            batteryModelRepository.Update(batteryModel);
+            batteryModel.FileUrl = await minioService.PutFileAsync(command.File, new String[] { "drone-hub-api", "battery-model" });
+            await batteryModelRepository.UpdateAsync(batteryModel);
             response.SetUpdatedMessage();
 
             return response.ToIActionResult();
         }
         [HttpPatch("{id:int}")]
         [HasPermission(typeof(AdminPermission))]
-        public IActionResult Update([FromRoute] Int32 id, [FromServices] BatteryModelRepository batteryModelRepository, [FromBody] PatchingBatterModelCommand command)
+        public async Task<IActionResult> Update([FromRoute] Int32 id, [FromServices] BatteryModelRepository batteryModelRepository, [FromBody] PatchingBatterModelCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
-            var batteryModel = batteryModelRepository.Get(ww => ww.ID == id);
+            var batteryModel = await batteryModelRepository.GetAsync(ww => ww.ID == id);
             if (batteryModel is null)
             {
                 response.AddNotFoundErr("BatteryModel");
@@ -99,7 +97,7 @@ namespace MiSmart.API.Controllers
             batteryModel.Name = String.IsNullOrWhiteSpace(command.Name) ? batteryModel.Name : command.Name;
             batteryModel.ManufacturerName = String.IsNullOrWhiteSpace(command.ManufacturerName) ? batteryModel.ManufacturerName : command.ManufacturerName;
 
-            batteryModelRepository.Update(batteryModel);
+            await batteryModelRepository.UpdateAsync(batteryModel);
 
 
             return response.ToIActionResult();

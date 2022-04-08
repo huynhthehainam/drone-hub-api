@@ -6,6 +6,7 @@ using MiSmart.Infrastructure.Responses;
 using MiSmart.Infrastructure.Settings;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using System.Threading.Tasks;
 
 namespace MiSmart.API.Controllers
 {
@@ -16,10 +17,10 @@ namespace MiSmart.API.Controllers
         }
 
         [HttpPost("GenerateDeviceToken")]
-        public IActionResult GenerateDeviceAccessToken([FromServices] IOptions<AuthSettings> options, [FromServices] DeviceRepository deviceRepository, [FromBody] GeneratingDeviceAccessTokenCommand command)
+        public async Task<IActionResult> GenerateDeviceAccessToken([FromServices] IOptions<AuthSettings> options, [FromServices] DeviceRepository deviceRepository, [FromBody] GeneratingDeviceAccessTokenCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
-            var device = deviceRepository.Get(ww => ww.Token == command.DeviceToken);
+            var device = await deviceRepository.GetAsync(ww => ww.Token == command.DeviceToken);
             if (device is null)
             {
                 response.AddNotFoundErr("Device");
@@ -28,7 +29,7 @@ namespace MiSmart.API.Controllers
             {
                 device.AccessToken = device.GenerateDeviceAccessToken(options.Value.AuthSecret);
                 device.NextGeneratingAccessTokenTime = DateTime.Now.AddMonths(1);
-                deviceRepository.Update(device);
+                await deviceRepository.UpdateAsync(device);
             }
 
 

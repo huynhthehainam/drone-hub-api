@@ -13,6 +13,7 @@ using System.Linq.Expressions;
 using MiSmart.Infrastructure.Permissions;
 using MiSmart.API.Permissions;
 using MiSmart.Infrastructure.Minio;
+using System.Threading.Tasks;
 
 namespace MiSmart.API.Controllers
 {
@@ -24,22 +25,21 @@ namespace MiSmart.API.Controllers
 
         [HttpPost]
         [HasPermission(typeof(AdminPermission))]
-        public IActionResult Create([FromBody] AddingDeviceModelCommand command,
+        public async Task<IActionResult> Create([FromBody] AddingDeviceModelCommand command,
         [FromServices] DeviceModelRepository deviceModelRepository)
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
-            var model = new DeviceModel() { Name = command.Name };
-            deviceModelRepository.Create(model);
+            var model = await deviceModelRepository.CreateAsync(new DeviceModel() { Name = command.Name });
             response.SetCreatedObject(model);
 
             return response.ToIActionResult();
         }
         [HttpGet]
-        public IActionResult GetActionResult([FromQuery] PageCommand pageCommand, [FromServices] MinioService minioService, [FromServices] DeviceModelRepository deviceModelRepository)
+        public async Task<IActionResult> GetActionResult([FromQuery] PageCommand pageCommand, [FromServices] MinioService minioService, [FromServices] DeviceModelRepository deviceModelRepository)
         {
             var response = actionResponseFactory.CreateInstance();
             Expression<Func<DeviceModel, Boolean>> query = ww => true;
-            var listResponse = deviceModelRepository.GetListResponseView<SmallDeviceModelVieModel>(pageCommand, query);
+            var listResponse = await deviceModelRepository.GetListResponseViewAsync<SmallDeviceModelVieModel>(pageCommand, query);
 
             listResponse.SetResponse(response);
 
@@ -48,27 +48,27 @@ namespace MiSmart.API.Controllers
         }
         [HttpDelete("{id:int}")]
         [HasPermission(typeof(AdminPermission))]
-        public IActionResult RemoveDeviceModel([FromRoute] Int32 id, [FromServices] DeviceModelRepository deviceModelRepository)
+        public async Task<IActionResult> RemoveDeviceModel([FromRoute] Int32 id, [FromServices] DeviceModelRepository deviceModelRepository)
         {
             var response = actionResponseFactory.CreateInstance();
-            var deviceModel = deviceModelRepository.Get(ww => ww.ID == id);
+            var deviceModel = await deviceModelRepository.GetAsync(ww => ww.ID == id);
             if (deviceModel is null)
             {
                 response.AddNotFoundErr("DeviceModel");
             }
 
 
-            deviceModelRepository.Delete(deviceModel);
+            await deviceModelRepository.DeleteAsync(deviceModel);
             response.SetNoContent();
 
             return response.ToIActionResult();
         }
         [HttpPost("{id:int}/UploadImage")]
         [HasPermission(typeof(AdminPermission))]
-        public IActionResult UpdateImage([FromRoute] Int32 id, [FromServices] DeviceModelRepository deviceModelRepository, [FromServices] MinioService minioService, [FromForm] UpdatingDeviceModelImageCommand command)
+        public async Task<IActionResult> UpdateImage([FromRoute] Int32 id, [FromServices] DeviceModelRepository deviceModelRepository, [FromServices] MinioService minioService, [FromForm] UpdatingDeviceModelImageCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
-            var deviceModel = deviceModelRepository.Get(ww => ww.ID == id);
+            var deviceModel = await deviceModelRepository.GetAsync(ww => ww.ID == id);
             if (deviceModel is null)
             {
                 response.AddNotFoundErr("DeviceModel");
@@ -76,21 +76,21 @@ namespace MiSmart.API.Controllers
 
             if (deviceModel.FileUrl is not null)
             {
-                minioService.RemoveFileByUrl(deviceModel.FileUrl);
+                await minioService.RemoveFileByUrlAsync(deviceModel.FileUrl);
             }
 
-            deviceModel.FileUrl = minioService.PutFile(command.File, new String[] { "drone-hub-api", "device-model" });
-            deviceModelRepository.Update(deviceModel);
+            deviceModel.FileUrl = await minioService.PutFileAsync(command.File, new String[] { "drone-hub-api", "device-model" });
+            await deviceModelRepository.UpdateAsync(deviceModel);
             response.SetUpdatedMessage();
 
             return response.ToIActionResult();
         }
         [HttpPatch("{id:int}")]
         [HasPermission(typeof(AdminPermission))]
-        public IActionResult UpdateDeviceModel([FromRoute] Int32 id, [FromServices] DeviceModelRepository deviceModelRepository, [FromBody] PatchingDeviceModelCommand command)
+        public async Task<IActionResult> UpdateDeviceModel([FromRoute] Int32 id, [FromServices] DeviceModelRepository deviceModelRepository, [FromBody] PatchingDeviceModelCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
-            var deviceModel = deviceModelRepository.Get(ww => ww.ID == id);
+            var deviceModel = await deviceModelRepository.GetAsync(ww => ww.ID == id);
             if (deviceModel is null)
             {
                 response.AddNotFoundErr("DeviceModel");
@@ -98,7 +98,7 @@ namespace MiSmart.API.Controllers
 
             deviceModel.Name = String.IsNullOrWhiteSpace(command.Name) ? deviceModel.Name : command.Name;
 
-            deviceModelRepository.Update(deviceModel);
+            await deviceModelRepository.UpdateAsync(deviceModel);
 
 
             return response.ToIActionResult();

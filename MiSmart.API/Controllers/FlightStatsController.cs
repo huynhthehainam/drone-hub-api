@@ -16,6 +16,7 @@ using Microsoft.Extensions.Options;
 using MiSmart.Infrastructure.Permissions;
 using MiSmart.API.Permissions;
 using MiSmart.API.Commands;
+using System.Threading.Tasks;
 
 namespace MiSmart.API.Controllers
 {
@@ -26,7 +27,7 @@ namespace MiSmart.API.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetFlightStats([FromServices] FlightStatRepository flightStatRepository,
+        public async Task<IActionResult> GetFlightStats([FromServices] FlightStatRepository flightStatRepository,
         [FromServices] TeamUserRepository teamUserRepository,
         [FromServices] IOptions<ActionResponseSettings> options,
         [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository,
@@ -44,7 +45,7 @@ namespace MiSmart.API.Controllers
             if (relation == "Owner")
             {
 
-                CustomerUser customerUser = customerUserRepository.GetByPermission(CurrentUser.ID);
+                CustomerUser customerUser = await customerUserRepository.GetByPermissionAsync(CurrentUser.ID);
                 if (customerUser is null)
                 {
                     response.AddNotAllowedErr();
@@ -68,12 +69,12 @@ namespace MiSmart.API.Controllers
             }
             else
             {
-                ExecutionCompanyUser executionCompanyUser = executionCompanyUserRepository.GetByPermission(CurrentUser.ID);
+                ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.ID);
                 if (executionCompanyUser is null)
                 {
                     response.AddNotAllowedErr();
                 }
-                List<Int64> teamIDs = teamUserRepository.GetListEntities(new PageCommand(), ww => ww.ExecutionCompanyUserID == executionCompanyUser.ID).Select(ww => ww.TeamID).ToList();
+                List<Int64> teamIDs = teamUserRepository.GetListEntitiesAsync(new PageCommand(), ww => ww.ExecutionCompanyUserID == executionCompanyUser.ID).Result.Select(ww => ww.TeamID).ToList();
                 query = ww => (ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID)
                    && (teamID.HasValue ? (ww.Device.TeamID == teamID.Value) : true)
                    && (deviceID.HasValue ? (ww.DeviceID == deviceID.Value) : true)
@@ -82,13 +83,13 @@ namespace MiSmart.API.Controllers
                    && (customerID.HasValue ? (ww.CustomerID == customerID.GetValueOrDefault()) : true)
                    && (executionCompanyUser.Type == ExecutionCompanyUserType.Member ? (teamIDs.Contains(ww.TeamID.GetValueOrDefault())) : true);
             }
-            var listResponse = flightStatRepository.GetListFlightStatsView<SmallFlightStatViewModel>(pageCommand, query, ww => ww.FlightTime, false);
+            var listResponse = await flightStatRepository.GetListResponseViewAsync<SmallFlightStatViewModel>(pageCommand, query, ww => ww.FlightTime, false);
             listResponse.SetResponse(response);
             return response.ToIActionResult();
         }
 
         [HttpGet("{id:Guid}")]
-        public IActionResult GetByID([FromServices] FlightStatRepository flightStatRepository, [FromServices] CustomerUserRepository customerUserRepository,
+        public async Task<IActionResult> GetByID([FromServices] FlightStatRepository flightStatRepository, [FromServices] CustomerUserRepository customerUserRepository,
         [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, [FromRoute] Guid id,
         [FromQuery] String relation = "Owner")
         {
@@ -96,7 +97,7 @@ namespace MiSmart.API.Controllers
             Expression<Func<FlightStat, Boolean>> query = ww => false;
             if (relation == "Owner")
             {
-                CustomerUser customerUser = customerUserRepository.GetByPermission(CurrentUser.ID);
+                CustomerUser customerUser = await customerUserRepository.GetByPermissionAsync(CurrentUser.ID);
                 if (customerUser is null)
                 {
                     response.AddNotAllowedErr();
@@ -113,14 +114,14 @@ namespace MiSmart.API.Controllers
             }
             else
             {
-                ExecutionCompanyUser executionCompanyUser = executionCompanyUserRepository.GetByPermission(CurrentUser.ID);
+                ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.ID);
                 if (executionCompanyUser is null)
                 {
                     response.AddNotAllowedErr();
                 }
                 query = ww => ww.ID == id && ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID;
             }
-            var flightStat = flightStatRepository.Get(query);
+            var flightStat = await flightStatRepository.GetAsync(query);
 
             if (flightStat is null)
             {
@@ -130,20 +131,20 @@ namespace MiSmart.API.Controllers
             return response.ToIActionResult();
         }
         [HttpPost("{id:Guid}/UpdateFromExecutor")]
-        public IActionResult UpdateFromExecutor([FromRoute] Guid id, [FromServices] TeamRepository teamRepository,
+        public async Task<IActionResult> UpdateFromExecutor([FromRoute] Guid id, [FromServices] TeamRepository teamRepository,
          [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, [FromServices] FlightStatRepository flightStatRepository,
          [FromServices] ExecutionCompanyUserFlightStatRepository executionCompanyUserFlightStatRepository,
          [FromBody] UpdatingFlightStatFromExecutorCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
-            ExecutionCompanyUser executionCompanyUser = executionCompanyUserRepository.GetByPermission(CurrentUser.ID, ExecutionCompanyUserType.Owner);
+            ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.ID, ExecutionCompanyUserType.Owner);
             if (executionCompanyUser is null)
             {
                 response.AddNotAllowedErr();
             }
 
 
-            var flightStat = flightStatRepository.Get(ww => ww.ID == id && ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID);
+            var flightStat = await flightStatRepository.GetAsync(ww => ww.ID == id && ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID);
             if (flightStat is null)
             {
                 response.AddNotFoundErr("FlightStat");
@@ -151,7 +152,7 @@ namespace MiSmart.API.Controllers
 
             if (command.TeamID.HasValue)
             {
-                var team = teamRepository.Get(ww => ww.ID == command.TeamID.GetValueOrDefault() && ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID);
+                var team = await teamRepository.GetAsync(ww => ww.ID == command.TeamID.GetValueOrDefault() && ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID);
                 if (team is null)
                 {
                     response.AddInvalidErr("TeamID");
@@ -159,18 +160,17 @@ namespace MiSmart.API.Controllers
                 flightStat.Team = team;
                 List<TeamUser> teamUsers = team.TeamUsers.ToList();
 
-                var executionCompanyUserFlightStats = executionCompanyUserFlightStatRepository.GetListEntities(new PageCommand(), ww => ww.FlightStatID == flightStat.ID);
-                executionCompanyUserFlightStatRepository.DeleteRange(executionCompanyUserFlightStats);
+                var executionCompanyUserFlightStats = await executionCompanyUserFlightStatRepository.GetListEntitiesAsync(new PageCommand(), ww => ww.FlightStatID == flightStat.ID);
+                await executionCompanyUserFlightStatRepository.DeleteRangeAsync(executionCompanyUserFlightStats);
 
                 foreach (var teamUser in teamUsers)
                 {
-                    ExecutionCompanyUserFlightStat executionCompanyUserFlightStat = new ExecutionCompanyUserFlightStat
+                    ExecutionCompanyUserFlightStat executionCompanyUserFlightStat = await executionCompanyUserFlightStatRepository.CreateAsync(new ExecutionCompanyUserFlightStat
                     {
                         ExecutionCompanyUserID = teamUser.ExecutionCompanyUserID,
                         FlightStatID = flightStat.ID,
                         Type = teamUser.Type,
-                    };
-                    executionCompanyUserFlightStatRepository.Create(executionCompanyUserFlightStat);
+                    });
                 }
             }
 
@@ -178,7 +178,7 @@ namespace MiSmart.API.Controllers
             flightStat.FieldName = String.IsNullOrEmpty(command.FieldName) ? flightStat.FieldName : command.FieldName;
             flightStat.TaskLocation = String.IsNullOrEmpty(command.TaskLocation) ? flightStat.TaskLocation : command.TaskLocation;
 
-            flightStatRepository.Update(flightStat);
+            await flightStatRepository.UpdateAsync(flightStat);
             response.SetUpdatedMessage();
 
             return response.ToIActionResult();
@@ -186,16 +186,16 @@ namespace MiSmart.API.Controllers
 
         [HttpDelete("{id:Guid}")]
         [HasPermission(typeof(AdminPermission))]
-        public IActionResult DeleteByID([FromServices] FlightStatRepository flightStatRepository, [FromServices] CustomerUserRepository customerUserRepository, [FromRoute] Guid id)
+        public async Task<IActionResult> DeleteByID([FromServices] FlightStatRepository flightStatRepository, [FromServices] CustomerUserRepository customerUserRepository, [FromRoute] Guid id)
         {
             var response = actionResponseFactory.CreateInstance();
-            var flightStat = flightStatRepository.Get(ww => ww.ID == id);
+            var flightStat = await flightStatRepository.GetAsync(ww => ww.ID == id);
 
             if (flightStat is null)
             {
                 response.AddNotFoundErr("FlightStat");
             }
-            flightStatRepository.Delete(flightStat);
+            await flightStatRepository.DeleteAsync(flightStat);
             response.SetNoContent();
             return response.ToIActionResult();
         }

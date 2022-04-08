@@ -1,14 +1,6 @@
 using MiSmart.Infrastructure.Responses;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using System.Text.Json;
-using System;
-using MiSmart.Infrastructure.QueuedBackgroundTasks;
 using System.Threading.Tasks;
-using System.Threading;
-using Microsoft.Extensions.DependencyInjection;
-using MiSmart.DAL.DatabaseContexts;
-using System.Linq;
 
 namespace MiSmart.API.Controllers
 {
@@ -20,7 +12,7 @@ namespace MiSmart.API.Controllers
             this.actionResponseFactory = actionResponseFactory;
         }
         [HttpGet]
-        public IActionResult Index()
+        public Task<IActionResult> Index()
         {
             var response = actionResponseFactory.CreateInstance();
             response.SetData(new
@@ -29,7 +21,7 @@ namespace MiSmart.API.Controllers
                 Service = "App Sync",
                 Description = "MiSmart is the best drone company in VN"
             });
-            return response.ToIActionResult();
+            return Task.FromResult(response.ToIActionResult());
         }
     }
 }

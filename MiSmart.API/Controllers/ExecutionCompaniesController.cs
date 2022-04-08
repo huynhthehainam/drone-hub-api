@@ -14,6 +14,8 @@ using MiSmart.Infrastructure.Permissions;
 using MiSmart.API.Permissions;
 using System.Linq;
 using MiSmart.API.Services;
+using System.Threading.Tasks;
+
 namespace MiSmart.API.Controllers
 {
     public class ExecutionCompaniesController : AuthorizedAPIControllerBase
@@ -24,34 +26,33 @@ namespace MiSmart.API.Controllers
         }
         [HttpPost]
         [HasPermission(typeof(AdminPermission))]
-        public IActionResult Create([FromServices] ExecutionCompanyRepository executionCompanyRepository, [FromBody] AddingExecutionCompanyCommand command)
+        public async Task<IActionResult> Create([FromServices] ExecutionCompanyRepository executionCompanyRepository, [FromBody] AddingExecutionCompanyCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
 
 
-            var executionCompany = new ExecutionCompany { Name = command.Name, Address = command.Address };
-            executionCompanyRepository.Create(executionCompany);
+            var executionCompany = await executionCompanyRepository.CreateAsync(new ExecutionCompany { Name = command.Name, Address = command.Address });
             response.SetCreatedObject(executionCompany);
 
             return response.ToIActionResult();
         }
 
         [HttpGet]
-        public IActionResult GetList([FromQuery] PageCommand pageCommand,
+        public async Task<IActionResult> GetList([FromQuery] PageCommand pageCommand,
         [FromServices] ExecutionCompanyRepository executionCompanyRepository,
         [FromQuery] String search)
         {
             var response = actionResponseFactory.CreateInstance();
             Expression<Func<ExecutionCompany, Boolean>> query = ww => (!String.IsNullOrWhiteSpace(search) ? (ww.Name.ToLower().Contains(search.ToLower()) || ww.Address.ToLower().Contains(search.ToLower())) : true);
-            var listResponse = executionCompanyRepository.GetListResponseView<ExecutionCompanyViewModel>(pageCommand, query);
+            var listResponse = await executionCompanyRepository.GetListResponseViewAsync<ExecutionCompanyViewModel>(pageCommand, query);
             listResponse.SetResponse(response);
             return response.ToIActionResult();
         }
 
-     
+
         [HttpPost("{id:int}/AssignUser")]
         [HasPermission(typeof(AdminPermission))]
-        public IActionResult AssignExecutionCompanyUser([FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository,
+        public async Task<IActionResult> AssignExecutionCompanyUser([FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository,
      [FromServices] ExecutionCompanyRepository executionCompanyRepository, [FromServices] AuthSystemService authSystemService,
       [FromBody] AssigningExecutionCompanyUserCommand command, [FromRoute] Int32 id)
         {
@@ -62,18 +63,17 @@ namespace MiSmart.API.Controllers
                 response.AddInvalidErr("UserID");
             }
 
-            var executionCompany = executionCompanyRepository.Get(ww => ww.ID == id);
+            var executionCompany = await executionCompanyRepository.GetAsync(ww => ww.ID == id);
             if (executionCompany is null)
             {
                 response.AddNotFoundErr("ExecutionCompany");
             }
-            var existedExecutionCompanyUser = executionCompanyUserRepository.Get(ww => ww.UserID == command.UserID.GetValueOrDefault());
+            var existedExecutionCompanyUser = await executionCompanyUserRepository.GetAsync(ww => ww.UserID == command.UserID.GetValueOrDefault());
             if (existedExecutionCompanyUser is not null)
             {
                 response.AddExistedErr("User");
             }
-            ExecutionCompanyUser executionCompanyUser = new ExecutionCompanyUser { ExecutionCompanyID = id, UserID = command.UserID.Value, Type = command.Type };
-            executionCompanyUserRepository.Create(executionCompanyUser);
+            ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.CreateAsync(new ExecutionCompanyUser { ExecutionCompanyID = id, UserID = command.UserID.Value, Type = command.Type });
             response.SetCreatedObject(executionCompanyUser);
 
             return response.ToIActionResult();
@@ -82,20 +82,20 @@ namespace MiSmart.API.Controllers
 
         [HttpGet("AssignedUsers")]
         [HasPermission(typeof(AdminPermission))]
-        public IActionResult GetCurrentExecutionCompanyUsers([FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository)
+        public Task<IActionResult> GetCurrentExecutionCompanyUsers([FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository)
         {
             var response = actionResponseFactory.CreateInstance();
-            var assignedUserIDs = executionCompanyUserRepository.GetListEntities(new PageCommand(), ww => true).Select(ww => ww.UserID).ToList();
+            var assignedUserIDs = executionCompanyUserRepository.GetListEntitiesAsync(new PageCommand(), ww => true).Result.Select(ww => ww.UserID).ToList();
             response.SetData(new { AssignedUserIDs = assignedUserIDs });
-            return response.ToIActionResult();
+            return Task.FromResult(response.ToIActionResult());
         }
 
         [HttpGet("{id:int}/Users")]
         [HasPermission(typeof(AdminPermission))]
-        public IActionResult GetExecutionCompanyUsers([FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, [FromServices] ExecutionCompanyRepository executionCompanyRepository, [FromQuery] PageCommand pageCommand, [FromRoute] Int32 id)
+        public async Task<IActionResult> GetExecutionCompanyUsers([FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, [FromServices] ExecutionCompanyRepository executionCompanyRepository, [FromQuery] PageCommand pageCommand, [FromRoute] Int32 id)
         {
             var response = actionResponseFactory.CreateInstance();
-            var executionCompany = executionCompanyRepository.Get(ww => ww.ID == id);
+            var executionCompany = await executionCompanyRepository.GetAsync(ww => ww.ID == id);
             if (executionCompany is null)
             {
                 response.AddNotFoundErr("ExecutionCompany");
@@ -103,23 +103,23 @@ namespace MiSmart.API.Controllers
 
             Expression<Func<ExecutionCompanyUser, Boolean>> query = ww => ww.ExecutionCompanyID == id;
 
-            var listResponse = executionCompanyUserRepository.GetListResponseView<ExecutionCompanyUserViewModel>(pageCommand, query);
+            var listResponse = await executionCompanyUserRepository.GetListResponseViewAsync<ExecutionCompanyUserViewModel>(pageCommand, query);
             listResponse.SetResponse(response);
 
             return response.ToIActionResult();
         }
         [HttpGet("{id:int}/Devices")]
         [HasPermission(typeof(AdminPermission))]
-        public IActionResult GetExecutionCompanyDevices([FromServices] DeviceRepository deviceRepository, [FromServices] ExecutionCompanyRepository executionCompanyRepository, [FromQuery] PageCommand pageCommand, [FromRoute] Int32 id)
+        public async Task<IActionResult> GetExecutionCompanyDevices([FromServices] DeviceRepository deviceRepository, [FromServices] ExecutionCompanyRepository executionCompanyRepository, [FromQuery] PageCommand pageCommand, [FromRoute] Int32 id)
         {
             var response = actionResponseFactory.CreateInstance();
-            var executionCompany = executionCompanyRepository.Get(ww => ww.ID == id);
+            var executionCompany = await executionCompanyRepository.GetAsync(ww => ww.ID == id);
             if (executionCompany is null)
             {
                 response.AddNotFoundErr("ExecutionCompany");
             }
 
-            var listResponse = deviceRepository.GetListResponseView<LargeDeviceViewModel>(pageCommand, ww => ww.ExecutionCompanyID == executionCompany.ID);
+            var listResponse = await deviceRepository.GetListResponseViewAsync<LargeDeviceViewModel>(pageCommand, ww => ww.ExecutionCompanyID == executionCompany.ID);
             listResponse.SetResponse(response);
 
             return response.ToIActionResult();
@@ -128,16 +128,16 @@ namespace MiSmart.API.Controllers
 
         [HttpGet("{id:int}/Batteries")]
         [HasPermission(typeof(AdminPermission))]
-        public IActionResult GetBatteries([FromServices] BatteryRepository batteryRepository, [FromServices] ExecutionCompanyRepository executionCompanyRepository, [FromQuery] PageCommand pageCommand, [FromRoute] Int32 id)
+        public async Task<IActionResult> GetBatteries([FromServices] BatteryRepository batteryRepository, [FromServices] ExecutionCompanyRepository executionCompanyRepository, [FromQuery] PageCommand pageCommand, [FromRoute] Int32 id)
         {
             var response = actionResponseFactory.CreateInstance();
-            var executionCompany = executionCompanyRepository.Get(ww => ww.ID == id);
+            var executionCompany = await executionCompanyRepository.GetAsync(ww => ww.ID == id);
             if (executionCompany is null)
             {
                 response.AddNotFoundErr("ExecutionCompany");
             }
 
-            var listResponse = batteryRepository.GetListResponseView<BatteryViewModel>(pageCommand, ww => ww.ExecutionCompanyID == executionCompany.ID);
+            var listResponse = await batteryRepository.GetListResponseViewAsync<BatteryViewModel>(pageCommand, ww => ww.ExecutionCompanyID == executionCompany.ID);
             listResponse.SetResponse(response);
 
             return response.ToIActionResult();
@@ -145,31 +145,31 @@ namespace MiSmart.API.Controllers
 
         [HttpDelete("{id:int}")]
         [HasPermission(typeof(AdminPermission))]
-        public IActionResult DeleteExecutionCompany([FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, [FromServices] ExecutionCompanyRepository executionCompanyRepository,
+        public async Task<IActionResult> DeleteExecutionCompany([FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, [FromServices] ExecutionCompanyRepository executionCompanyRepository,
         [FromQuery] PageCommand pageCommand, [FromRoute] Int32 id)
         {
             var response = actionResponseFactory.CreateInstance();
-            var executionCompany = executionCompanyRepository.Get(ww => ww.ID == id);
+            var executionCompany = await executionCompanyRepository.GetAsync(ww => ww.ID == id);
             if (executionCompany is null)
             {
                 response.AddNotFoundErr("ExecutionCompany");
             }
-            executionCompanyRepository.Delete(executionCompany);
+            await executionCompanyRepository.DeleteAsync(executionCompany);
             return response.ToIActionResult();
         }
 
         [HttpPost("RemoveUser")]
         [HasPermission(typeof(AdminPermission))]
-        public IActionResult RemoveExecutionCompanyUser([FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, [FromServices] TeamUserRepository teamUserRepository, [FromBody] RemovingExecutionCompanyUserCommand command)
+        public async Task<IActionResult> RemoveExecutionCompanyUser([FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, [FromServices] TeamUserRepository teamUserRepository, [FromBody] RemovingExecutionCompanyUserCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
-            var executionCompanyUser = executionCompanyUserRepository.Get(ww => ww.UserID == command.UserID);
+            var executionCompanyUser = await executionCompanyUserRepository.GetAsync(ww => ww.UserID == command.UserID);
             if (executionCompanyUser is null)
             {
                 response.AddInvalidErr("UserID");
             }
 
-            executionCompanyUserRepository.Delete(executionCompanyUser);
+            await executionCompanyUserRepository.DeleteAsync(executionCompanyUser);
 
             response.SetUpdatedMessage();
 

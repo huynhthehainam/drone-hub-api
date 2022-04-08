@@ -9,6 +9,7 @@ using MiSmart.Infrastructure.Commands;
 using MiSmart.DAL.ViewModels;
 using MiSmart.Infrastructure.ViewModels;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 
 namespace MiSmart.API.Controllers
 {
@@ -18,7 +19,7 @@ namespace MiSmart.API.Controllers
         {
         }
         [HttpGet]
-        public IActionResult GetFields([FromServices] FieldRepository fieldRepository,
+        public async Task<IActionResult> GetFields([FromServices] FieldRepository fieldRepository,
             [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository,
          [FromServices] CustomerUserRepository customerUserRepository, [FromQuery] PageCommand pageCommand, [FromQuery] DateTime? from,
          [FromQuery] DateTime? to, [FromQuery] String search,
@@ -30,7 +31,7 @@ namespace MiSmart.API.Controllers
             Expression<Func<Field, Boolean>> query = ww => false;
             if (relation == "Owner")
             {
-                CustomerUser customerUser = customerUserRepository.GetByPermission(CurrentUser.ID);
+                CustomerUser customerUser = await customerUserRepository.GetByPermissionAsync(CurrentUser.ID);
                 if (customerUser is null)
                 {
                     response.AddNotAllowedErr();
@@ -43,7 +44,7 @@ namespace MiSmart.API.Controllers
             }
             else
             {
-                ExecutionCompanyUser executionCompanyUser = executionCompanyUserRepository.GetByPermission(CurrentUser.ID);
+                ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.ID);
                 if (executionCompanyUser is null)
                 {
                     response.AddNotAllowedErr();
@@ -53,7 +54,7 @@ namespace MiSmart.API.Controllers
                                    && (to.HasValue ? (ww.CreatedTime <= to.Value) : true)
                                    && (!String.IsNullOrWhiteSpace(search) ? (ww.Name.ToLower().Contains(search.ToLower()) || ww.FieldLocation.ToLower().Contains(search.ToLower()) || ww.FieldName.ToLower().Contains(search.ToLower())) : true);
             }
-            var listResponse = fieldRepository.GetListResponseView<FieldViewModel>(pageCommand, query, ww => ww.CreatedTime, false);
+            var listResponse = await fieldRepository.GetListResponseViewAsync<FieldViewModel>(pageCommand, query, ww => ww.CreatedTime, false);
             listResponse.SetResponse(response);
 
 
@@ -63,16 +64,16 @@ namespace MiSmart.API.Controllers
         }
 
         [HttpGet("{id:int}")]
-        public IActionResult GetFields([FromServices] FieldRepository fieldRepository, [FromServices] CustomerUserRepository customerUserRepository, [FromRoute] Int64 id)
+        public async Task<IActionResult> GetFields([FromServices] FieldRepository fieldRepository, [FromServices] CustomerUserRepository customerUserRepository, [FromRoute] Int64 id)
         {
             var response = actionResponseFactory.CreateInstance();
 
-            CustomerUser customerUser = customerUserRepository.GetByPermission(CurrentUser.ID);
+            CustomerUser customerUser = await customerUserRepository.GetByPermissionAsync(CurrentUser.ID);
             if (customerUser is null)
             {
                 response.AddNotAllowedErr();
             }
-            var field = fieldRepository.Get(ww => ww.ID == id && ww.CustomerID == customerUser.CustomerID);
+            var field = await fieldRepository.GetAsync(ww => ww.ID == id && ww.CustomerID == customerUser.CustomerID);
             if (field is null)
             {
                 response.AddNotFoundErr("Field");

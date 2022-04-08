@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using MiSmart.Infrastructure.Minio;
 using Microsoft.AspNetCore.Authorization;
 using MiSmart.Infrastructure.Services;
+using System.Threading.Tasks;
 
 namespace MiSmart.API.Controllers
 {
@@ -34,24 +35,24 @@ namespace MiSmart.API.Controllers
         }
 
         [HttpPost("{id:int}/AssignExecutionCompany")]
-        public IActionResult AssignExecutionCompany([FromServices] CustomerUserRepository customerUserRepository, [FromServices] ExecutionCompanyRepository executionCompanyRepository,
+        public async Task<IActionResult> AssignExecutionCompany([FromServices] CustomerUserRepository customerUserRepository, [FromServices] ExecutionCompanyRepository executionCompanyRepository,
         [FromServices] DeviceRepository deviceRepository,
          [FromServices] TeamUserRepository teamUserRepository, [FromRoute] Int32 id, [FromBody] AssigningDeviceExecutionCompanyCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
-            CustomerUser customerUser = customerUserRepository.GetByPermission(CurrentUser.ID);
+            CustomerUser customerUser =await customerUserRepository.GetByPermissionAsync(CurrentUser.ID);
             if (customerUser is null)
             {
                 response.AddNotAllowedErr();
             }
 
-            var executionCompany = executionCompanyRepository.Get(ww => ww.ID == command.ExecutionCompanyID.GetValueOrDefault());
+            var executionCompany = await executionCompanyRepository.GetAsync(ww => ww.ID == command.ExecutionCompanyID.GetValueOrDefault());
             if (executionCompany is null)
             {
                 response.AddInvalidErr("ExecutionCompanyID");
             }
             Expression<Func<Device, Boolean>> query = ww => (ww.ID == id) && (ww.CustomerID == customerUser.CustomerID);
-            var device = deviceRepository.Get(query);
+            var device = await deviceRepository.GetAsync(query);
             if (device is null)
             {
                 response.AddNotFoundErr("Device");
@@ -60,7 +61,7 @@ namespace MiSmart.API.Controllers
             {
                 device.ExecutionCompanyID = executionCompany.ID;
                 device.TeamID = null;
-                deviceRepository.Update(device);
+                await deviceRepository.UpdateAsync(device);
             }
             response.SetUpdatedMessage();
 
@@ -68,37 +69,37 @@ namespace MiSmart.API.Controllers
         }
 
         [HttpPost("{id:int}/AssignTeam")]
-        public IActionResult AssignTeam([FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, [FromRoute] Int32 id,
+        public async Task<IActionResult> AssignTeam([FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, [FromRoute] Int32 id,
         [FromServices] DeviceRepository deviceRepository,
         [FromServices] TeamRepository teamRepository, [FromBody] AssigningDeviceTeamCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
-            ExecutionCompanyUser executionCompanyUser = executionCompanyUserRepository.GetByPermission(CurrentUser.ID, ExecutionCompanyUserType.Owner);
+            ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.ID, ExecutionCompanyUserType.Owner);
             if (executionCompanyUser is null)
             {
                 response.AddNotAllowedErr();
             }
-            var device = deviceRepository.Get(ww => ww.ID == id && ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID);
+            var device = await deviceRepository.GetAsync(ww => ww.ID == id && ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID);
             if (device is null)
             {
                 response.AddNotFoundErr("Device");
             }
 
-            var team = teamRepository.Get(ww => ww.ID == command.TeamID.GetValueOrDefault() && ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID);
+            var team = await teamRepository.GetAsync(ww => ww.ID == command.TeamID.GetValueOrDefault() && ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID);
             if (team is null)
             {
                 response.AddInvalidErr("TeamID");
             }
 
             device.Team = team;
-            deviceRepository.Update(device);
+            await deviceRepository.UpdateAsync(device);
             response.SetUpdatedMessage();
 
             return response.ToIActionResult();
         }
 
         [HttpGet]
-        public IActionResult GetList([FromServices] CustomerUserRepository customerUserRepository,
+        public async Task<IActionResult> GetList([FromServices] CustomerUserRepository customerUserRepository,
         [FromServices] DeviceRepository deviceRepository,
         [FromServices] BatteryGroupLogRepository batteryGroupLogRepository,
     [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository,
@@ -109,7 +110,7 @@ namespace MiSmart.API.Controllers
             Expression<Func<Device, Boolean>> query = ww => false;
             if (relation == "Owner")
             {
-                CustomerUser customerUser = customerUserRepository.GetByPermission(CurrentUser.ID);
+                CustomerUser customerUser = await customerUserRepository.GetByPermissionAsync(CurrentUser.ID);
 
                 if (customerUser is null)
                 {
@@ -130,17 +131,17 @@ namespace MiSmart.API.Controllers
             }
             else
             {
-                ExecutionCompanyUser executionCompanyUser = executionCompanyUserRepository.GetByPermission(CurrentUser.ID);
+                ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.ID);
                 if (executionCompanyUser is null)
                 {
                     response.AddNotAllowedErr();
                 }
-                List<Int64> teamIDs = teamUserRepository.GetListEntities(new PageCommand(), ww => ww.ExecutionCompanyUserID == executionCompanyUser.ID).Select(ww => ww.TeamID).ToList();
+                List<Int64> teamIDs = teamUserRepository.GetListEntitiesAsync(new PageCommand(), ww => ww.ExecutionCompanyUserID == executionCompanyUser.ID).Result.Select(ww => ww.TeamID).ToList();
                 query = ww => (ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID)
                 && (executionCompanyUser.Type == ExecutionCompanyUserType.Member ? (teamIDs.Contains(ww.TeamID.GetValueOrDefault())) : true)
                  && (!String.IsNullOrWhiteSpace(search) ? ww.Name.ToLower().Contains(search.ToLower()) : true);
             }
-            var listResponse = deviceRepository.GetListResponseView<SmallDeviceViewModel>(pageCommand, query);
+            var listResponse = await deviceRepository.GetListResponseViewAsync<SmallDeviceViewModel>(pageCommand, query);
             foreach (var item in listResponse.Data)
             {
                 if (item.LastBatteryGroupIDs.Count > 0)
@@ -148,7 +149,7 @@ namespace MiSmart.API.Controllers
                     item.BatteryGroupLogs = new List<BatteryGroupLogViewModel>();
                     foreach (var groupID in item.LastBatteryGroupIDs)
                     {
-                        var group = batteryGroupLogRepository.Get(ww => ww.ID == groupID);
+                        var group = await batteryGroupLogRepository.GetAsync(ww => ww.ID == groupID);
                         if (group is not null)
                         {
                             item.BatteryGroupLogs.Add(ViewModelHelpers.ConvertToViewModel<BatteryGroupLog, BatteryGroupLogViewModel>(group));
@@ -160,7 +161,7 @@ namespace MiSmart.API.Controllers
             return response.ToIActionResult();
         }
         [HttpGet("{id:int}/GetToken")]
-        public IActionResult GetToken([FromServices] CustomerUserRepository customerUserRepository, [FromServices] TeamUserRepository teamUserRepository, [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository,
+        public async Task<IActionResult> GetToken([FromServices] CustomerUserRepository customerUserRepository, [FromServices] TeamUserRepository teamUserRepository, [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository,
          [FromServices] DeviceRepository deviceRepository, [FromRoute] Int32 id, [FromQuery] String relation = "Owner")
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
@@ -168,7 +169,7 @@ namespace MiSmart.API.Controllers
             if (relation == "Owner")
             {
 
-                CustomerUser customerUser = customerUserRepository.GetByPermission(CurrentUser.ID);
+                CustomerUser customerUser = await customerUserRepository.GetByPermissionAsync(CurrentUser.ID);
                 if (customerUser is null)
                 {
                     response.AddNotAllowedErr();
@@ -188,14 +189,14 @@ namespace MiSmart.API.Controllers
             }
             else
             {
-                ExecutionCompanyUser executionCompanyUser = executionCompanyUserRepository.GetByPermission(CurrentUser.ID);
+                ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.ID);
                 if (executionCompanyUser is null)
                 {
                     response.AddNotAllowedErr();
                 }
                 query = ww => (ww.ID == id) && (ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID);
             }
-            var device = deviceRepository.Get(query);
+            var device = await deviceRepository.GetAsync(query);
             if (device is null)
             {
                 response.AddNotFoundErr("Device");
@@ -207,11 +208,11 @@ namespace MiSmart.API.Controllers
         }
         [HttpPatch("{id:int}")]
         [HasPermission(typeof(AdminPermission))]
-        public IActionResult PatchDevice([FromServices] DeviceRepository deviceRepository, [FromServices] DeviceModelRepository deviceModelRepository, [FromRoute] Int32 id, [FromBody] PatchingDeviceCommand command)
+        public async Task<IActionResult> PatchDevice([FromServices] DeviceRepository deviceRepository, [FromServices] DeviceModelRepository deviceModelRepository, [FromRoute] Int32 id, [FromBody] PatchingDeviceCommand command)
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
 
-            var device = deviceRepository.Get(ww => ww.ID == id);
+            var device = await deviceRepository.GetAsync(ww => ww.ID == id);
             if (device is null)
             {
                 response.AddNotFoundErr("Device");
@@ -222,7 +223,7 @@ namespace MiSmart.API.Controllers
 
             if (command.DeviceModelID.HasValue)
             {
-                var deviceModel = deviceModelRepository.Get(ww => ww.ID == command.DeviceModelID.GetValueOrDefault());
+                var deviceModel = await deviceModelRepository.GetAsync(ww => ww.ID == command.DeviceModelID.GetValueOrDefault());
                 if (deviceModel is null)
                 {
                     response.AddInvalidErr("DeviceModelID");
@@ -231,7 +232,7 @@ namespace MiSmart.API.Controllers
             }
 
 
-            deviceRepository.Update(device);
+            await deviceRepository.UpdateAsync(device);
 
             response.SetUpdatedMessage();
 
@@ -239,7 +240,7 @@ namespace MiSmart.API.Controllers
         }
         [HttpPost("UploadOfflineStats")]
         [AllowAnonymous]
-        public IActionResult UploadOfflineStats([FromBody] AddingBulkOfflineFlightStatsCommand command,
+        public async Task<IActionResult> UploadOfflineStats([FromBody] AddingBulkOfflineFlightStatsCommand command,
         [FromServices] FlightStatRepository flightStatRepository,
         [FromServices] ExecutionCompanySettingRepository executionCompanySettingRepository,
         [FromServices] ExecutionCompanyUserFlightStatRepository executionCompanyUserFlightStatRepository,
@@ -253,7 +254,7 @@ namespace MiSmart.API.Controllers
                 if (deviceJWT.Type == "Device")
                 {
 
-                    var device = deviceRepository.Get(ww => ww.ID == deviceJWT.ID);
+                    var device = await deviceRepository.GetAsync(ww => ww.ID == deviceJWT.ID);
                     if (device is not null)
                     {
 
@@ -292,27 +293,27 @@ namespace MiSmart.API.Controllers
                         }
 
 
-                        flightStatRepository.Create(stat);
+                        stat = await flightStatRepository.CreateAsync(stat);
                         if (device.Team is not null)
                         {
                             var team = device.Team;
                             List<TeamUser> teamUsers = team.TeamUsers.ToList();
 
-                            var executionCompanyUserFlightStats = executionCompanyUserFlightStatRepository.GetListEntities(new PageCommand(), ww => ww.FlightStatID == stat.ID);
-                            executionCompanyUserFlightStatRepository.DeleteRange(executionCompanyUserFlightStats);
+                            var executionCompanyUserFlightStats = await executionCompanyUserFlightStatRepository.GetListEntitiesAsync(new PageCommand(), ww => ww.FlightStatID == stat.ID);
+                            await executionCompanyUserFlightStatRepository.DeleteRangeAsync(executionCompanyUserFlightStats);
 
                             foreach (var teamUser in teamUsers)
                             {
-                                ExecutionCompanyUserFlightStat executionCompanyUserFlightStat = new ExecutionCompanyUserFlightStat
+                                ExecutionCompanyUserFlightStat executionCompanyUserFlightStat = await
+                                executionCompanyUserFlightStatRepository.CreateAsync(new ExecutionCompanyUserFlightStat
                                 {
                                     ExecutionCompanyUserID = teamUser.ExecutionCompanyUserID,
                                     FlightStatID = stat.ID,
                                     Type = teamUser.Type,
-                                };
-                                executionCompanyUserFlightStatRepository.Create(executionCompanyUserFlightStat);
+                                });
                             }
                         }
-                        deviceRepository.Update(device);
+                        await deviceRepository.UpdateAsync(device);
                         flightStats.Add(stat);
                     }
                 }
@@ -331,14 +332,14 @@ namespace MiSmart.API.Controllers
 
 
         [HttpPost("me/TelemetryRecords")]
-        public IActionResult CreateTelemetryRecord([FromServices] DeviceRepository deviceRepository,
+        public async Task<IActionResult> CreateTelemetryRecord([FromServices] DeviceRepository deviceRepository,
         [FromServices] BatteryGroupLogRepository batteryGroupLogRepository,
         [FromServices] BatteryModelRepository batteryModelRepository,
         [FromServices] EmailService emailService,
         [FromServices] BatteryRepository batteryRepository, [FromServices] TelemetryGroupRepository telemetryGroupRepository, [FromBody] AddingBulkTelemetryRecordCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
-            var device = deviceRepository.Get(ww => ww.ID == CurrentDevice.ID);
+            var device = await deviceRepository.GetAsync(ww => ww.ID == CurrentDevice.ID);
 
             if (device is null)
             {
@@ -374,13 +375,14 @@ namespace MiSmart.API.Controllers
                 Records = records,
             };
 
-            telemetryGroupRepository.Create(group);
+            group = await telemetryGroupRepository.CreateAsync(group);
 
             device.LastGroupID = group.ID;
             if (device.Status != DeviceStatus.Active)
                 device.Status = DeviceStatus.Active;
 
-            deviceRepository.Update(device);
+            await deviceRepository.UpdateAsync(device);
+            Task sendEmailTask = null;
 
             var batteryLogGroups = command.BatteryLogs.GroupBy(bl => bl.ActualID);
             List<Guid> lastGroupIDs = new List<Guid>();
@@ -388,15 +390,15 @@ namespace MiSmart.API.Controllers
             {
                 var key = batteryGroup.Key;
 
-                var battery = batteryRepository.Get(b => b.ActualID == key);
+                var battery = await batteryRepository.GetAsync(b => b.ActualID == key);
                 if (battery is null)
                 {
-                    var batteryModel = batteryModelRepository.Get(ww => true);
+                    var batteryModel = await batteryModelRepository.GetAsync(ww => true);
                     if (batteryModel is not null)
                     {
                         battery = new Battery { ActualID = key, BatteryModelID = batteryModel.ID };
-                        batteryRepository.Create(battery);
-                        emailService.SendMailAsync(new String[] { "huynhthehainam@gmail.com" }, new String[] { }, new String[] { }, "New battery", $"Battery name {battery.ActualID} is just registered.").Wait();
+                        battery = await batteryRepository.CreateAsync(battery);
+                        sendEmailTask = emailService.SendMailAsync(new String[] { "huynhthehainam@gmail.com" }, new String[] { }, new String[] { }, "New battery", $"Battery name {battery.ActualID} is just registered.");
                     }
                 }
                 if (battery is not null)
@@ -430,9 +432,9 @@ namespace MiSmart.API.Controllers
                         CreatedTime = DateTime.Now,
                         Logs = logs,
                     };
-                    batteryGroupLogRepository.Create(groupLog);
+                    await batteryGroupLogRepository.CreateAsync(groupLog);
                     battery.LastGroup = groupLog;
-                    batteryRepository.Update(battery);
+                    await batteryRepository.UpdateAsync(battery);
                     lastGroupIDs.Add(groupLog.ID);
                 }
 
@@ -441,17 +443,20 @@ namespace MiSmart.API.Controllers
             device.LastBatterGroupLogs = lastGroupIDs;
 
 
-            deviceRepository.Update(device);
-
+            await deviceRepository.UpdateAsync(device);
+            if (sendEmailTask is not null)
+            {
+                await sendEmailTask;
+            }
 
             response.SetCreatedObject(group);
             return response.ToIActionResult();
         }
         [HttpPost("me/Logs")]
-        public IActionResult UploadLogFile([FromServices] DeviceRepository deviceRepository, [FromServices] MinioService minioService, [FromForm] AddingLogFileCommand command)
+        public async Task<IActionResult> UploadLogFile([FromServices] DeviceRepository deviceRepository, [FromServices] MinioService minioService, [FromForm] AddingLogFileCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
-            var device = deviceRepository.Get(ww => ww.ID == CurrentDevice.ID);
+            var device = await deviceRepository.GetAsync(ww => ww.ID == CurrentDevice.ID);
             if (device is null)
             {
                 response.AddNotFoundErr("Device");
@@ -460,12 +465,12 @@ namespace MiSmart.API.Controllers
 
             LogFile logFile = new LogFile
             {
-                FileUrl = minioService.PutFile(command.File, new String[] { "drone-hub-api", "logs", $"{device.ID}_{device.Name}" }),
+                FileUrl = await minioService.PutFileAsync(command.File, new String[] { "drone-hub-api", "logs", $"{device.ID}_{device.Name}" }),
             };
 
             device.LogFiles.Add(logFile);
 
-            deviceRepository.Update(device);
+            await deviceRepository.UpdateAsync(device);
 
 
             response.SetCreatedObject(logFile);
@@ -474,12 +479,12 @@ namespace MiSmart.API.Controllers
         }
 
         [HttpPost("me/FlightStats")]
-        public IActionResult CreateFlightStat([FromServices] DeviceRepository deviceRepository, [FromServices] FlightStatRepository flightStatRepository,
+        public async Task<IActionResult> CreateFlightStat([FromServices] DeviceRepository deviceRepository, [FromServices] FlightStatRepository flightStatRepository,
         [FromServices] ExecutionCompanySettingRepository executionCompanySettingRepository,
         [FromServices] ExecutionCompanyUserFlightStatRepository executionCompanyUserFlightStatRepository, [FromBody] AddingFlightStatCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
-            var device = deviceRepository.Get(ww => ww.ID == CurrentDevice.ID);
+            var device = await deviceRepository.GetAsync(ww => ww.ID == CurrentDevice.ID);
             if (command.FlywayPoints.Count == 0)
             {
                 response.AddInvalidErr("FlywayPoints");
@@ -518,14 +523,14 @@ namespace MiSmart.API.Controllers
             }
 
 
-            flightStatRepository.Create(stat);
+            await flightStatRepository.CreateAsync(stat);
             if (device.Team is not null)
             {
                 var team = device.Team;
                 List<TeamUser> teamUsers = team.TeamUsers.ToList();
 
-                var executionCompanyUserFlightStats = executionCompanyUserFlightStatRepository.GetListEntities(new PageCommand(), ww => ww.FlightStatID == stat.ID);
-                executionCompanyUserFlightStatRepository.DeleteRange(executionCompanyUserFlightStats);
+                var executionCompanyUserFlightStats = await executionCompanyUserFlightStatRepository.GetListEntitiesAsync(new PageCommand(), ww => ww.FlightStatID == stat.ID);
+                await executionCompanyUserFlightStatRepository.DeleteRangeAsync(executionCompanyUserFlightStats);
 
                 foreach (var teamUser in teamUsers)
                 {
@@ -535,27 +540,27 @@ namespace MiSmart.API.Controllers
                         FlightStatID = stat.ID,
                         Type = teamUser.Type,
                     };
-                    executionCompanyUserFlightStatRepository.Create(executionCompanyUserFlightStat);
+                    await executionCompanyUserFlightStatRepository.CreateAsync(executionCompanyUserFlightStat);
                 }
             }
-            deviceRepository.Update(device);
+            await deviceRepository.UpdateAsync(device);
 
             response.SetCreatedObject(stat);
 
             return response.ToIActionResult();
         }
         [HttpPost("me/Plans")]
-        public IActionResult CreatePlan([FromServices] DeviceRepository deviceRepository, [FromServices] PlanRepository planRepository, [FromForm] AddingPlanCommand command)
+        public async Task<IActionResult> CreatePlan([FromServices] DeviceRepository deviceRepository, [FromServices] PlanRepository planRepository, [FromForm] AddingPlanCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
-            var device = deviceRepository.Get(ww => ww.ID == CurrentDevice.ID);
+            var device = await deviceRepository.GetAsync(ww => ww.ID == CurrentDevice.ID);
 
             if (device is null)
             {
                 response.AddNotFoundErr("Device");
             }
             var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
-            var plan = planRepository.Get(ww => ww.FileName == command.File.FileName && ww.Device == device);
+            var plan = await planRepository.GetAsync(ww => ww.FileName == command.File.FileName && ww.Device == device);
             if (plan is null)
             {
                 plan = new Plan { FileName = command.File.FileName, Device = device };
@@ -567,18 +572,18 @@ namespace MiSmart.API.Controllers
 
             if (plan.ID == 0)
             {
-                planRepository.Create(plan);
+                await planRepository.CreateAsync(plan);
             }
             else
             {
-                planRepository.Update(plan);
+                await planRepository.UpdateAsync(plan);
             }
             response.SetCreatedObject(plan);
 
             return response.ToIActionResult();
         }
         [HttpGet("RetrivePlans")]
-        public IActionResult GetPlans([FromServices] PlanRepository planRepository, [FromQuery] PageCommand pageCommand, [FromQuery] String search, [FromQuery] Double? latitude, [FromQuery] Double? longitude, [FromQuery] Double? range)
+        public async Task<IActionResult> GetPlans([FromServices] PlanRepository planRepository, [FromQuery] PageCommand pageCommand, [FromQuery] String search, [FromQuery] Double? latitude, [FromQuery] Double? longitude, [FromQuery] Double? range)
         {
             var response = actionResponseFactory.CreateInstance();
             Point centerLocation = null;
@@ -591,7 +596,7 @@ namespace MiSmart.API.Controllers
             Expression<Func<Plan, Boolean>> query = ww => (String.IsNullOrWhiteSpace(search) ?
             ((centerLocation != null) ? (ww.Location.Distance(centerLocation) < range.GetValueOrDefault()) : true)
             : ww.FileName.ToLower().Contains(search.ToLower()));
-            var listResponse = planRepository.GetListResponseView<SmallPlanViewModel>(pageCommand, query);
+            var listResponse = await planRepository.GetListResponseViewAsync<SmallPlanViewModel>(pageCommand, query);
             if (centerLocation is not null)
             {
                 foreach (var item in listResponse.Data)
@@ -606,11 +611,11 @@ namespace MiSmart.API.Controllers
         }
 
         [HttpPost("RetrivePlanFile")]
-        public IActionResult GetFile([FromServices] PlanRepository planRepository, [FromBody] RetrievingPlanFileCommand command)
+        public async Task<IActionResult> GetFile([FromServices] PlanRepository planRepository, [FromBody] RetrievingPlanFileCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
 
-            var plan = planRepository.Get(ww => ww.ID == command.PlanID);
+            var plan = await planRepository.GetAsync(ww => ww.ID == command.PlanID);
             if (plan is null)
             {
                 response.AddNotFoundErr("Plan");

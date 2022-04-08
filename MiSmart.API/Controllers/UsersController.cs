@@ -11,6 +11,7 @@ using MiSmart.Infrastructure.Commands;
 using MiSmart.DAL.ViewModels;
 using MiSmart.Infrastructure.ViewModels;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace MiSmart.API.Controllers
 {
@@ -20,11 +21,11 @@ namespace MiSmart.API.Controllers
         {
         }
         [HttpGet("me")]
-        public IActionResult GetProfile([FromServices] CustomerUserRepository customerUserRepository, [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository)
+        public async Task<IActionResult> GetProfile([FromServices] CustomerUserRepository customerUserRepository, [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository)
         {
             var response = actionResponseFactory.CreateInstance();
-            var customerUser = customerUserRepository.Get(ww => ww.UserID == CurrentUser.ID);
-            ExecutionCompanyUser executionCompanyUser = executionCompanyUserRepository.Get(ww => ww.UserID == CurrentUser.ID);
+            var customerUser = await customerUserRepository.GetAsync(ww => ww.UserID == CurrentUser.ID);
+            ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.GetAsync(ww => ww.UserID == CurrentUser.ID);
             if (customerUser is null && executionCompanyUser is null)
             {
                 response.AddNotFoundErr("User");
@@ -48,13 +49,13 @@ namespace MiSmart.API.Controllers
             return response.ToIActionResult();
         }
         [HttpGet]
-        public IActionResult GetList([FromServices] CustomerUserRepository customerUserRepository, [FromQuery] Boolean? isAssigned)
+        public async Task<IActionResult> GetList([FromServices] CustomerUserRepository customerUserRepository, [FromQuery] Boolean? isAssigned)
         {
             var response = actionResponseFactory.CreateInstance();
 
             if (isAssigned is not null && isAssigned.GetValueOrDefault() == true)
             {
-                var customerUsers = customerUserRepository.GetListEntities(new PageCommand(), ww => true);
+                var customerUsers = await customerUserRepository.GetListEntitiesAsync(new PageCommand(), ww => true);
                 List<Int64> ids = customerUsers.Select(ww => ww.UserID).ToList().Distinct().ToList();
                 response.SetData(ids);
             }

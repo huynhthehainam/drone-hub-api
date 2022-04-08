@@ -12,6 +12,7 @@ using MiSmart.Infrastructure.Commands;
 using System.Linq.Expressions;
 using System;
 using MiSmart.DAL.ViewModels;
+using System.Threading.Tasks;
 
 namespace MiSmart.API.Controllers
 {
@@ -24,7 +25,7 @@ namespace MiSmart.API.Controllers
 
         [HttpPost]
         [HasPermission(typeof(AdminPermission))]
-        public IActionResult Create([FromBody] AddingBatteryCommand command,
+        public async Task<IActionResult> Create([FromBody] AddingBatteryCommand command,
         [FromServices] BatteryModelRepository batteryModelRepository,
         [FromServices] ExecutionCompanyRepository executionCompanyRepository,
          [FromServices] BatteryRepository batteryRepository)
@@ -32,26 +33,26 @@ namespace MiSmart.API.Controllers
             var response = actionResponseFactory.CreateInstance();
             if (command.ExecutionCompanyID.HasValue)
             {
-                ExecutionCompany executionCompany = executionCompanyRepository.Get(c => c.ID == command.ExecutionCompanyID.GetValueOrDefault());
+                ExecutionCompany executionCompany = await executionCompanyRepository.GetAsync(c => c.ID == command.ExecutionCompanyID.GetValueOrDefault());
                 if (executionCompany is null)
                 {
                     response.AddInvalidErr("ExecutionCompanyID");
                 }
             }
-            BatteryModel batteryModel = batteryModelRepository.Get(ww => ww.ID == command.BatteryModelID.GetValueOrDefault());
+            BatteryModel batteryModel = await batteryModelRepository.GetAsync(ww => ww.ID == command.BatteryModelID.GetValueOrDefault());
             if (batteryModel is null)
             {
                 response.AddInvalidErr("BatteryModelID");
             }
             Battery battery = new Battery { ActualID = command.ActualID, ExecutionCompanyID = command.ExecutionCompanyID, BatteryModel = batteryModel };
 
-            batteryRepository.Create(battery);
+            await batteryRepository.CreateAsync(battery);
             response.SetCreatedObject(battery);
             return response.ToIActionResult();
         }
 
         [HttpGet]
-        public IActionResult GetList([FromQuery] PageCommand pageCommand, [FromServices] BatteryRepository batteryRepository, [FromQuery] String search, [FromQuery] String relation = "Administrator")
+        public async Task<IActionResult> GetList([FromQuery] PageCommand pageCommand, [FromServices] BatteryRepository batteryRepository, [FromQuery] String search, [FromQuery] String relation = "Administrator")
         {
             var response = actionResponseFactory.CreateInstance();
             Expression<Func<Battery, Boolean>> query = b => false;
@@ -64,7 +65,7 @@ namespace MiSmart.API.Controllers
                 query = b => true;
             }
 
-            var listResponse = batteryRepository.GetListResponseView<BatteryViewModel>(pageCommand, query);
+            var listResponse = await batteryRepository.GetListResponseViewAsync<BatteryViewModel>(pageCommand, query);
             listResponse.SetResponse(response);
 
             return response.ToIActionResult();

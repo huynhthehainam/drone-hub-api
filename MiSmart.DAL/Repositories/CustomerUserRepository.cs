@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using MiSmart.DAL.DatabaseContexts;
 using MiSmart.DAL.Models;
 using MiSmart.Infrastructure.Repositories;
@@ -10,9 +11,9 @@ namespace MiSmart.DAL.Repositories
         public CustomerUserRepository(DatabaseContext context) : base(context)
         {
         }
-        public CustomerUser GetByPermission(Int64 userID)
+        public async Task<CustomerUser> GetByPermissionAsync(Int64 userID)
         {
-            var customerUser = Get(ww => ww.UserID == userID);
+            var customerUser = await GetAsync(ww => ww.UserID == userID);
 
             return customerUser;
         }
