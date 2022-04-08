@@ -40,7 +40,7 @@ namespace MiSmart.API.Controllers
          [FromServices] TeamUserRepository teamUserRepository, [FromRoute] Int32 id, [FromBody] AssigningDeviceExecutionCompanyCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
-            CustomerUser customerUser =await customerUserRepository.GetByPermissionAsync(CurrentUser.ID);
+            CustomerUser customerUser = await customerUserRepository.GetByPermissionAsync(CurrentUser.ID);
             if (customerUser is null)
             {
                 response.AddNotAllowedErr();
@@ -382,7 +382,6 @@ namespace MiSmart.API.Controllers
                 device.Status = DeviceStatus.Active;
 
             await deviceRepository.UpdateAsync(device);
-            Task sendEmailTask = null;
 
             var batteryLogGroups = command.BatteryLogs.GroupBy(bl => bl.ActualID);
             List<Guid> lastGroupIDs = new List<Guid>();
@@ -398,7 +397,7 @@ namespace MiSmart.API.Controllers
                     {
                         battery = new Battery { ActualID = key, BatteryModelID = batteryModel.ID };
                         battery = await batteryRepository.CreateAsync(battery);
-                        sendEmailTask = emailService.SendMailAsync(new String[] { "huynhthehainam@gmail.com" }, new String[] { }, new String[] { }, "New battery", $"Battery name {battery.ActualID} is just registered.");
+                        await emailService.SendMailAsync(new String[] { "huynhthehainam@gmail.com" }, new String[] { }, new String[] { }, "New battery", $"Battery name {battery.ActualID} is just registered.");
                     }
                 }
                 if (battery is not null)
@@ -444,10 +443,7 @@ namespace MiSmart.API.Controllers
 
 
             await deviceRepository.UpdateAsync(device);
-            if (sendEmailTask is not null)
-            {
-                await sendEmailTask;
-            }
+
 
             response.SetCreatedObject(group);
             return response.ToIActionResult();
