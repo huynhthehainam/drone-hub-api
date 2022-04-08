@@ -36,6 +36,7 @@ namespace MiSmart.DAL.ViewModels
         public String TeamName { get; set; }
         public Double TaskArea { get; set; }
         public String PilotName { get; set; }
+        public Int64? TeamID { get; set; }
         public String ExecutionCompanyName { get; set; }
         public String CustomerName { get; set; }
         public Double Cost { get; set; }
@@ -58,7 +59,8 @@ namespace MiSmart.DAL.ViewModels
             DeviceModelName = entity.Device.DeviceModel.Name;
             ExecutionCompanyName = entity.ExecutionCompany?.Name;
             CustomerName = entity.Customer.Name;
-            Cost = entity.Cost; 
+            Cost = entity.Cost;
+            TeamID = entity.TeamID;
         }
     }
 }
