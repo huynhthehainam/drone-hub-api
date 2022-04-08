@@ -83,7 +83,7 @@ namespace MiSmart.API.Controllers
                    && (customerID.HasValue ? (ww.CustomerID == customerID.GetValueOrDefault()) : true)
                    && (executionCompanyUser.Type == ExecutionCompanyUserType.Member ? (teamIDs.Contains(ww.TeamID.GetValueOrDefault())) : true);
             }
-            var listResponse = await flightStatRepository.GetListResponseViewAsync<SmallFlightStatViewModel>(pageCommand, query, ww => ww.FlightTime, false);
+            var listResponse = await flightStatRepository.GetListFlightStatsViewAsync<SmallFlightStatViewModel>(pageCommand, query, ww => ww.FlightTime, false);
             listResponse.SetResponse(response);
             return response.ToIActionResult();
         }
