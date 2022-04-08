@@ -74,7 +74,8 @@ namespace MiSmart.API.Controllers
                 {
                     response.AddNotAllowedErr();
                 }
-                List<Int64> teamIDs = teamUserRepository.GetListEntitiesAsync(new PageCommand(), ww => ww.ExecutionCompanyUserID == executionCompanyUser.ID).Result.Select(ww => ww.TeamID).ToList();
+                var aa = await teamUserRepository.GetListEntitiesAsync(new PageCommand(), ww => ww.ExecutionCompanyUserID == executionCompanyUser.ID);
+                List<Int64> teamIDs = aa.Select(ww => ww.TeamID).ToList();
                 query = ww => (ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID)
                    && (teamID.HasValue ? (ww.Device.TeamID == teamID.Value) : true)
                    && (deviceID.HasValue ? (ww.DeviceID == deviceID.Value) : true)
