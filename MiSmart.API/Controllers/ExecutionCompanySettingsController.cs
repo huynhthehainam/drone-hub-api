@@ -35,7 +35,7 @@ namespace MiSmart.API.Controllers
                 CreatedTime = DateTime.Now,
                 ExecutionCompanyID = executionCompanyUser.ExecutionCompanyID,
                 MainPilotCostPerHectare = command.MainPilotCostPerHectare.GetValueOrDefault(),
-                SubPitlotCostPerHectare = command.SubPitlotCostPerHectare.GetValueOrDefault(),
+                SubPilotCostPerHectare = command.SubPilotCostPerHectare.GetValueOrDefault(),
             };
             executionCompanySettingRepository.Create(setting);
 

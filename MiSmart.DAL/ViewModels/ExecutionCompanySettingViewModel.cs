@@ -11,7 +11,7 @@ namespace MiSmart.DAL.ViewModels
         public Double CostPerHectare { get; set; }
         public DateTime CreatedTime { get; set; }
         public Double MainPilotCostPerHectare { get; set; }
-        public Double SubPitlotCostPerHectare { get; set; }
+        public Double SubPilotCostPerHectare { get; set; }
 
         public void LoadFrom(ExecutionCompanySetting entity)
         {
@@ -19,7 +19,7 @@ namespace MiSmart.DAL.ViewModels
             CostPerHectare = entity.CostPerHectare;
             CreatedTime = entity.CreatedTime;
             MainPilotCostPerHectare = entity.MainPilotCostPerHectare;
-            SubPitlotCostPerHectare = entity.SubPitlotCostPerHectare;
+            SubPilotCostPerHectare = entity.SubPilotCostPerHectare;
         }
     }
 }

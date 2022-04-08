@@ -19,7 +19,7 @@ namespace MiSmart.DAL.Models
 
         public DateTime CreatedTime { get; set; } = DateTime.Now;
         public Double MainPilotCostPerHectare { get; set; }
-        public Double SubPitlotCostPerHectare { get; set; }
+        public Double SubPilotCostPerHectare { get; set; }
         public Double CostPerHectare { get; set; }
         private ExecutionCompany executionCompany;
         public ExecutionCompany ExecutionCompany

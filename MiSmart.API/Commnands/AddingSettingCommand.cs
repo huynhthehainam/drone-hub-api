@@ -11,7 +11,7 @@ namespace MiSmart.API.Commands
         [Required]
         public Double? MainPilotCostPerHectare { get; set; }
         [Required]
-        public Double? SubPitlotCostPerHectare { get; set; }
+        public Double? SubPilotCostPerHectare { get; set; }
         [Required]
         public Double? CostPerHectare { get; set; }
     }
