@@ -69,14 +69,12 @@ namespace MiSmart.API.Controllers
             }
             else
             {
-                var bb = await executionCompanyUserRepository.GetListEntitiesAsync(new PageCommand(), ww => true);
                 ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.ID);
                 if (executionCompanyUser is null)
                 {
                     response.AddNotAllowedErr();
                 }
-                var aa = await teamUserRepository.GetListEntitiesAsync(new PageCommand(), ww => ww.ExecutionCompanyUserID == executionCompanyUser.ID);
-                List<Int64> teamIDs = aa.Select(ww => ww.TeamID).ToList();
+                List<Int64> teamIDs = teamUserRepository.GetListEntitiesAsync(new PageCommand(), ww => ww.ExecutionCompanyUserID == executionCompanyUser.ID).Result.Select(ww => ww.TeamID).ToList();
                 query = ww => (ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID)
                    && (teamID.HasValue ? (ww.Device.TeamID == teamID.Value) : true)
                    && (deviceID.HasValue ? (ww.DeviceID == deviceID.Value) : true)
@@ -85,7 +83,7 @@ namespace MiSmart.API.Controllers
                    && (customerID.HasValue ? (ww.CustomerID == customerID.GetValueOrDefault()) : true)
                    && (executionCompanyUser.Type == ExecutionCompanyUserType.Member ? (teamIDs.Contains(ww.TeamID.GetValueOrDefault())) : true);
             }
-            var listResponse = await flightStatRepository.GetListFlightStatsViewAsync<SmallFlightStatViewModel>(pageCommand, query, ww => ww.FlightTime, false);
+            var listResponse = await flightStatRepository.GetListResponseViewAsync<SmallFlightStatViewModel>(pageCommand, query, ww => ww.FlightTime, false);
             listResponse.SetResponse(response);
             return response.ToIActionResult();
         }
