@@ -147,7 +147,7 @@ namespace MiSmart.API.Controllers
             }
 
 
-            var teamUser = teamUserRepository.Get(ww => ww.ExecutionCompanyUser.UserID == command.UserID.GetValueOrDefault() && ww.TeamID == id && ww.Team.ExecutionCompanyID == executionCompanyUser.ID);
+            var teamUser = teamUserRepository.Get(ww => ww.ExecutionCompanyUser.UserID == command.UserID.GetValueOrDefault() && ww.TeamID == id && ww.Team.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID);
 
             if (teamUser is null)
             {
