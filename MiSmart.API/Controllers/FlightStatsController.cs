@@ -69,6 +69,7 @@ namespace MiSmart.API.Controllers
             }
             else
             {
+                var bb = await executionCompanyUserRepository.GetListEntitiesAsync(new PageCommand(), ww => true);
                 ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.ID);
                 if (executionCompanyUser is null)
                 {
