@@ -54,7 +54,10 @@ namespace MiSmart.API.Controllers
             }
 
             var latestSetting = executionCompanySettingRepository.GetLatestSetting(executionCompanyUser.ExecutionCompanyID);
-
+            if (latestSetting is null)
+            {
+                response.AddNotFoundErr("LatestSetting");
+            }
             var vm = ViewModelHelpers.ConvertToViewModel<ExecutionCompanySetting, ExecutionCompanySettingViewModel>(latestSetting);
 
             response.SetData(vm);
