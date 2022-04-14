@@ -68,6 +68,7 @@ namespace MiSmart.API.Controllers
                     && (deviceID.HasValue ? (ww.DeviceID == deviceID.Value) : true)
                     && (from.HasValue ? (ww.FlightTime >= from.Value) : true)
                     && (to.HasValue ? (ww.FlightTime <= to.Value.AddDays(1)) : true)
+                    && (customerID.HasValue ? (ww.CustomerID == customerID.Value) : true)
                     && (executionCompanyID.HasValue ? (ww.ExecutionCompanyID == executionCompanyID.GetValueOrDefault()) : true);
             }
             else
