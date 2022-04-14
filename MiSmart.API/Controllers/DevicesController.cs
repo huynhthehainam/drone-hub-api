@@ -127,7 +127,7 @@ namespace MiSmart.API.Controllers
                 {
                     response.AddNotAllowedErr();
                 }
-                query = fl => true;
+                query = ww => true && (!String.IsNullOrWhiteSpace(search) ? ww.Name.ToLower().Contains(search.ToLower()) : true);
             }
             else
             {

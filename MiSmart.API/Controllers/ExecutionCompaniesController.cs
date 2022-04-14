@@ -20,7 +20,6 @@ namespace MiSmart.API.Controllers
 {
     public class ExecutionCompaniesController : AuthorizedAPIControllerBase
     {
-
         public ExecutionCompaniesController(IActionResponseFactory actionResponseFactory) : base(actionResponseFactory)
         {
         }

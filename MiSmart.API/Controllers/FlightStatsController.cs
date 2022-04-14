@@ -55,6 +55,7 @@ namespace MiSmart.API.Controllers
                     && (deviceID.HasValue ? (ww.DeviceID == deviceID.Value) : true)
                     && (from.HasValue ? (ww.FlightTime >= from.Value) : true)
                     && (to.HasValue ? (ww.FlightTime <= to.Value.AddDays(1)) : true)
+                    && (deviceModelID.HasValue ? (ww.Device.DeviceModelID == deviceModelID.Value) : true)
                     && (executionCompanyID.HasValue ? (ww.ExecutionCompanyID == executionCompanyID.GetValueOrDefault()) : true)
                     && (true);
             }
@@ -69,6 +70,7 @@ namespace MiSmart.API.Controllers
                     && (from.HasValue ? (ww.FlightTime >= from.Value) : true)
                     && (to.HasValue ? (ww.FlightTime <= to.Value.AddDays(1)) : true)
                     && (customerID.HasValue ? (ww.CustomerID == customerID.Value) : true)
+                    && (deviceModelID.HasValue ? (ww.Device.DeviceModelID == deviceModelID.Value) : true)
                     && (executionCompanyID.HasValue ? (ww.ExecutionCompanyID == executionCompanyID.GetValueOrDefault()) : true);
             }
             else
@@ -85,6 +87,8 @@ namespace MiSmart.API.Controllers
                    && (from.HasValue ? (ww.FlightTime >= from.Value) : true)
                    && (to.HasValue ? (ww.FlightTime <= to.Value.AddDays(1)) : true)
                    && (customerID.HasValue ? (ww.CustomerID == customerID.GetValueOrDefault()) : true)
+                    && (deviceModelID.HasValue ? (ww.Device.DeviceModelID == deviceModelID.Value) : true)
+
                    && (executionCompanyUser.Type == ExecutionCompanyUserType.Member ? (teamIDs.Contains(ww.TeamID.GetValueOrDefault())) : true);
             }
             var listResponse = await flightStatRepository.GetListFlightStatsViewAsync<SmallFlightStatViewModel>(pageCommand, query, ww => ww.FlightTime, false);
