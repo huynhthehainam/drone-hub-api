@@ -23,8 +23,7 @@ namespace MiSmart.API.Controllers
             [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository,
          [FromServices] CustomerUserRepository customerUserRepository, [FromQuery] PageCommand pageCommand, [FromQuery] DateTime? from,
          [FromQuery] DateTime? to, [FromQuery] String search,
-         [FromQuery] String relation = "Owner",
-         [FromQuery] String mode = "Small")
+         [FromQuery] String relation = "Owner")
         {
             var response = actionResponseFactory.CreateInstance();
 

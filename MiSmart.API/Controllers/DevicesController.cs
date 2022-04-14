@@ -104,7 +104,7 @@ namespace MiSmart.API.Controllers
         [FromServices] BatteryGroupLogRepository batteryGroupLogRepository,
     [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository,
          [FromServices] TeamUserRepository teamUserRepository, [FromQuery] PageCommand pageCommand, [FromQuery] String search,
-         [FromQuery] String relation = "Owner", [FromQuery] String mode = "Small")
+         [FromQuery] String relation = "Owner")
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
             Expression<Func<Device, Boolean>> query = ww => false;

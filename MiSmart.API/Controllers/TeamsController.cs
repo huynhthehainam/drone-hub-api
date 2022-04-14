@@ -41,29 +41,36 @@ namespace MiSmart.API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetTeams([FromServices] TeamRepository teamRepository, [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, [FromServices] TeamUserRepository teamUserRepository, [FromQuery] PageCommand pageCommand, [FromQuery] String search, [FromQuery] String mode = "Small")
+        public async Task<IActionResult> GetTeams([FromServices] TeamRepository teamRepository, [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository,
+         [FromServices] TeamUserRepository teamUserRepository, [FromQuery] PageCommand pageCommand, [FromQuery] String search, [FromQuery] String relation = "Executor")
         {
             var response = actionResponseFactory.CreateInstance();
-
-            ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.ID);
-            if (executionCompanyUser is null)
+            Expression<Func<Team, Boolean>> query = ww => false;
+            if (relation == "Executor")
             {
-                response.AddNotAllowedErr();
-            }
-            var teamIDs = teamUserRepository.GetListEntitiesAsync(new PageCommand(), ww => ww.ExecutionCompanyUserID == executionCompanyUser.ID).Result.Select(ww => ww.TeamID).ToList();
+                ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.ID);
+                if (executionCompanyUser is null)
+                {
+                    response.AddNotAllowedErr();
+                }
+                var teamIDs = teamUserRepository.GetListEntitiesAsync(new PageCommand(), ww => ww.ExecutionCompanyUserID == executionCompanyUser.ID).Result.Select(ww => ww.TeamID).ToList();
 
-            Expression<Func<Team, Boolean>> query = ww => (executionCompanyUser.Type == ExecutionCompanyUserType.Owner ? ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID : (teamIDs.Contains(ww.ID)))
-              && (!String.IsNullOrWhiteSpace(search) ? (ww.Name.ToLower().Contains(search.ToLower())) : true) && !ww.IsDisbanded;
-            if (mode == "Large")
-            {
-
+                query = ww => (executionCompanyUser.Type == ExecutionCompanyUserType.Owner ? ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID : (teamIDs.Contains(ww.ID)))
+                   && (!String.IsNullOrWhiteSpace(search) ? (ww.Name.ToLower().Contains(search.ToLower())) : true) && !ww.IsDisbanded;
 
             }
             else
             {
-                var listResponse = await teamRepository.GetListResponseViewAsync<SmallTeamViewModel>(pageCommand, query);
-                listResponse.SetResponse(response);
+                if (!CurrentUser.IsAdmin && CurrentUser.RoleID != 1)
+                {
+                    response.AddNotAllowedErr();
+                }
+                query = ww => true;
             }
+
+            var listResponse = await teamRepository.GetListResponseViewAsync<SmallTeamViewModel>(pageCommand, query);
+            listResponse.SetResponse(response);
+
 
 
 

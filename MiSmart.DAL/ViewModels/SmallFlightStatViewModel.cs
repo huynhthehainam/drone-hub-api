@@ -11,6 +11,8 @@ namespace MiSmart.DAL.ViewModels
         public Int32 Flights { get; set; }
         public Double FlightDuration { get; set; }
         public Double TaskArea { get; set; }
+        public String TaskLocation { get; set; }
+        public DateTime FlightTime { get; set; }
 
         public void LoadFrom(FlightStat entity)
         {
@@ -25,8 +27,6 @@ namespace MiSmart.DAL.ViewModels
         public Guid ID { get; set; }
         public Double FlightDuration { get; set; }
         public DateTime CreatedTime { get; set; }
-        // public Int32 CustomerID { get; set; }
-        // public Int32 DeviceID { get; set; }
         public String DeviceModelName { get; set; }
         public String AircraftName { get; set; }
         public Int32 Flights { get; set; }
@@ -46,8 +46,6 @@ namespace MiSmart.DAL.ViewModels
             ID = entity.ID;
             FlightDuration = entity.FlightDuration;
             CreatedTime = entity.CreatedTime;
-            // CustomerID = entity.CustomerID;
-            // DeviceID = entity.DeviceID;
             PilotName = entity.PilotName;
             Flights = entity.Flights;
             FlightTime = entity.FlightTime;

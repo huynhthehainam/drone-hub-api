@@ -39,20 +39,14 @@ namespace MiSmart.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetList([FromQuery] PageCommand pageCommand,
         [FromServices] CustomerRepository customerRepository,
-        [FromQuery] String search, [FromQuery] String mode = "Small")
+        [FromQuery] String search)
         {
             var response = actionResponseFactory.CreateInstance();
             Expression<Func<Customer, Boolean>> query = ww => (!String.IsNullOrWhiteSpace(search) ? (ww.Name.ToLower().Contains(search.ToLower()) || ww.Address.ToLower().Contains(search.ToLower())) : true);
-            if (mode == "Large")
-            {
-                // var listResponse = customerRepository.GetListResponseView<SmallCustomerViewModel>(pageCommand, query);
-                // listResponse.SetResponse(response);
-            }
-            else
-            {
-                var listResponse = await customerRepository.GetListResponseViewAsync<SmallCustomerViewModel>(pageCommand, query);
-                listResponse.SetResponse(response);
-            }
+
+            var listResponse = await customerRepository.GetListResponseViewAsync<SmallCustomerViewModel>(pageCommand, query);
+            listResponse.SetResponse(response);
+
 
             return response.ToIActionResult();
         }

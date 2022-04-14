@@ -35,8 +35,7 @@ namespace MiSmart.API.Controllers
          [FromQuery] DateTime? from, [FromQuery] DateTime? to, [FromQuery] Int32? executionCompanyID,
          [FromQuery] Int32? customerID,
          [FromQuery] Int64? teamID, [FromQuery] Int32? deviceID, [FromQuery] Int32? deviceModelID,
-         [FromQuery] String relation = "Owner",
-         [FromQuery] String mode = "Small")
+         [FromQuery] String relation = "Owner")
         {
             FlightStatsActionResponse response = new FlightStatsActionResponse();
             response.ApplySettings(options.Value);
@@ -65,7 +64,11 @@ namespace MiSmart.API.Controllers
                 {
                     response.AddNotAllowedErr();
                 }
-                query = fl => true;
+                query = ww => (teamID.HasValue ? (ww.Device.TeamID == teamID.Value) : true)
+                    && (deviceID.HasValue ? (ww.DeviceID == deviceID.Value) : true)
+                    && (from.HasValue ? (ww.FlightTime >= from.Value) : true)
+                    && (to.HasValue ? (ww.FlightTime <= to.Value.AddDays(1)) : true)
+                    && (executionCompanyID.HasValue ? (ww.ExecutionCompanyID == executionCompanyID.GetValueOrDefault()) : true);
             }
             else
             {
