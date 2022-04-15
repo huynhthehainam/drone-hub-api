@@ -61,7 +61,7 @@ namespace MiSmart.API.Controllers
             }
             else if (relation == "Administrator")
             {
-                if (!CurrentUser.IsAdmin && CurrentUser.RoleID != 1)
+                if (!CurrentUser.IsAdministrator)
                 {
                     response.AddNotAllowedErr();
                 }
@@ -114,7 +114,7 @@ namespace MiSmart.API.Controllers
             }
             else if (relation == "Administrator")
             {
-                if (!CurrentUser.IsAdmin && CurrentUser.RoleID != 1)
+                if (!CurrentUser.IsAdministrator)
                 {
                     response.AddNotAllowedErr();
                 }

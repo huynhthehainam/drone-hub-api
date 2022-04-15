@@ -58,7 +58,7 @@ namespace MiSmart.API.Controllers
             Expression<Func<Battery, Boolean>> query = b => false;
             if (relation == "Administrator")
             {
-                if (!CurrentUser.IsAdmin && CurrentUser.RoleID != 1)
+                if (!CurrentUser.IsAdministrator)
                 {
                     response.AddNotAllowedErr();
                 }

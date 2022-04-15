@@ -12,7 +12,7 @@ namespace MiSmart.API.Permissions
             var currentUser = UserCacheViewModel.GetUserCache(context.HttpContext.User);
             if (currentUser is not null)
             {
-                return currentUser.IsAdmin || currentUser.RoleID == 1;
+                return currentUser.IsAdministrator;
             }
             else
             {
