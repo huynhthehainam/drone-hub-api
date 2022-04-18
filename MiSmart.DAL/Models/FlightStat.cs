@@ -26,8 +26,8 @@ namespace MiSmart.DAL.Models
         public FlightStat(ILazyLoader lazyLoader) : base(lazyLoader)
         {
         }
-        public DateTime CreatedTime { get; set; } = DateTime.Now;
-        public DateTime FlightTime { get; set; } = DateTime.Now;
+        public DateTime CreatedTime { get; set; } = DateTime.UtcNow;
+        public DateTime FlightTime { get; set; } = DateTime.UtcNow;
         public String TaskLocation { get; set; }
         public Int32 Flights { get; set; }
         public String FieldName { get; set; }

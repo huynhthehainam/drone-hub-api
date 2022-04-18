@@ -30,7 +30,7 @@ namespace MiSmart.DAL.Models
         public Field() : base() { }
         public Field(ILazyLoader lazyLoader) : base(lazyLoader) { }
         public String Name { get; set; }
-        public DateTime CreatedTime { get; set; } = DateTime.Now;
+        public DateTime CreatedTime { get; set; } = DateTime.UtcNow;
         public String FieldName { get; set; }
         public String FieldLocation { get; set; }
         public String PilotName { get; set; }

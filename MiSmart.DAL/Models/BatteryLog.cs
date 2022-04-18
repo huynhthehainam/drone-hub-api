@@ -36,7 +36,7 @@ namespace MiSmart.DAL.Models
         public Double Current { get; set; }
         public String CurrentUnit { get; set; }
 
-        public DateTime CreatedTime { get; set; } = DateTime.Now;
+        public DateTime CreatedTime { get; set; } = DateTime.UtcNow;
 
 
     }

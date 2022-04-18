@@ -125,7 +125,7 @@ namespace MiSmart.DAL.Models
             var claims = new[] { new Claim(Keys.JWTAuthKey, ID.ToString()), new Claim(Keys.JWTUserTypeKey, "Device") };
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var token = new JwtSecurityToken(claims: claims, signingCredentials: creds, expires: DateTime.Now.AddMonths(2));
+            var token = new JwtSecurityToken(claims: claims, signingCredentials: creds, expires: DateTime.UtcNow.AddMonths(2));
             var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
             return tokenString;
         }

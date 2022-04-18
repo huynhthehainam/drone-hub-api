@@ -25,10 +25,10 @@ namespace MiSmart.API.Controllers
             {
                 response.AddNotFoundErr("Device");
             }
-            if (device.AccessToken is null || device.NextGeneratingAccessTokenTime.GetValueOrDefault() < DateTime.Now.AddDays(2))
+            if (device.AccessToken is null || device.NextGeneratingAccessTokenTime.GetValueOrDefault() < DateTime.UtcNow.AddDays(2))
             {
                 device.AccessToken = device.GenerateDeviceAccessToken(options.Value.AuthSecret);
-                device.NextGeneratingAccessTokenTime = DateTime.Now.AddMonths(1);
+                device.NextGeneratingAccessTokenTime = DateTime.UtcNow.AddMonths(1);
                 await deviceRepository.UpdateAsync(device);
             }
 

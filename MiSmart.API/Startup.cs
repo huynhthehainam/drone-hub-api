@@ -423,7 +423,7 @@ namespace MiSmart.API
                         {
                             FlightStat flightStat = new FlightStat
                             {
-                                CreatedTime = DateTime.Now,
+                                CreatedTime = DateTime.UtcNow,
                                 Customer = customer,
                                 Device = device,
                                 DeviceName = device.Name,
@@ -534,7 +534,7 @@ namespace MiSmart.API
                         MappingTime = 120,
                         IsLargeFarm = true,
                         WorkArea = 1200,
-                        UpdatedTime = DateTime.Now,
+                        UpdatedTime = DateTime.UtcNow,
                         Name = "Cô bảy long an",
                         WorkSpeed = 12,
                         InnerArea = 800,
@@ -544,7 +544,7 @@ namespace MiSmart.API
 
                         Border = geometryFactory.CreatePolygon(coordinates),
                         Flyway = geometryFactory.CreateLineString(samples.Select(sample => new Coordinate(sample.Longitude, sample.Latitude)).ToArray()),
-                        CreatedTime = DateTime.Now,
+                        CreatedTime = DateTime.UtcNow,
                         Customer = customer,
                         EdgeOffset = 0,
                         LocationPoint = geometryFactory.CreatePoint(new Coordinate(samples[0].Longitude, samples[0].Latitude)),
@@ -558,7 +558,7 @@ namespace MiSmart.API
                         MappingTime = 130,
                         IsLargeFarm = true,
                         WorkArea = 1400,
-                        UpdatedTime = DateTime.Now,
+                        UpdatedTime = DateTime.UtcNow,
                         Name = "Cô bảy long điền",
                         WorkSpeed = 10,
                         InnerArea = 900,
@@ -568,7 +568,7 @@ namespace MiSmart.API
 
                         Border = geometryFactory.CreatePolygon(samples2.Select(sample => new Coordinate(sample.Longitude, sample.Latitude)).ToArray()),
                         Flyway = geometryFactory.CreateLineString(samples.Select(sample => new Coordinate(sample.Longitude, sample.Latitude)).ToArray()),
-                        CreatedTime = DateTime.Now,
+                        CreatedTime = DateTime.UtcNow,
                         Customer = customer,
                         EdgeOffset = 0,
                         ExecutionCompany = executionCompany,

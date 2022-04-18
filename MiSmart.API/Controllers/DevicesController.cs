@@ -270,10 +270,10 @@ namespace MiSmart.API.Controllers
                             FlightDuration = item.FlightDuration.GetValueOrDefault(),
                             FieldName = item.FieldName,
                             Flights = item.Flights.GetValueOrDefault(),
-                            FlightTime = item.FlightTime ?? DateTime.Now,
+                            FlightTime = item.FlightTime ?? DateTime.UtcNow,
                             FlywayPoints = geometryFactory.CreateLineString(item.FlywayPoints.Select(ww => new Coordinate(ww.Longitude.GetValueOrDefault(), ww.Latitude.GetValueOrDefault())).ToArray()),
                             PilotName = item.PilotName,
-                            CreatedTime = DateTime.Now,
+                            CreatedTime = DateTime.UtcNow,
                             CustomerID = device.CustomerID,
                             DeviceID = device.ID,
                             DeviceName = device.Name,
@@ -356,7 +356,7 @@ namespace MiSmart.API.Controllers
             TimeSpan span = new TimeSpan(0, 0, 0, 0, 5000);
             TimeSpan eachSpan = span / command.Data.Count;
             var records = new List<TelemetryRecord>();
-            var startedTime = DateTime.Now - span;
+            var startedTime = DateTime.UtcNow - span;
             for (Int32 i = 0; i < command.Data.Count; i++)
             {
                 var item = command.Data[i];
@@ -405,7 +405,7 @@ namespace MiSmart.API.Controllers
 
                     TimeSpan span1 = new TimeSpan(0, 0, 0, 0, 5000);
                     TimeSpan eachSpan1 = span1 / batteryGroup.Count();
-                    var startedTime1 = DateTime.Now - span1;
+                    var startedTime1 = DateTime.UtcNow - span1;
                     var actualGroup = batteryGroup.ToList();
                     var logs = new List<BatteryLog>();
                     for (var i = 0; i < actualGroup.Count(); i++)
@@ -428,7 +428,7 @@ namespace MiSmart.API.Controllers
                     var groupLog = new BatteryGroupLog
                     {
                         Battery = battery,
-                        CreatedTime = DateTime.Now,
+                        CreatedTime = DateTime.UtcNow,
                         Logs = logs,
                     };
                     await batteryGroupLogRepository.CreateAsync(groupLog);
@@ -497,10 +497,10 @@ namespace MiSmart.API.Controllers
                 FlightDuration = command.FlightDuration.GetValueOrDefault(),
                 FieldName = command.FieldName,
                 Flights = command.Flights.GetValueOrDefault(),
-                FlightTime = command.FlightTime ?? DateTime.Now,
+                FlightTime = command.FlightTime ?? DateTime.UtcNow,
                 FlywayPoints = geometryFactory.CreateLineString(command.FlywayPoints.Select(ww => new Coordinate(ww.Longitude.GetValueOrDefault(), ww.Latitude.GetValueOrDefault())).ToArray()),
                 PilotName = command.PilotName,
-                CreatedTime = DateTime.Now,
+                CreatedTime = DateTime.UtcNow,
                 CustomerID = device.CustomerID,
                 DeviceID = device.ID,
                 DeviceName = device.Name,

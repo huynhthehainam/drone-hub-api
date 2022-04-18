@@ -33,7 +33,7 @@ namespace MiSmart.DAL.Models
             set => battery = value;
         }
         public Int32 BatteryID { get; set; }
-        public DateTime CreatedTime { get; set; } = DateTime.Now;
+        public DateTime CreatedTime { get; set; } = DateTime.UtcNow;
 
 
         private ICollection<Battery> lastBatteries;

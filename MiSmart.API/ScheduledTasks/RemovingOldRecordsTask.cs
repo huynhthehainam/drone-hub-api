@@ -24,10 +24,10 @@ namespace MiSmart.API.ScheduledTasks
             {
                 using (DatabaseContext databaseContext = scope.ServiceProvider.GetRequiredService<DatabaseContext>())
                 {
-                    List<TelemetryGroup> groups = databaseContext.TelemetryGroups.Where(g => g.CreatedTime < DateTime.Now.AddDays(-7) && g.LastDevice == null).ToList();
+                    List<TelemetryGroup> groups = databaseContext.TelemetryGroups.Where(g => g.CreatedTime < DateTime.UtcNow.AddDays(-7) && g.LastDevice == null).ToList();
                     databaseContext.TelemetryGroups.RemoveRange(groups);
                     databaseContext.SaveChanges();
-                  
+
                 }
             }
 

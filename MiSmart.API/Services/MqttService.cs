@@ -1,12 +1,7 @@
 
 
 using System;
-using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.Versioning;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using MiSmart.DAL.DatabaseContexts;
@@ -14,7 +9,6 @@ using MiSmart.Infrastructure.Mqtt;
 using MQTTnet;
 using MQTTnet.AspNetCore;
 using MQTTnet.AspNetCore.AttributeRouting;
-using MQTTnet.Client.Receiving;
 using MQTTnet.Protocol;
 using MQTTnet.Server;
 
@@ -52,15 +46,7 @@ namespace MiSmart.API.Services
 
         public Task HandleApplicationMessageReceivedAsync(MqttApplicationMessageReceivedEventArgs eventArgs)
         {
-            // return Task.Run(() =>
-            //   {
-            //       Console.WriteLine(
-            //           $"{DateTime.Now.ToString(CultureInfo.InvariantCulture)} - Received MQTT Message Logged:");
-            //       Console.WriteLine($"- Topic = {eventArgs.ApplicationMessage.Topic }");
-            //       Console.WriteLine($"- Payload = {Encoding.UTF8.GetString(eventArgs.ApplicationMessage.Payload) }");
-            //       Console.WriteLine($"- QoS = {eventArgs.ApplicationMessage.QualityOfServiceLevel }");
-            //       Console.WriteLine($"- Retain = {eventArgs.ApplicationMessage.Retain }");
-            //   });
+         
             return Task.CompletedTask;
         }
 

@@ -33,7 +33,7 @@ namespace MiSmart.API.Controllers
             var setting = await executionCompanySettingRepository.CreateAsync(new ExecutionCompanySetting
             {
                 CostPerHectare = command.CostPerHectare.GetValueOrDefault(),
-                CreatedTime = DateTime.Now,
+                CreatedTime = DateTime.UtcNow,
                 ExecutionCompanyID = executionCompanyUser.ExecutionCompanyID,
                 MainPilotCostPerHectare = command.MainPilotCostPerHectare.GetValueOrDefault(),
                 SubPilotCostPerHectare = command.SubPilotCostPerHectare.GetValueOrDefault(),

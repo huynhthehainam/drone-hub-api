@@ -20,7 +20,7 @@ namespace MiSmart.DAL.Models
         {
         }
 
-        public DateTime CreatedTime { get; set; } = DateTime.Now;
+        public DateTime CreatedTime { get; set; } = DateTime.UtcNow;
         public Point LocationPoint { get; set; }
         public Double Direction { get; set; }
         public String AdditionalInformationString { get; set; }
