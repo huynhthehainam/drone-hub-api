@@ -81,6 +81,27 @@ namespace MiSmart.API.Controllers
             return response.ToIActionResult();
         }
 
+        [HttpPatch("{id:int}")]
+        [HasPermission(typeof(AdminPermission))]
+        public async Task<IActionResult> UpdateCustomer([FromRoute] Int32 id, [FromServices] CustomerRepository customerRepository, [FromBody] UpdatingCustomerCommand command)
+        {
+            var response = actionResponseFactory.CreateInstance();
+            var customer = await customerRepository.GetAsync(ww => ww.ID == id);
+
+            if (customer is null)
+            {
+                response.AddNotFoundErr("Customer");
+            }
+            customer.Name = String.IsNullOrEmpty(command.Name) ? customer.Name : command.Name;
+            customer.Address = String.IsNullOrEmpty(command.Address) ? customer.Address : command.Address;
+
+
+            await customerRepository.UpdateAsync(customer);
+            response.SetUpdatedMessage();
+
+            return response.ToIActionResult();
+        }
+
 
         [HttpGet("AssignedUsers")]
         [HasPermission(typeof(AdminPermission))]
