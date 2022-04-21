@@ -24,4 +24,10 @@ namespace MiSmart.API.Commands
 
         public String Address { get; set; }
     }
+    public class UpdatingExecutionCompanyCommand
+    {
+        public String Name { get; set; }
+
+        public String Address { get; set; }
+    }
 }

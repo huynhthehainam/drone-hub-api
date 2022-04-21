@@ -48,6 +48,23 @@ namespace MiSmart.API.Controllers
             return response.ToIActionResult();
         }
 
+        [HttpPatch("{id:int}")]
+        [HasPermission(typeof(AdminPermission))]
+        public async Task<IActionResult> UpdateExecutionCompany([FromServices] ExecutionCompanyRepository executionCompanyRepository, [FromRoute] Int32 id, [FromBody] UpdatingExecutionCompanyCommand command)
+        {
+            var response = actionResponseFactory.CreateInstance();
+            var company = await executionCompanyRepository.GetAsync(ww => ww.ID == id);
+
+            if (company is null)
+            {
+                response.AddNotFoundErr("ExecutionCompany");
+            }
+
+            company.Name = String.IsNullOrWhiteSpace(company.Name) ? company.Name : command.Name;
+            company.Address = String.IsNullOrWhiteSpace(company.Address) ? company.Address : command.Address;
+            response.SetUpdatedMessage();
+            return response.ToIActionResult();
+        }
 
         [HttpPost("{id:int}/AssignUser")]
         [HasPermission(typeof(AdminPermission))]
