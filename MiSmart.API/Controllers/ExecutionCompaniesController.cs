@@ -62,6 +62,7 @@ namespace MiSmart.API.Controllers
 
             company.Name = String.IsNullOrWhiteSpace(company.Name) ? company.Name : command.Name;
             company.Address = String.IsNullOrWhiteSpace(company.Address) ? company.Address : command.Address;
+            await executionCompanyRepository.UpdateAsync(company);
             response.SetUpdatedMessage();
             return response.ToIActionResult();
         }
