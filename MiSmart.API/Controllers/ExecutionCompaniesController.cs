@@ -60,8 +60,8 @@ namespace MiSmart.API.Controllers
                 response.AddNotFoundErr("ExecutionCompany");
             }
 
-            company.Name = String.IsNullOrWhiteSpace(company.Name) ? company.Name : command.Name;
-            company.Address = String.IsNullOrWhiteSpace(company.Address) ? company.Address : command.Address;
+            company.Name = String.IsNullOrWhiteSpace(command.Name) ? company.Name : command.Name;
+            company.Address = String.IsNullOrWhiteSpace(command.Address) ? company.Address : command.Address;
             await executionCompanyRepository.UpdateAsync(company);
             response.SetUpdatedMessage();
             return response.ToIActionResult();
