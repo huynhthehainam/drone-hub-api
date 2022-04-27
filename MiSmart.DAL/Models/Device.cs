@@ -129,6 +129,14 @@ namespace MiSmart.DAL.Models
             var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
             return tokenString;
         }
+
+
+        private ICollection<StreamingLink> streamingLinks;
+        public ICollection<StreamingLink> StreamingLinks
+        {
+            get => lazyLoader.Load(this, ref streamingLinks);
+            set => streamingLinks = value;
+        }
     }
 
 }

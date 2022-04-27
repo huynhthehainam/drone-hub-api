@@ -545,6 +545,55 @@ namespace MiSmart.API.Controllers
 
             return response.ToIActionResult();
         }
+        [HttpPost("me/StreamingLinks")]
+
+        public async Task<IActionResult> CreateStreamingLink([FromServices] DeviceRepository deviceRepository, [FromBody] AddingStreamingLinkCommand command)
+        {
+            var actionResponse = actionResponseFactory.CreateInstance();
+            var device = await deviceRepository.GetAsync(ww => ww.ID == CurrentDevice.ID);
+
+            if (device is null)
+            {
+                actionResponse.AddNotFoundErr("Device");
+            }
+
+            StreamingLink streamingLink = new StreamingLink()
+            {
+                Link = command.Link
+            };
+
+            device.StreamingLinks.Add(streamingLink);
+
+
+            await deviceRepository.UpdateAsync(device);
+
+            actionResponse.SetCreatedObject(streamingLink);
+
+            return actionResponse.ToIActionResult();
+        }
+
+        [HttpPost("me/RemoveAllStreamingLinks")]
+        public async Task<IActionResult> RemoveAllStreamingLinks([FromServices] DeviceRepository deviceRepository, [FromServices] StreamingLinkRepository streamingLinkRepository)
+        {
+            var actionResponse = actionResponseFactory.CreateInstance();
+
+            var device = await deviceRepository.GetAsync(ww => ww.ID == CurrentDevice.ID);
+
+            if (device is null)
+            {
+                actionResponse.AddNotFoundErr("Device");
+            }
+
+
+
+
+            await streamingLinkRepository.DeleteRangeAsync(device.StreamingLinks.ToList());
+            actionResponse.SetUpdatedMessage();
+
+
+            return actionResponse.ToIActionResult();
+        }
+
         [HttpPost("me/Plans")]
         public async Task<IActionResult> CreatePlan([FromServices] DeviceRepository deviceRepository, [FromServices] PlanRepository planRepository, [FromForm] AddingPlanCommand command)
         {

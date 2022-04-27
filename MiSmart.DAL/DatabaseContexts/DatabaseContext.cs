@@ -28,10 +28,18 @@ namespace MiSmart.DAL.DatabaseContexts
         public DbSet<BatteryModel> BatteryModels { get; set; }
         public DbSet<ExecutionCompanyUserFlightStat> ExecutionCompanyUserFlightStats { get; set; }
         public DbSet<ExecutionCompanySetting> ExecutionCompanySettings { get; set; }
+        public DbSet<StreamingLink> StreamingLinks { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.HasPostgresExtension("postgis");
+
+
+
+            modelBuilder.Entity<StreamingLink>(ww =>
+            {
+                ww.HasOne(ww => ww.Device).WithMany(ww => ww.StreamingLinks).HasForeignKey(ww => ww.DeviceID).OnDelete(DeleteBehavior.Cascade);
+            });
             modelBuilder.Entity<Customer>(ww =>
             {
 
