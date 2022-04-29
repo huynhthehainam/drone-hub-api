@@ -36,6 +36,7 @@ using NetTopologySuite;
 using Microsoft.Extensions.Options;
 using MiSmart.Infrastructure.ScheduledTasks;
 using MiSmart.API.ScheduledTasks;
+using FirebaseAdmin;
 
 namespace MiSmart.API
 {
@@ -73,6 +74,8 @@ namespace MiSmart.API
                 Description = "Drone hub management"
             });
             services.AddHttpClient();
+
+            FirebaseApp.Create();
 
 
 

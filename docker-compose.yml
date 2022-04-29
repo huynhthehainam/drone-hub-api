@@ -52,6 +52,7 @@ services:
     environment:
       - ASPNETCORE_URLS=http://+:5000
       - ASPNETCORE_ENVIRONMENT=Docker
+      - GOOGLE_APPLICATION_CREDENTIALS=google_services.json
     depends_on:
       postgres_image:
         condition: service_healthy

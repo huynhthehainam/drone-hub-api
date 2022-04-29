@@ -14,7 +14,8 @@
             "cwd": "${workspaceFolder}/MiSmart.API",
             "stopAtEntry": false,
             "env": {
-                "ASPNETCORE_ENVIRONMENT": "Development"
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "GOOGLE_APPLICATION_CREDENTIALS": "google_services.json"
             },
             "sourceFileMap": {
                 "/Views": "${workspaceFolder}/Views"
