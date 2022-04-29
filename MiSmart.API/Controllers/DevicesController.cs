@@ -23,6 +23,7 @@ using MiSmart.Infrastructure.Minio;
 using Microsoft.AspNetCore.Authorization;
 using MiSmart.Infrastructure.Services;
 using System.Threading.Tasks;
+using FirebaseAdmin.Messaging;
 
 namespace MiSmart.API.Controllers
 {
@@ -561,6 +562,8 @@ namespace MiSmart.API.Controllers
             {
                 Link = command.Link
             };
+            var result = await FirebaseMessaging.DefaultInstance.SendAsync(new Message() { Topic = "dronehub_message", Data = new Dictionary<String, String>() { { "update", "streaming_links" }, } });
+
 
             device.StreamingLinks.Add(streamingLink);
 
