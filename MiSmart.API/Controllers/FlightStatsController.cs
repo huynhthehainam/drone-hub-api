@@ -26,6 +26,23 @@ namespace MiSmart.API.Controllers
         {
         }
 
+        public async Task<IActionResult> GetFlightStatsFromTM([FromServices] FlightStatRepository flightStatRepository,
+        [FromQuery] PageCommand pageCommand,
+        [FromBody] GettingFlightStatsFromTMCommand command,
+               [FromServices] IOptions<ActionResponseSettings> options)
+        {
+            FlightStatsActionResponse response = new FlightStatsActionResponse();
+            response.ApplySettings(options.Value);
+            Expression<Func<FlightStat, Boolean>> query = ww => ww.TMUserUID == command.TMUserUID;
+
+
+
+            var listResponse = await flightStatRepository.GetListFlightStatsViewAsync<SmallFlightStatViewModel>(pageCommand, query, ww => ww.FlightTime, false);
+            listResponse.SetResponse(response);
+
+            return response.ToIActionResult();
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetFlightStats([FromServices] FlightStatRepository flightStatRepository,
         [FromServices] TeamUserRepository teamUserRepository,
@@ -185,6 +202,7 @@ namespace MiSmart.API.Controllers
 
             flightStat.FieldName = String.IsNullOrEmpty(command.FieldName) ? flightStat.FieldName : command.FieldName;
             flightStat.TaskLocation = String.IsNullOrEmpty(command.TaskLocation) ? flightStat.TaskLocation : command.TaskLocation;
+            flightStat.TMUserUID = String.IsNullOrEmpty(command.TMUserUID) ? flightStat.TMUserUID : command.TMUserUID;
 
             await flightStatRepository.UpdateAsync(flightStat);
             response.SetUpdatedMessage();

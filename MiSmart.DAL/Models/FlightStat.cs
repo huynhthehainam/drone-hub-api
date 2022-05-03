@@ -35,6 +35,7 @@ namespace MiSmart.DAL.Models
         public Double TaskArea { get; set; }
         public Double FlightDuration { get; set; }
         public String PilotName { get; set; }
+        public String TMUserUID { get; set; }
         public LineString FlywayPoints { get; set; }
         private Device device;
         [JsonIgnore]
