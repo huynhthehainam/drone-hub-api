@@ -562,7 +562,7 @@ namespace MiSmart.API.Controllers
             {
                 Link = command.Link
             };
-            var result = await FirebaseMessaging.DefaultInstance.SendAsync(new Message() { Topic = "dronehub_message", Data = new Dictionary<String, String>() { { "update", "streaming_links" }, } });
+
 
 
             device.StreamingLinks.Add(streamingLink);
@@ -571,7 +571,7 @@ namespace MiSmart.API.Controllers
             await deviceRepository.UpdateAsync(device);
 
             actionResponse.SetCreatedObject(streamingLink);
-
+            var result = await FirebaseMessaging.DefaultInstance.SendAsync(new Message() { Topic = "dronehub_message", Data = new Dictionary<String, String>() { { "update", "streaming_links" }, } });
             return actionResponse.ToIActionResult();
         }
 
@@ -593,7 +593,7 @@ namespace MiSmart.API.Controllers
             await streamingLinkRepository.DeleteRangeAsync(device.StreamingLinks.ToList());
             actionResponse.SetUpdatedMessage();
 
-
+            var result = await FirebaseMessaging.DefaultInstance.SendAsync(new Message() { Topic = "dronehub_message", Data = new Dictionary<String, String>() { { "update", "streaming_links" }, } });
             return actionResponse.ToIActionResult();
         }
 
