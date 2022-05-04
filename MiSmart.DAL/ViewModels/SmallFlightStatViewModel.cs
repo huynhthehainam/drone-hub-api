@@ -1,5 +1,6 @@
 
 using System;
+using System.Collections.Generic;
 using MiSmart.DAL.Models;
 using MiSmart.Infrastructure.ViewModels;
 
@@ -41,7 +42,7 @@ namespace MiSmart.DAL.ViewModels
         public String CustomerName { get; set; }
         public Double Cost { get; set; }
         public String TMUserUID { get; set; }
-
+        public List<Medicine> Medicines { get; set; }
         public void LoadFrom(FlightStat entity)
         {
             ID = entity.ID;
@@ -61,6 +62,7 @@ namespace MiSmart.DAL.ViewModels
             Cost = entity.Cost;
             TeamID = entity.TeamID;
             TMUserUID = entity.TMUserUID;
+            Medicines = entity.Medicines;
         }
     }
 }

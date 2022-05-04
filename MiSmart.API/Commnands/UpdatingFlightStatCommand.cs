@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using MiSmart.DAL.Models;
 
 namespace MiSmart.API.Commands
 {
@@ -8,5 +10,6 @@ namespace MiSmart.API.Commands
         public String FieldName { get; set; }
         public String TaskLocation { get; set; }
         public String TMUserUID { get; set; }
+        public List<Medicine> Medicines { get; set; } =  new List<Medicine>();
     }
 }

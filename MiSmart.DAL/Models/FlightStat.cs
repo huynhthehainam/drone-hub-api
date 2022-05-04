@@ -4,9 +4,19 @@ using System;
 using System.Text.Json.Serialization;
 using NetTopologySuite.Geometries;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json;
+using MiSmart.Infrastructure.Constants;
 
 namespace MiSmart.DAL.Models
 {
+    public class Medicine
+    {
+        public String ID { get; set; }
+        public String Code { get; set; }
+        public String Thumbnail { get; set; }
+        public String Name { get; set; }
+    }
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum FlightMode
     {
@@ -79,6 +89,18 @@ namespace MiSmart.DAL.Models
         {
             get => lazyLoader.Load(this, ref executionCompanyUserFlightStats);
             set => executionCompanyUserFlightStats = value;
+        }
+
+        public String MedicinesString { get; set; }
+        [NotMapped]
+        public List<Medicine> Medicines
+        {
+            get => String.IsNullOrEmpty(MedicinesString) ? null : JsonSerializer.Deserialize<List<Medicine>>(MedicinesString, JsonSerializerDefaultOptions.CamelOptions);
+            set
+            {
+                if (value != null)
+                    MedicinesString = JsonSerializer.Serialize(value, JsonSerializerDefaultOptions.CamelOptions);
+            }
         }
     }
 }

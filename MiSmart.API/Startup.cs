@@ -137,6 +137,7 @@ namespace MiSmart.API
             services.Configure<ExpiredTimeSettings>(Configuration.GetSection("ExpiredTimeSettings"));
             services.Configure<ConversionSettings>(Configuration.GetSection("ConversionSettings"));
             services.Configure<AuthSystemSettings>(Configuration.GetSection("AuthSystemSettings"));
+            services.Configure<FarmAppSettings>(Configuration.GetSection("FarmAppSettings"));
 
             #endregion
             #region ConfiguringJWT
