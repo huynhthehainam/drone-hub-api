@@ -50,7 +50,7 @@ namespace MiSmart.DAL.ViewModels
         {
             BatteryID = entity.BatteryID;
             CreatedTime = entity.CreatedTime;
-            Logs = entity.Logs.Select(l => ViewModelHelpers.ConvertToViewModel<BatteryLog, BatteryLogViewModel>(l)).ToList();
+            Logs = entity.Logs.OrderBy(ww => ww.CreatedTime).Select(l => ViewModelHelpers.ConvertToViewModel<BatteryLog, BatteryLogViewModel>(l)).ToList();
             ID = entity.ID;
         }
     }
