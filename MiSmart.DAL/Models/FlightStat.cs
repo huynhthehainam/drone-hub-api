@@ -10,6 +10,14 @@ using MiSmart.Infrastructure.Constants;
 
 namespace MiSmart.DAL.Models
 {
+    public class TMUser
+    {
+        public String ID { get; set; }
+        public String UID { get; set; }
+        public String Name { get; set; }
+        public String Email { get; set; }
+        public String Phone { get; set; }
+    }
     public class Medicine
     {
         public String ID { get; set; }
@@ -46,6 +54,20 @@ namespace MiSmart.DAL.Models
         public Double FlightDuration { get; set; }
         public String PilotName { get; set; }
         public String TMUserUID { get; set; }
+        public String TMUserString { get; set; }
+        [NotMapped]
+        public TMUser TMUser
+        {
+            get => String.IsNullOrEmpty(TMUserString) ? null : JsonSerializer.Deserialize<TMUser>(TMUserString, JsonSerializerDefaultOptions.CamelOptions);
+            set
+            {
+                if (value != null)
+                {
+                    TMUserString = JsonSerializer.Serialize(value, JsonSerializerDefaultOptions.CamelOptions);
+                    TMUserUID = value.UID;
+                }
+            }
+        }
         public LineString FlywayPoints { get; set; }
         private Device device;
         [JsonIgnore]

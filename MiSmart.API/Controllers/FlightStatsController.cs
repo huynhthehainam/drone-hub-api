@@ -202,7 +202,7 @@ namespace MiSmart.API.Controllers
 
             flightStat.FieldName = String.IsNullOrEmpty(command.FieldName) ? flightStat.FieldName : command.FieldName;
             flightStat.TaskLocation = String.IsNullOrEmpty(command.TaskLocation) ? flightStat.TaskLocation : command.TaskLocation;
-            flightStat.TMUserUID = String.IsNullOrEmpty(command.TMUserUID) ? flightStat.TMUserUID : command.TMUserUID;
+            flightStat.TMUser = command.TMUser == null ? flightStat.TMUser : command.TMUser;
             flightStat.Medicines = command.Medicines.Count == 0 ? flightStat.Medicines : command.Medicines;
             await flightStatRepository.UpdateAsync(flightStat);
             response.SetUpdatedMessage();

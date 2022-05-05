@@ -23,4 +23,25 @@ namespace MiSmart.API.Models
         }
         public GettingAllMedicinesResponseData Data { get; set; }
     }
+
+    public class GettingAllFarmersResponse
+    {
+        public class GettingAllFarmersResponseData
+        {
+            public class GettingAllFarmersResponseDataModel
+            {
+                public class GettingAllFarmersResponseDataModelData
+                {
+                    public String ID { get; set; }
+                    public String UID { get; set; }
+                    public String Name { get; set; }
+                    public String Phone { get; set; }
+                    public String Email { get; set; }
+                }
+                public List<GettingAllFarmersResponseDataModelData> Data { get; set; }
+            }
+            public GettingAllFarmersResponseDataModel GetAllFarmerFromDroneHub { get; set; }
+        }
+        public GettingAllFarmersResponseData Data { get; set; }
+    }
 }

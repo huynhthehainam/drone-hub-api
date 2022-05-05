@@ -20,6 +20,38 @@ namespace MiSmart.API.Controllers
         {
         }
 
+        [HttpGet("AllFarmers")]
+        public async Task<IActionResult> GetAllFarmers([FromServices] IHttpClientFactory httpClientFactory, [FromServices] IOptions<FarmAppSettings> options)
+        {
+            var actionResponse = actionResponseFactory.CreateInstance();
+            using (var client = httpClientFactory.CreateClient())
+            {
+
+                var contentJson = JsonSerializer.Serialize(new { Query = @"
+          query {
+  getAllFarmer(q: {}) {
+    data {
+      id
+      name
+      phone
+      uid
+      
+    }
+  }
+}
+            " }, JsonSerializerDefaultOptions.CamelOptions);
+                StringContent content = new StringContent(contentJson, Encoding.UTF8, "application/json");
+                client.DefaultRequestHeaders.TryAddWithoutValidation("x-token", options.Value.SecretKey);
+                var url = options.Value.FarmDomain + "/graphql";
+                var response = await client.PostAsync(url, content);
+                var body = await response.Content.ReadAsStringAsync();
+            }
+
+
+
+            return actionResponse.ToIActionResult();
+        }
+
         [HttpGet("AllMedicines")]
         public async Task<IActionResult> GetAllMedichines([FromServices] IHttpClientFactory httpClientFactory,
         [FromServices] IOptions<FarmAppSettings> options)
@@ -27,18 +59,21 @@ namespace MiSmart.API.Controllers
             var actionResponse = actionResponseFactory.CreateInstance();
             using (var client = httpClientFactory.CreateClient())
             {
-                var aa = JsonSerializer.Serialize(new { Query = @"
-                query {
-                    getAllMedicineFromDroneHub(q:{}){
+                var contentJson = JsonSerializer.Serialize(new { Query = @"
+                                query {
+                    getAllFarmerFromDroneHub(q: {}) {
                         data {
-                            id
-                            name
-                            code
-                            thumbnail
+                        id
+                        uid
+                        name
+                        phone
+                        email
                         }
                     }
-                }" }, JsonSerializerDefaultOptions.CamelOptions);
-                StringContent content = new StringContent(aa, Encoding.UTF8, "application/json");
+                    }
+
+                " }, JsonSerializerDefaultOptions.CamelOptions);
+                StringContent content = new StringContent(contentJson, Encoding.UTF8, "application/json");
 
                 client.DefaultRequestHeaders.TryAddWithoutValidation("x-token", options.Value.SecretKey);
                 var url = options.Value.FarmDomain + "/graphql";
@@ -46,13 +81,13 @@ namespace MiSmart.API.Controllers
 
                 var body = await response.Content.ReadAsStringAsync();
 
-                GettingAllMedicinesResponse gettingAllMedicinesResponse = JsonSerializer.Deserialize<GettingAllMedicinesResponse>(body, JsonSerializerDefaultOptions.CamelOptions);
-                if (gettingAllMedicinesResponse.Data.GetAllMedicineFromDroneHub == null)
+                GettingAllFarmersResponse gettingAllMedicinesResponse = JsonSerializer.Deserialize<GettingAllFarmersResponse>(body, JsonSerializerDefaultOptions.CamelOptions);
+                if (gettingAllMedicinesResponse.Data.GetAllFarmerFromDroneHub == null)
                 {
-                    actionResponse.AddNotFoundErr("AllMedicines");
+                    actionResponse.AddNotFoundErr("AllFarmers");
                 }
 
-                actionResponse.SetData(gettingAllMedicinesResponse.Data.GetAllMedicineFromDroneHub.Data);
+                actionResponse.SetData(gettingAllMedicinesResponse.Data.GetAllFarmerFromDroneHub.Data);
             }
 
             return actionResponse.ToIActionResult();
