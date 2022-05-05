@@ -26,10 +26,11 @@ namespace MiSmart.API.Controllers
         {
         }
 
+        [HttpGet("GetFlightStatsFromTM")]
         public async Task<IActionResult> GetFlightStatsFromTM([FromServices] FlightStatRepository flightStatRepository,
-        [FromQuery] PageCommand pageCommand,
-        [FromBody] GettingFlightStatsFromTMCommand command,
-               [FromServices] IOptions<ActionResponseSettings> options)
+                [FromQuery] PageCommand pageCommand,
+                [FromBody] GettingFlightStatsFromTMCommand command,
+                       [FromServices] IOptions<ActionResponseSettings> options)
         {
             FlightStatsActionResponse response = new FlightStatsActionResponse();
             response.ApplySettings(options.Value);
