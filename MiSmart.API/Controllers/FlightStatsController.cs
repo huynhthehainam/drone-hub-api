@@ -26,7 +26,7 @@ namespace MiSmart.API.Controllers
         {
         }
 
-        [HttpGet("GetFlightStatsFromTM")]
+        [HttpPost("GetFlightStatsFromTM")]
         public async Task<IActionResult> GetFlightStatsFromTM([FromServices] FlightStatRepository flightStatRepository,
                 [FromQuery] PageCommand pageCommand,
                 [FromBody] GettingFlightStatsFromTMCommand command,
