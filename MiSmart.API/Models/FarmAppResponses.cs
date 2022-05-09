@@ -3,6 +3,8 @@ using System.Collections.Generic;
 
 namespace MiSmart.API.Models
 {
+
+    // Add comment
     public class GettingAllMedicinesResponse
     {
         public class GettingAllMedicinesResponseData
