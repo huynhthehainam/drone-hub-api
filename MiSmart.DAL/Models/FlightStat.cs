@@ -69,6 +69,7 @@ namespace MiSmart.DAL.Models
             }
         }
         public LineString FlywayPoints { get; set; }
+        public List<Int32> SprayedIndexes {get;set;}
         private Device device;
         [JsonIgnore]
         public Device Device

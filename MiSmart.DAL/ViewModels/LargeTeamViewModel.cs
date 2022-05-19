@@ -9,13 +9,13 @@ namespace MiSmart.DAL.ViewModels
     public class SmallExecutionCompanyUserFlightStatViewModel : IViewModel<ExecutionCompanyUserFlightStat>
     {
         public Guid ID { get; set; }
-        public SuperSmallFlightStatViewmodel FlightStat { get; set; }
+        public SuperSmallFlightStatViewModel FlightStat { get; set; }
         public TeamMemberType Type { get; set; }
 
         public void LoadFrom(ExecutionCompanyUserFlightStat entity)
         {
             ID = entity.ID;
-            FlightStat = ViewModelHelpers.ConvertToViewModel<FlightStat, SuperSmallFlightStatViewmodel>(entity.FlightStat);
+            FlightStat = ViewModelHelpers.ConvertToViewModel<FlightStat, SuperSmallFlightStatViewModel>(entity.FlightStat);
             Type = entity.Type;
         }
     }
@@ -40,7 +40,7 @@ namespace MiSmart.DAL.ViewModels
         public Double TotalFlightDuration { get; set; }
         public Int32 TotalFlights { get; set; }
         public Double TotalCost { get; set; }
-        public List<SuperSmallFlightStatViewmodel> FlightStats { get; set; }
+        public List<SuperSmallFlightStatViewModel> FlightStats { get; set; }
         public void LoadFrom(Team entity)
         {
             ID = entity.ID;
@@ -67,7 +67,7 @@ namespace MiSmart.DAL.ViewModels
             TotalFlightDuration = entity.FlightStats.Sum(ww => ww.FlightDuration);
             TotalFlights = entity.FlightStats.Sum(ww => ww.Flights);
             TotalCost = entity.FlightStats.Sum(ww => ww.Cost);
-            FlightStats = entity.FlightStats.Select(ww => ViewModelHelpers.ConvertToViewModel<FlightStat, SuperSmallFlightStatViewmodel>(ww)).ToList();
+            FlightStats = entity.FlightStats.Select(ww => ViewModelHelpers.ConvertToViewModel<FlightStat, SuperSmallFlightStatViewModel>(ww)).ToList();
         }
     }
 }

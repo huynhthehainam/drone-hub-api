@@ -6,7 +6,7 @@ using MiSmart.Infrastructure.ViewModels;
 
 namespace MiSmart.DAL.ViewModels
 {
-    public class SuperSmallFlightStatViewmodel : IViewModel<FlightStat>
+    public class SuperSmallFlightStatViewModel : IViewModel<FlightStat>
     {
         public Guid ID { get; set; }
         public Int32 Flights { get; set; }

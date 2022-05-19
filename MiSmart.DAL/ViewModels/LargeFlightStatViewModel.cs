@@ -18,6 +18,7 @@ namespace MiSmart.DAL.ViewModels
         public DateTime FlightTime { get; set; }
         public String FieldName { get; set; }
         public List<CoordinateViewModel> FlywayPoints { get; set; }
+        public List<Int32> SprayedIndexes { get; set; }
         public String TaskLocation { get; set; }
         public String TeamName { get; set; }
         public Double TaskArea { get; set; }
@@ -32,6 +33,7 @@ namespace MiSmart.DAL.ViewModels
             FlightTime = entity.FlightTime;
             FieldName = entity.FieldName;
             FlywayPoints = entity.FlywayPoints.Coordinates.Select(ww => new CoordinateViewModel(ww)).ToList();
+            SprayedIndexes = entity.SprayedIndexes;
             TaskLocation = entity.TaskLocation;
             TeamName = entity.Device.Team?.Name;
             TaskArea = entity.TaskArea;
