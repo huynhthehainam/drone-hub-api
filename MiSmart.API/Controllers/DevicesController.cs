@@ -4,7 +4,6 @@ using MiSmart.Infrastructure.Controllers;
 using MiSmart.Infrastructure.Responses;
 using MiSmart.API.Commands;
 using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
 using System;
 using MiSmart.DAL.Models;
 using MiSmart.DAL.Repositories;
@@ -24,6 +23,9 @@ using Microsoft.AspNetCore.Authorization;
 using MiSmart.Infrastructure.Services;
 using System.Threading.Tasks;
 using FirebaseAdmin.Messaging;
+using MiSmart.DAL.DatabaseContexts;
+using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace MiSmart.API.Controllers
 {
@@ -243,6 +245,7 @@ namespace MiSmart.API.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> UploadOfflineStats([FromBody] AddingBulkOfflineFlightStatsCommand command,
         [FromServices] FlightStatRepository flightStatRepository,
+        [FromServices] DatabaseContext databaseContext,
         [FromServices] ExecutionCompanySettingRepository executionCompanySettingRepository,
         [FromServices] ExecutionCompanyUserFlightStatRepository executionCompanyUserFlightStatRepository,
          [FromServices] DeviceRepository deviceRepository, [FromServices] JWTService jwtService)
@@ -264,7 +267,43 @@ namespace MiSmart.API.Controllers
                             response.AddInvalidErr("FlywayPoints");
                         }
                         var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
-                        item.FlywayPoints.Add(JsonSerializer.Deserialize<LocationPoint>(JsonSerializer.Serialize(item.FlywayPoints[0])));
+                        if (item.SprayedIndexes.Count > 0 && item.TaskArea == 0)
+                        {
+                            var taskArea = 0.0;
+                            for (var i = 0; i < item.FlywayPoints.Count - 1; i++)
+                            {
+                                if (item.SprayedIndexes.Contains(i))
+                                {
+                                    var firstLng = item.FlywayPoints[i].Longitude.GetValueOrDefault();
+                                    var firstLat = item.FlywayPoints[i].Latitude.GetValueOrDefault();
+                                    var secondLng = item.FlywayPoints[i + 1].Longitude.GetValueOrDefault();
+                                    var secondLat = item.FlywayPoints[i + 1].Latitude.GetValueOrDefault();
+                                    var point1 = geometryFactory.CreatePoint(new Coordinate(firstLng, firstLat));
+                                    var point2 = geometryFactory.CreatePoint(new Coordinate(secondLng, secondLat));
+                                    var distance = 0.0;
+
+                                    using (var databaseCommand = databaseContext.Database.GetDbConnection().CreateCommand())
+                                    {
+                                        databaseCommand.CommandText = @$"select ST_Distance(st_transform( st_geomfromtext ('point({firstLng} {firstLat})', 4326), 3857 ),
+st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * cosd({firstLat})
+";
+                                        databaseCommand.CommandType = CommandType.Text;
+                                        databaseContext.Database.OpenConnection();
+                                        using (var result = databaseCommand.ExecuteReader())
+                                        {
+                                            while (result.Read())
+                                            {
+                                                var parsed = Double.TryParse(result[0].ToString(), out distance);
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    taskArea += distance * 6; // Mr Dat confirmed
+                                }
+                            }
+                            item.TaskArea = taskArea;
+                        }
+
 
                         var stat = new FlightStat
                         {
@@ -273,7 +312,7 @@ namespace MiSmart.API.Controllers
                             Flights = item.Flights.GetValueOrDefault(),
                             FlightTime = item.FlightTime ?? DateTime.UtcNow,
                             FlywayPoints = geometryFactory.CreateLineString(item.FlywayPoints.Select(ww => new Coordinate(ww.Longitude.GetValueOrDefault(), ww.Latitude.GetValueOrDefault())).ToArray()),
-                            SprayedIndexes =  item.SprayedIndexes,
+                            SprayedIndexes = item.SprayedIndexes,
                             PilotName = item.PilotName,
                             CreatedTime = DateTime.UtcNow,
                             CustomerID = device.CustomerID,
@@ -479,6 +518,7 @@ namespace MiSmart.API.Controllers
         [HttpPost("me/FlightStats")]
         public async Task<IActionResult> CreateFlightStat([FromServices] DeviceRepository deviceRepository, [FromServices] FlightStatRepository flightStatRepository,
         [FromServices] ExecutionCompanySettingRepository executionCompanySettingRepository,
+        [FromServices] DatabaseContext databaseContext,
         [FromServices] ExecutionCompanyUserFlightStatRepository executionCompanyUserFlightStatRepository, [FromBody] AddingFlightStatCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
@@ -492,7 +532,42 @@ namespace MiSmart.API.Controllers
                 response.AddNotFoundErr("Device");
             }
             var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
-            command.FlywayPoints.Add(JsonSerializer.Deserialize<LocationPoint>(JsonSerializer.Serialize(command.FlywayPoints[0])));
+            if (command.SprayedIndexes.Count > 0 && command.TaskArea == 0)
+            {
+                var taskArea = 0.0;
+                for (var i = 0; i < command.FlywayPoints.Count - 1; i++)
+                {
+                    if (command.SprayedIndexes.Contains(i))
+                    {
+                        var firstLng = command.FlywayPoints[i].Longitude.GetValueOrDefault();
+                        var firstLat = command.FlywayPoints[i].Latitude.GetValueOrDefault();
+                        var secondLng = command.FlywayPoints[i + 1].Longitude.GetValueOrDefault();
+                        var secondLat = command.FlywayPoints[i + 1].Latitude.GetValueOrDefault();
+                        var point1 = geometryFactory.CreatePoint(new Coordinate(firstLng, firstLat));
+                        var point2 = geometryFactory.CreatePoint(new Coordinate(secondLng, secondLat));
+                        var distance = 0.0;
+
+                        using (var databaseCommand = databaseContext.Database.GetDbConnection().CreateCommand())
+                        {
+                            databaseCommand.CommandText = @$"select ST_Distance(st_transform( st_geomfromtext ('point({firstLng} {firstLat})', 4326), 3857 ),
+st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * cosd({firstLat})
+";
+                            databaseCommand.CommandType = CommandType.Text;
+                            databaseContext.Database.OpenConnection();
+                            using (var result = databaseCommand.ExecuteReader())
+                            {
+                                while (result.Read())
+                                {
+                                    var parsed = Double.TryParse(result[0].ToString(), out distance);
+                                    break;
+                                }
+                            }
+                        }
+                        taskArea += distance * 6; // Mr Dat confirmed
+                    }
+                }
+                command.TaskArea = taskArea;
+            }
 
             var stat = new FlightStat
             {
@@ -501,7 +576,7 @@ namespace MiSmart.API.Controllers
                 Flights = command.Flights.GetValueOrDefault(),
                 FlightTime = command.FlightTime ?? DateTime.UtcNow,
                 FlywayPoints = geometryFactory.CreateLineString(command.FlywayPoints.Select(ww => new Coordinate(ww.Longitude.GetValueOrDefault(), ww.Latitude.GetValueOrDefault())).ToArray()),
-                SprayedIndexes =  command.SprayedIndexes,
+                SprayedIndexes = command.SprayedIndexes,
                 PilotName = command.PilotName,
                 CreatedTime = DateTime.UtcNow,
                 CustomerID = device.CustomerID,
@@ -632,7 +707,7 @@ namespace MiSmart.API.Controllers
 
             return response.ToIActionResult();
         }
-        [HttpGet("RetrivePlans")]
+        [HttpGet("RetrievePlans")]
         public async Task<IActionResult> GetPlans([FromServices] PlanRepository planRepository, [FromQuery] PageCommand pageCommand, [FromQuery] String search, [FromQuery] Double? latitude, [FromQuery] Double? longitude, [FromQuery] Double? range)
         {
             var response = actionResponseFactory.CreateInstance();
