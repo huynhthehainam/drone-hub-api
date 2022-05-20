@@ -31,7 +31,7 @@ namespace MiSmart.API.Commands
         [Required(AllowEmptyStrings = false)]
         public String PilotName { get; set; }
         public List<LocationPoint> FlywayPoints { get; set; } = new List<LocationPoint>();
-        public List<Int32> SprayedIndexes { get; set; } = new List<int>();
+        public List<Int32> SprayedIndexes { get; set; } = new List<Int32>();
         public String TeamName { get; set; }
     }
     public class AddingOfflineFlightStatCommand : AddingFlightStatCommand
