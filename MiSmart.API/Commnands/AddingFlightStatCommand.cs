@@ -33,6 +33,7 @@ namespace MiSmart.API.Commands
         public List<LocationPoint> FlywayPoints { get; set; } = new List<LocationPoint>();
         public List<Int32> SprayedIndexes { get; set; } = new List<Int32>();
         public String TeamName { get; set; }
+        public Guid FlightUID { get; set; } = Guid.NewGuid();
     }
     public class AddingOfflineFlightStatCommand : AddingFlightStatCommand
     {

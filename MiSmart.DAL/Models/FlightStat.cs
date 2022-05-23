@@ -69,7 +69,7 @@ namespace MiSmart.DAL.Models
             }
         }
         public LineString FlywayPoints { get; set; }
-        public List<Int32> SprayedIndexes {get;set;}
+        public List<Int32> SprayedIndexes { get; set; }
         private Device device;
         [JsonIgnore]
         public Device Device
@@ -78,6 +78,8 @@ namespace MiSmart.DAL.Models
             set => device = value;
         }
         public Int32 DeviceID { get; set; }
+
+        public Guid FlightUID { get; set; }
 
         private Customer customer;
         [JsonIgnore]

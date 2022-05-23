@@ -309,6 +309,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
                         {
                             FlightDuration = item.FlightDuration.GetValueOrDefault(),
                             FieldName = item.FieldName,
+                            FlightUID = item.FlightUID,
                             Flights = item.Flights.GetValueOrDefault(),
                             FlightTime = item.FlightTime ?? DateTime.UtcNow,
                             FlywayPoints = geometryFactory.CreateLineString(item.FlywayPoints.Select(ww => new Coordinate(ww.Longitude.GetValueOrDefault(), ww.Latitude.GetValueOrDefault())).ToArray()),
@@ -573,6 +574,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
             {
                 FlightDuration = command.FlightDuration.GetValueOrDefault(),
                 FieldName = command.FieldName,
+                FlightUID = command.FlightUID,
                 Flights = command.Flights.GetValueOrDefault(),
                 FlightTime = command.FlightTime ?? DateTime.UtcNow,
                 FlywayPoints = geometryFactory.CreateLineString(command.FlywayPoints.Select(ww => new Coordinate(ww.Longitude.GetValueOrDefault(), ww.Latitude.GetValueOrDefault())).ToArray()),
