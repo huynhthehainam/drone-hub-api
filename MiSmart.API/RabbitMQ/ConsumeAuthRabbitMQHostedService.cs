@@ -13,7 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Linq;
 using MiSmart.Infrastructure.Constants;
 
-namespace MiSmart.Microservices.OrderService.RabbitMQ
+namespace MiSmart.API.RabbitMQ
 {
     public class ConsumeAuthRabbitMQHostedService : BackgroundService
     {

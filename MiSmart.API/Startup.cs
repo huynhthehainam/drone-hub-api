@@ -25,7 +25,7 @@ using MiSmart.Infrastructure.Mqtt;
 using MiSmart.DAL.Repositories;
 using MiSmart.API.Settings;
 using MiSmart.Infrastructure.RabbitMQ;
-using MiSmart.Microservices.OrderService.RabbitMQ;
+using MiSmart.API.RabbitMQ;
 using Microsoft.Extensions.Hosting;
 using MiSmart.Infrastructure.Minio;
 using MiSmart.Infrastructure.ScheduledTasks;
