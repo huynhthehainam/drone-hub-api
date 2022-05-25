@@ -1,11 +1,15 @@
 using MiSmart.DAL.Models;
 using Microsoft.EntityFrameworkCore;
+using System;
+
 namespace MiSmart.DAL.DatabaseContexts
 {
     public class DatabaseContext : DbContext
     {
         public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
         {
+            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+            AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
         }
 
         public DbSet<Customer> Customers { get; set; }

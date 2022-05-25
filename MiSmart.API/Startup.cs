@@ -30,7 +30,6 @@ using Microsoft.Extensions.Hosting;
 using MiSmart.Infrastructure.Minio;
 using MiSmart.Infrastructure.ScheduledTasks;
 using MiSmart.API.ScheduledTasks;
-using FirebaseAdmin;
 
 namespace MiSmart.API
 {
@@ -69,7 +68,7 @@ namespace MiSmart.API
             });
             services.AddHttpClient();
 
-            FirebaseApp.Create();
+            // FirebaseApp.Create();
 
 
 
