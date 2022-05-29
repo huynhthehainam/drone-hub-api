@@ -59,7 +59,7 @@ namespace MiSmart.API
 
             services.AddMvc().AddJsonOptions(options =>
             {
-                options.JsonSerializerOptions.IgnoreNullValues = true;
+                options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
             });
             services.AddSwagger(Configuration, new OpenApiInfo
             {
