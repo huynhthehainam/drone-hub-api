@@ -32,71 +32,10 @@
             "args": [
                 "watch",
                 "run",
-                "${workspaceFolder}/MiSmart.API/MiSmart.API.csproj",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary"
+                "--project",
+                "${workspaceFolder}/MiSmart.API/MiSmart.API.csproj"
             ],
             "problemMatcher": "$msCompile"
-        },
-        {
-            "type": "docker-build",
-            "label": "docker-build: debug",
-            "dependsOn": [
-                "build"
-            ],
-            "dockerBuild": {
-                "tag": "senvi:dev",
-                "target": "base",
-                "dockerfile": "${workspaceFolder}/MiSmart.API/Dockerfile",
-                "context": "${workspaceFolder}",
-                "pull": true
-            },
-            "netCore": {
-                "appProject": "${workspaceFolder}/MiSmart.API/MiSmart.API.csproj"
-            }
-        },
-        {
-            "type": "docker-build",
-            "label": "docker-build: release",
-            "dependsOn": [
-                "build"
-            ],
-            "dockerBuild": {
-                "tag": "senvi:latest",
-                "dockerfile": "${workspaceFolder}/MiSmart.API/Dockerfile",
-                "context": "${workspaceFolder}",
-                "pull": true
-            },
-            "netCore": {
-                "appProject": "${workspaceFolder}/MiSmart.API/MiSmart.API.csproj"
-            }
-        },
-        {
-            "type": "docker-run",
-            "label": "docker-run: debug",
-            "dependsOn": [
-                "docker-build: debug"
-            ],
-            "dockerRun": {
-                "os": "Windows"
-            },
-            "netCore": {
-                "appProject": "${workspaceFolder}/MiSmart.API/MiSmart.API.csproj",
-                "enableDebugging": true
-            }
-        },
-        {
-            "type": "docker-run",
-            "label": "docker-run: release",
-            "dependsOn": [
-                "docker-build: release"
-            ],
-            "dockerRun": {
-                "os": "Windows"
-            },
-            "netCore": {
-                "appProject": "${workspaceFolder}/MiSmart.API/MiSmart.API.csproj"
-            }
         }
     ]
 }

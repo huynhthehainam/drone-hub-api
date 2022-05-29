@@ -248,6 +248,7 @@ namespace MiSmart.API.Controllers
         [FromServices] DatabaseContext databaseContext,
         [FromServices] ExecutionCompanySettingRepository executionCompanySettingRepository,
         [FromServices] ExecutionCompanyUserFlightStatRepository executionCompanyUserFlightStatRepository,
+        [FromServices] EmailService emailService,
          [FromServices] DeviceRepository deviceRepository, [FromServices] JWTService jwtService)
         {
             var response = actionResponseFactory.CreateInstance();
@@ -302,6 +303,15 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
                                 }
                             }
                             item.TaskArea = taskArea;
+                        }
+                        else if (item.TaskArea.GetValueOrDefault() < 0)
+                        {
+                            await emailService.SendMailAsync(new String[] { "huynhthehainam@gmail.com" }, new String[] { }, new String[] { }, "Report flight stat", @$"
+                                task area: {item.TaskArea},
+                                sprayedIndexes: {item.SprayedIndexes.ToString()}
+                                device: {device.Name}
+                                flightDuration: {item.FlightDuration.GetValueOrDefault()}
+                            ");
                         }
 
 
@@ -520,6 +530,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
         public async Task<IActionResult> CreateFlightStat([FromServices] DeviceRepository deviceRepository, [FromServices] FlightStatRepository flightStatRepository,
         [FromServices] ExecutionCompanySettingRepository executionCompanySettingRepository,
         [FromServices] DatabaseContext databaseContext,
+        [FromServices] EmailService emailService,
         [FromServices] ExecutionCompanyUserFlightStatRepository executionCompanyUserFlightStatRepository, [FromBody] AddingFlightStatCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
@@ -568,6 +579,15 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
                     }
                 }
                 command.TaskArea = taskArea;
+            }
+            else if (command.TaskArea.GetValueOrDefault() < 0)
+            {
+                await emailService.SendMailAsync(new String[] { "huynhthehainam@gmail.com" }, new String[] { }, new String[] { }, "Report flight stat", @$"
+                                task area: {command.TaskArea},
+                                sprayedIndexes: {command.SprayedIndexes.ToString()}
+                                device: {device.Name}
+                                flightDuration: {command.FlightDuration.GetValueOrDefault()}
+                            ");
             }
 
             var stat = new FlightStat

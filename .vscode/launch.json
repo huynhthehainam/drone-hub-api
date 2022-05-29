@@ -9,10 +9,11 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/MiSmart.API/bin/Debug/net5.0/MiSmart.API.dll",
+            "program": "${workspaceFolder}/MiSmart.API/bin/Debug/net6.0/MiSmart.API.dll",
             "args": [],
             "cwd": "${workspaceFolder}/MiSmart.API",
             "stopAtEntry": false,
+            
             "env": {
                 "ASPNETCORE_ENVIRONMENT": "Development",
                 "GOOGLE_APPLICATION_CREDENTIALS": "google_services.json"
@@ -22,13 +23,9 @@
             }
         },
         {
-            "name": "Docker .NET Core Launch",
-            "type": "docker",
-            "request": "launch",
-            "preLaunchTask": "docker-run: debug",
-            "netCore": {
-                "appProject": "${workspaceFolder}/MiSmart.API/MiSmart.API.csproj"
-            }
+            "name": ".NET Core Attach",
+            "type": "coreclr",
+            "request": "attach"
         }
     ]
 }
