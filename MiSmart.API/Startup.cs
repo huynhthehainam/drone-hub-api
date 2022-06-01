@@ -16,7 +16,7 @@ using System.Collections.Generic;
 using MiSmart.Infrastructure.Swagger;
 using MiSmart.Infrastructure.Responses;
 using System;
-using MiSmart.Infrastructure.Middlewares;
+using MiSmart.Infrastructure.Middleware;
 
 using MQTTnet.AspNetCore.Extensions;
 using MQTTnet.AspNetCore.AttributeRouting;
@@ -59,7 +59,7 @@ namespace MiSmart.API
 
             services.AddMvc().AddJsonOptions(options =>
             {
-                options.JsonSerializerOptions.IgnoreNullValues = true;
+                options.JsonSerializerOptions.DefaultIgnoreCondition =  System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
             });
             services.AddSwagger(Configuration, new OpenApiInfo
             {
