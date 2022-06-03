@@ -277,6 +277,7 @@ namespace MiSmart.API.Controllers
                                 sprayedIndexes: {item.SprayedIndexes.ToString()}
                                 device: {device.Name}
                                 flightDuration: {item.FlightDuration.GetValueOrDefault()}
+                                flightTime: {item.FlightTime}
                             ");
                             }
                             var taskArea = 0.0;
@@ -334,6 +335,8 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
                             TeamID = device.TeamID,
                             TaskArea = item.TaskArea.GetValueOrDefault(),
                             ExecutionCompanyID = device.ExecutionCompanyID,
+                            GCSVersion = item.GCSVersion,
+                            AdditionalInformation = item.AdditionalInformation,
                         };
 
                         if (device.ExecutionCompanyID.HasValue)
@@ -554,6 +557,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
                                 sprayedIndexes: {command.SprayedIndexes.ToString()}
                                 device: {device.Name}
                                 flightDuration: {command.FlightDuration.GetValueOrDefault()}
+                                flightTime: {command.FlightTime}
                             ");
                 }
                 var taskArea = 0.0;
@@ -618,6 +622,8 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
                 TaskArea = command.TaskArea.GetValueOrDefault(),
                 TeamID = device.TeamID,
                 ExecutionCompanyID = device.ExecutionCompanyID,
+                GCSVersion = command.GCSVersion,
+                AdditionalInformation = command.AdditionalInformation
             };
             if (device.ExecutionCompanyID.HasValue)
             {

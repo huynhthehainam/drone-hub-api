@@ -34,6 +34,8 @@ namespace MiSmart.API.Commands
         public List<Int32> SprayedIndexes { get; set; } = new List<Int32>();
         public String TeamName { get; set; }
         public Guid FlightUID { get; set; } = Guid.NewGuid();
+        public String GCSVersion { get; set; }
+        public Object AdditionalInformation { get; set; }
     }
     public class AddingOfflineFlightStatCommand : AddingFlightStatCommand
     {

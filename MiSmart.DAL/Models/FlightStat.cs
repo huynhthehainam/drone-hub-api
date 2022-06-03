@@ -127,5 +127,20 @@ namespace MiSmart.DAL.Models
                     MedicinesString = JsonSerializer.Serialize(value, JsonSerializerDefaultOptions.CamelOptions);
             }
         }
+
+        public String AdditionalInformationString { get; set; }
+        [NotMapped]
+        public Object AdditionalInformation
+        {
+            get => String.IsNullOrEmpty(AdditionalInformationString) ? null : JsonSerializer.Deserialize<Object>(AdditionalInformationString, JsonSerializerDefaultOptions.CamelOptions);
+            set
+            {
+                if (value != null)
+                {
+                    AdditionalInformationString = JsonSerializer.Serialize(value, JsonSerializerDefaultOptions.CamelOptions);
+                }
+            }
+        }
+        public String GCSVersion { get; set; }
     }
 }
