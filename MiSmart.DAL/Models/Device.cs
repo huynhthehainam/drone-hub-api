@@ -116,7 +116,7 @@ namespace MiSmart.DAL.Models
         [NotMapped]
         public List<Guid> LastBatterGroupLogs
         {
-            get => LastBatterGroupLogsString is null ? new List<Guid>() : LastBatterGroupLogsString.Split(",", StringSplitOptions.RemoveEmptyEntries).Select(item => Guid.Parse(item)).ToList();
+            get => String.IsNullOrEmpty(LastBatterGroupLogsString) ? new List<Guid>() : LastBatterGroupLogsString.Split(",", StringSplitOptions.RemoveEmptyEntries).Select(item => Guid.Parse(item)).ToList();
             set => LastBatterGroupLogsString = String.Join(",", value.Select(item => item.ToString()));
         }
 
