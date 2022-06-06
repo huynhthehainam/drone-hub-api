@@ -265,7 +265,7 @@ namespace MiSmart.API.Controllers
 
                         if (item.FlywayPoints.Count == 0)
                         {
-                              await emailService.SendMailAsync(new String[] { "huynhthehainam@gmail.com" }, new String[] { }, new String[] { }, "Report flight stat", @$"
+                            await emailService.SendMailAsync(new String[] { "huynhthehainam@gmail.com" }, new String[] { }, new String[] { }, "Report flight stat", @$"
                                 task area: {item.TaskArea},
                                 sprayedIndexes: {item.SprayedIndexes.Count()}
                                 flywayPoints: {item.FlywayPoints.Count()}
