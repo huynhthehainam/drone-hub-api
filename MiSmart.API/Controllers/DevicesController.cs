@@ -265,6 +265,15 @@ namespace MiSmart.API.Controllers
 
                         if (item.FlywayPoints.Count == 0)
                         {
+                              await emailService.SendMailAsync(new String[] { "huynhthehainam@gmail.com" }, new String[] { }, new String[] { }, "Report flight stat", @$"
+                                task area: {item.TaskArea},
+                                sprayedIndexes: {item.SprayedIndexes.Count()}
+                                flywayPoints: {item.FlywayPoints.Count()}
+                                device: {device.Name}
+                                flightDuration: {item.FlightDuration.GetValueOrDefault()}
+                                flightTime: {item.FlightTime}
+                            ");
+                            continue;
                             response.AddInvalidErr("FlywayPoints");
                         }
                         var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
@@ -274,7 +283,8 @@ namespace MiSmart.API.Controllers
                             {
                                 await emailService.SendMailAsync(new String[] { "huynhthehainam@gmail.com" }, new String[] { }, new String[] { }, "Report flight stat", @$"
                                 task area: {item.TaskArea},
-                                sprayedIndexes: {item.SprayedIndexes.ToString()}
+                                sprayedIndexes: {item.SprayedIndexes.Count()}
+                                flywayPoints: {item.FlywayPoints.Count()}
                                 device: {device.Name}
                                 flightDuration: {item.FlightDuration.GetValueOrDefault()}
                                 flightTime: {item.FlightTime}
@@ -541,6 +551,16 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
             var device = await deviceRepository.GetAsync(ww => ww.ID == CurrentDevice.ID);
             if (command.FlywayPoints.Count == 0)
             {
+                response.SetMessage("Invalid");
+                await emailService.SendMailAsync(new String[] { "huynhthehainam@gmail.com" }, new String[] { }, new String[] { }, "Report flight stat", @$"
+                                task area: {command.TaskArea},
+                                sprayedIndexes: {command.SprayedIndexes.Count()}
+                                device: {device.Name}
+                                flightDuration: {command.FlightDuration.GetValueOrDefault()}
+                                flywayPoints: {command.FlywayPoints.Count()}
+                                flightTime: {command.FlightTime}
+                            ");
+                return response.ToIActionResult();
                 response.AddInvalidErr("FlywayPoints");
             }
             if (device is null)
@@ -554,9 +574,10 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
                 {
                     await emailService.SendMailAsync(new String[] { "huynhthehainam@gmail.com" }, new String[] { }, new String[] { }, "Report flight stat", @$"
                                 task area: {command.TaskArea},
-                                sprayedIndexes: {command.SprayedIndexes.ToString()}
+                                sprayedIndexes: {command.SprayedIndexes.Count()}
                                 device: {device.Name}
                                 flightDuration: {command.FlightDuration.GetValueOrDefault()}
+                                flywayPoints: {command.FlywayPoints.Count()}
                                 flightTime: {command.FlightTime}
                             ");
                 }
