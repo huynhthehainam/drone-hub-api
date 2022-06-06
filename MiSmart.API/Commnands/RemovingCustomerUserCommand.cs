@@ -8,12 +8,12 @@ namespace MiSmart.API.Commands
     public class RemovingCustomerUserCommand
     {
         [Required]
-        public Int64? UserID { get; set; }
+        public Guid? UserUUID { get; set; }
     }
     public class RemovingExecutionCompanyUserCommand
     {
         [Required]
-        public Int64? UserID { get; set; }
+        public Guid? UserUUID { get; set; }
     }
     public class RemovingDeviceCommand
     {

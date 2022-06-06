@@ -24,8 +24,8 @@ namespace MiSmart.API.Controllers
         public async Task<IActionResult> GetProfile([FromServices] CustomerUserRepository customerUserRepository, [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository)
         {
             var response = actionResponseFactory.CreateInstance();
-            var customerUser = await customerUserRepository.GetAsync(ww => ww.UserID == CurrentUser.ID);
-            ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.GetAsync(ww => ww.UserID == CurrentUser.ID);
+            var customerUser = await customerUserRepository.GetAsync(ww => ww.UserUUID == CurrentUser.UUID);
+            ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.GetAsync(ww => ww.UserUUID == CurrentUser.UUID);
             if (customerUser is null && executionCompanyUser is null)
             {
                 response.AddNotFoundErr("User");
@@ -56,7 +56,7 @@ namespace MiSmart.API.Controllers
             if (isAssigned is not null && isAssigned.GetValueOrDefault() == true)
             {
                 var customerUsers = await customerUserRepository.GetListEntitiesAsync(new PageCommand(), ww => true);
-                List<Int64> ids = customerUsers.Select(ww => ww.UserID).ToList().Distinct().ToList();
+                List<Guid> ids = customerUsers.Select(ww => ww.UserUUID).ToList().Distinct().ToList();
                 response.SetData(ids);
             }
             else

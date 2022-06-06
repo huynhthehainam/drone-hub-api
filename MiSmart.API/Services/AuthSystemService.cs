@@ -29,10 +29,10 @@ namespace MiSmart.API.Services
             this.httpClientFactory = httpClientFactory;
             this.settings = options.Value;
         }
-        public Boolean CheckUserIDExists(Int64 userID)
+        public Boolean CheckUserUUIDExists(Guid userUUID)
         {
             var client = httpClientFactory.CreateClient();
-            StringContent content = new StringContent(JsonSerializer.Serialize(new { UserID = userID }, JsonSerializerDefaultOptions.CamelOptions), Encoding.UTF8, "application/json");
+            StringContent content = new StringContent(JsonSerializer.Serialize(new { UserUUID = userUUID }, JsonSerializerDefaultOptions.CamelOptions), Encoding.UTF8, "application/json");
             var response = client.PostAsync($"{settings.Url}/Auth/CheckUserIDExists", content).Result;
             if (response.IsSuccessStatusCode)
             {

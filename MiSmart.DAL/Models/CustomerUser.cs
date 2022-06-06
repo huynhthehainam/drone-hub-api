@@ -16,7 +16,7 @@ namespace MiSmart.DAL.Models
         {
         }
 
-        public Int64 UserID { get; set; }
+        public Guid UserUUID { get; set; }
         private Customer customer;
         [JsonIgnore]
         public Customer Customer

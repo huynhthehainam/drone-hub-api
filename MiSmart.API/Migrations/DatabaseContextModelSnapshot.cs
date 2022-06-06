@@ -176,14 +176,14 @@ namespace MiSmart.API.Migrations
                     b.Property<int>("CustomerID")
                         .HasColumnType("integer");
 
-                    b.Property<long>("UserID")
-                        .HasColumnType("bigint");
+                    b.Property<Guid>("UserUUID")
+                        .HasColumnType("uuid");
 
                     b.HasKey("ID");
 
                     b.HasIndex("CustomerID");
 
-                    b.HasIndex("UserID")
+                    b.HasIndex("UserUUID")
                         .IsUnique();
 
                     b.ToTable("CustomerUsers");
@@ -209,8 +209,8 @@ namespace MiSmart.API.Migrations
                     b.Property<int?>("ExecutionCompanyID")
                         .HasColumnType("integer");
 
-                    b.Property<string>("LastBatterGroupLogsString")
-                        .HasColumnType("text");
+                    b.Property<List<Guid>>("LastBatterGroupLogs")
+                        .HasColumnType("uuid[]");
 
                     b.Property<Guid?>("LastGroupID")
                         .HasColumnType("uuid");
@@ -331,14 +331,14 @@ namespace MiSmart.API.Migrations
                     b.Property<int>("Type")
                         .HasColumnType("integer");
 
-                    b.Property<long>("UserID")
-                        .HasColumnType("bigint");
+                    b.Property<Guid>("UserUUID")
+                        .HasColumnType("uuid");
 
                     b.HasKey("ID");
 
                     b.HasIndex("ExecutionCompanyID");
 
-                    b.HasIndex("UserID")
+                    b.HasIndex("UserUUID")
                         .IsUnique();
 
                     b.ToTable("ExecutionCompanyUsers");

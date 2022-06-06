@@ -74,10 +74,10 @@ namespace MiSmart.API.Controllers
       [FromBody] AssigningExecutionCompanyUserCommand command, [FromRoute] Int32 id)
         {
             var response = actionResponseFactory.CreateInstance();
-            var userExists = authSystemService.CheckUserIDExists(command.UserID.GetValueOrDefault());
+            var userExists = authSystemService.CheckUserUUIDExists(command.UserUUID.GetValueOrDefault());
             if (!userExists)
             {
-                response.AddInvalidErr("UserID");
+                response.AddInvalidErr("UserUUID");
             }
 
             var executionCompany = await executionCompanyRepository.GetAsync(ww => ww.ID == id);
@@ -85,12 +85,12 @@ namespace MiSmart.API.Controllers
             {
                 response.AddNotFoundErr("ExecutionCompany");
             }
-            var existedExecutionCompanyUser = await executionCompanyUserRepository.GetAsync(ww => ww.UserID == command.UserID.GetValueOrDefault());
+            var existedExecutionCompanyUser = await executionCompanyUserRepository.GetAsync(ww => ww.UserUUID == command.UserUUID.GetValueOrDefault());
             if (existedExecutionCompanyUser is not null)
             {
                 response.AddExistedErr("User");
             }
-            ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.CreateAsync(new ExecutionCompanyUser { ExecutionCompanyID = id, UserID = command.UserID.Value, Type = command.Type });
+            ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.CreateAsync(new ExecutionCompanyUser { ExecutionCompanyID = id, UserUUID = command.UserUUID.Value, Type = command.Type });
             response.SetCreatedObject(executionCompanyUser);
 
             return response.ToIActionResult();
@@ -102,7 +102,7 @@ namespace MiSmart.API.Controllers
         public Task<IActionResult> GetCurrentExecutionCompanyUsers([FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository)
         {
             var response = actionResponseFactory.CreateInstance();
-            var assignedUserIDs = executionCompanyUserRepository.GetListEntitiesAsync(new PageCommand(), ww => true).Result.Select(ww => ww.UserID).ToList();
+            var assignedUserIDs = executionCompanyUserRepository.GetListEntitiesAsync(new PageCommand(), ww => true).Result.Select(ww => ww.UserUUID).ToList();
             response.SetData(new { AssignedUserIDs = assignedUserIDs });
             return Task.FromResult(response.ToIActionResult());
         }
@@ -180,10 +180,10 @@ namespace MiSmart.API.Controllers
         public async Task<IActionResult> RemoveExecutionCompanyUser([FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, [FromServices] TeamUserRepository teamUserRepository, [FromBody] RemovingExecutionCompanyUserCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
-            var executionCompanyUser = await executionCompanyUserRepository.GetAsync(ww => ww.UserID == command.UserID);
+            var executionCompanyUser = await executionCompanyUserRepository.GetAsync(ww => ww.UserUUID == command.UserUUID);
             if (executionCompanyUser is null)
             {
-                response.AddInvalidErr("UserID");
+                response.AddInvalidErr("UserUUID");
             }
 
             await executionCompanyUserRepository.DeleteAsync(executionCompanyUser);

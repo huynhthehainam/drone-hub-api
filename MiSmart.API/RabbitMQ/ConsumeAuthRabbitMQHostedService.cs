@@ -80,11 +80,11 @@ namespace MiSmart.API.RabbitMQ
                 RemovingUserModel model = JsonSerializer.Deserialize<RemovingUserModel>(JsonSerializer.Serialize(contentModel.Data, JsonSerializerDefaultOptions.CamelOptions), JsonSerializerDefaultOptions.CamelOptions);
                 using (var context = serviceProvider.CreateScope().ServiceProvider.GetRequiredService<DatabaseContext>())
                 {
-                    var customerUsers = context.CustomerUsers.Where(ww => ww.UserID == model.ID).ToList();
+                    var customerUsers = context.CustomerUsers.Where(ww => ww.UserUUID == model.UUID).ToList();
                     context.CustomerUsers.RemoveRange(customerUsers);
                     context.SaveChanges();
 
-                    var executionCompanyUsers = context.ExecutionCompanyUsers.Where(ww => ww.UserID == model.ID).ToList();
+                    var executionCompanyUsers = context.ExecutionCompanyUsers.Where(ww => ww.UserUUID == model.UUID).ToList();
                     context.ExecutionCompanyUsers.RemoveRange(executionCompanyUsers);
                     context.SaveChanges();
                 }

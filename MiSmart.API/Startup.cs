@@ -212,15 +212,15 @@ namespace MiSmart.API
 
             services.AddCronJob<RemovingOldRecordsTask>(o =>
             {
-                o.CronExpression = "*/10 * * * * *";
+                o.CronExpression = "* */30 * * * *";
                 o.TimeZoneInfo = TimeZoneInfo.Local;
             });
 
-            services.AddCronJob<UpdatingCostFlightStatsTask>(o =>
-           {
-               o.CronExpression = "*/50 * * * * *";
-               o.TimeZoneInfo = TimeZoneInfo.Local;
-           });
+        //     services.AddCronJob<UpdatingCostFlightStatsTask>(o =>
+        //    {
+        //        o.CronExpression = "*/50 * * * * *";
+        //        o.TimeZoneInfo = TimeZoneInfo.Local;
+        //    });
             #endregion
         }
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -232,7 +232,7 @@ namespace MiSmart.API
             }
             else
             {
-                app.CustomizeErrorHandler("App dronehub");
+                app.CustomizeErrorHandler("App Drone Hub");
             }
 
 
@@ -252,7 +252,7 @@ namespace MiSmart.API
             });
             app.UseSwagger().UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint($"/swagger/v1/swagger.json", "Flighthub.API V1");
+                c.SwaggerEndpoint($"/swagger/v1/swagger.json", "FlightHub.API V1");
             });
 
             SeedData(app);

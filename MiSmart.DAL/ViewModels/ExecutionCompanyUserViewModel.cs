@@ -6,12 +6,12 @@ namespace MiSmart.DAL.ViewModels
 {
     public class ExecutionCompanyUserViewModel : IViewModel<ExecutionCompanyUser>
     {
-        public Int64 UserID { get; private set; }
+        public Guid UserUUID { get; private set; }
         public ExecutionCompanyUserType Type { get; set; }
 
         public void LoadFrom(ExecutionCompanyUser entity)
         {
-            UserID = entity.UserID;
+            UserUUID = entity.UserUUID;
             Type = entity.Type;
         }
     }

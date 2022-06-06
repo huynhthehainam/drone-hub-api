@@ -25,7 +25,7 @@ namespace MiSmart.API.Controllers
              [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, [FromBody] AddingExecutionCompanySettingCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
-            var executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.ID, ExecutionCompanyUserType.Owner);
+            var executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.UUID, ExecutionCompanyUserType.Owner);
             if (executionCompanyUser is null)
             {
                 response.AddNotAllowedErr();
@@ -47,7 +47,7 @@ namespace MiSmart.API.Controllers
         {
             var response = actionResponseFactory.CreateInstance();
 
-            var executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.ID);
+            var executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.UUID);
             if (executionCompanyUser is null)
             {
                 response.AddNotAllowedErr();

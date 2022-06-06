@@ -59,10 +59,10 @@ namespace MiSmart.API.Controllers
          [FromBody] AssigningCustomerUserCommand command, [FromRoute] Int32 id)
         {
             var response = actionResponseFactory.CreateInstance();
-            var userExists = authSystemService.CheckUserIDExists(command.UserID.GetValueOrDefault());
+            var userExists = authSystemService.CheckUserUUIDExists(command.UserUUID.GetValueOrDefault());
             if (!userExists)
             {
-                response.AddInvalidErr("UserID");
+                response.AddInvalidErr("UserUUID");
             }
             var customer = await customerRepository.GetAsync(ww => ww.ID == id);
 
@@ -70,12 +70,12 @@ namespace MiSmart.API.Controllers
             {
                 response.AddNotFoundErr("Customer");
             }
-            var existedCustomerUser = await customerUserRepository.GetAsync(ww => ww.UserID == command.UserID.GetValueOrDefault());
+            var existedCustomerUser = await customerUserRepository.GetAsync(ww => ww.UserUUID == command.UserUUID.GetValueOrDefault());
             if (existedCustomerUser is not null)
             {
                 response.AddExistedErr("User");
             }
-            CustomerUser customerUser = await customerUserRepository.CreateAsync(new CustomerUser { CustomerID = id, UserID = command.UserID.Value });
+            CustomerUser customerUser = await customerUserRepository.CreateAsync(new CustomerUser { CustomerID = id, UserUUID = command.UserUUID.Value });
             response.SetCreatedObject(customerUser);
 
             return response.ToIActionResult();
@@ -108,8 +108,8 @@ namespace MiSmart.API.Controllers
         public Task<IActionResult> GetCurrentCustomerUsers([FromServices] CustomerUserRepository customerUserRepository)
         {
             var response = actionResponseFactory.CreateInstance();
-            var assignedUserIDs = customerUserRepository.GetListEntitiesAsync(new PageCommand(), ww => true).Result.Select(ww => ww.UserID).ToList();
-            response.SetData(new { AssignedUserIDs = assignedUserIDs });
+            var assignedUserUUIDs = customerUserRepository.GetListEntitiesAsync(new PageCommand(), ww => true).Result.Select(ww => ww.UserUUID).ToList();
+            response.SetData(new { AssignedUserUUIDs = assignedUserUUIDs });
             return Task.FromResult(response.ToIActionResult());
         }
 
@@ -168,10 +168,10 @@ namespace MiSmart.API.Controllers
         public async Task<IActionResult> RemoveCustomerUser([FromServices] CustomerUserRepository customerUserRepository, [FromServices] TeamUserRepository teamUserRepository, [FromBody] RemovingCustomerUserCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
-            var customerUser = await customerUserRepository.GetAsync(ww => ww.UserID == command.UserID);
+            var customerUser = await customerUserRepository.GetAsync(ww => ww.UserUUID == command.UserUUID);
             if (customerUser is null)
             {
-                response.AddInvalidErr("UserID");
+                response.AddInvalidErr("UserUUID");
             }
 
             await customerUserRepository.DeleteAsync(customerUser);

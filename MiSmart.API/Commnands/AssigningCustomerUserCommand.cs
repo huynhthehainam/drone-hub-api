@@ -11,12 +11,12 @@ namespace MiSmart.API.Commands
     public class AssigningCustomerUserCommand
     {
         [Required]
-        public Int64? UserID { get; set; }
+        public Guid? UserUUID { get; set; }
     }
     public class AssigningExecutionCompanyUserCommand
     {
         [Required]
-        public Int64? UserID { get; set; }
+        public Guid? UserUUID { get; set; }
         public ExecutionCompanyUserType Type { get; set; } = ExecutionCompanyUserType.Member;
     }
 

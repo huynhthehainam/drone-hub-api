@@ -6,11 +6,11 @@ namespace MiSmart.DAL.ViewModels
 {
     public class CustomerUserViewModel : IViewModel<CustomerUser>
     {
-        public Int64 UserID { get; private set; }
+        public Guid UserUUID { get; private set; }
 
         public void LoadFrom(CustomerUser entity)
         {
-            UserID = entity.UserID;
+            UserUUID = entity.UserUUID;
         }
     }
 }

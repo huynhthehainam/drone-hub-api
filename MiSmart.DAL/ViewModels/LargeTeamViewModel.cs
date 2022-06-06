@@ -21,7 +21,7 @@ namespace MiSmart.DAL.ViewModels
     }
     public class TeamMemberViewModel
     {
-        public Int64 UserID { get; set; }
+        public Guid UserUUID { get; set; }
         public TeamMemberType Type { get; set; }
         public Double TotalTaskArea { get; set; }
         public Double TotalFlightDuration { get; set; }
@@ -51,7 +51,7 @@ namespace MiSmart.DAL.ViewModels
             {
                 TeamMemberViewModel teamMember = new TeamMemberViewModel
                 {
-                    UserID = teamUser.ExecutionCompanyUser.UserID,
+                    UserUUID = teamUser.ExecutionCompanyUser.UserUUID,
                     Type = teamUser.Type,
                     ExecutionCompanyUserFlightStats = teamUser.ExecutionCompanyUser.ExecutionCompanyUserFlightStats.Select(ww => ViewModelHelpers.ConvertToViewModel<ExecutionCompanyUserFlightStat, SmallExecutionCompanyUserFlightStatViewModel>(ww)).ToList(),
                     TotalTaskArea = teamUser.ExecutionCompanyUser.ExecutionCompanyUserFlightStats.Sum(ww => ww.FlightStat.TaskArea),

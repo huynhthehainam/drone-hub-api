@@ -12,9 +12,9 @@ namespace MiSmart.DAL.Repositories
         public ExecutionCompanyUserRepository(DatabaseContext context) : base(context)
         {
         }
-        public async Task<ExecutionCompanyUser> GetByPermissionAsync(Int64 userID, ExecutionCompanyUserType type = ExecutionCompanyUserType.Member)
+        public async Task<ExecutionCompanyUser> GetByPermissionAsync(Guid userUUID, ExecutionCompanyUserType type = ExecutionCompanyUserType.Member)
         {
-            var executionCompanyUser = await GetAsync(ww => ww.UserID == userID);
+            var executionCompanyUser = await GetAsync(ww => ww.UserUUID == userUUID);
             List<ExecutionCompanyUserType> types = new List<ExecutionCompanyUserType>();
             if (executionCompanyUser is not null)
             {

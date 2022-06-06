@@ -11,9 +11,9 @@ namespace MiSmart.DAL.Repositories
         public CustomerUserRepository(DatabaseContext context) : base(context)
         {
         }
-        public async Task<CustomerUser> GetByPermissionAsync(Int64 userID)
+        public async Task<CustomerUser> GetByPermissionAsync(Guid userUUID)
         {
-            var customerUser = await GetAsync(ww => ww.UserID == userID);
+            var customerUser = await GetAsync(ww => ww.UserUUID == userUUID);
 
             return customerUser;
         }

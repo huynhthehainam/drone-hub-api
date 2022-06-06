@@ -11,12 +11,12 @@ namespace MiSmart.API.Commands
     public class AssigningTeamUserCommand
     {
         [Required]
-        public Int64? UserID { get; set; }
+        public Guid? UserUUID { get; set; }
         public TeamMemberType Type { get; set; } = TeamMemberType.Member;
     }
      public class RemovingTeamUserCommand
     {
         [Required]
-        public Int64? UserID { get; set; }
+        public Guid? UserUUID { get; set; }
     }
 }

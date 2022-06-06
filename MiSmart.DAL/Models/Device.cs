@@ -2,9 +2,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -111,13 +109,9 @@ namespace MiSmart.DAL.Models
             get => lazyLoader.Load(this, ref logFiles);
             set => logFiles = value;
         }
-
-        public String LastBatterGroupLogsString { get; set; }
-        [NotMapped]
         public List<Guid> LastBatterGroupLogs
         {
-            get => String.IsNullOrEmpty(LastBatterGroupLogsString) ? new List<Guid>() : LastBatterGroupLogsString.Split(",", StringSplitOptions.RemoveEmptyEntries).Select(item => Guid.Parse(item)).ToList();
-            set => LastBatterGroupLogsString = String.Join(",", value.Select(item => item.ToString()));
+            get; set;
         }
 
         public String GenerateDeviceAccessToken(String secretKey)

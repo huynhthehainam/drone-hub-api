@@ -30,7 +30,7 @@ namespace MiSmart.API.Controllers
             if (relation == "Owner")
             {
 
-                CustomerUser customerUser = await customerUserRepository.GetByPermissionAsync(CurrentUser.ID);
+                CustomerUser customerUser = await customerUserRepository.GetByPermissionAsync(CurrentUser.UUID);
                 if (customerUser is null)
                 {
                     actionResponse.AddNotAllowedErr();
@@ -43,7 +43,7 @@ namespace MiSmart.API.Controllers
             }
             else
             {
-                ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.ID);
+                ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.UUID);
                 if (executionCompanyUser is null)
                 {
                     actionResponse.AddNotAllowedErr();

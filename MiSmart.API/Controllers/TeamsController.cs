@@ -25,7 +25,7 @@ namespace MiSmart.API.Controllers
         public async Task<IActionResult> CreateTeam([FromServices] TeamRepository teamRepository, [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, [FromBody] AddingTeamCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
-            ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.ID, ExecutionCompanyUserType.Owner);
+            ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.UUID, ExecutionCompanyUserType.Owner);
             if (executionCompanyUser is null)
             {
                 response.AddNotAllowedErr();
@@ -48,7 +48,7 @@ namespace MiSmart.API.Controllers
             Expression<Func<Team, Boolean>> query = ww => false;
             if (relation == "Executor")
             {
-                ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.ID);
+                ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.UUID);
                 if (executionCompanyUser is null)
                 {
                     response.AddNotAllowedErr();
@@ -80,7 +80,7 @@ namespace MiSmart.API.Controllers
         public async Task<IActionResult> GetTeamByID([FromServices] TeamRepository teamRepository, [FromServices] TeamUserRepository teamUserRepository, [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, [FromRoute] Int32 id)
         {
             var response = actionResponseFactory.CreateInstance();
-            ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.ID);
+            ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.UUID);
             if (executionCompanyUser is null)
             {
                 response.AddNotAllowedErr();
@@ -104,7 +104,7 @@ namespace MiSmart.API.Controllers
         , [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, [FromBody] UpdatingTeamCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
-            ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.ID, ExecutionCompanyUserType.Owner);
+            ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.UUID, ExecutionCompanyUserType.Owner);
             if (executionCompanyUser is null)
             {
                 response.AddNotAllowedErr();
@@ -124,7 +124,7 @@ namespace MiSmart.API.Controllers
         public async Task<IActionResult> Disband([FromServices] TeamRepository teamRepository, [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, [FromRoute] Int32 id)
         {
             var response = actionResponseFactory.CreateInstance();
-            ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.ID, ExecutionCompanyUserType.Owner);
+            ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.UUID, ExecutionCompanyUserType.Owner);
             if (executionCompanyUser is null)
             {
                 response.AddNotAllowedErr();
@@ -147,18 +147,18 @@ namespace MiSmart.API.Controllers
         public async Task<IActionResult> UnassignUser([FromRoute] Int64 id, [FromServices] TeamUserRepository teamUserRepository, [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, [FromBody] RemovingTeamUserCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
-            ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.ID, ExecutionCompanyUserType.Owner);
+            ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.UUID, ExecutionCompanyUserType.Owner);
             if (executionCompanyUser is null)
             {
                 response.AddNotAllowedErr();
             }
 
 
-            var teamUser = await teamUserRepository.GetAsync(ww => ww.ExecutionCompanyUser.UserID == command.UserID.GetValueOrDefault() && ww.TeamID == id && ww.Team.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID);
+            var teamUser = await teamUserRepository.GetAsync(ww => ww.ExecutionCompanyUser.UserUUID == command.UserUUID.GetValueOrDefault() && ww.TeamID == id && ww.Team.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID);
 
             if (teamUser is null)
             {
-                response.AddInvalidErr("UserID");
+                response.AddInvalidErr("UserUUID");
             }
             await teamUserRepository.DeleteAsync(teamUser);
             response.SetNoContent();
@@ -171,7 +171,7 @@ namespace MiSmart.API.Controllers
         {
             var response = actionResponseFactory.CreateInstance();
 
-            ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.ID, ExecutionCompanyUserType.Owner);
+            ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.UUID, ExecutionCompanyUserType.Owner);
             if (executionCompanyUser is null)
             {
                 response.AddNotAllowedErr();
@@ -179,7 +179,7 @@ namespace MiSmart.API.Controllers
 
             ExecutionCompanyUser targetExecutionCompanyUser = null;
 
-            var existedExecutionCompanyUser = await executionCompanyUserRepository.GetAsync(ww => ww.UserID == command.UserID.GetValueOrDefault());
+            var existedExecutionCompanyUser = await executionCompanyUserRepository.GetAsync(ww => ww.UserUUID == command.UserUUID.GetValueOrDefault());
             if (existedExecutionCompanyUser is not null)
             {
                 if (existedExecutionCompanyUser.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID)
@@ -188,13 +188,13 @@ namespace MiSmart.API.Controllers
                 }
                 else
                 {
-                    response.AddInvalidErr("UserID");
+                    response.AddInvalidErr("UserUUID");
                 }
             }
 
             if (targetExecutionCompanyUser is null)
             {
-                targetExecutionCompanyUser = new ExecutionCompanyUser { ExecutionCompanyID = executionCompanyUser.ExecutionCompanyID, UserID = command.UserID.GetValueOrDefault(), Type = ExecutionCompanyUserType.Member };
+                targetExecutionCompanyUser = new ExecutionCompanyUser { ExecutionCompanyID = executionCompanyUser.ExecutionCompanyID, UserUUID = command.UserUUID.GetValueOrDefault(), Type = ExecutionCompanyUserType.Member };
                 await executionCompanyUserRepository.CreateAsync(targetExecutionCompanyUser);
             }
             var team = await teamRepository.GetAsync(ww => ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID && ww.ID == id && !ww.IsDisbanded);
@@ -217,7 +217,7 @@ namespace MiSmart.API.Controllers
         public async Task<IActionResult> GetUnassignedUsers([FromRoute] Int64 id, [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, [FromServices] TeamRepository teamRepository)
         {
             var response = actionResponseFactory.CreateInstance();
-            ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.ID, ExecutionCompanyUserType.Owner);
+            ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.UUID, ExecutionCompanyUserType.Owner);
             if (executionCompanyUser is null)
             {
                 response.AddNotAllowedErr();
@@ -229,9 +229,9 @@ namespace MiSmart.API.Controllers
                 response.AddNotFoundErr("Team");
             }
 
-            var userIDs = executionCompanyUser.ExecutionCompany.ExecutionCompanyUsers.Select(ww => ww.UserID).ToList();
+            var userIDs = executionCompanyUser.ExecutionCompany.ExecutionCompanyUsers.Select(ww => ww.UserUUID).ToList();
 
-            var teamUserIDs = team.TeamUsers.Select(ww => ww.ExecutionCompanyUser.UserID).ToList();
+            var teamUserIDs = team.TeamUsers.Select(ww => ww.ExecutionCompanyUser.UserUUID).ToList();
 
             var unassignedIDs = userIDs.Except(teamUserIDs).ToList();
             response.SetData(unassignedIDs);

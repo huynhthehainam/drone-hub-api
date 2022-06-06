@@ -5,6 +5,6 @@ namespace MiSmart.API.RabbitMQ.Models
 {
     public class RemovingUserModel
     {
-        public Int64 ID { get; set; }
+        public Guid UUID { get; set; }
     }
 }
