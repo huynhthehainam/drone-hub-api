@@ -794,7 +794,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
 
         }
 
-        [HttpPost("RetrivePlanFile")]
+        [HttpPost("RetrievePlanFile")]
         public async Task<IActionResult> GetFile([FromServices] PlanRepository planRepository, [FromBody] RetrievingPlanFileCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
