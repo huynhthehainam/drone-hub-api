@@ -262,7 +262,11 @@ namespace MiSmart.API.Controllers
                     var device = await deviceRepository.GetAsync(ww => ww.ID == deviceJWT.ID);
                     if (device is not null)
                     {
-
+                        if (!Constants.AllowedVersions.Contains(item.GCSVersion))
+                        {
+                            continue;
+                            response.AddInvalidErr("FlywayPoints");
+                        }
                         if (item.FlywayPoints.Count == 0)
                         {
                             await emailService.SendMailAsync(new String[] { "huynhthehainam@gmail.com" }, new String[] { }, new String[] { }, "Report flight stat", @$"
@@ -549,6 +553,12 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
         {
             var response = actionResponseFactory.CreateInstance();
             var device = await deviceRepository.GetAsync(ww => ww.ID == CurrentDevice.ID);
+            if (!Constants.AllowedVersions.Contains(command.GCSVersion))
+            {
+                response.SetMessage("Invalid");
+                return response.ToIActionResult();
+                response.AddInvalidErr("FlywayPoints");
+            }
             if (command.FlywayPoints.Count == 0)
             {
                 response.SetMessage("Invalid");
