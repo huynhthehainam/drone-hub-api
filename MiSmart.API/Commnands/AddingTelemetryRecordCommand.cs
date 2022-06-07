@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
 
 namespace MiSmart.API.Commands
 {
@@ -32,7 +33,7 @@ namespace MiSmart.API.Commands
         [Required]
         [Range(0, 360)]
         public Double? Direction { get; set; }
-        public Object AdditionalInformation { get; set; } = new Object();
+        public JsonDocument AdditionalInformation { get; set; }
     }
     public class AddingBulkTelemetryRecordCommand
     {

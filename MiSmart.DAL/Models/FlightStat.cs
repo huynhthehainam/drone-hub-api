@@ -4,9 +4,7 @@ using System;
 using System.Text.Json.Serialization;
 using NetTopologySuite.Geometries;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json;
-using MiSmart.Infrastructure.Constants;
 
 namespace MiSmart.DAL.Models
 {
@@ -54,19 +52,10 @@ namespace MiSmart.DAL.Models
         public Double FlightDuration { get; set; }
         public String PilotName { get; set; }
         public String TMUserUID { get; set; }
-        public String TMUserString { get; set; }
-        [NotMapped]
-        public TMUser TMUser
+
+        public JsonDocument TMUser
         {
-            get => String.IsNullOrEmpty(TMUserString) ? null : JsonSerializer.Deserialize<TMUser>(TMUserString, JsonSerializerDefaultOptions.CamelOptions);
-            set
-            {
-                if (value != null)
-                {
-                    TMUserString = JsonSerializer.Serialize(value, JsonSerializerDefaultOptions.CamelOptions);
-                    TMUserUID = value.UID;
-                }
-            }
+            get; set;
         }
         public LineString FlywayPoints { get; set; }
         public List<Int32> SprayedIndexes { get; set; }
@@ -117,29 +106,18 @@ namespace MiSmart.DAL.Models
         }
 
         public String MedicinesString { get; set; }
-        [NotMapped]
-        public List<Medicine> Medicines
+
+        public JsonDocument Medicines
         {
-            get => String.IsNullOrEmpty(MedicinesString) ? null : JsonSerializer.Deserialize<List<Medicine>>(MedicinesString, JsonSerializerDefaultOptions.CamelOptions);
-            set
-            {
-                if (value != null)
-                    MedicinesString = JsonSerializer.Serialize(value, JsonSerializerDefaultOptions.CamelOptions);
-            }
+            get;
+            set;
         }
 
-        public String AdditionalInformationString { get; set; }
-        [NotMapped]
-        public Object AdditionalInformation
+
+        public JsonDocument AdditionalInformation
         {
-            get => String.IsNullOrEmpty(AdditionalInformationString) ? null : JsonSerializer.Deserialize<Object>(AdditionalInformationString, JsonSerializerDefaultOptions.CamelOptions);
-            set
-            {
-                if (value != null)
-                {
-                    AdditionalInformationString = JsonSerializer.Serialize(value, JsonSerializerDefaultOptions.CamelOptions);
-                }
-            }
+            get;
+            set;
         }
         public String GCSVersion { get; set; }
     }

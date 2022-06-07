@@ -1,6 +1,6 @@
 
 using System;
-using System.Collections.Generic;
+using System.Text.Json;
 using MiSmart.DAL.Models;
 using MiSmart.Infrastructure.ViewModels;
 
@@ -42,8 +42,8 @@ namespace MiSmart.DAL.ViewModels
         public String CustomerName { get; set; }
         public Double Cost { get; set; }
         public String TMUserUID { get; set; }
-        public TMUser TMUser { get; set; }
-        public List<Medicine> Medicines { get; set; }
+        public JsonDocument TMUser { get; set; }
+        public JsonDocument Medicines { get; set; }
         public void LoadFrom(FlightStat entity)
         {
             ID = entity.ID;

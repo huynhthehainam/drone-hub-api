@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore.Migrations;
 using NetTopologySuite.Geometries;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -372,7 +373,7 @@ namespace MiSmart.API.Migrations
                     FlightDuration = table.Column<double>(type: "double precision", nullable: false),
                     PilotName = table.Column<string>(type: "text", nullable: true),
                     TMUserUID = table.Column<string>(type: "text", nullable: true),
-                    TMUserString = table.Column<string>(type: "text", nullable: true),
+                    TMUser = table.Column<JsonDocument>(type: "jsonb", nullable: true),
                     FlywayPoints = table.Column<LineString>(type: "geography (linestring)", nullable: true),
                     SprayedIndexes = table.Column<List<int>>(type: "integer[]", nullable: true),
                     DeviceID = table.Column<int>(type: "integer", nullable: false),
@@ -383,7 +384,8 @@ namespace MiSmart.API.Migrations
                     Mode = table.Column<int>(type: "integer", nullable: false),
                     Cost = table.Column<double>(type: "double precision", nullable: false),
                     MedicinesString = table.Column<string>(type: "text", nullable: true),
-                    AdditionalInformationString = table.Column<string>(type: "text", nullable: true),
+                    Medicines = table.Column<JsonDocument>(type: "jsonb", nullable: true),
+                    AdditionalInformation = table.Column<JsonDocument>(type: "jsonb", nullable: true),
                     GCSVersion = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
@@ -530,7 +532,7 @@ namespace MiSmart.API.Migrations
                     CreatedTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     LocationPoint = table.Column<Point>(type: "geography (point)", nullable: true),
                     Direction = table.Column<double>(type: "double precision", nullable: false),
-                    AdditionalInformationString = table.Column<string>(type: "text", nullable: true),
+                    AdditionalInformation = table.Column<JsonDocument>(type: "jsonb", nullable: true),
                     GroupID = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>

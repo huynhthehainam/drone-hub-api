@@ -3,10 +3,8 @@
 using System;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using MiSmart.Infrastructure.Data;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json;
 using NetTopologySuite.Geometries;
-using MiSmart.Infrastructure.Constants;
 
 namespace MiSmart.DAL.Models
 {
@@ -23,12 +21,9 @@ namespace MiSmart.DAL.Models
         public DateTime CreatedTime { get; set; } = DateTime.UtcNow;
         public Point LocationPoint { get; set; }
         public Double Direction { get; set; }
-        public String AdditionalInformationString { get; set; }
-        [NotMapped]
-        public Object AdditionalInformation
+        public JsonDocument AdditionalInformation
         {
-            get => JsonSerializer.Deserialize<Object>(AdditionalInformationString, JsonSerializerDefaultOptions.CamelOptions);
-            set => AdditionalInformationString = JsonSerializer.Serialize(value, JsonSerializerDefaultOptions.CamelOptions);
+            get; set;
         }
 
         private TelemetryGroup group;

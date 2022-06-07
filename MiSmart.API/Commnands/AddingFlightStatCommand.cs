@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
 
 namespace MiSmart.API.Commands
 {
@@ -35,7 +36,7 @@ namespace MiSmart.API.Commands
         public String TeamName { get; set; }
         public Guid FlightUID { get; set; } = Guid.NewGuid();
         public String GCSVersion { get; set; }
-        public Object AdditionalInformation { get; set; }
+        public JsonDocument AdditionalInformation { get; set; }
     }
     public class AddingOfflineFlightStatCommand : AddingFlightStatCommand
     {

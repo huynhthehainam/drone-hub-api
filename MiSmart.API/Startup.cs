@@ -25,7 +25,6 @@ using MiSmart.Infrastructure.Mqtt;
 using MiSmart.DAL.Repositories;
 using MiSmart.API.Settings;
 using MiSmart.Infrastructure.RabbitMQ;
-using MiSmart.API.RabbitMQ;
 using Microsoft.Extensions.Hosting;
 using MiSmart.Infrastructure.Minio;
 using MiSmart.Infrastructure.ScheduledTasks;
@@ -179,7 +178,7 @@ namespace MiSmart.API
 
             #region RabbitMQ
             services.AddRabbit(Configuration);
-            services.AddHostedService<ConsumeAuthRabbitMQHostedService>();
+            // services.AddHostedService<ConsumeAuthRabbitMQHostedService>();
 
 
             #endregion

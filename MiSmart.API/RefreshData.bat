@@ -1,6 +1,5 @@
-﻿@echo off
-if exist wwwroot/images del "wwwroot/images" /s /f /q
-dotnet ef database drop -f
-dotnet ef migrations remove
-dotnet ef migrations add Initial
-dotnet ef database update
+﻿
+GOOGLE_APPLICATION_CREDENTIALS=google_services.json dotnet ef database drop -f
+GOOGLE_APPLICATION_CREDENTIALS=google_services.json dotnet ef migrations remove
+GOOGLE_APPLICATION_CREDENTIALS=google_services.json dotnet ef migrations add Initial
+GOOGLE_APPLICATION_CREDENTIALS=google_services.json dotnet ef database update
