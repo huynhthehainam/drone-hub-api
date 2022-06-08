@@ -18,4 +18,6 @@ RUN dotnet publish "MiSmart.API.csproj" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "MiSmart.API.dll"]
+COPY --from=publish /src/wait-for-it.sh /app
+RUN chmod +x ./*.sh
+ENTRYPOINT ["./wait-for-it.sh", "postgres_image:5432" ,"--","dotnet", "MiSmart.API.dll"]

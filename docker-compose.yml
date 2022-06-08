@@ -13,17 +13,9 @@ services:
     restart: unless-stopped
     depends_on:
       - postgres_image
-    healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
-      interval: 1s
-      timeout: 3s
-      retries: 30
 
   postgres_image:
-    image: huynhthehainam/dronehub_db
-    # build:
-    #   context: .
-    #   dockerfile: database.Dockerfile
+    image: postgis/postgis
     environment:
       - POSTGRES_PASSWORD=mismart123@123
     volumes:
@@ -33,11 +25,6 @@ services:
       - mismart
     ports:
       - 5438:5432
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
-      interval: 5s
-      timeout: 5s
-      retries: 5
 
   mismartapi:
     image: mismartapi
@@ -54,10 +41,8 @@ services:
       - ASPNETCORE_ENVIRONMENT=Docker
       - GOOGLE_APPLICATION_CREDENTIALS=google_services.json
     depends_on:
-      postgres_image:
-        condition: service_healthy
-      redis_image:
-        condition: service_healthy
+      - postgres_image  
+      - redis_image
     volumes:
       - ./certs/https:/https
       - ./mydata/wwwroot_images:/app/wwwroot/images
