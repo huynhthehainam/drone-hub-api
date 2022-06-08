@@ -147,18 +147,19 @@ namespace MiSmart.API.Controllers
             var listResponse = await deviceRepository.GetListResponseViewAsync<SmallDeviceViewModel>(pageCommand, query);
             foreach (var item in listResponse.Data)
             {
-                if (item.LastBatteryGroupIDs.Count > 0)
-                {
-                    item.BatteryGroupLogs = new List<BatteryGroupLogViewModel>();
-                    foreach (var groupID in item.LastBatteryGroupIDs)
+                if (item.LastBatteryGroupIDs is not null)
+                    if (item.LastBatteryGroupIDs.Count > 0)
                     {
-                        var group = await batteryGroupLogRepository.GetAsync(ww => ww.ID == groupID);
-                        if (group is not null)
+                        item.BatteryGroupLogs = new List<BatteryGroupLogViewModel>();
+                        foreach (var groupID in item.LastBatteryGroupIDs)
                         {
-                            item.BatteryGroupLogs.Add(ViewModelHelpers.ConvertToViewModel<BatteryGroupLog, BatteryGroupLogViewModel>(group));
+                            var group = await batteryGroupLogRepository.GetAsync(ww => ww.ID == groupID);
+                            if (group is not null)
+                            {
+                                item.BatteryGroupLogs.Add(ViewModelHelpers.ConvertToViewModel<BatteryGroupLog, BatteryGroupLogViewModel>(group));
+                            }
                         }
                     }
-                }
             }
             listResponse.SetResponse(response);
             return response.ToIActionResult();
