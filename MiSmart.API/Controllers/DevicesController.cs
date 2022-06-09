@@ -266,7 +266,6 @@ namespace MiSmart.API.Controllers
                         if (!Constants.AllowedVersions.Contains(item.GCSVersion))
                         {
                             continue;
-                            response.AddInvalidErr("FlywayPoints");
                         }
                         if (item.FlywayPoints.Count == 0)
                         {
@@ -279,7 +278,6 @@ namespace MiSmart.API.Controllers
                                 flightTime: {item.FlightTime}
                             ");
                             continue;
-                            response.AddInvalidErr("FlywayPoints");
                         }
                         var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
                         if (item.SprayedIndexes.Count > 0 && item.TaskArea.GetValueOrDefault() <= 0)
@@ -558,7 +556,6 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
             {
                 response.SetMessage("Invalid");
                 return response.ToIActionResult();
-                response.AddInvalidErr("FlywayPoints");
             }
             if (command.FlywayPoints.Count == 0)
             {
@@ -572,7 +569,6 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
                                 flightTime: {command.FlightTime}
                             ");
                 return response.ToIActionResult();
-                response.AddInvalidErr("FlywayPoints");
             }
             if (device is null)
             {
@@ -763,6 +759,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
 
             plan.Location = geometryFactory.CreatePoint(new Coordinate(command.Longitude.GetValueOrDefault(), command.Latitude.GetValueOrDefault()));
             plan.FileName = command.File.FileName;
+            plan.Area =  command.Area.GetValueOrDefault();
             plan.FileBytes = command.GetFileBytes();
 
             if (plan.ID == 0)

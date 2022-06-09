@@ -80,7 +80,7 @@ namespace MiSmart.DAL.DatabaseContexts
 
             modelBuilder.Entity<CustomerUser>(ww =>
             {
-                ww.HasOne(ww => ww.Customer).WithMany(ww => ww.CustomerUsers).OnDelete(DeleteBehavior.Cascade);
+                ww.HasOne(ww => ww.Customer).WithMany(ww => ww.CustomerUsers).HasForeignKey(ww => ww.CustomerID).OnDelete(DeleteBehavior.Cascade);
                 ww.HasIndex(ww => new { ww.UserUUID }).IsUnique();
             });
 

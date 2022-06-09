@@ -22,6 +22,8 @@ namespace MiSmart.API.Commands
         public Double? Latitude { get; set; }
         [Required]
         public Double? Longitude { get; set; }
+        [Required]
+        public Double? Area { get; set; }
         public Byte[] GetFileBytes()
         {
             Byte[] bytes = new Byte[] { };

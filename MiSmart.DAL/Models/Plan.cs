@@ -1,11 +1,8 @@
 
 using System;
-using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using System.Text.Json;
 using MiSmart.Infrastructure.Data;
-using System.ComponentModel.DataAnnotations.Schema;
 using NetTopologySuite.Geometries;
 
 namespace MiSmart.DAL.Models
@@ -42,5 +39,6 @@ namespace MiSmart.DAL.Models
             set => device = value;
         }
         public Int32 DeviceID { get; set; }
+        public Double Area { get; set; }
     }
 }
