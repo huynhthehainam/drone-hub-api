@@ -26,6 +26,7 @@ using FirebaseAdmin.Messaging;
 using MiSmart.DAL.DatabaseContexts;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
+using MiSmart.API.Helpers;
 
 namespace MiSmart.API.Controllers
 {
@@ -759,7 +760,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
 
             plan.Location = geometryFactory.CreatePoint(new Coordinate(command.Longitude.GetValueOrDefault(), command.Latitude.GetValueOrDefault()));
             plan.FileName = command.File.FileName;
-            plan.Area =  command.Area.GetValueOrDefault();
+            plan.Area = command.Area.GetValueOrDefault();
             plan.FileBytes = command.GetFileBytes();
 
             if (plan.ID == 0)
@@ -775,7 +776,9 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
             return response.ToIActionResult();
         }
         [HttpGet("RetrievePlans")]
-        public async Task<IActionResult> GetPlans([FromServices] PlanRepository planRepository, [FromQuery] PageCommand pageCommand, [FromQuery] String search, [FromQuery] Double? latitude, [FromQuery] Double? longitude, [FromQuery] Double? range)
+        public async Task<IActionResult> GetPlans([FromServices] PlanRepository planRepository,
+        [FromServices] DatabaseContext databaseContext,
+        [FromQuery] PageCommand pageCommand, [FromQuery] String search, [FromQuery] Double? latitude, [FromQuery] Double? longitude, [FromQuery] Double? range)
         {
             var response = actionResponseFactory.CreateInstance();
             Point centerLocation = null;
@@ -793,7 +796,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
             {
                 foreach (var item in listResponse.Data)
                 {
-                    item.CalculateDistance(centerLocation);
+                    item.Distance = DistanceHelper.CalculateDistance(databaseContext, item.Point, centerLocation);
                 }
             }
             listResponse.SetResponse(response);

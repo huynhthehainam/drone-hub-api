@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.Text.Json.Serialization;
-using MiSmart.DAL.Extensions;
 using MiSmart.DAL.Models;
 using MiSmart.Infrastructure.ViewModels;
 using NetTopologySuite.Geometries;
@@ -16,7 +14,8 @@ namespace MiSmart.DAL.ViewModels
         public Double Longitude { get; set; }
         public Double Latitude { get; set; }
         [JsonIgnore]
-        public Point Location { get; set; }
+        public Point Point { get; set; }
+        public CoordinateViewModel Location { get; set; }
         public Double? Distance { get; set; }
         public String DistanceString
         {
@@ -42,10 +41,7 @@ namespace MiSmart.DAL.ViewModels
             }
         }
 
-        public void CalculateDistance(Point point)
-        {
-            this.Distance = Location.ProjectTo(2855).Distance(point.ProjectTo(2855));
-        }
+
 
         public void LoadFrom(Plan entity)
         {
@@ -54,7 +50,8 @@ namespace MiSmart.DAL.ViewModels
             FileName = entity.FileName;
             Longitude = entity.Location.X;
             Latitude = entity.Location.Y;
-            Location = entity.Location;
+            Point = entity.Location;
+            Location = new CoordinateViewModel(entity.Location.Coordinate);
         }
     }
 }
