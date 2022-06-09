@@ -30,6 +30,7 @@ using MiSmart.Infrastructure.Minio;
 using MiSmart.Infrastructure.ScheduledTasks;
 using MiSmart.API.ScheduledTasks;
 using FirebaseAdmin;
+using MiSmart.API.RabbitMQ;
 
 namespace MiSmart.API
 {
@@ -178,7 +179,7 @@ namespace MiSmart.API
 
             #region RabbitMQ
             services.AddRabbit(Configuration);
-            // services.AddHostedService<ConsumeAuthRabbitMQHostedService>();
+            services.AddHostedService<ConsumeAuthRabbitMQHostedService>();
 
 
             #endregion
