@@ -777,10 +777,17 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
         }
         [HttpGet("RetrievePlans")]
         public async Task<IActionResult> GetPlans([FromServices] PlanRepository planRepository,
-        [FromServices] DatabaseContext databaseContext,
+        [FromServices] DatabaseContext databaseContext, [FromServices] DeviceRepository deviceRepository,
         [FromQuery] PageCommand pageCommand, [FromQuery] String search, [FromQuery] Double? latitude, [FromQuery] Double? longitude, [FromQuery] Double? range)
         {
             var response = actionResponseFactory.CreateInstance();
+            var device = await deviceRepository.GetAsync(ww => ww.ID == CurrentDevice.ID);
+
+            if (device is null)
+            {
+                response.AddNotFoundErr("Device");
+            }
+
             Point centerLocation = null;
             var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
 
@@ -788,7 +795,8 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
             {
                 centerLocation = geometryFactory.CreatePoint(new Coordinate(longitude.GetValueOrDefault(), latitude.GetValueOrDefault()));
             }
-            Expression<Func<Plan, Boolean>> query = ww => (String.IsNullOrWhiteSpace(search) ?
+            Expression<Func<Plan, Boolean>> query = ww => (ww.Device.ExecutionCompanyID == device.ExecutionCompanyID)
+            && (String.IsNullOrWhiteSpace(search) ?
             ((centerLocation != null) ? (ww.Location.Distance(centerLocation) < range.GetValueOrDefault()) : true)
             : ww.FileName.ToLower().Contains(search.ToLower()));
             var listResponse = await planRepository.GetListResponseViewAsync<SmallPlanViewModel>(pageCommand, query);
