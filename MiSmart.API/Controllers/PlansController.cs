@@ -48,7 +48,7 @@ namespace MiSmart.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] AddingPlanCommand command, [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository,
+        public async Task<IActionResult> Create([FromForm] AddingPlanCommand command, [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository,
         [FromServices] PlanRepository planRepository,
 
         [FromServices] DeviceRepository deviceRepository)
