@@ -39,11 +39,13 @@ namespace MiSmart.API.Controllers
                 {
                     actionResponse.AddNotAllowedErr();
                 }
-                query = ww => ww.Device.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID
+                query = ww => true
                 && String.IsNullOrEmpty(search) ? true : ww.FileName.ToLower().Contains(search.ToLower());
 
             }
             var listResponse = await planRepository.GetListResponseViewAsync<SmallPlanViewModel>(pageCommand, query);
+            
+            listResponse.SetResponse(actionResponse);
             return actionResponse.ToIActionResult();
         }
 
