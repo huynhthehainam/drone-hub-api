@@ -780,7 +780,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
         [HttpGet("RetrievePlans")]
         public async Task<IActionResult> GetPlans([FromServices] PlanRepository planRepository,
         [FromServices] DatabaseContext databaseContext, [FromServices] DeviceRepository deviceRepository,
-        [FromQuery] PageCommand pageCommand, [FromQuery] String search, [FromQuery] Double? latitude, [FromQuery] Double? longitude, [FromQuery] Double? range)
+        [FromQuery] PageCommand pageCommand, [FromQuery] String search, [FromQuery] Double? latitude, [FromQuery] Double? longitude, [FromQuery] Double? range = 5000)
         {
             var response = actionResponseFactory.CreateInstance();
             var device = await deviceRepository.GetAsync(ww => ww.ID == CurrentDevice.ID);
