@@ -120,6 +120,7 @@ namespace MiSmart.DAL.DatabaseContexts
             {
                 ww.Property(ww => ww.Location).HasColumnType("geography (point)");
                 ww.HasOne(ww => ww.Device).WithMany(ww => ww.Plans).HasForeignKey(ww => ww.DeviceID).OnDelete(DeleteBehavior.Cascade);
+                ww.Property(ww=>ww.CreatedTime).HasDefaultValueSql("now() at time zone 'utc'");
             });
 
             modelBuilder.Entity<BatteryModel>(bm =>

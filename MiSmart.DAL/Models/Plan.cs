@@ -38,5 +38,6 @@ namespace MiSmart.DAL.Models
         }
         public Int32 DeviceID { get; set; }
         public Double Area { get; set; }
+        public DateTime CreatedTime { get; set; } = DateTime.UtcNow;
     }
 }

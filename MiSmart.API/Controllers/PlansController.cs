@@ -43,7 +43,7 @@ namespace MiSmart.API.Controllers
                 && (ww.Device.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID);
 
             }
-            var listResponse = await planRepository.GetListResponseViewAsync<SmallPlanViewModel>(pageCommand, query);
+            var listResponse = await planRepository.GetListResponseViewAsync<SmallPlanViewModel>(pageCommand, query, ww => ww.CreatedTime, false);
 
             listResponse.SetResponse(actionResponse);
             return actionResponse.ToIActionResult();
