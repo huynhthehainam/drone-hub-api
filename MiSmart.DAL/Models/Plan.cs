@@ -1,6 +1,5 @@
 
 using System;
-using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using MiSmart.Infrastructure.Data;
 using NetTopologySuite.Geometries;
@@ -32,7 +31,6 @@ namespace MiSmart.DAL.Models
         public Byte[] FileBytes { get; set; }
         public String FileName { get; set; }
         private Device device;
-        [JsonIgnore]
         public Device Device
         {
             get => lazyLoader.Load(this, ref device);

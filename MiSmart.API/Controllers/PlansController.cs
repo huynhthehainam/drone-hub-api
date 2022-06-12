@@ -39,13 +39,52 @@ namespace MiSmart.API.Controllers
                 {
                     actionResponse.AddNotAllowedErr();
                 }
-                query = ww => true
-                && String.IsNullOrEmpty(search) ? true : ww.FileName.ToLower().Contains(search.ToLower());
+                query = ww => (String.IsNullOrEmpty(search) ? true : ww.FileName.ToLower().Contains(search.ToLower()))
+                && (ww.Device.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID);
 
             }
             var listResponse = await planRepository.GetListResponseViewAsync<SmallPlanViewModel>(pageCommand, query);
-            
+
             listResponse.SetResponse(actionResponse);
+            return actionResponse.ToIActionResult();
+        }
+        [HttpGet("{id:long}/File")]
+        public async Task<IActionResult> GetFile([FromRoute] Int64 id, [FromServices] PlanRepository planRepository, [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository)
+        {
+            ActionResponse actionResponse = actionResponseFactory.CreateInstance();
+            ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.UUID, ExecutionCompanyUserType.Owner);
+            if (executionCompanyUser is null)
+            {
+                actionResponse.AddNotAllowedErr();
+            }
+            Expression<Func<Plan, Boolean>> query = ww => (ww.Device.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID) && (ww.ID == id);
+            var plan = await planRepository.GetAsync(query);
+            if (plan is null)
+            {
+                actionResponse.AddNotFoundErr("Plan");
+            }
+
+            actionResponse.SetFile(plan.FileBytes, "application/octet-stream", plan.FileName);
+            return actionResponse.ToIActionResult();
+        }
+
+        [HttpDelete("{id:long}")]
+        public async Task<IActionResult> RemovePlan([FromRoute] Int64 id, [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, [FromServices] PlanRepository planRepository)
+        {
+            ActionResponse actionResponse = actionResponseFactory.CreateInstance();
+            ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.UUID, ExecutionCompanyUserType.Owner);
+            if (executionCompanyUser is null)
+            {
+                actionResponse.AddNotAllowedErr();
+            }
+            Expression<Func<Plan, Boolean>> query = ww => (ww.Device.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID) && (ww.ID == id);
+            var plan = await planRepository.GetAsync(query);
+            if (plan is null)
+            {
+                actionResponse.AddNotFoundErr("Plan");
+            }
+            await planRepository.DeleteAsync(plan);
+            actionResponse.SetNoContent();
             return actionResponse.ToIActionResult();
         }
 
