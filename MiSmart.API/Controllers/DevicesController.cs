@@ -800,7 +800,8 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
             Expression<Func<Plan, Boolean>> query = ww => (ww.Device.ExecutionCompanyID == device.ExecutionCompanyID)
             && (String.IsNullOrWhiteSpace(search) ?
             ((centerLocation != null) ? (ww.Location.Distance(centerLocation) < range.GetValueOrDefault()) : true)
-            : ww.FileName.ToLower().Contains(search.ToLower()));
+            : ww.FileName.ToLower().Contains(search.ToLower()))
+            && (ww.Device.ExecutionCompanyID == device.ExecutionCompanyID);
             var listResponse = await planRepository.GetListResponseViewAsync<SmallPlanViewModel>(pageCommand, query);
             if (centerLocation is not null)
             {
@@ -816,11 +817,20 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
         }
 
         [HttpPost("RetrievePlanFile")]
-        public async Task<IActionResult> GetFile([FromServices] PlanRepository planRepository, [FromBody] RetrievingPlanFileCommand command)
+        public async Task<IActionResult> GetFile([FromServices] PlanRepository planRepository, [FromServices] DeviceRepository deviceRepository, [FromBody] RetrievingPlanFileCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
+            var device = await deviceRepository.GetAsync(ww => ww.ID == CurrentDevice.ID);
 
-            var plan = await planRepository.GetAsync(ww => ww.ID == command.PlanID);
+            if (device is null)
+            {
+                response.AddNotFoundErr("Device");
+            }
+            Expression<Func<Plan, Boolean>> query = ww => (ww.Device.ExecutionCompanyID == device.ExecutionCompanyID)
+
+                       && (ww.Device.ExecutionCompanyID == device.ExecutionCompanyID)
+                       && (ww.ID == command.PlanID);
+            var plan = await planRepository.GetAsync(query);
             if (plan is null)
             {
                 response.AddNotFoundErr("Plan");
