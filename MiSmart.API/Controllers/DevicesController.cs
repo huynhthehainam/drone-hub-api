@@ -782,6 +782,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
         [FromServices] DatabaseContext databaseContext, [FromServices] DeviceRepository deviceRepository,
         [FromQuery] PageCommand pageCommand, [FromQuery] String search, [FromQuery] Double? latitude, [FromQuery] Double? longitude, [FromQuery] Double? range = 5000)
         {
+            Console.WriteLine($"lat: {latitude} lng: {longitude}, range: {range}");
             var response = actionResponseFactory.CreateInstance();
             var device = await deviceRepository.GetAsync(ww => ww.ID == CurrentDevice.ID);
 
@@ -802,7 +803,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
             ((centerLocation != null) ? (ww.Location.Distance(centerLocation) < range.GetValueOrDefault()) : true)
             : ww.FileName.ToLower().Contains(search.ToLower()))
             && (ww.Device.ExecutionCompanyID == device.ExecutionCompanyID);
-            var listResponse = await planRepository.GetListResponseViewAsync<SmallPlanViewModel>(pageCommand, query);
+            var listResponse = await planRepository.GetListResponseViewAsync<SmallPlanViewModel>(pageCommand, query, ww => ww.CreatedTime, false);
             if (centerLocation is not null)
             {
                 foreach (var item in listResponse.Data)
