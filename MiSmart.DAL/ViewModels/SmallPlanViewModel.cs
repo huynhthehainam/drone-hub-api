@@ -18,6 +18,7 @@ namespace MiSmart.DAL.ViewModels
         public CoordinateViewModel Location { get; set; }
         public Double? Distance { get; set; }
         public DateTime CreatedTime { get; set; }
+        public Double Area { get; set; }
         public String DistanceString
         {
             get
@@ -53,6 +54,7 @@ namespace MiSmart.DAL.ViewModels
             Latitude = entity.Location.Y;
             Point = entity.Location;
             CreatedTime = entity.CreatedTime;
+            Area = entity.Area;
             Location = new CoordinateViewModel(entity.Location.Coordinate);
         }
     }

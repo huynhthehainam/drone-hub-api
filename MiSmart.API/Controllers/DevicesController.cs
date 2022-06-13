@@ -782,7 +782,6 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
         [FromServices] DatabaseContext databaseContext, [FromServices] DeviceRepository deviceRepository,
         [FromQuery] PageCommand pageCommand, [FromQuery] String search, [FromQuery] Double? latitude, [FromQuery] Double? longitude, [FromQuery] Double? range = 5000)
         {
-            Console.WriteLine($"lat: {latitude} lng: {longitude}, range: {range}");
             var response = actionResponseFactory.CreateInstance();
             var device = await deviceRepository.GetAsync(ww => ww.ID == CurrentDevice.ID);
 
