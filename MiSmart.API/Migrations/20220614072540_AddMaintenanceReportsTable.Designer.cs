@@ -15,8 +15,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MiSmart.API.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20220612112104_AddPlanCreatedTime")]
-    partial class AddPlanCreatedTime
+    [Migration("20220614072540_AddMaintenanceReportsTable")]
+    partial class AddMaintenanceReportsTable
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -564,6 +564,42 @@ namespace MiSmart.API.Migrations
                     b.ToTable("LogFiles");
                 });
 
+            modelBuilder.Entity("MiSmart.DAL.Models.MaintenanceReport", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
+
+                    b.Property<DateTime>("ActualReportCreatedTime")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<List<string>>("AttachmentLinks")
+                        .HasColumnType("text[]");
+
+                    b.Property<DateTime>("CreatedTime")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<int>("DeviceID")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Reason")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UUID")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UserUUID")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("DeviceID");
+
+                    b.ToTable("MaintenanceReports");
+                });
+
             modelBuilder.Entity("MiSmart.DAL.Models.Plan", b =>
                 {
                     b.Property<long>("ID")
@@ -932,6 +968,17 @@ namespace MiSmart.API.Migrations
                     b.Navigation("Device");
                 });
 
+            modelBuilder.Entity("MiSmart.DAL.Models.MaintenanceReport", b =>
+                {
+                    b.HasOne("MiSmart.DAL.Models.Device", "Device")
+                        .WithMany("MaintenanceReports")
+                        .HasForeignKey("DeviceID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Device");
+                });
+
             modelBuilder.Entity("MiSmart.DAL.Models.Plan", b =>
                 {
                     b.HasOne("MiSmart.DAL.Models.Device", "Device")
@@ -1039,6 +1086,8 @@ namespace MiSmart.API.Migrations
                     b.Navigation("FlightStats");
 
                     b.Navigation("LogFiles");
+
+                    b.Navigation("MaintenanceReports");
 
                     b.Navigation("Plans");
 

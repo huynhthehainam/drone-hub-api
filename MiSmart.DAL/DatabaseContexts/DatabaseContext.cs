@@ -33,6 +33,7 @@ namespace MiSmart.DAL.DatabaseContexts
         public DbSet<ExecutionCompanyUserFlightStat> ExecutionCompanyUserFlightStats { get; set; }
         public DbSet<ExecutionCompanySetting> ExecutionCompanySettings { get; set; }
         public DbSet<StreamingLink> StreamingLinks { get; set; }
+        public DbSet<MaintenanceReport> MaintenanceReports { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -120,7 +121,7 @@ namespace MiSmart.DAL.DatabaseContexts
             {
                 ww.Property(ww => ww.Location).HasColumnType("geography (point)");
                 ww.HasOne(ww => ww.Device).WithMany(ww => ww.Plans).HasForeignKey(ww => ww.DeviceID).OnDelete(DeleteBehavior.Cascade);
-                ww.Property(ww=>ww.CreatedTime).HasDefaultValueSql("now() at time zone 'utc'");
+                ww.Property(ww => ww.CreatedTime).HasDefaultValueSql("now() at time zone 'utc'");
             });
 
             modelBuilder.Entity<BatteryModel>(bm =>
@@ -152,6 +153,11 @@ namespace MiSmart.DAL.DatabaseContexts
             modelBuilder.Entity<ExecutionCompanySetting>(ww =>
             {
                 ww.HasOne(ww => ww.ExecutionCompany).WithMany(ww => ww.Settings).HasForeignKey(ww => ww.ExecutionCompanyID).OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<MaintenanceReport>(ww =>
+            {
+                ww.HasOne(ww => ww.Device).WithMany(ww => ww.MaintenanceReports).HasForeignKey(ww => ww.DeviceID).OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

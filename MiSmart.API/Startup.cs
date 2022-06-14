@@ -173,6 +173,7 @@ namespace MiSmart.API
             services.AddScoped<ExecutionCompanyUserFlightStatRepository, ExecutionCompanyUserFlightStatRepository>();
             services.AddScoped<ExecutionCompanySettingRepository, ExecutionCompanySettingRepository>();
             services.AddScoped<StreamingLinkRepository, StreamingLinkRepository>();
+            services.AddScoped<MaintenanceReportRepository, MaintenanceReportRepository>();
 
 
             #endregion
@@ -216,11 +217,11 @@ namespace MiSmart.API
                 o.TimeZoneInfo = TimeZoneInfo.Local;
             });
 
-        //     services.AddCronJob<UpdatingCostFlightStatsTask>(o =>
-        //    {
-        //        o.CronExpression = "*/50 * * * * *";
-        //        o.TimeZoneInfo = TimeZoneInfo.Local;
-        //    });
+            //     services.AddCronJob<UpdatingCostFlightStatsTask>(o =>
+            //    {
+            //        o.CronExpression = "*/50 * * * * *";
+            //        o.TimeZoneInfo = TimeZoneInfo.Local;
+            //    });
             #endregion
         }
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

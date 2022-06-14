@@ -38,6 +38,27 @@ namespace MiSmart.API.Controllers
 
         }
 
+        [HttpPost("{id:int}/MakeMaintenanceReport")]
+        [HasPermission(typeof(MaintainerPermission))]
+        public async Task<IActionResult> MakeMaintenanceReport([FromRoute] Int32 id, [FromServices] DeviceRepository deviceRepository,
+        [FromBody] AddingMaintenanceReportCommand command,
+         [FromServices] MaintenanceReportRepository maintenanceReportRepository)
+        {
+            ActionResponse actionResponse = actionResponseFactory.CreateInstance();
+            var device = await deviceRepository.GetAsync(ww => ww.ID == id);
+
+            MaintenanceReport maintenanceReport = await maintenanceReportRepository.CreateAsync(new MaintenanceReport
+            {
+                Reason = command.Reason,
+                ActualReportCreatedTime = command.ActualReportCreatedTime.HasValue ? command.ActualReportCreatedTime.GetValueOrDefault() : DateTime.UtcNow,
+                Device = device,
+                UserUUID = CurrentUser.UUID,
+                AttachmentLinks = new List<String> { },
+            });
+            actionResponse.SetCreatedObject(maintenanceReport);
+            return actionResponse.ToIActionResult();
+        }
+
         [HttpPost("{id:int}/AssignExecutionCompany")]
         public async Task<IActionResult> AssignExecutionCompany([FromServices] CustomerUserRepository customerUserRepository, [FromServices] ExecutionCompanyRepository executionCompanyRepository,
         [FromServices] DeviceRepository deviceRepository,
@@ -128,6 +149,14 @@ namespace MiSmart.API.Controllers
             else if (relation == "Administrator")
             {
                 if (!CurrentUser.IsAdministrator)
+                {
+                    response.AddNotAllowedErr();
+                }
+                query = ww => true && (!String.IsNullOrWhiteSpace(search) ? ww.Name.ToLower().Contains(search.ToLower()) : true);
+            }
+            else if (relation == "Maintainer")
+            {
+                if (CurrentUser.RoleID != 3)
                 {
                     response.AddNotAllowedErr();
                 }

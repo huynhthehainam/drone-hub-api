@@ -12,6 +12,8 @@ using MiSmart.DAL.DatabaseContexts;
 using Microsoft.Extensions.DependencyInjection;
 using System.Linq;
 using MiSmart.Infrastructure.Constants;
+using MiSmart.Infrastructure.Minio;
+using System.Collections.Generic;
 
 namespace MiSmart.API.RabbitMQ
 {
@@ -21,11 +23,13 @@ namespace MiSmart.API.RabbitMQ
         private IModel channel;
         private readonly IServiceProvider serviceProvider;
         private readonly RabbitOptions rabbitOptions;
+        private readonly MinioService minioService;
 
-        public ConsumeAuthRabbitMQHostedService(IServiceProvider serviceProvider, IOptions<RabbitOptions> options1)
+        public ConsumeAuthRabbitMQHostedService(IServiceProvider serviceProvider, MinioService minioService, IOptions<RabbitOptions> options1)
         {
             this.serviceProvider = serviceProvider;
             this.rabbitOptions = options1.Value;
+            this.minioService = minioService;
             InitRabbitMQ();
         }
 
@@ -72,7 +76,7 @@ namespace MiSmart.API.RabbitMQ
             return Task.CompletedTask;
         }
 
-        private void HandleMessage(String content)
+        private async void HandleMessage(String content)
         {
             ExchangeRequest<Object> contentModel = JsonSerializer.Deserialize<ExchangeRequest<Object>>(content, JsonSerializerDefaultOptions.CamelOptions);
             if (contentModel.Type == "RemoveUser")
@@ -86,6 +90,17 @@ namespace MiSmart.API.RabbitMQ
 
                     var executionCompanyUsers = context.ExecutionCompanyUsers.Where(ww => ww.UserUUID == model.UUID).ToList();
                     context.ExecutionCompanyUsers.RemoveRange(executionCompanyUsers);
+                    context.SaveChanges();
+
+                    var reports = context.MaintenanceReports.Where(ww => ww.UserUUID == model.UUID).ToList();
+                    foreach (var report in reports)
+                    {
+                        foreach (var url in report.AttachmentLinks ?? new List<String> { })
+                        {
+                            await minioService.RemoveFileByUrlAsync(url);
+                        }
+                    }
+                    context.MaintenanceReports.RemoveRange(reports);
                     context.SaveChanges();
                 }
             }
