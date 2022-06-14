@@ -46,6 +46,10 @@ namespace MiSmart.API.Controllers
         {
             ActionResponse actionResponse = actionResponseFactory.CreateInstance();
             var device = await deviceRepository.GetAsync(ww => ww.ID == id);
+            if (device is null)
+            {
+                actionResponse.AddNotFoundErr("Device");
+            }
 
             MaintenanceReport maintenanceReport = await maintenanceReportRepository.CreateAsync(new MaintenanceReport
             {
@@ -56,6 +60,40 @@ namespace MiSmart.API.Controllers
                 AttachmentLinks = new List<String> { },
             });
             actionResponse.SetCreatedObject(maintenanceReport);
+            return actionResponse.ToIActionResult();
+        }
+
+        [HttpGet("{id:int}/MaintenanceReports")]
+
+        public async Task<IActionResult> GetMaintenanceReports([FromRoute] Int32 id, [FromQuery] PageCommand pageCommand, [FromServices] DeviceRepository deviceRepository,
+         [FromServices] MaintenanceReportRepository maintenanceReportRepository,
+         [FromQuery] String relation = "Maintainer")
+        {
+            ActionResponse actionResponse = actionResponseFactory.CreateInstance();
+            var device = await deviceRepository.GetAsync(ww => ww.ID == id);
+            if (device is null)
+            {
+                actionResponse.AddNotFoundErr("Device");
+            }
+            Expression<Func<MaintenanceReport, Boolean>> query = ww => false;
+            if (relation == "Maintainer")
+            {
+                if (CurrentUser.RoleID != 3)
+                {
+                    actionResponse.AddNotAllowedErr();
+                }
+                query = ww => ww.UserUUID == CurrentUser.UUID && ww.DeviceID == device.ID;
+            }
+            else if (relation == "Administrator")
+            {
+                if (!CurrentUser.IsAdministrator)
+                {
+                    actionResponse.AddNotAllowedErr();
+                }
+                query = ww => ww.DeviceID == device.ID;
+            }
+            var listResponse = await maintenanceReportRepository.GetListResponseViewAsync<MaintenanceReportViewModel>(pageCommand, query, ww => ww.CreatedTime, false);
+            listResponse.SetResponse(actionResponse);
             return actionResponse.ToIActionResult();
         }
 
