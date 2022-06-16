@@ -16,6 +16,7 @@ namespace MiSmart.DAL.Models
         }
 
         public String ActualID { get; set; }
+        public String Name { get; set; }
 
         private BatteryModel batteryModel;
         public BatteryModel BatteryModel

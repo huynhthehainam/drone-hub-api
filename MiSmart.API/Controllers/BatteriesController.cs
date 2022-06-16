@@ -23,6 +23,46 @@ namespace MiSmart.API.Controllers
         }
 
 
+        [HttpPatch("{id:int}")]
+        [HasPermission(typeof(AdminPermission))]
+        public async Task<IActionResult> Patch([FromRoute] Int32 id, [FromBody] PatchingBatteryCommand command, [FromServices] ExecutionCompanyRepository executionCompanyRepository, [FromServices] BatteryRepository batteryRepository, [FromServices] BatteryModelRepository batteryModelRepository)
+        {
+            var response = actionResponseFactory.CreateInstance();
+            var battery = await batteryRepository.GetAsync(ww => ww.ID == id);
+            if (battery is null)
+            {
+                response.AddNotFoundErr("Battery");
+            }
+
+            if (command.BatteryModelID.HasValue)
+            {
+                BatteryModel batteryModel = await batteryModelRepository.GetAsync(ww => ww.ID == command.BatteryModelID.GetValueOrDefault());
+                if (batteryModel is null)
+                {
+                    response.AddInvalidErr("BatteryModelID");
+                }
+                battery.BatteryModel = batteryModel;
+            }
+            if (command.ExecutionCompanyID.HasValue)
+            {
+                ExecutionCompany executionCompany = await executionCompanyRepository.GetAsync(ww => ww.ID == command.ExecutionCompanyID.GetValueOrDefault());
+                if (executionCompany is null)
+                {
+                    response.AddInvalidErr("ExecutionCompanyID");
+                }
+                battery.ExecutionCompany = executionCompany;
+            }
+
+            battery.Name = String.IsNullOrEmpty(command.Name) ? battery.Name : command.Name;
+
+
+            await batteryRepository.UpdateAsync(battery);
+            response.SetUpdatedMessage();
+
+
+            return response.ToIActionResult();
+        }
+
         [HttpPost]
         [HasPermission(typeof(AdminPermission))]
         public async Task<IActionResult> Create([FromBody] AddingBatteryCommand command,
@@ -44,7 +84,7 @@ namespace MiSmart.API.Controllers
             {
                 response.AddInvalidErr("BatteryModelID");
             }
-            Battery battery = new Battery { ActualID = command.ActualID, ExecutionCompanyID = command.ExecutionCompanyID, BatteryModel = batteryModel };
+            Battery battery = new Battery { ActualID = command.ActualID, ExecutionCompanyID = command.ExecutionCompanyID, BatteryModel = batteryModel, Name = command.Name };
 
             await batteryRepository.CreateAsync(battery);
             response.SetCreatedObject(battery);
