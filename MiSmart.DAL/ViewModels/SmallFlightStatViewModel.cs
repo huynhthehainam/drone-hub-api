@@ -1,5 +1,6 @@
 
 using System;
+using System.Linq;
 using System.Text.Json;
 using MiSmart.DAL.Models;
 using MiSmart.Infrastructure.ViewModels;
@@ -44,6 +45,7 @@ namespace MiSmart.DAL.ViewModels
         public String TMUserUID { get; set; }
         public JsonDocument TMUser { get; set; }
         public JsonDocument Medicines { get; set; }
+        public CoordinateViewModel FirstPoint { get; set; }
         public void LoadFrom(FlightStat entity)
         {
             ID = entity.ID;
@@ -65,6 +67,10 @@ namespace MiSmart.DAL.ViewModels
             TMUserUID = entity.TMUserUID;
             TMUser = entity.TMUser;
             Medicines = entity.Medicines;
+            if (entity.FlywayPoints.Count > 0)
+            {
+                FirstPoint = new CoordinateViewModel(entity.FlywayPoints.Coordinates.FirstOrDefault());
+            }
         }
     }
 }
