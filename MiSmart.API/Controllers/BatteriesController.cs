@@ -65,7 +65,7 @@ namespace MiSmart.API.Controllers
                 query = b => true;
             }
 
-            var listResponse = await batteryRepository.GetListResponseViewAsync<BatteryViewModel>(pageCommand, query);
+            var listResponse = await batteryRepository.GetListResponseViewAsync<BatteryViewModel>(pageCommand, query, ww => ww.CreatedTime, false);
             listResponse.SetResponse(response);
 
             return response.ToIActionResult();
