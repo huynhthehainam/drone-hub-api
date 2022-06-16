@@ -15,6 +15,7 @@ namespace MiSmart.DAL.ViewModels
         public String BatteryModel { get; set; }
         public Int32 BatteryModelID { get; set; }
         public String BatteryModelName { get; set; }
+        public String Name { get; set; }
         public BatteryGroupLogViewModel LastGroup { get; set; }
         public void LoadFrom(Battery entity)
         {
@@ -25,6 +26,7 @@ namespace MiSmart.DAL.ViewModels
             LastGroup = entity.LastGroup is null ? null : ViewModelHelpers.ConvertToViewModel<BatteryGroupLog, BatteryGroupLogViewModel>(entity.LastGroup);
             BatteryModelID = entity.BatteryModelID;
             BatteryModelName = entity.BatteryModel.Name;
+            Name = entity.Name;
         }
     }
     public class SmallBatteryModelViewModel : IViewModel<BatteryModel>
