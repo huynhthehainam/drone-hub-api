@@ -102,7 +102,7 @@ namespace MiSmart.API.Controllers
                 {
                     response.AddNotAllowedErr();
                 }
-                query = b => true;
+                query = b => String.IsNullOrEmpty(search) ? true : (b.Name.ToLower().Contains(search.ToLower()) || b.ActualID.ToLower().Contains(search.ToLower()));
             }
 
             var listResponse = await batteryRepository.GetListResponseViewAsync<BatteryViewModel>(pageCommand, query, ww => ww.CreatedTime, false);
