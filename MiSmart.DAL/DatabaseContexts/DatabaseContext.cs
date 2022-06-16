@@ -134,6 +134,7 @@ namespace MiSmart.DAL.DatabaseContexts
                 b.HasOne(b => b.ExecutionCompany).WithMany(c => c.Batteries).HasForeignKey(b => b.ExecutionCompanyID).OnDelete(DeleteBehavior.SetNull);
                 b.HasOne(b => b.LastGroup).WithMany(g => g.LastBatteries).HasForeignKey(b => b.LastGroupID).OnDelete(DeleteBehavior.SetNull);
                 b.HasOne(b => b.BatteryModel).WithMany(bm => bm.Batteries).HasForeignKey(b => b.BatteryModelID).OnDelete(DeleteBehavior.Cascade);
+                b.Property(b => b.CreatedTime).HasDefaultValueSql("now() at time zone 'utc'");
             });
             modelBuilder.Entity<BatteryGroupLog>(bgl =>
             {

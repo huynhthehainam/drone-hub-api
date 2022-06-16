@@ -50,5 +50,6 @@ namespace MiSmart.DAL.Models
             set => executionCompany = value;
         }
         public Int32? ExecutionCompanyID { get; set; }
+        public DateTime CreatedTime { get; set; } = DateTime.UtcNow;
     }
 }
