@@ -24,10 +24,13 @@ namespace MiSmart.API.Controllers
 
 
         [HttpPatch("{id:int}")]
-        [HasPermission(typeof(AdminPermission))]
         public async Task<IActionResult> Patch([FromRoute] Int32 id, [FromBody] PatchingBatteryCommand command, [FromServices] ExecutionCompanyRepository executionCompanyRepository, [FromServices] BatteryRepository batteryRepository, [FromServices] BatteryModelRepository batteryModelRepository)
         {
             var response = actionResponseFactory.CreateInstance();
+            if (!CurrentUser.IsAdministrator && CurrentUser.RoleID != 3)
+            {
+                response.AddNotAllowedErr();
+            }
             var battery = await batteryRepository.GetAsync(ww => ww.ID == id);
             if (battery is null)
             {
@@ -99,6 +102,14 @@ namespace MiSmart.API.Controllers
             if (relation == "Administrator")
             {
                 if (!CurrentUser.IsAdministrator)
+                {
+                    response.AddNotAllowedErr();
+                }
+                query = b => String.IsNullOrEmpty(search) ? true : (b.Name.ToLower().Contains(search.ToLower()) || b.ActualID.ToLower().Contains(search.ToLower()));
+            }
+            else if (relation == "Maintainer")
+            {
+                if (CurrentUser.RoleID != 3)
                 {
                     response.AddNotAllowedErr();
                 }
