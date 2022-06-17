@@ -19,6 +19,8 @@ using MiSmart.API.Commands;
 using System.Threading.Tasks;
 using System.Text.Json;
 using MiSmart.Infrastructure.Constants;
+using System.Net.Http;
+using MiSmart.API.Helpers;
 
 namespace MiSmart.API.Controllers
 {
@@ -51,6 +53,7 @@ namespace MiSmart.API.Controllers
         [FromServices] TeamUserRepository teamUserRepository,
         [FromServices] IOptions<ActionResponseSettings> options,
         [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository,
+        [FromServices] IHttpClientFactory httpClientFactory,
         [FromServices] CustomerUserRepository customerUserRepository, [FromQuery] PageCommand pageCommand,
          [FromQuery] DateTime? from, [FromQuery] DateTime? to, [FromQuery] Int32? executionCompanyID,
          [FromQuery] Int32? customerID,
@@ -112,6 +115,20 @@ namespace MiSmart.API.Controllers
                    && (executionCompanyUser.Type == ExecutionCompanyUserType.Member ? (teamIDs.Contains(ww.TeamID.GetValueOrDefault())) : true);
             }
             var listResponse = await flightStatRepository.GetListFlightStatsViewAsync<SmallFlightStatViewModel>(pageCommand, query, ww => ww.FlightTime, false);
+            List<Task> tasks = new List<Task> { };
+            List<String> test = new List<String> {};            for (var i = 0; i < listResponse.Data.Count; i++)
+            {
+                if (i % 5 == 0)
+                {
+                    Task.WaitAll(tasks.ToArray());
+                    tasks = new List<Task> { };
+                }
+                var client = httpClientFactory.CreateClient();
+                var item = listResponse.Data[i];
+                tasks.Add(BingLocationHelper.UpdateLocation(listResponse, i, httpClientFactory));
+            }
+            Task.WaitAll(tasks.ToArray());
+
             listResponse.SetResponse(response);
             return response.ToIActionResult();
         }
