@@ -17,9 +17,11 @@ namespace MiSmart.API.Controllers
             var response = actionResponseFactory.CreateInstance();
             response.SetData(new
             {
+                Version = "1.0.0",
                 CreatedBy = "MiSmart",
                 Service = "App Sync",
-                Description = "MiSmart is the best drone company in VN"
+                Description = "MiSmart is the best drone company in VN",
+                AllowedVersions = Constants.AllowedVersions,
             });
             return Task.FromResult(response.ToIActionResult());
         }
