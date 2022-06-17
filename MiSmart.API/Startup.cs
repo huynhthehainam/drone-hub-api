@@ -217,6 +217,12 @@ namespace MiSmart.API
                 o.TimeZoneInfo = TimeZoneInfo.Local;
             });
 
+            services.AddCronJob<UpdatingTaskBingLocation>(o =>
+            {
+                o.CronExpression = "*/10 * * * * *";
+                o.TimeZoneInfo = TimeZoneInfo.Local;
+            });
+
             //     services.AddCronJob<UpdatingCostFlightStatsTask>(o =>
             //    {
             //        o.CronExpression = "*/50 * * * * *";

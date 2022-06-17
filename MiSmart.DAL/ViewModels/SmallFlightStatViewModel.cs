@@ -46,8 +46,10 @@ namespace MiSmart.DAL.ViewModels
         public JsonDocument TMUser { get; set; }
         public JsonDocument Medicines { get; set; }
         public CoordinateViewModel FirstPoint { get; set; }
+        public Boolean IsBingLocation { get; set; }
         public void LoadFrom(FlightStat entity)
         {
+            IsBingLocation = entity.IsBingLocation;
             ID = entity.ID;
             FlightDuration = entity.FlightDuration;
             CreatedTime = entity.CreatedTime;

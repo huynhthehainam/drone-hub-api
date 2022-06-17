@@ -42,6 +42,7 @@ namespace MiSmart.DAL.Models
         public FlightStat(ILazyLoader lazyLoader) : base(lazyLoader)
         {
         }
+        public Boolean IsBingLocation { get; set; } = false;
         public DateTime CreatedTime { get; set; } = DateTime.UtcNow;
         public DateTime FlightTime { get; set; } = DateTime.UtcNow;
         public String TaskLocation { get; set; }
