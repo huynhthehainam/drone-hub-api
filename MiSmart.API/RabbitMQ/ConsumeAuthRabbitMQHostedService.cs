@@ -78,31 +78,38 @@ namespace MiSmart.API.RabbitMQ
 
         private async void HandleMessage(String content)
         {
-            ExchangeRequest<Object> contentModel = JsonSerializer.Deserialize<ExchangeRequest<Object>>(content, JsonSerializerDefaultOptions.CamelOptions);
-            if (contentModel.Type == "RemoveUser")
+            try
             {
-                RemovingUserModel model = JsonSerializer.Deserialize<RemovingUserModel>(JsonSerializer.Serialize(contentModel.Data, JsonSerializerDefaultOptions.CamelOptions), JsonSerializerDefaultOptions.CamelOptions);
-                using (var context = serviceProvider.CreateScope().ServiceProvider.GetRequiredService<DatabaseContext>())
+                ExchangeRequest<Object> contentModel = JsonSerializer.Deserialize<ExchangeRequest<Object>>(content, JsonSerializerDefaultOptions.CamelOptions);
+                if (contentModel.Type == "RemoveUser")
                 {
-                    var customerUsers = context.CustomerUsers.Where(ww => ww.UserUUID == model.UUID).ToList();
-                    context.CustomerUsers.RemoveRange(customerUsers);
-                    context.SaveChanges();
-
-                    var executionCompanyUsers = context.ExecutionCompanyUsers.Where(ww => ww.UserUUID == model.UUID).ToList();
-                    context.ExecutionCompanyUsers.RemoveRange(executionCompanyUsers);
-                    context.SaveChanges();
-
-                    var reports = context.MaintenanceReports.Where(ww => ww.UserUUID == model.UUID).ToList();
-                    foreach (var report in reports)
+                    RemovingUserModel model = JsonSerializer.Deserialize<RemovingUserModel>(JsonSerializer.Serialize(contentModel.Data, JsonSerializerDefaultOptions.CamelOptions), JsonSerializerDefaultOptions.CamelOptions);
+                    using (var context = serviceProvider.CreateScope().ServiceProvider.GetRequiredService<DatabaseContext>())
                     {
-                        foreach (var url in report.AttachmentLinks ?? new List<String> { })
+                        var customerUsers = context.CustomerUsers.Where(ww => ww.UserUUID == model.UUID).ToList();
+                        context.CustomerUsers.RemoveRange(customerUsers);
+                        context.SaveChanges();
+
+                        var executionCompanyUsers = context.ExecutionCompanyUsers.Where(ww => ww.UserUUID == model.UUID).ToList();
+                        context.ExecutionCompanyUsers.RemoveRange(executionCompanyUsers);
+                        context.SaveChanges();
+
+                        var reports = context.MaintenanceReports.Where(ww => ww.UserUUID == model.UUID).ToList();
+                        foreach (var report in reports)
                         {
-                            await minioService.RemoveFileByUrlAsync(url);
+                            foreach (var url in report.AttachmentLinks ?? new List<String> { })
+                            {
+                                await minioService.RemoveFileByUrlAsync(url);
+                            }
                         }
+                        context.MaintenanceReports.RemoveRange(reports);
+                        context.SaveChanges();
                     }
-                    context.MaintenanceReports.RemoveRange(reports);
-                    context.SaveChanges();
                 }
+            }
+            catch (Exception)
+            {
+
             }
         }
 
