@@ -58,6 +58,9 @@ namespace MiSmart.API.Controllers
          [FromQuery] DateTime? from, [FromQuery] DateTime? to, [FromQuery] Int32? executionCompanyID,
          [FromQuery] Int32? customerID,
          [FromQuery] Int64? teamID, [FromQuery] Int32? deviceID, [FromQuery] Int32? deviceModelID,
+         [FromQuery] Boolean? getMappingRecords,
+         [FromQuery] Boolean? getSeedingRecords,
+         [FromQuery] Boolean? getSprayingRecords,
          [FromQuery] String relation = "Owner")
         {
             FlightStatsActionResponse response = new FlightStatsActionResponse();
@@ -80,7 +83,10 @@ namespace MiSmart.API.Controllers
                     && (to.HasValue ? (ww.FlightTime <= to.Value.AddDays(1)) : true)
                     && (deviceModelID.HasValue ? (ww.Device.DeviceModelID == deviceModelID.Value) : true)
                     && (executionCompanyID.HasValue ? (ww.ExecutionCompanyID == executionCompanyID.GetValueOrDefault()) : true)
-                    && (true);
+                    && (getMappingRecords.HasValue ? (getMappingRecords.GetValueOrDefault() ? true : (ww.TaskArea > 0)) : true)
+                    && (getSprayingRecords.HasValue ? (getSprayingRecords.GetValueOrDefault() ? true : (ww.TaskArea == 0)) : true)
+                    && (getSeedingRecords.HasValue ? true : true)
+                    ;
             }
             else if (relation == "Administrator")
             {
@@ -94,7 +100,11 @@ namespace MiSmart.API.Controllers
                     && (to.HasValue ? (ww.FlightTime <= to.Value.AddDays(1)) : true)
                     && (customerID.HasValue ? (ww.CustomerID == customerID.Value) : true)
                     && (deviceModelID.HasValue ? (ww.Device.DeviceModelID == deviceModelID.Value) : true)
-                    && (executionCompanyID.HasValue ? (ww.ExecutionCompanyID == executionCompanyID.GetValueOrDefault()) : true);
+                    && (executionCompanyID.HasValue ? (ww.ExecutionCompanyID == executionCompanyID.GetValueOrDefault()) : true)
+                      && (getMappingRecords.HasValue ? (getMappingRecords.GetValueOrDefault() ? true : (ww.TaskArea > 0)) : true)
+                    && (getSprayingRecords.HasValue ? (getSprayingRecords.GetValueOrDefault() ? true : (ww.TaskArea == 0)) : true)
+                    && (getSeedingRecords.HasValue ? true : true)
+                    ;
             }
             else
             {
@@ -112,11 +122,15 @@ namespace MiSmart.API.Controllers
                    && (customerID.HasValue ? (ww.CustomerID == customerID.GetValueOrDefault()) : true)
                     && (deviceModelID.HasValue ? (ww.Device.DeviceModelID == deviceModelID.Value) : true)
 
-                   && (executionCompanyUser.Type == ExecutionCompanyUserType.Member ? (teamIDs.Contains(ww.TeamID.GetValueOrDefault())) : true);
+                   && (executionCompanyUser.Type == ExecutionCompanyUserType.Member ? (teamIDs.Contains(ww.TeamID.GetValueOrDefault())) : true)
+                     && (getMappingRecords.HasValue ? (getMappingRecords.GetValueOrDefault() ? true : (ww.TaskArea > 0)) : true)
+                    && (getSprayingRecords.HasValue ? (getSprayingRecords.GetValueOrDefault() ? true : (ww.TaskArea == 0)) : true)
+                    && (getSeedingRecords.HasValue ? true : true)
+                   ;
             }
             var listResponse = await flightStatRepository.GetListFlightStatsViewAsync<SmallFlightStatViewModel>(pageCommand, query, ww => ww.FlightTime, false);
             List<Task> tasks = new List<Task> { };
-            List<String> test = new List<String> {};            for (var i = 0; i < listResponse.Data.Count; i++)
+            List<String> test = new List<String> { }; for (var i = 0; i < listResponse.Data.Count; i++)
             {
                 if (i % 5 == 0)
                 {
