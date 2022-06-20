@@ -869,7 +869,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
             ((centerLocation != null) ? (ww.Location.Distance(centerLocation) < range.GetValueOrDefault()) : true)
             : ww.FileName.ToLower().Contains(search.ToLower()))
             && (ww.Device.ExecutionCompanyID == device.ExecutionCompanyID);
-            var listResponse = await planRepository.GetListResponseViewAsync<SmallPlanViewModel>(pageCommand, query, ww => ww.CreatedTime, false);
+            var listResponse = await planRepository.GetListResponseViewAsync<SmallPlanViewModel>(pageCommand, query, ww => centerLocation != null ? ww.Location.Distance(centerLocation) : ww.CreatedTime, true);
             if (centerLocation is not null)
             {
                 foreach (var item in listResponse.Data)
