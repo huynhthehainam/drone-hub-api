@@ -37,6 +37,7 @@ namespace MiSmart.API.Commands
         public Guid FlightUID { get; set; } = Guid.NewGuid();
         public String GCSVersion { get; set; }
         public JsonDocument AdditionalInformation { get; set; }
+        public Double? BatteryPercentRemaining { get; set; }
     }
     public class AddingOfflineFlightStatCommand : AddingFlightStatCommand
     {

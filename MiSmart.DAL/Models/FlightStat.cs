@@ -53,6 +53,7 @@ namespace MiSmart.DAL.Models
         public Double FlightDuration { get; set; }
         public String PilotName { get; set; }
         public String TMUserUID { get; set; }
+        public Double? BatteryPercentRemaining { get; set; }
 
         public JsonDocument TMUser
         {

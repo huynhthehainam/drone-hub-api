@@ -418,6 +418,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
                             ExecutionCompanyID = device.ExecutionCompanyID,
                             GCSVersion = item.GCSVersion,
                             AdditionalInformation = item.AdditionalInformation,
+                            BatteryPercentRemaining = item.BatteryPercentRemaining,
                         };
 
                         if (device.ExecutionCompanyID.HasValue)
@@ -721,7 +722,8 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
                 TeamID = device.TeamID,
                 ExecutionCompanyID = device.ExecutionCompanyID,
                 GCSVersion = command.GCSVersion,
-                AdditionalInformation = command.AdditionalInformation
+                AdditionalInformation = command.AdditionalInformation,
+                BatteryPercentRemaining = command.BatteryPercentRemaining,
             };
             if (device.ExecutionCompanyID.HasValue)
             {
