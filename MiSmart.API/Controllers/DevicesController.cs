@@ -27,6 +27,8 @@ using MiSmart.DAL.DatabaseContexts;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 using MiSmart.API.Helpers;
+using Microsoft.Extensions.Options;
+using MiSmart.Infrastructure.Settings;
 
 namespace MiSmart.API.Controllers
 {
@@ -318,6 +320,7 @@ namespace MiSmart.API.Controllers
         [FromServices] ExecutionCompanySettingRepository executionCompanySettingRepository,
         [FromServices] ExecutionCompanyUserFlightStatRepository executionCompanyUserFlightStatRepository,
         [FromServices] EmailService emailService,
+        [FromServices] IOptions<FrontEndSettings> options,
          [FromServices] DeviceRepository deviceRepository, [FromServices] JWTService jwtService)
         {
             var response = actionResponseFactory.CreateInstance();
@@ -344,6 +347,7 @@ namespace MiSmart.API.Controllers
                                 device: {device.Name}
                                 flightDuration: {item.FlightDuration.GetValueOrDefault()}
                                 flightTime: {item.FlightTime}
+                                offline
                             ");
                             continue;
                         }
@@ -359,6 +363,7 @@ namespace MiSmart.API.Controllers
                                 device: {device.Name}
                                 flightDuration: {item.FlightDuration.GetValueOrDefault()}
                                 flightTime: {item.FlightTime}
+                                offline
                             ");
                             }
                             var taskArea = 0.0;
@@ -421,6 +426,8 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
                             BatteryPercentRemaining = item.BatteryPercentRemaining,
                         };
 
+
+
                         if (device.ExecutionCompanyID.HasValue)
                         {
                             var latestSetting = executionCompanySettingRepository.GetLatestSetting(device.ExecutionCompanyID.GetValueOrDefault());
@@ -452,6 +459,22 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
                             }
                         }
                         await deviceRepository.UpdateAsync(device);
+                        if (stat.BatteryPercentRemaining.HasValue)
+                        {
+                            if (stat.BatteryPercentRemaining.GetValueOrDefault() < 30)
+                            {
+                                await emailService.SendMailAsync(Constants.LowBatteryReportEmailTargets.ToArray(), new String[] { }, new String[] { }, "Báo cáo chuyến bay phần trăm Pin tháp", @$"
+                                    diện tích: {(stat.TaskArea / 10000).ToString("0.##")},
+                                    thời điểm: {stat.FlightTime}
+                                    thiết bị: {device.Name}
+                                    thời gian bay: {stat.FlightDuration} giờ
+                                    id: {stat.ID}
+                                    phần trăm pin còn lại: {stat.BatteryPercentRemaining.GetValueOrDefault()}%
+                                    link: {options.Value.Domain}/apps/execution-flight-statistics/map/{stat.ID}
+                                    offline
+                            ");
+                            }
+                        }
                         flightStats.Add(stat);
                     }
                 }
@@ -619,6 +642,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
         [FromServices] ExecutionCompanySettingRepository executionCompanySettingRepository,
         [FromServices] DatabaseContext databaseContext,
         [FromServices] EmailService emailService,
+        [FromServices] IOptions<FrontEndSettings> options,
         [FromServices] ExecutionCompanyUserFlightStatRepository executionCompanyUserFlightStatRepository, [FromBody] AddingFlightStatCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
@@ -638,6 +662,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
                                 flightDuration: {command.FlightDuration.GetValueOrDefault()}
                                 flywayPoints: {command.FlywayPoints.Count()}
                                 flightTime: {command.FlightTime}
+                                online
                             ");
                 return response.ToIActionResult();
             }
@@ -657,6 +682,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
                                 flightDuration: {command.FlightDuration.GetValueOrDefault()}
                                 flywayPoints: {command.FlywayPoints.Count()}
                                 flightTime: {command.FlightTime}
+                                online
                             ");
                 }
                 var taskArea = 0.0;
@@ -756,7 +782,22 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
                 }
             }
             await deviceRepository.UpdateAsync(device);
-
+            if (stat.BatteryPercentRemaining.HasValue)
+            {
+                if (stat.BatteryPercentRemaining.GetValueOrDefault() < 30)
+                {
+                    await emailService.SendMailAsync(Constants.LowBatteryReportEmailTargets.ToArray(), new String[] { }, new String[] { }, "Báo cáo chuyến bay phần trăm Pin tháp", @$"
+                                    diện tích: {(stat.TaskArea / 10000).ToString("0.##")},
+                                    thời điểm: {stat.FlightTime}
+                                    thiết bị: {device.Name}
+                                    thời gian bay: {stat.FlightDuration} giờ
+                                    id: {stat.ID}
+                                    phần trăm pin còn lại: {stat.BatteryPercentRemaining.GetValueOrDefault()}%
+                                    link: {options.Value.Domain}/apps/execution-flight-statistics/map/{stat.ID}
+                                    online
+                            ");
+                }
+            }
             response.SetCreatedObject(stat);
 
             return response.ToIActionResult();
