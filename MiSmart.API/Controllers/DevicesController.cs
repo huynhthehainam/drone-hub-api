@@ -464,10 +464,10 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
                             if (stat.BatteryPercentRemaining.GetValueOrDefault() < 30)
                             {
                                 await emailService.SendMailAsync(Constants.LowBatteryReportEmailTargets.ToArray(), new String[] { }, new String[] { }, "Báo cáo chuyến bay phần trăm Pin tháp", @$"
-                                    diện tích: {(stat.TaskArea / 10000).ToString("0.##")},
+                                    diện tích: {(stat.TaskArea / 10000).ToString("0.##")} ha,
                                     thời điểm: {stat.FlightTime}
                                     thiết bị: {device.Name}
-                                    thời gian bay: {stat.FlightDuration} giờ
+                                    thời gian bay: {stat.FlightDuration.ToString("0.##")} giờ
                                     id: {stat.ID}
                                     phần trăm pin còn lại: {stat.BatteryPercentRemaining.GetValueOrDefault()}%
                                     link: {options.Value.Domain}/apps/execution-flight-statistics/map/{stat.ID}
@@ -787,10 +787,10 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
                 if (stat.BatteryPercentRemaining.GetValueOrDefault() < 30)
                 {
                     await emailService.SendMailAsync(Constants.LowBatteryReportEmailTargets.ToArray(), new String[] { }, new String[] { }, "Báo cáo chuyến bay phần trăm Pin tháp", @$"
-                                    diện tích: {(stat.TaskArea / 10000).ToString("0.##")},
+                                    diện tích: {(stat.TaskArea / 10000).ToString("0.##")} ha,
                                     thời điểm: {stat.FlightTime}
                                     thiết bị: {device.Name}
-                                    thời gian bay: {stat.FlightDuration} giờ
+                                    thời gian bay: {stat.FlightDuration.ToString("0.##")} giờ
                                     id: {stat.ID}
                                     phần trăm pin còn lại: {stat.BatteryPercentRemaining.GetValueOrDefault()}%
                                     link: {options.Value.Domain}/apps/execution-flight-statistics/map/{stat.ID}
