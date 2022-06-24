@@ -29,6 +29,7 @@ using System.Data;
 using MiSmart.API.Helpers;
 using Microsoft.Extensions.Options;
 using MiSmart.Infrastructure.Settings;
+using MiSmart.API.Services;
 
 namespace MiSmart.API.Controllers
 {
@@ -319,7 +320,7 @@ namespace MiSmart.API.Controllers
         [FromServices] DatabaseContext databaseContext,
         [FromServices] ExecutionCompanySettingRepository executionCompanySettingRepository,
         [FromServices] ExecutionCompanyUserFlightStatRepository executionCompanyUserFlightStatRepository,
-        [FromServices] EmailService emailService,
+        [FromServices] MyEmailService emailService,
         [FromServices] IOptions<FrontEndSettings> options,
          [FromServices] DeviceRepository deviceRepository, [FromServices] JWTService jwtService)
         {
@@ -415,7 +416,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
                             PilotName = item.PilotName,
                             CreatedTime = DateTime.UtcNow,
                             CustomerID = device.CustomerID,
-                            DeviceID = device.ID,
+                            Device = device,
                             DeviceName = device.Name,
                             TaskLocation = item.TaskLocation,
                             TeamID = device.TeamID,
@@ -463,16 +464,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
                         {
                             if (stat.BatteryPercentRemaining.GetValueOrDefault() < 30)
                             {
-                                await emailService.SendMailAsync(Constants.LowBatteryReportEmailTargets.ToArray(), new String[] { }, new String[] { }, "Báo cáo chuyến bay phần trăm Pin tháp", @$"
-                                    diện tích: {(stat.TaskArea / 10000).ToString("0.##")} ha,
-                                    thời điểm: {stat.FlightTime}
-                                    thiết bị: {device.Name}
-                                    thời gian bay: {stat.FlightDuration.ToString("0.##")} giờ
-                                    id: {stat.ID}
-                                    phần trăm pin còn lại: {stat.BatteryPercentRemaining.GetValueOrDefault()}%
-                                    link: {options.Value.Domain}/apps/execution-flight-statistics/map/{stat.ID}
-                                    offline
-                            ");
+                                await emailService.SendLowBatteryReport(stat, false);
                             }
                         }
                         flightStats.Add(stat);
@@ -641,7 +633,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
         public async Task<IActionResult> CreateFlightStat([FromServices] DeviceRepository deviceRepository, [FromServices] FlightStatRepository flightStatRepository,
         [FromServices] ExecutionCompanySettingRepository executionCompanySettingRepository,
         [FromServices] DatabaseContext databaseContext,
-        [FromServices] EmailService emailService,
+        [FromServices] MyEmailService emailService,
         [FromServices] IOptions<FrontEndSettings> options,
         [FromServices] ExecutionCompanyUserFlightStatRepository executionCompanyUserFlightStatRepository, [FromBody] AddingFlightStatCommand command)
         {
@@ -741,7 +733,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
                 PilotName = command.PilotName,
                 CreatedTime = DateTime.UtcNow,
                 CustomerID = device.CustomerID,
-                DeviceID = device.ID,
+                Device = device,
                 DeviceName = device.Name,
                 TaskLocation = command.TaskLocation,
                 TaskArea = command.TaskArea.GetValueOrDefault(),
@@ -786,16 +778,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
             {
                 if (stat.BatteryPercentRemaining.GetValueOrDefault() < 30)
                 {
-                    await emailService.SendMailAsync(Constants.LowBatteryReportEmailTargets.ToArray(), new String[] { }, new String[] { }, "Báo cáo chuyến bay phần trăm Pin tháp", @$"
-                                    diện tích: {(stat.TaskArea / 10000).ToString("0.##")} ha,
-                                    thời điểm: {stat.FlightTime}
-                                    thiết bị: {device.Name}
-                                    thời gian bay: {stat.FlightDuration.ToString("0.##")} giờ
-                                    id: {stat.ID}
-                                    phần trăm pin còn lại: {stat.BatteryPercentRemaining.GetValueOrDefault()}%
-                                    link: {options.Value.Domain}/apps/execution-flight-statistics/map/{stat.ID}
-                                    online
-                            ");
+                    await emailService.SendLowBatteryReport(stat, true);
                 }
             }
             response.SetCreatedObject(stat);

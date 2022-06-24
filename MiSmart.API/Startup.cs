@@ -31,6 +31,7 @@ using MiSmart.Infrastructure.ScheduledTasks;
 using MiSmart.API.ScheduledTasks;
 using FirebaseAdmin;
 using MiSmart.API.RabbitMQ;
+using Microsoft.Extensions.Options;
 
 namespace MiSmart.API
 {
@@ -133,6 +134,7 @@ namespace MiSmart.API
             services.Configure<AuthSystemSettings>(Configuration.GetSection("AuthSystemSettings"));
             services.Configure<FrontEndSettings>(Configuration.GetSection("FrontEndSettings"));
             services.Configure<FarmAppSettings>(Configuration.GetSection("FarmAppSettings"));
+            services.Configure<TargetEmailSettings>(Configuration.GetSection("TargetEmailSettings"));
 
             #endregion
             #region ConfiguringJWT
@@ -141,7 +143,7 @@ namespace MiSmart.API
             #region AddingServices
             services.AddSingleton<HashService, HashService>();
             services.AddScoped<JWTService, JWTService>();
-            services.AddScoped<EmailService, EmailService>();
+            services.AddScoped<MyEmailService, MyEmailService>();
 
             services.AddSingleton<AuthSystemService, AuthSystemService>();
 
@@ -287,6 +289,12 @@ namespace MiSmart.API
             context.Database.Migrate();
 
             var env = scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
+
+            TargetEmailSettings targetEmailSettings = scope.ServiceProvider.GetRequiredService<IOptions<TargetEmailSettings>>().Value;
+            foreach (var email in targetEmailSettings.LowBattery)
+            {
+                Console.WriteLine(email);
+            }
             if (!env.IsDevelopment())
             {
                 Console.WriteLine("Not dev env");

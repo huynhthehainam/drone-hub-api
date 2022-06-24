@@ -49,17 +49,7 @@ namespace MiSmart.API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetFlightStats([FromServices] FlightStatRepository flightStatRepository,
-        [FromServices] TeamUserRepository teamUserRepository,
-        [FromServices] IOptions<ActionResponseSettings> options,
-        [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository,
-        [FromServices] IHttpClientFactory httpClientFactory,
-        [FromServices] CustomerUserRepository customerUserRepository, [FromQuery] PageCommand pageCommand,
-         [FromQuery] DateTime? from, [FromQuery] DateTime? to, [FromQuery] Int32? executionCompanyID,
-         [FromQuery] Int32? customerID,
-         [FromQuery] Int64? teamID, [FromQuery] Int32? deviceID, [FromQuery] Int32? deviceModelID,
-         [FromQuery] Boolean? getMappingRecords,
-         [FromQuery] Boolean? getSeedingRecords,
+        public async Task<IActionResult> GetFlightStats([FromServices] FlightStatRepository flightStatRepository, [FromServices] TeamUserRepository teamUserRepository, [FromServices] IOptions<ActionResponseSettings> options, [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, [FromServices] IHttpClientFactory httpClientFactory, [FromServices] CustomerUserRepository customerUserRepository, [FromQuery] PageCommand pageCommand, [FromQuery] DateTime? from, [FromQuery] DateTime? to, [FromQuery] Int32? executionCompanyID, [FromQuery] Int32? customerID, [FromQuery] Int64? teamID, [FromQuery] Int32? deviceID, [FromQuery] Int32? deviceModelID, [FromQuery] Boolean? getMappingRecords, [FromQuery] Boolean? getSeedingRecords,
          [FromQuery] Boolean? getSprayingRecords,
          [FromQuery] String relation = "Owner")
         {
