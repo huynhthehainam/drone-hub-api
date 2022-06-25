@@ -26,6 +26,7 @@
 	</ItemGroup>
 	<ItemGroup>
 		<Protobuf Include="Protos/auth.proto" GrpcServices="Client"/>
+		<None Include="HTMLTemplates/**" CopyToOutputDirectory="PreserveNewest"/>
 		<None Include="google_services.json" CopyToOutputDirectory="PreserveNewest"/>
 	</ItemGroup>
 	<ItemGroup>
