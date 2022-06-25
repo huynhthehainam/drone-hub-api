@@ -30,6 +30,7 @@ using MiSmart.API.Helpers;
 using Microsoft.Extensions.Options;
 using MiSmart.Infrastructure.Settings;
 using MiSmart.API.Services;
+using System.Net.Http;
 
 namespace MiSmart.API.Controllers
 {
@@ -322,6 +323,7 @@ namespace MiSmart.API.Controllers
         [FromServices] ExecutionCompanyUserFlightStatRepository executionCompanyUserFlightStatRepository,
         [FromServices] MyEmailService emailService,
         [FromServices] IOptions<FrontEndSettings> options,
+        [FromServices] IHttpClientFactory httpClientFactory,
          [FromServices] DeviceRepository deviceRepository, [FromServices] JWTService jwtService)
         {
             var response = actionResponseFactory.CreateInstance();
@@ -426,8 +428,15 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
                             AdditionalInformation = item.AdditionalInformation,
                             BatteryPercentRemaining = item.BatteryPercentRemaining,
                         };
+                        try
+                        {
+                            stat.TaskLocation = await BingLocationHelper.UpdateFlightStatLocation(stat, httpClientFactory);
+                            stat.IsBingLocation = true;
+                        }
+                        catch (Exception)
+                        {
 
-
+                        }
 
                         if (device.ExecutionCompanyID.HasValue)
                         {
@@ -635,6 +644,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
         [FromServices] DatabaseContext databaseContext,
         [FromServices] MyEmailService emailService,
         [FromServices] IOptions<FrontEndSettings> options,
+        [FromServices] IHttpClientFactory httpClientFactory,
         [FromServices] ExecutionCompanyUserFlightStatRepository executionCompanyUserFlightStatRepository, [FromBody] AddingFlightStatCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
@@ -751,7 +761,15 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
                     stat.Cost = stat.TaskArea / 10000 * latestSetting.CostPerHectare;
                 }
             }
+            try
+            {
+                stat.TaskLocation = await BingLocationHelper.UpdateFlightStatLocation(stat, httpClientFactory);
+                stat.IsBingLocation = true;
+            }
+            catch (Exception)
+            {
 
+            }
 
             await flightStatRepository.CreateAsync(stat);
             if (device.Team is not null)
