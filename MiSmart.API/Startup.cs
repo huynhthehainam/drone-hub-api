@@ -217,13 +217,13 @@ namespace MiSmart.API
             services.AddCronJob<RemovingOldRecordsTask>(o =>
             {
                 o.CronExpression = "* */30 * * * *";
-                o.TimeZoneInfo = TimeZoneInfo.Local;
+                o.TimeZoneInfo = TimeZoneInfo.Utc;
             });
 
             services.AddCronJob<UpdatingTaskBingLocation>(o =>
             {
                 o.CronExpression = "*/10 * * * * *";
-                o.TimeZoneInfo = TimeZoneInfo.Local;
+                o.TimeZoneInfo = TimeZoneInfo.Utc;
             });
 
             //     services.AddCronJob<UpdatingCostFlightStatsTask>(o =>
