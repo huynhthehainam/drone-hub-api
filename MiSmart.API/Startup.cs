@@ -229,7 +229,7 @@ namespace MiSmart.API
             //     services.AddCronJob<UpdatingCostFlightStatsTask>(o =>
             //    {
             //        o.CronExpression = "*/50 * * * * *";
-            //        o.TimeZoneInfo = TimeZoneInfo.Local;
+            //        o.TimeZoneInfo = TimeZoneInfo.Utc;
             //    });
             #endregion
         }
