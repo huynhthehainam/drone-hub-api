@@ -69,7 +69,7 @@ public class MyEmailService : EmailService
             $"{frontEndSettings.Domain}/apps/execution-flight-statistics/map/{stat.ID}",
             ""
         );
-        await SendMailAsync(targetEmailSettings.LowBattery.ToArray(), new String[] { }, new String[] { }, "Báo cáo chuyến bay phần trăm Pin thấp", html, true);
+        await SendMailAsync(targetEmailSettings.LowBattery.ToArray(), new String[] { }, new String[] { }, $"[{stat.Device.Name}] Báo cáo chuyến bay phần trăm Pin thấp", html, true);
     }
     private String generateLowBatteryDailyReport(List<FlightStat> listStat, DateTime localNow)
     {
