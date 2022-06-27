@@ -52,9 +52,11 @@ public class MyEmailService : EmailService
     public async Task SendLowBatteryReport(FlightStat stat, Boolean isOnline)
     {
         var online = isOnline ? "online" : "offline";
+        TimeZoneInfo seaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+        var localFlightTime = TimeZoneInfo.ConvertTimeFromUtc(stat.FlightTime, seaTimeZone);
         var html = generateLowBatteryReportHTML(
             "Nghiêm trọng",
-            stat.FlightTime,
+            localFlightTime,
             "",
             "",
             "",

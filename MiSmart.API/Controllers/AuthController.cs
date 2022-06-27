@@ -15,7 +15,6 @@ namespace MiSmart.API.Controllers
         public AuthController(IActionResponseFactory actionResponseFactory) : base(actionResponseFactory)
         {
         }
-
         [HttpPost("GenerateDeviceToken")]
         public async Task<IActionResult> GenerateDeviceAccessToken([FromServices] IOptions<AuthSettings> options, [FromServices] DeviceRepository deviceRepository, [FromBody] GeneratingDeviceAccessTokenCommand command)
         {
