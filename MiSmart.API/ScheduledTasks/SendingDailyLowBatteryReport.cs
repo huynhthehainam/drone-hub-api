@@ -17,10 +17,11 @@ namespace MiSmart.API.ScheduledTasks
         {
             this.serviceProvider = serviceProvider;
         }
-        public override Task DoWork(CancellationToken cancellationToken)
+        public override async Task DoWork(CancellationToken cancellationToken)
         {
             using (var scope = serviceProvider.CreateScope())
             {
+                MyEmailService emailService = scope.ServiceProvider.GetRequiredService<MyEmailService>();
                 TimeZoneInfo seaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
                 var utcNow = DateTime.UtcNow;
                 var localNow = TimeZoneInfo.ConvertTimeFromUtc(utcNow, seaTimeZone);
@@ -31,12 +32,11 @@ namespace MiSmart.API.ScheduledTasks
                 using (DatabaseContext databaseContext = scope.ServiceProvider.GetRequiredService<DatabaseContext>())
                 {
                     var flightStats = databaseContext.FlightStats.Where(ww => ww.FlightTime >= utcStartTime && ww.FlightTime <= utcEndTime && ww.BatteryPercentRemaining.GetValueOrDefault(100) < 30).ToList();
-                    MyEmailService  emailService =  scope.ServiceProvider.GetRequiredService<MyEmailService>();
+                    
+                    await emailService.SendLowBatteryDailyReport(flightStats);
                 }
 
             }
-
-            return Task.CompletedTask;
         }
     }
 }

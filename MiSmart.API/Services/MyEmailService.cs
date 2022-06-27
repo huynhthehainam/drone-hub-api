@@ -8,6 +8,7 @@ using System;
 using MiSmart.Infrastructure.Services;
 using MiSmart.Infrastructure.Settings;
 using System.IO;
+using System.Collections.Generic;
 
 namespace MiSmart.API.Services;
 
@@ -69,5 +70,40 @@ public class MyEmailService : EmailService
             ""
         );
         await SendMailAsync(targetEmailSettings.LowBattery.ToArray(), new String[] { }, new String[] { }, "Báo cáo chuyến bay phần trăm Pin thấp", html, true);
+    }
+    private String generateLowBatteryDailyReport(List<FlightStat> listStat)
+    {
+        var tableData = "";
+        TimeZoneInfo seaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+        for (int i = 0; i < listStat.Count; i++)
+        {
+            var flightStat = listStat[i];
+            var row = getHTML("LowBatteryRow");
+            var localFlightTime = TimeZoneInfo.ConvertTimeFromUtc(flightStat.FlightTime, seaTimeZone);
+            row = row.Replace("index", (i + 1).ToString());
+            row = row.Replace("time", localFlightTime.ToString());
+            row = row.Replace("pilot", "");
+            row = row.Replace("drone", flightStat.DeviceName);
+            row = row.Replace("customer", "");
+            row = row.Replace("location", flightStat.TaskLocation);
+            row = row.Replace("percent_battery", flightStat.BatteryPercentRemaining.ToString() + "%");
+            tableData += row;
+        }
+        var utcNow = DateTime.UtcNow;
+        var localNow = TimeZoneInfo.ConvertTimeFromUtc(utcNow, seaTimeZone);
+        var html = getHTML("LowBatteryDailyReport");
+        html = html.Replace("table_data_indicator ", tableData);
+
+        html = html.Replace("DDMMYYYY", localNow.ToString("yyyy-MM-dd"));
+        return html;
+    }
+
+    public async Task SendLowBatteryDailyReport(List<FlightStat> flightStats)
+    {
+        var html = generateLowBatteryDailyReport(flightStats);
+        TimeZoneInfo seaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+        var utcNow = DateTime.UtcNow;
+        var localNow = TimeZoneInfo.ConvertTimeFromUtc(utcNow, seaTimeZone);
+        await SendMailAsync(targetEmailSettings.DailyReport.ToArray(), new String[] { }, new String[] { }, "Báo cáo cảnh báo vận hành pin sai cách " + localNow.ToString("yyyy-MM-dd"), html, true);
     }
 }

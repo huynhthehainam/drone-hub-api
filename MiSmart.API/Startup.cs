@@ -226,6 +226,11 @@ namespace MiSmart.API
                 o.TimeZoneInfo = TimeZoneInfo.Utc;
             });
 
+            services.AddCronJob<SendingDailyLowBatteryReport>(o => {
+                o.CronExpression = "0 45 7 * * *";
+                o.TimeZoneInfo = TimeZoneInfo.Utc;
+            });
+
             //     services.AddCronJob<UpdatingCostFlightStatsTask>(o =>
             //    {
             //        o.CronExpression = "*/50 * * * * *";
