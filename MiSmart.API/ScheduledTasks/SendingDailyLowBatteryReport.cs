@@ -32,8 +32,8 @@ namespace MiSmart.API.ScheduledTasks
                 using (DatabaseContext databaseContext = scope.ServiceProvider.GetRequiredService<DatabaseContext>())
                 {
                     var flightStats = databaseContext.FlightStats.Where(ww => ww.FlightTime >= utcStartTime && ww.FlightTime <= utcEndTime && ww.BatteryPercentRemaining.GetValueOrDefault(100) < 30).ToList();
-                    
-                    await emailService.SendLowBatteryDailyReport(flightStats);
+
+                    await emailService.SendLowBatteryDailyReport(flightStats, localNow);
                 }
 
             }

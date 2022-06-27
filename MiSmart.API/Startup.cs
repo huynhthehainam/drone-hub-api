@@ -226,8 +226,9 @@ namespace MiSmart.API
                 o.TimeZoneInfo = TimeZoneInfo.Utc;
             });
 
-            services.AddCronJob<SendingDailyLowBatteryReport>(o => {
-                o.CronExpression = "0 45 7 * * *";
+            services.AddCronJob<SendingDailyLowBatteryReport>(o =>
+            {
+                o.CronExpression = "0 0 15 * * *";
                 o.TimeZoneInfo = TimeZoneInfo.Utc;
             });
 

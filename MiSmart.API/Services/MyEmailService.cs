@@ -71,7 +71,7 @@ public class MyEmailService : EmailService
         );
         await SendMailAsync(targetEmailSettings.LowBattery.ToArray(), new String[] { }, new String[] { }, "Báo cáo chuyến bay phần trăm Pin thấp", html, true);
     }
-    private String generateLowBatteryDailyReport(List<FlightStat> listStat)
+    private String generateLowBatteryDailyReport(List<FlightStat> listStat, DateTime localNow)
     {
         var tableData = "";
         TimeZoneInfo seaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
@@ -89,8 +89,7 @@ public class MyEmailService : EmailService
             row = row.Replace("percent_battery", flightStat.BatteryPercentRemaining.ToString() + "%");
             tableData += row;
         }
-        var utcNow = DateTime.UtcNow;
-        var localNow = TimeZoneInfo.ConvertTimeFromUtc(utcNow, seaTimeZone);
+
         var html = getHTML("LowBatteryDailyReport");
         html = html.Replace("table_data_indicator ", tableData);
 
@@ -98,12 +97,10 @@ public class MyEmailService : EmailService
         return html;
     }
 
-    public async Task SendLowBatteryDailyReport(List<FlightStat> flightStats)
+    public async Task SendLowBatteryDailyReport(List<FlightStat> flightStats, DateTime localNow)
     {
-        var html = generateLowBatteryDailyReport(flightStats);
-        TimeZoneInfo seaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
-        var utcNow = DateTime.UtcNow;
-        var localNow = TimeZoneInfo.ConvertTimeFromUtc(utcNow, seaTimeZone);
+        var html = generateLowBatteryDailyReport(flightStats, localNow);
+
         await SendMailAsync(targetEmailSettings.DailyReport.ToArray(), new String[] { }, new String[] { }, "Báo cáo cảnh báo vận hành pin sai cách " + localNow.ToString("yyyy-MM-dd"), html, true);
     }
 }
