@@ -1,5 +1,6 @@
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using MiSmart.DAL.Models;
@@ -47,6 +48,9 @@ namespace MiSmart.DAL.ViewModels
         public JsonDocument Medicines { get; set; }
         public CoordinateViewModel FirstPoint { get; set; }
         public Boolean IsBingLocation { get; set; }
+        public FlightStatStatus? Status { get; set; }
+
+        public List<FlightStatReportRecordViewModel> ReportRecords { get; set; }
         public void LoadFrom(FlightStat entity)
         {
             IsBingLocation = entity.IsBingLocation;
@@ -69,10 +73,12 @@ namespace MiSmart.DAL.ViewModels
             TMUserUID = entity.TMUserUID;
             TMUser = entity.TMUser;
             Medicines = entity.Medicines;
+            Status = entity.Status;
             if (entity.FlywayPoints.Count > 0)
             {
                 FirstPoint = new CoordinateViewModel(entity.FlywayPoints.Coordinates.FirstOrDefault());
             }
+            ReportRecords = entity.FlightStatReportRecords.Select(ww => ViewModelHelpers.ConvertToViewModel<FlightStatReportRecord, FlightStatReportRecordViewModel>(ww)).ToList();
         }
     }
 }

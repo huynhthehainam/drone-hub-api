@@ -177,6 +177,7 @@ namespace MiSmart.API
             services.AddScoped<ExecutionCompanySettingRepository, ExecutionCompanySettingRepository>();
             services.AddScoped<StreamingLinkRepository, StreamingLinkRepository>();
             services.AddScoped<MaintenanceReportRepository, MaintenanceReportRepository>();
+            services.AddScoped<FlightStatReportRecordRepository, FlightStatReportRecordRepository>();
 
 
             #endregion

@@ -21,6 +21,7 @@ using System.Text.Json;
 using MiSmart.Infrastructure.Constants;
 using System.Net.Http;
 using MiSmart.API.Helpers;
+using MiSmart.Infrastructure.Minio;
 
 namespace MiSmart.API.Controllers
 {
@@ -46,6 +47,54 @@ namespace MiSmart.API.Controllers
             listResponse.SetResponse(response);
 
             return response.ToIActionResult();
+        }
+
+        [HttpPost("{id:Guid}/AddReportRecord")]
+        public async Task<IActionResult> AddReportRecord([FromServices] FlightStatRepository flightStatRepository, [FromServices] MinioService minioService, [FromForm] AddingFlightStatReportRecordCommand command, [FromRoute] Guid id, [FromServices] FlightStatReportRecordRepository flightStatReportRecordRepository)
+        {
+            ActionResponse actionResponse = actionResponseFactory.CreateInstance();
+            if (!CurrentUser.IsAdministrator)
+            {
+                actionResponse.AddNotAllowedErr();
+            }
+
+            var flightStat = await flightStatRepository.GetAsync(ww => ww.ID == id);
+            if (flightStat is null)
+            {
+                actionResponse.AddNotFoundErr("FlightStat");
+            }
+            List<String> images = new List<String>();
+            foreach (var imageCommand in command.Files)
+            {
+                var url = await minioService.PutFileAsync(imageCommand, new String[] { "drone-hub-api", "flight-stat-report", $"{flightStat.ID}" });
+                images.Add(url);
+            }
+            FlightStatReportRecord flightStatReportRecord = new FlightStatReportRecord { FlightStat = flightStat, Reason = command.Reason, Images = images };
+            await flightStatReportRecordRepository.CreateAsync(flightStatReportRecord);
+            actionResponse.SetCreatedObject(flightStatReportRecord);
+            return actionResponse.ToIActionResult();
+        }
+        [HttpPost("{id:Guid}/UpdateFromAdministrator")]
+        public async Task<IActionResult> UpdateFromAdministrator([FromRoute] Guid id, [FromServices] FlightStatRepository flightStatRepository, [FromBody] UpdatingFlightStatFromAdministratorCommand command)
+        {
+            ActionResponse actionResponse = actionResponseFactory.CreateInstance();
+            if (!CurrentUser.IsAdministrator)
+            {
+                actionResponse.AddNotAllowedErr();
+            }
+            var flightStat = await flightStatRepository.GetAsync(ww => ww.ID == id);
+            if (flightStat is null)
+            {
+                actionResponse.AddNotFoundErr("FlightStat");
+            }
+
+            flightStat.Status = command.Status;
+            flightStat.StatusUpdatedTime = DateTime.UtcNow;
+            flightStat.StatusUpdatedUserUUID = CurrentUser.UUID;
+
+            await flightStatRepository.UpdateAsync(flightStat);
+
+            return actionResponse.ToIActionResult();
         }
 
         [HttpGet]
@@ -179,6 +228,7 @@ namespace MiSmart.API.Controllers
             response.SetData(ViewModelHelpers.ConvertToViewModel<FlightStat, LargeFlightStatViewModel>(flightStat));
             return response.ToIActionResult();
         }
+
         [HttpPost("{id:Guid}/UpdateFromExecutor")]
         public async Task<IActionResult> UpdateFromExecutor([FromRoute] Guid id, [FromServices] TeamRepository teamRepository,
          [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, [FromServices] FlightStatRepository flightStatRepository,

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using MiSmart.DAL.Models;
 
 namespace MiSmart.API.Commands
@@ -13,5 +14,11 @@ namespace MiSmart.API.Commands
         public String TaskLocation { get; set; }
         public TMUser TMUser { get; set; }
         public List<Medicine> Medicines { get; set; } = new List<Medicine>();
+    }
+    public class UpdatingFlightStatFromAdministratorCommand
+    {
+        [Required]
+        public FlightStatStatus Status { get; set; }
+        
     }
 }

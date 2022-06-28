@@ -33,6 +33,15 @@ namespace MiSmart.DAL.Models
         Other,
 
     }
+
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public enum FlightStatStatus
+    {
+        Safe,
+        Unsafe,
+        Failed
+    }
+
     public class FlightStat : EntityBase<Guid>
     {
         public FlightStat() : base()
@@ -122,5 +131,16 @@ namespace MiSmart.DAL.Models
             set;
         }
         public String GCSVersion { get; set; }
+
+        public FlightStatStatus? Status { get; set; }
+        public DateTime? StatusUpdatedTime { get; set; }
+        public Guid? StatusUpdatedUserUUID { get; set; }
+
+        private ICollection<FlightStatReportRecord> flightStatReportRecords;
+        public ICollection<FlightStatReportRecord> FlightStatReportRecords
+        {
+            get => lazyLoader.Load(this, ref flightStatReportRecords);
+            set => flightStatReportRecords = value;
+        }
     }
 }
