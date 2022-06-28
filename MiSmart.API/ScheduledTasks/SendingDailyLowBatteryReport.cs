@@ -31,7 +31,7 @@ namespace MiSmart.API.ScheduledTasks
                 var utcEndTime = TimeZoneInfo.ConvertTimeToUtc(localEndTime, seaTimeZone);
                 using (DatabaseContext databaseContext = scope.ServiceProvider.GetRequiredService<DatabaseContext>())
                 {
-                    var flightStats = databaseContext.FlightStats.Where(ww => ww.FlightTime >= utcStartTime && ww.FlightTime <= utcEndTime && ww.BatteryPercentRemaining.GetValueOrDefault(100) < 30).ToList();
+                    var flightStats = databaseContext.FlightStats.Where(ww => ww.FlightTime >= utcStartTime && ww.FlightTime <= utcEndTime && ww.BatteryPercentRemaining.GetValueOrDefault(100) < 30).OrderBy(ww => ww.FlightTime).ToList();
 
                     await emailService.SendLowBatteryDailyReport(flightStats, localNow);
                 }
