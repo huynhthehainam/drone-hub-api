@@ -427,6 +427,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
                             GCSVersion = item.GCSVersion,
                             AdditionalInformation = item.AdditionalInformation,
                             BatteryPercentRemaining = item.BatteryPercentRemaining,
+                            IsOnline = false,
                         };
                         try
                         {
@@ -752,6 +753,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
                 GCSVersion = command.GCSVersion,
                 AdditionalInformation = command.AdditionalInformation,
                 BatteryPercentRemaining = command.BatteryPercentRemaining,
+                IsOnline = true,
             };
             if (device.ExecutionCompanyID.HasValue)
             {

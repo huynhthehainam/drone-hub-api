@@ -142,5 +142,6 @@ namespace MiSmart.DAL.Models
             get => lazyLoader.Load(this, ref flightStatReportRecords);
             set => flightStatReportRecords = value;
         }
+        public Boolean? IsOnline { get; set; }
     }
 }
