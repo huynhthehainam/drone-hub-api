@@ -346,7 +346,7 @@ namespace MiSmart.API.Controllers
                         {
                             continue;
                         }
-                        if (item.FlywayPoints.Count == 0)
+                        if (item.FlywayPoints.Count < 2)
                         {
 
                             continue;
@@ -652,7 +652,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
                 response.SetMessage("Invalid");
                 return response.ToIActionResult();
             }
-            if (command.FlywayPoints.Count == 0)
+            if (command.FlywayPoints.Count < 2)
             {
                 response.SetMessage("Invalid");
                 await emailService.SendMailAsync(new String[] { "huynhthehainam@gmail.com" }, new String[] { }, new String[] { }, "Report flight stat", @$"
