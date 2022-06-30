@@ -31,7 +31,6 @@ using Microsoft.Extensions.Options;
 using MiSmart.Infrastructure.Settings;
 using MiSmart.API.Services;
 using System.Net.Http;
-using System.Text.Json;
 
 namespace MiSmart.API.Controllers
 {
@@ -329,10 +328,6 @@ namespace MiSmart.API.Controllers
         {
             var response = actionResponseFactory.CreateInstance();
             List<FlightStat> flightStats = new List<FlightStat>();
-            var emailContent = JsonSerializer.Serialize(command);
-            await emailService.SendMailAsync(new String[] { "huynhthehainam@gmail.com" }, new String[] { }, new String[] { }, "[Offline Report]Report flight stat", @$"
-                               {emailContent}
-                            ");
             foreach (var item in command.Data)
             {
                 var deviceJWT = jwtService.GetUser(item.DeviceAccessToken);
@@ -348,7 +343,18 @@ namespace MiSmart.API.Controllers
                         }
                         if (item.FlywayPoints.Count < 2)
                         {
-
+                            if (item.TaskArea.GetValueOrDefault() < 0)
+                            {
+                                await emailService.SendMailAsync(new String[] { "huynhthehainam@gmail.com" }, new String[] { }, new String[] { }, "Report flight stat", @$"
+                                task area: {item.TaskArea},
+                                sprayedIndexes: {item.SprayedIndexes.Count()}
+                                flywayPoints: {item.FlywayPoints.Count()}
+                                device: {device.Name}
+                                flightDuration: {item.FlightDuration.GetValueOrDefault()}
+                                flightTime: {item.FlightTime}
+                                offline
+                            ");
+                            }
                             continue;
                         }
                         var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
