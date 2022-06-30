@@ -495,7 +495,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
         public async Task<IActionResult> CreateTelemetryRecord([FromServices] DeviceRepository deviceRepository,
         [FromServices] BatteryGroupLogRepository batteryGroupLogRepository,
         [FromServices] BatteryModelRepository batteryModelRepository,
-        [FromServices] EmailService emailService,
+        [FromServices] MyEmailService emailService,
         [FromServices] BatteryRepository batteryRepository, [FromServices] TelemetryGroupRepository telemetryGroupRepository, [FromBody] AddingBulkTelemetryRecordCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
