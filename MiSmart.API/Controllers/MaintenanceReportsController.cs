@@ -26,14 +26,16 @@ namespace MiSmart.API.Controllers
         {
             ActionResponse actionResponse = actionResponseFactory.CreateInstance();
             var report = await maintenanceReportRepository.GetAsync(ww => ww.ID == id && ww.UserUUID == CurrentUser.UUID);
+            Console.WriteLine(report);
             if (report is null)
             {
                 actionResponse.AddNotFoundErr("Report");
             }
 
-            var fileLink = await minioService.PutFileAsync(command.File, new String[] { "drone-hub-api", "maintenance-report", $"{report.UUID}" });
-
-            report.AttachmentLinks.Add(fileLink);
+            for(var i = 0; i < command.Files.Count; i++){
+                var fileLink = await minioService.PutFileAsync(command.Files[i], new String[] { "drone-hub-api", "maintenance-report", $"{report.UUID}" });
+                report.AttachmentLinks.Add(fileLink);
+            }
 
             await maintenanceReportRepository.UpdateAsync(report);
 

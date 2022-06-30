@@ -1,9 +1,9 @@
 
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Http;
-using MiSmart.Infrastructure.Validations;
 
 namespace MiSmart.API.Commands
 {
@@ -16,7 +16,6 @@ namespace MiSmart.API.Commands
     public class AddingMaintenanceReportAttachmentCommand
     {
         [Required]
-        [AllowedExtensions(new String[] { ".jpg", ".png", ".mp3", ".wav", ".mid", ".aif", ".mp4", ".avi" })]
-        public IFormFile File { get; set; }
+        public List<IFormFile> Files { get; set; }
     }
 }
