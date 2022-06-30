@@ -15,7 +15,8 @@ namespace MiSmart.API.Services;
 public class MyEmailService : EmailService
 {
 
-    private const String htmlFolderPath = "./HTMLTemplates"; private readonly TargetEmailSettings targetEmailSettings;
+    private const String htmlFolderPath = "./HTMLTemplates";
+    private readonly TargetEmailSettings targetEmailSettings;
     private readonly FrontEndSettings frontEndSettings;
     public MyEmailService(IOptions<SmtpSettings> options, IOptions<EmailSettings> options1, IOptions<TargetEmailSettings> options2, IOptions<FrontEndSettings> options3) : base(options, options1)
     {
