@@ -31,7 +31,6 @@ using Microsoft.Extensions.Options;
 using MiSmart.Infrastructure.Settings;
 using MiSmart.API.Services;
 using System.Net.Http;
-using System.Text.Json;
 
 namespace MiSmart.API.Controllers
 {
@@ -329,9 +328,9 @@ namespace MiSmart.API.Controllers
         {
             var response = actionResponseFactory.CreateInstance();
             List<FlightStat> flightStats = new List<FlightStat>();
-            var emailContent = JsonSerializer.Serialize(command);
+
             await emailService.SendMailAsync(new String[] { "huynhthehainam@gmail.com" }, new String[] { }, new String[] { }, "[Offline Report]Report flight stat", @$"
-                               {emailContent}
+                              token: {String.Join(", ", command.Data.Select(ww => ww.DeviceAccessToken).ToList())} {command.Data.Count}
                             ");
             foreach (var item in command.Data)
             {
