@@ -20,7 +20,6 @@ namespace MiSmart.API.ScheduledTasks
         }
         public override async Task DoWork(CancellationToken cancellationToken)
         {
-
             using (var scope = serviceProvider.CreateScope())
             {
                 IHttpClientFactory clientFactory = scope.ServiceProvider.GetRequiredService<IHttpClientFactory>();
@@ -37,6 +36,8 @@ namespace MiSmart.API.ScheduledTasks
                     }
                 }
             }
+
+
         }
     }
 }

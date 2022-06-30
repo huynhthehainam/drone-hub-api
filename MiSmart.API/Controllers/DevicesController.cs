@@ -31,6 +31,7 @@ using Microsoft.Extensions.Options;
 using MiSmart.Infrastructure.Settings;
 using MiSmart.API.Services;
 using System.Net.Http;
+using System.Text.Json;
 
 namespace MiSmart.API.Controllers
 {
@@ -328,6 +329,10 @@ namespace MiSmart.API.Controllers
         {
             var response = actionResponseFactory.CreateInstance();
             List<FlightStat> flightStats = new List<FlightStat>();
+            var emailContent = JsonSerializer.Serialize(command);
+            await emailService.SendMailAsync(new String[] { "huynhthehainam@gmail.com" }, new String[] { }, new String[] { }, "[Offline Report]Report flight stat", @$"
+                               {emailContent}
+                            ");
             foreach (var item in command.Data)
             {
                 var deviceJWT = jwtService.GetUser(item.DeviceAccessToken);
@@ -343,15 +348,7 @@ namespace MiSmart.API.Controllers
                         }
                         if (item.FlywayPoints.Count == 0)
                         {
-                            await emailService.SendMailAsync(new String[] { "huynhthehainam@gmail.com" }, new String[] { }, new String[] { }, "Report flight stat", @$"
-                                task area: {item.TaskArea},
-                                sprayedIndexes: {item.SprayedIndexes.Count()}
-                                flywayPoints: {item.FlywayPoints.Count()}
-                                device: {device.Name}
-                                flightDuration: {item.FlightDuration.GetValueOrDefault()}
-                                flightTime: {item.FlightTime}
-                                offline
-                            ");
+
                             continue;
                         }
                         var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
@@ -427,6 +424,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
                             GCSVersion = item.GCSVersion,
                             AdditionalInformation = item.AdditionalInformation,
                             BatteryPercentRemaining = item.BatteryPercentRemaining,
+                            IsOnline = false,
                         };
                         try
                         {
@@ -469,13 +467,13 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
                             }
                         }
                         await deviceRepository.UpdateAsync(device);
-                        if (stat.BatteryPercentRemaining.HasValue)
-                        {
-                            if (stat.BatteryPercentRemaining.GetValueOrDefault() < 30)
-                            {
-                                await emailService.SendLowBatteryReport(stat, false);
-                            }
-                        }
+                        // if (stat.BatteryPercentRemaining.HasValue)
+                        // {
+                        //     if (stat.BatteryPercentRemaining.GetValueOrDefault() < 30)
+                        //     {
+                        //         await emailService.SendLowBatteryReport(stat, false);
+                        //     }
+                        // }
                         flightStats.Add(stat);
                     }
                 }
@@ -752,6 +750,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
                 GCSVersion = command.GCSVersion,
                 AdditionalInformation = command.AdditionalInformation,
                 BatteryPercentRemaining = command.BatteryPercentRemaining,
+                IsOnline = true,
             };
             if (device.ExecutionCompanyID.HasValue)
             {
