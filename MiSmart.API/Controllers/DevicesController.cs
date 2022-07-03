@@ -473,13 +473,13 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
                             }
                         }
                         await deviceRepository.UpdateAsync(device);
-                        // if (stat.BatteryPercentRemaining.HasValue)
-                        // {
-                        //     if (stat.BatteryPercentRemaining.GetValueOrDefault() < 30)
-                        //     {
-                        //         await emailService.SendLowBatteryReport(stat, false);
-                        //     }
-                        // }
+                        if (stat.BatteryPercentRemaining.HasValue)
+                        {
+                            if (stat.BatteryPercentRemaining.GetValueOrDefault() < 30)
+                            {
+                                await emailService.SendLowBatteryReport(stat, false);
+                            }
+                        }
                         flightStats.Add(stat);
                     }
                 }
