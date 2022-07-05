@@ -328,6 +328,24 @@ namespace MiSmart.API.Controllers
         {
             var response = actionResponseFactory.CreateInstance();
             List<FlightStat> flightStats = new List<FlightStat>();
+            var sendNotification = false;
+            for (var i = 0; i < command.Data.Count - 1; i++)
+            {
+                var item = command.Data[i];
+                var item1 = command.Data[i + 1];
+
+                if (item.TaskArea == item1.TaskArea && item.FlightDuration == item1.FlightDuration)
+                {
+                    sendNotification = true;
+                }
+            }
+            if (sendNotification)
+            {
+                await emailService.SendMailAsync(new String[] { "huynhthehainam@gmail.com" }, new String[] { }, new String[] { }, "[Duplicate] Report flight stat ", @$"
+                               count: {command.Data.Count}
+                               offline
+                            ");
+            }
             foreach (var item in command.Data)
             {
                 var deviceJWT = jwtService.GetUser(item.DeviceAccessToken);
@@ -801,7 +819,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
             {
                 if (stat.BatteryPercentRemaining.GetValueOrDefault() < 30)
                 {
-                    await emailService.SendLowBatteryReport(stat, true);
+                    await emailService.SendLowBatteryReportAsync(stat, true);
                 }
             }
             response.SetCreatedObject(stat);

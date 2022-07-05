@@ -51,7 +51,7 @@ public class MyEmailService : EmailService
         html = html.Replace("document_link_indicator", documentLink);
         return html;
     }
-    public async Task SendLowBatteryReport(FlightStat stat, Boolean isOnline)
+    public async Task SendLowBatteryReportAsync(FlightStat stat, Boolean isOnline)
     {
         var online = isOnline ? "online" : "offline";
         TimeZoneInfo seaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
@@ -98,7 +98,7 @@ public class MyEmailService : EmailService
         return html;
     }
 
-    public async Task SendLowBatteryDailyReport(List<FlightStat> flightStats, DateTime localNow)
+    public async Task SendLowBatteryDailyReportAsync(List<FlightStat> flightStats, DateTime localNow)
     {
         var html = generateLowBatteryDailyReport(flightStats, localNow);
 

@@ -33,7 +33,7 @@ namespace MiSmart.API.ScheduledTasks
                 {
                     var flightStats = databaseContext.FlightStats.Where(ww => ww.FlightTime >= utcStartTime && ww.FlightTime <= utcEndTime && ww.BatteryPercentRemaining.GetValueOrDefault(100) < 30).OrderBy(ww => ww.FlightTime).ToList();
 
-                    await emailService.SendLowBatteryDailyReport(flightStats, localNow);
+                    await emailService.SendLowBatteryDailyReportAsync(flightStats, localNow);
                 }
 
             }
