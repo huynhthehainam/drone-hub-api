@@ -495,7 +495,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
                         {
                             if (stat.BatteryPercentRemaining.GetValueOrDefault() < 30)
                             {
-                                await emailService.SendLowBatteryReport(stat, false);
+                                await emailService.SendLowBatteryReportAsync(stat, false);
                             }
                         }
                         flightStats.Add(stat);
