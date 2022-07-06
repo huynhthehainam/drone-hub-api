@@ -31,15 +31,17 @@ namespace MiSmart.API.Controllers
         {
         }
 
-        [HttpPost("GetFlightStatsFromTM")]
+        [HttpGet("GetFlightStatsFromTM")]
         public async Task<IActionResult> GetFlightStatsFromTM([FromServices] FlightStatRepository flightStatRepository,
                 [FromQuery] PageCommand pageCommand,
-                [FromBody] GettingFlightStatsFromTMCommand command,
+                [FromQuery] String tmUserUUID,
                        [FromServices] IOptions<ActionResponseSettings> options)
         {
             FlightStatsActionResponse response = new FlightStatsActionResponse();
             response.ApplySettings(options.Value);
-            Expression<Func<FlightStat, Boolean>> query = ww => ww.TMUserUID == command.TMUserUID;
+
+
+            Expression<Func<FlightStat, Boolean>> query = ww => String.IsNullOrEmpty(tmUserUUID) ? false : ww.TMUserUID == tmUserUUID;
 
 
 
