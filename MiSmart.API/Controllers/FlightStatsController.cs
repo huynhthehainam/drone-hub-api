@@ -35,15 +35,17 @@ namespace MiSmart.API.Controllers
         public async Task<IActionResult> GetFlightStatsFromTM([FromServices] FlightStatRepository flightStatRepository,
                 [FromQuery] PageCommand pageCommand,
                 [FromQuery] String tmUserUUID,
+                [FromQuery] DateTime? from, 
+                [FromQuery] DateTime? to,
                        [FromServices] IOptions<ActionResponseSettings> options)
         {
             FlightStatsActionResponse response = new FlightStatsActionResponse();
             response.ApplySettings(options.Value);
 
 
-            Expression<Func<FlightStat, Boolean>> query = ww => String.IsNullOrEmpty(tmUserUUID) ? false : ww.TMUserUID == tmUserUUID;
-
-
+            Expression<Func<FlightStat, Boolean>> query = ww => String.IsNullOrEmpty(tmUserUUID) ? false : ww.TMUserUID == tmUserUUID 
+                && (from.HasValue ? (ww.FlightTime >= from.Value) : true)
+                && (to.HasValue ? (ww.FlightTime <= to.Value.AddDays(1)) : true);
 
             var listResponse = await flightStatRepository.GetListFlightStatsViewAsync<SmallFlightStatViewModel>(pageCommand, query, ww => ww.FlightTime, false);
             listResponse.SetResponse(response);
