@@ -335,7 +335,7 @@ namespace MiSmart.API.Controllers
                 var item = command.Data[i];
                 var item1 = command.Data[i + 1];
 
-                if (item.TaskArea == item1.TaskArea && item.FlightDuration == item1.FlightDuration)
+                if (item.TaskArea == item1.TaskArea && item.FlightTime == item1.FlightTime && item.FlightDuration == item1.FlightDuration)
                 {
                     sendNotification = true;
                     taskAreas.Add(item.TaskArea.GetValueOrDefault());
