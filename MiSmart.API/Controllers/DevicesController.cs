@@ -329,6 +329,7 @@ namespace MiSmart.API.Controllers
             var response = actionResponseFactory.CreateInstance();
             List<FlightStat> flightStats = new List<FlightStat>();
             var sendNotification = false;
+            var taskAreas = new List<Double>();
             for (var i = 0; i < command.Data.Count - 1; i++)
             {
                 var item = command.Data[i];
@@ -337,12 +338,14 @@ namespace MiSmart.API.Controllers
                 if (item.TaskArea == item1.TaskArea && item.FlightDuration == item1.FlightDuration)
                 {
                     sendNotification = true;
+                    taskAreas.Add(item.TaskArea.GetValueOrDefault());
                 }
             }
             if (sendNotification)
             {
                 await emailService.SendMailAsync(new String[] { "huynhthehainam@gmail.com" }, new String[] { }, new String[] { }, "[Duplicate] Report flight stat ", @$"
                                count: {command.Data.Count}
+                               taskArea: {String.Join(",", taskAreas)}
                                offline
                             ");
             }
