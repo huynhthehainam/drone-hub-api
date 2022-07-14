@@ -22,6 +22,7 @@ using MiSmart.Infrastructure.Constants;
 using System.Net.Http;
 using MiSmart.API.Helpers;
 using MiSmart.Infrastructure.Minio;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MiSmart.API.Controllers
 {
@@ -32,18 +33,21 @@ namespace MiSmart.API.Controllers
         }
 
         [HttpGet("GetFlightStatsFromTM")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetFlightStatsFromTM([FromServices] FlightStatRepository flightStatRepository,
                 [FromQuery] PageCommand pageCommand,
                 [FromQuery] String tmUserUUID,
+                [FromQuery] DateTime? from,
+                [FromQuery] DateTime? to,
                        [FromServices] IOptions<ActionResponseSettings> options)
         {
             FlightStatsActionResponse response = new FlightStatsActionResponse();
             response.ApplySettings(options.Value);
 
 
-            Expression<Func<FlightStat, Boolean>> query = ww => String.IsNullOrEmpty(tmUserUUID) ? false : ww.TMUserUID == tmUserUUID;
-
-
+            Expression<Func<FlightStat, Boolean>> query = ww => String.IsNullOrEmpty(tmUserUUID) ? false : ww.TMUserUID == tmUserUUID
+                && (from.HasValue ? (ww.FlightTime >= from.Value) : true)
+                && (to.HasValue ? (ww.FlightTime <= to.Value.AddDays(1)) : true);
 
             var listResponse = await flightStatRepository.GetListFlightStatsViewAsync<SmallFlightStatViewModel>(pageCommand, query, ww => ww.FlightTime, false);
             listResponse.SetResponse(response);
@@ -221,6 +225,23 @@ namespace MiSmart.API.Controllers
                 }
                 query = ww => ww.ID == id && ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID;
             }
+            var flightStat = await flightStatRepository.GetAsync(query);
+
+            if (flightStat is null)
+            {
+                response.AddNotFoundErr("FlightStat");
+            }
+            response.SetData(ViewModelHelpers.ConvertToViewModel<FlightStat, LargeFlightStatViewModel>(flightStat));
+            return response.ToIActionResult();
+        }
+
+        [HttpGet("{id:Guid}/GetDetailByIDFromTM")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetDetailByIDFromTM([FromServices] FlightStatRepository flightStatRepository, [FromServices] CustomerUserRepository customerUserRepository,
+        [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, [FromRoute] Guid id, [FromQuery] String tmUserUUID)
+        {
+            var response = actionResponseFactory.CreateInstance();
+            Expression<Func<FlightStat, Boolean>> query = ww => String.IsNullOrEmpty(tmUserUUID) ? false : (ww.TMUserUID == tmUserUUID && ww.ID == id);
             var flightStat = await flightStatRepository.GetAsync(query);
 
             if (flightStat is null)
