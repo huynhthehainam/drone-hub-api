@@ -23,7 +23,8 @@ namespace MiSmart.API.Controllers
                 Service = "App Sync",
                 Description = "MiSmart is the best drone company in VN",
                 AllowedVersions = Constants.AllowedVersions,
-                Count =  countingService.Count,
+                Count = countingService.Count,
+                Count2 = countingService.Count2,
             });
             return Task.FromResult(response.ToIActionResult());
         }

@@ -539,6 +539,11 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
                 response.AddInvalidErr("Data");
             }
 
+            if (device.ID == 8)
+            {
+                countingService.Count2 += 1;
+            }
+
 
             var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
 
