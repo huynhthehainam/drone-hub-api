@@ -523,6 +523,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
         [FromServices] BatteryGroupLogRepository batteryGroupLogRepository,
         [FromServices] BatteryModelRepository batteryModelRepository,
         [FromServices] MyEmailService emailService,
+        [FromServices] CountingService countingService,
         [FromServices] BatteryRepository batteryRepository, [FromServices] TelemetryGroupRepository telemetryGroupRepository, [FromBody] AddingBulkTelemetryRecordCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
@@ -534,6 +535,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
             }
             if (command.Data.Count == 0)
             {
+                countingService.Count += 1;
                 response.AddInvalidErr("Data");
             }
 

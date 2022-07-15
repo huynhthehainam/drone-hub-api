@@ -147,6 +147,8 @@ namespace MiSmart.API
 
             services.AddSingleton<AuthSystemService, AuthSystemService>();
 
+            services.AddSingleton<CountingService, CountingService>();
+
             #endregion
             #region AddingFactories
 
