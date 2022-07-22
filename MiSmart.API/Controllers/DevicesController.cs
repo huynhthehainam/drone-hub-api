@@ -358,6 +358,8 @@ namespace MiSmart.API.Controllers
                     var device = await deviceRepository.GetAsync(ww => ww.ID == deviceJWT.ID);
                     if (device is not null)
                     {
+                        device.LastOnline = DateTime.UtcNow;
+                        await deviceRepository.UpdateAsync(device);
                         if (!Constants.AllowedVersions.Contains(item.GCSVersion))
                         {
                             continue;
@@ -681,6 +683,12 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
         {
             var response = actionResponseFactory.CreateInstance();
             var device = await deviceRepository.GetAsync(ww => ww.ID == CurrentDevice.ID);
+            if (device is null)
+            {
+                response.AddNotFoundErr("Device");
+            }
+            device.LastOnline = DateTime.UtcNow;
+            await deviceRepository.UpdateAsync(device);
             if (!Constants.AllowedVersions.Contains(command.GCSVersion))
             {
                 response.SetMessage("Invalid");
@@ -700,10 +708,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
                             ");
                 return response.ToIActionResult();
             }
-            if (device is null)
-            {
-                response.AddNotFoundErr("Device");
-            }
+
             var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
             if (command.SprayedIndexes.Count > 0 && command.TaskArea.GetValueOrDefault() <= 0)
             {

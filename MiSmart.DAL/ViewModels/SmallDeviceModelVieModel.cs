@@ -30,6 +30,7 @@ namespace MiSmart.DAL.ViewModels
             DevicesCount = entity.Devices.Count;
             Entity = entity;
             FileUrl = entity.FileUrl;
+            
             var group = entity.Devices.GroupBy(ww => ww.Customer).ToList();
             SpecificQuantities = group.Select(ww => new CustomerDeviceSpecificQuantity
             {

@@ -71,6 +71,8 @@ namespace MiSmart.DAL.ViewModels
 
         public String CustomerName { get; set; }
         public List<BatteryGroupLogViewModel> BatteryGroupLogs { get; set; }
+        public DateTime? LastOnline { get; set; }
+
         public void LoadFrom(Device entity)
         {
             ID = entity.ID;
@@ -86,6 +88,7 @@ namespace MiSmart.DAL.ViewModels
             ExecutionCompanyName = entity.ExecutionCompany?.Name;
             LastBatteryGroupIDs = entity.LastBatterGroupLogs;
             CustomerName = entity.Customer.Name;
+            LastOnline = entity.LastOnline;
         }
     }
     public class LargeDeviceViewModel : IViewModel<Device>

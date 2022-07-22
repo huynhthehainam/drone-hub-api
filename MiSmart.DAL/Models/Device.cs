@@ -93,6 +93,7 @@ namespace MiSmart.DAL.Models
             get => lazyLoader.Load(this, ref telemetryGroups);
             set => telemetryGroups = value;
         }
+        public DateTime? LastOnline { get; set; }
 
 
         private TelemetryGroup lastGroup;
