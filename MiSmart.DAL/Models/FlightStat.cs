@@ -11,7 +11,7 @@ namespace MiSmart.DAL.Models
     public class TMUser
     {
         public String ID { get; set; }
-        public String UID { get; set; }
+        public String UUID { get; set; }
         public String Name { get; set; }
         public String Email { get; set; }
         public String Phone { get; set; }
@@ -61,14 +61,20 @@ namespace MiSmart.DAL.Models
         public Double TaskArea { get; set; }
         public Double FlightDuration { get; set; }
         public String PilotName { get; set; }
-        public String TMUserUID { get; set; }
+        public String TMUserUUID { get; set; }
         public Double? BatteryPercentRemaining { get; set; }
-
         public JsonDocument TMUser
         {
             get; set;
         }
+        public String TMPlantID { get; set; }
+        public JsonDocument TMPlant { get; set; }
+        public String TMFieldID { get; set; }
+        public JsonDocument TMField { get; set; }
         public LineString FlywayPoints { get; set; }
+        public Polygon Boundary { get; set; }
+        public Boolean IsBoundaryArchived { get; set; }
+        public Boolean IsTMInformationArchived { get; set; }
         public List<Int32> SprayedIndexes { get; set; }
         private Device device;
         [JsonIgnore]

@@ -17,12 +17,15 @@ using MiSmart.Infrastructure.Permissions;
 using MiSmart.API.Permissions;
 using MiSmart.API.Commands;
 using System.Threading.Tasks;
-using System.Text.Json;
-using MiSmart.Infrastructure.Constants;
 using System.Net.Http;
 using MiSmart.API.Helpers;
 using MiSmart.Infrastructure.Minio;
 using Microsoft.AspNetCore.Authorization;
+using MiSmart.API.Settings;
+using NetTopologySuite;
+using NetTopologySuite.Geometries;
+using System.Text.Json;
+using MiSmart.Infrastructure.Constants;
 
 namespace MiSmart.API.Controllers
 {
@@ -30,6 +33,67 @@ namespace MiSmart.API.Controllers
     {
         public FlightStatsController(IActionResponseFactory actionResponseFactory) : base(actionResponseFactory)
         {
+        }
+
+        [HttpPost("UpdateFromTM")]
+        [AllowAnonymous]
+        public async Task<IActionResult> UpdateFlightStatFromTM([FromBody] UpdatingFlightStatsFromTMCommand command, [FromServices] FlightStatRepository flightStatRepository, [FromServices] IOptions<FarmAppSettings> options)
+        {
+            ActionResponse actionResponse = actionResponseFactory.CreateInstance();
+            var settings = options.Value;
+            if (command.SecretKey != settings.SecretKey)
+            {
+                actionResponse.AddAuthorizationErr();
+            }
+            var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
+
+            foreach (var item in command.Data)
+            {
+                var coords = new List<Coordinate>();
+                if (item.FieldPoints.Count < 2)
+                {
+                    continue;
+                }
+                item.FieldPoints.Add(new LocationPoint { Latitude = item.FieldPoints[0].Latitude, Longitude = item.FieldPoints[0].Longitude });
+                foreach (var point in item.FieldPoints)
+                {
+                    Console.WriteLine($"{{lng: {point.Longitude}, lat: {point.Latitude}}},");
+                    coords.Add(new Coordinate(point.Longitude.GetValueOrDefault(), point.Latitude.GetValueOrDefault()));
+                }
+                var polygon = geometryFactory.CreatePolygon(coords.ToArray());
+                var flightStats = await flightStatRepository.GetListEntitiesAsync(new PageCommand(), ww => ww.IsBoundaryArchived && ww.Boundary != null && !ww.IsTMInformationArchived, ww => ww.FlightTime, false);
+
+                foreach (var flightStat in flightStats)
+                {
+                    Polygon intersection = (Polygon)polygon.Intersection(flightStat.Boundary);
+
+                    var fieldPoints = new List<Object>();
+
+
+                    if (intersection.Coordinates.Count() > 0)
+                    {
+                        var intersectionArea = intersection.Area;
+                        var polygonArea = polygon.Area;
+                        var iou = intersectionArea / polygonArea;
+                        if (iou > settings.IOU)
+                        {
+                            flightStat.TMUserUUID = item.User.UUID;
+                            flightStat.TMUser = JsonDocument.Parse(JsonSerializer.Serialize(item.User, JsonSerializerDefaultOptions.CamelOptions));
+                            flightStat.TMPlantID = item.Plant.ID;
+                            flightStat.TMPlant = JsonDocument.Parse(JsonSerializer.Serialize(item.Plant, JsonSerializerDefaultOptions.CamelOptions));
+                            flightStat.TMFieldID = item.ID;
+                            flightStat.TMField = JsonDocument.Parse(JsonSerializer.Serialize(new { ID = item.ID }, JsonSerializerDefaultOptions.CamelOptions));
+                            flightStat.IsTMInformationArchived = true;
+                            await flightStatRepository.UpdateAsync(flightStat);
+                        }
+                    }
+
+
+                }
+            }
+
+
+            return actionResponse.ToIActionResult();
         }
 
         [HttpGet("GetFlightStatsFromTM")]
@@ -45,7 +109,7 @@ namespace MiSmart.API.Controllers
             response.ApplySettings(options.Value);
 
 
-            Expression<Func<FlightStat, Boolean>> query = ww => String.IsNullOrEmpty(tmUserUUID) ? false : ww.TMUserUID == tmUserUUID
+            Expression<Func<FlightStat, Boolean>> query = ww => String.IsNullOrEmpty(tmUserUUID) ? false : ww.TMUserUUID == tmUserUUID
                 && (from.HasValue ? (ww.FlightTime >= from.Value) : true)
                 && (to.HasValue ? (ww.FlightTime <= to.Value.AddDays(1)) : true);
 
@@ -241,7 +305,7 @@ namespace MiSmart.API.Controllers
         [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, [FromRoute] Guid id, [FromQuery] String tmUserUUID)
         {
             var response = actionResponseFactory.CreateInstance();
-            Expression<Func<FlightStat, Boolean>> query = ww => String.IsNullOrEmpty(tmUserUUID) ? false : (ww.TMUserUID == tmUserUUID && ww.ID == id);
+            Expression<Func<FlightStat, Boolean>> query = ww => String.IsNullOrEmpty(tmUserUUID) ? false : (ww.TMUserUUID == tmUserUUID && ww.ID == id);
             var flightStat = await flightStatRepository.GetAsync(query);
 
             if (flightStat is null)
@@ -297,15 +361,15 @@ namespace MiSmart.API.Controllers
             }
 
 
-            flightStat.FieldName = String.IsNullOrEmpty(command.FieldName) ? flightStat.FieldName : command.FieldName;
-            flightStat.TaskLocation = String.IsNullOrEmpty(command.TaskLocation) ? flightStat.TaskLocation : command.TaskLocation;
-            if (command.TMUser is not null)
-            {
-                flightStat.TMUser = JsonDocument.Parse(JsonSerializer.Serialize(command.TMUser, JsonSerializerDefaultOptions.CamelOptions));
-                flightStat.TMUserUID = command.TMUser.UID;
-            }
+            // flightStat.FieldName = String.IsNullOrEmpty(command.FieldName) ? flightStat.FieldName : command.FieldName;
+            // flightStat.TaskLocation = String.IsNullOrEmpty(command.TaskLocation) ? flightStat.TaskLocation : command.TaskLocation;
+            // if (command.TMUser is not null)
+            // {
+            //     flightStat.TMUser = JsonDocument.Parse(JsonSerializer.Serialize(command.TMUser, JsonSerializerDefaultOptions.CamelOptions));
+            //     flightStat.TMUserUID = command.TMUser.UID;
+            // }
 
-            flightStat.Medicines = command.Medicines.Count == 0 ? flightStat.Medicines : JsonDocument.Parse(JsonSerializer.Serialize(command.Medicines, JsonSerializerDefaultOptions.CamelOptions));
+            // flightStat.Medicines = command.Medicines.Count == 0 ? flightStat.Medicines : JsonDocument.Parse(JsonSerializer.Serialize(command.Medicines, JsonSerializerDefaultOptions.CamelOptions));
             await flightStatRepository.UpdateAsync(flightStat);
             response.SetUpdatedMessage();
 

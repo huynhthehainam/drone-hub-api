@@ -70,7 +70,7 @@ namespace MiSmart.DAL.ViewModels
             CustomerName = entity.Customer.Name;
             Cost = entity.Cost;
             TeamID = entity.TeamID;
-            TMUserUID = entity.TMUserUID;
+            TMUserUID = entity.TMUserUUID;
             TMUser = entity.TMUser;
             Medicines = entity.Medicines;
             Status = entity.Status;

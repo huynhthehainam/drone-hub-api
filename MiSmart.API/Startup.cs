@@ -228,6 +228,11 @@ namespace MiSmart.API
                 o.CronExpression = "*/10 * * * * *";
                 o.TimeZoneInfo = TimeZoneInfo.Utc;
             });
+             services.AddCronJob<UpdatingFlightStatBoundary>(o =>
+            {
+                o.CronExpression = "*/5 * * * * *";
+                o.TimeZoneInfo = TimeZoneInfo.Utc;
+            });
 
             services.AddCronJob<SendingDailyLowBatteryReport>(o =>
             {

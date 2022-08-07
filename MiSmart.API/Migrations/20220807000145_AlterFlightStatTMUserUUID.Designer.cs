@@ -5,6 +5,7 @@ using System.Text.Json;
 using MiSmart.DAL.DatabaseContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -14,9 +15,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MiSmart.API.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20220807000145_AlterFlightStatTMUserUUID")]
+    partial class AlterFlightStatTMUserUUID
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -526,9 +528,6 @@ namespace MiSmart.API.Migrations
                     b.Property<bool?>("IsOnline")
                         .HasColumnType("boolean");
 
-                    b.Property<bool>("IsTMInformationArchived")
-                        .HasColumnType("boolean");
-
                     b.Property<JsonDocument>("Medicines")
                         .HasColumnType("jsonb");
 
@@ -552,18 +551,6 @@ namespace MiSmart.API.Migrations
 
                     b.Property<Guid?>("StatusUpdatedUserUUID")
                         .HasColumnType("uuid");
-
-                    b.Property<JsonDocument>("TMField")
-                        .HasColumnType("jsonb");
-
-                    b.Property<string>("TMFieldID")
-                        .HasColumnType("text");
-
-                    b.Property<JsonDocument>("TMPlant")
-                        .HasColumnType("jsonb");
-
-                    b.Property<string>("TMPlantID")
-                        .HasColumnType("text");
 
                     b.Property<JsonDocument>("TMUser")
                         .HasColumnType("jsonb");
