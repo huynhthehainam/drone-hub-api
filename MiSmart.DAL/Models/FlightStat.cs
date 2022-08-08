@@ -8,6 +8,11 @@ using System.Text.Json;
 
 namespace MiSmart.DAL.Models
 {
+    public class TMPlant
+    {
+        public String ID { get; set; }
+        public String Name { get; set; }
+    }
     public class TMUser
     {
         public String ID { get; set; }
