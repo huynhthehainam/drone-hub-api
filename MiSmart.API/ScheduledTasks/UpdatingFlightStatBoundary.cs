@@ -1,15 +1,15 @@
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using MIConvexHull;
 using Microsoft.Extensions.DependencyInjection;
 using MiSmart.DAL.DatabaseContexts;
 using MiSmart.Infrastructure.ScheduledTasks;
-using MIConvexHull;
-using System.Collections.Generic;
-using NetTopologySuite.Geometries;
 using NetTopologySuite;
+using NetTopologySuite.Geometries;
 
 namespace MiSmart.API.ScheduledTasks
 {
@@ -39,12 +39,21 @@ namespace MiSmart.API.ScheduledTasks
 
                 using (DatabaseContext databaseContext = scope.ServiceProvider.GetRequiredService<DatabaseContext>())
                 {
-                    var flightStats = databaseContext.FlightStats.Where(ww => !ww.IsBoundaryArchived).OrderByDescending(ww => ww.FlightTime).Take(10).ToList();
+                    var flightStats = databaseContext.FlightStats.Where(ww => !ww.IsBoundaryArchived && ww.SprayedIndexes != null && ww.SprayedIndexes.Count > 2).OrderByDescending(ww => ww.FlightTime).Take(10).ToList();
                     var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
                     foreach (var flightStat in flightStats)
                     {
+                        var sprayedIndexes = flightStat.SprayedIndexes;
+                        sprayedIndexes.Sort();
+                        var minIndex = sprayedIndexes.FirstOrDefault();
+                        var maxIndex = sprayedIndexes.LastOrDefault();
+                        List<Coordinate> coordinates = new List<Coordinate>();
+                        for (var i = minIndex; i <= maxIndex; i += 1)
+                        {
+                            coordinates.Add(flightStat.FlywayPoints.Coordinates[i]);
+                        }
                         var vertices = new List<MyVertex>();
-                        foreach (var coordinate in flightStat.FlywayPoints.Coordinates)
+                        foreach (var coordinate in coordinates)
                         {
 
                             vertices.Add(new MyVertex { Longitude = coordinate.X, Latitude = coordinate.Y });
@@ -69,9 +78,12 @@ namespace MiSmart.API.ScheduledTasks
                                 }
                             }
                         }
+
+
                         flightStat.IsBoundaryArchived = true;
                         databaseContext.Update(flightStat);
                         databaseContext.SaveChanges();
+
                     }
                 }
             }

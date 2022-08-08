@@ -73,8 +73,8 @@ namespace MiSmart.API.Controllers
                     if (intersection.Coordinates.Count() > 0)
                     {
                         var intersectionArea = intersection.Area;
-                        var polygonArea = polygon.Area;
-                        var iou = intersectionArea / polygonArea;
+                        var boundaryArea = flightStat.Boundary.Area;
+                        var iou = intersectionArea / boundaryArea;
                         if (iou > settings.IOU)
                         {
                             flightStat.TMUserUUID = item.User.UUID;
