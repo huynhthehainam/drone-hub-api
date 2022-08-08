@@ -111,7 +111,8 @@ namespace MiSmart.API.Controllers
 
             Expression<Func<FlightStat, Boolean>> query = ww => String.IsNullOrEmpty(tmUserUUID) ? false : ww.TMUserUUID == tmUserUUID
                 && (from.HasValue ? (ww.FlightTime >= from.Value) : true)
-                && (to.HasValue ? (ww.FlightTime <= to.Value.AddDays(1)) : true);
+                && (to.HasValue ? (ww.FlightTime <= to.Value.AddDays(1)) : true)
+                && (ww.IsTMInformationArchived);
 
             var listResponse = await flightStatRepository.GetListFlightStatsViewAsync<SmallFlightStatViewModel>(pageCommand, query, ww => ww.FlightTime, false);
             listResponse.SetResponse(response);
@@ -305,7 +306,7 @@ namespace MiSmart.API.Controllers
         [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, [FromRoute] Guid id, [FromQuery] String tmUserUUID)
         {
             var response = actionResponseFactory.CreateInstance();
-            Expression<Func<FlightStat, Boolean>> query = ww => String.IsNullOrEmpty(tmUserUUID) ? false : (ww.TMUserUUID == tmUserUUID && ww.ID == id);
+            Expression<Func<FlightStat, Boolean>> query = ww => (String.IsNullOrEmpty(tmUserUUID) ? false : (ww.TMUserUUID == tmUserUUID && ww.ID == id)) && (ww.IsTMInformationArchived);
             var flightStat = await flightStatRepository.GetAsync(query);
 
             if (flightStat is null)
