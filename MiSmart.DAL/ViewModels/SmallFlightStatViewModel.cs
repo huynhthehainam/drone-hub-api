@@ -73,6 +73,8 @@ namespace MiSmart.DAL.ViewModels
             Cost = entity.Cost;
             TeamID = entity.TeamID;
             TMUserUID = entity.TMUserUUID;
+            TMPlantID = entity.TMPlantID;
+            TMFieldID = entity.TMFieldID;
             TMUser = entity.TMUser;
             Medicines = entity.Medicines;
             Status = entity.Status;
