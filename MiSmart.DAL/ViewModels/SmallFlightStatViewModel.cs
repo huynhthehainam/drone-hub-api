@@ -44,6 +44,8 @@ namespace MiSmart.DAL.ViewModels
         public String CustomerName { get; set; }
         public Double Cost { get; set; }
         public String TMUserUID { get; set; }
+        public String TMPlantID { get; set; }
+        public String TMFieldID { get; set; }
         public JsonDocument TMUser { get; set; }
         public JsonDocument Medicines { get; set; }
         public CoordinateViewModel FirstPoint { get; set; }

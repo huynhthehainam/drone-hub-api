@@ -36,8 +36,6 @@ namespace MiSmart.API.ScheduledTasks
                     }
                 }
             }
-
-
         }
     }
 }
