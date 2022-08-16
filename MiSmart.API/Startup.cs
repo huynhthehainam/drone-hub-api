@@ -134,6 +134,7 @@ namespace MiSmart.API
             services.Configure<AuthSystemSettings>(Configuration.GetSection("AuthSystemSettings"));
             services.Configure<FrontEndSettings>(Configuration.GetSection("FrontEndSettings"));
             services.Configure<FarmAppSettings>(Configuration.GetSection("FarmAppSettings"));
+            services.Configure<RpanionSettings>(Configuration.GetSection("RpanionSettings"));
             services.Configure<TargetEmailSettings>(Configuration.GetSection("TargetEmailSettings"));
 
             #endregion
@@ -180,6 +181,7 @@ namespace MiSmart.API
             services.AddScoped<StreamingLinkRepository, StreamingLinkRepository>();
             services.AddScoped<MaintenanceReportRepository, MaintenanceReportRepository>();
             services.AddScoped<FlightStatReportRecordRepository, FlightStatReportRecordRepository>();
+            services.AddScoped<LogFileRepository, LogFileRepository>();
 
 
             #endregion

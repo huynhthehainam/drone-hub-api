@@ -1,5 +1,6 @@
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using Microsoft.AspNetCore.Http;
@@ -9,9 +10,10 @@ namespace MiSmart.API.Commands
 {
     public class AddingLogFileCommand
     {
-        [AllowedExtensions(new String[] { ".bin" })]
-        [Required]
-        public IFormFile File { get; set; }
+
+        public List<IFormFile> Files { get; set; }
+        public String DeviceToken { get; set; }
+        public String SecretKey { get;  set; }
     }
     public class AddingPlanCommand
     {

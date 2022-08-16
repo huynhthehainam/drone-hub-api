@@ -30,6 +30,9 @@ using Microsoft.Extensions.Options;
 using MiSmart.Infrastructure.Settings;
 using MiSmart.API.Services;
 using System.Net.Http;
+using MiSmart.API.Settings;
+using System.IO;
+using System.Text.RegularExpressions;
 
 namespace MiSmart.API.Controllers
 {
@@ -40,7 +43,58 @@ namespace MiSmart.API.Controllers
         {
 
         }
-        
+        [HttpPost("UpdateFromRpanionServer")]
+        [AllowAnonymous]
+        public async Task<IActionResult> UpdateFromRpaionServer([FromServices] DeviceRepository deviceRepository, [FromForm] AddingLogFileCommand command, [FromServices] LogFileRepository logFileRepository, [FromServices] IOptions<RpanionSettings> options)
+        {
+            ActionResponse actionResponse = actionResponseFactory.CreateInstance();
+            var settings = options.Value;
+            if (command.SecretKey != settings.SecretKey)
+            {
+                actionResponse.AddAuthorizationErr();
+            }
+            var device = await deviceRepository.GetAsync(ww => ww.Token == command.DeviceToken);
+            if (device is null)
+            {
+                actionResponse.AddNotFoundErr("Device");
+            }
+            foreach (var formFile in command.Files)
+            {
+                var fileName = formFile.FileName;
+                var existedLogFile = await logFileRepository.GetAsync(ww => ww.DeviceID == device.ID && ww.FileName == fileName);
+                if (existedLogFile is not null)
+                {
+                    continue;
+                }
+                Byte[] bytes = new Byte[] { };
+                using (var ms = new MemoryStream())
+                {
+                    formFile.CopyTo(ms);
+                    bytes = ms.ToArray();
+                };
+                var fileNameRegex = new Regex("^(?<order>[0-9]+[0-9]+)-(?<year>[0-9]+[0-9]+)-(?<month>[0-9]+[0-9]+)-(?<day>[0-9]+[0-9]+)_(?<hour>[0-9]+[0-9]+)-(?<minute>[0-9]+[0-9]+)-(?<second>[0-9]+[0-9]+).bin$");
+                var m = fileNameRegex.Match(fileName);
+                if (m is not null && bytes.Length > 0)
+                {
+                    var groups = m.Groups;
+                    var order = Convert.ToInt32(groups["order"].Value);
+                    var year = Convert.ToInt32(groups["year"].Value);
+                    var month = Convert.ToInt32(groups["month"].Value);
+                    var day = Convert.ToInt32(groups["day"].Value);
+                    var hour = Convert.ToInt32(groups["hour"].Value);
+                    var minute = Convert.ToInt32(groups["minute"].Value);
+                    var second = Convert.ToInt32(groups["second"].Value);
+                    TimeZoneInfo seaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                    var loggingTime = new DateTime(year, month, day, hour, minute, second);
+                    var utcLoggingTime = TimeZoneInfo.ConvertTimeToUtc(loggingTime, seaTimeZone);
+                    LogFile logFile = await logFileRepository.CreateAsync(new LogFile { Device = device, FileBytes = bytes, FileName = fileName, LoggingTime = utcLoggingTime });
+                }
+
+            }
+            return actionResponse.ToIActionResult();
+
+        }
+
 
         [HttpPost("{id:int}/MakeMaintenanceReport")]
         [HasPermission(typeof(MaintainerPermission))]
