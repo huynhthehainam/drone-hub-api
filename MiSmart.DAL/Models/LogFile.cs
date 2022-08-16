@@ -16,7 +16,6 @@ namespace MiSmart.DAL.Models
         public LogFile(ILazyLoader lazyLoader) : base(lazyLoader)
         {
         }
-        public String FileUrl { get; set; }
         private Device device;
         public Device Device
         {
@@ -24,5 +23,9 @@ namespace MiSmart.DAL.Models
             set => device = value;
         }
         public Int32 DeviceID { get; set; }
+        public Byte[] FileBytes { get; set; }
+        public String FileName { get; set; }
+        public DateTime CreationTime { get; set; } = DateTime.UtcNow;
+        public DateTime LoggingTime { get; set; } = DateTime.UtcNow;
     }
 }

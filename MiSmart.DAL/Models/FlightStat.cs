@@ -126,9 +126,6 @@ namespace MiSmart.DAL.Models
             get => lazyLoader.Load(this, ref executionCompanyUserFlightStats);
             set => executionCompanyUserFlightStats = value;
         }
-
-        public String MedicinesString { get; set; }
-
         public JsonDocument Medicines
         {
             get;

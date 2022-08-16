@@ -18,7 +18,6 @@ using NetTopologySuite.Geometries;
 using MiSmart.Infrastructure.Permissions;
 using MiSmart.API.Permissions;
 using System.Collections.Generic;
-using MiSmart.Infrastructure.Minio;
 using Microsoft.AspNetCore.Authorization;
 using MiSmart.Infrastructure.Services;
 using System.Threading.Tasks;
@@ -41,6 +40,7 @@ namespace MiSmart.API.Controllers
         {
 
         }
+        
 
         [HttpPost("{id:int}/MakeMaintenanceReport")]
         [HasPermission(typeof(MaintainerPermission))]
@@ -644,31 +644,6 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
 
 
             response.SetCreatedObject(group);
-            return response.ToIActionResult();
-        }
-        [HttpPost("me/Logs")]
-        public async Task<IActionResult> UploadLogFile([FromServices] DeviceRepository deviceRepository, [FromServices] MinioService minioService, [FromForm] AddingLogFileCommand command)
-        {
-            var response = actionResponseFactory.CreateInstance();
-            var device = await deviceRepository.GetAsync(ww => ww.ID == CurrentDevice.ID);
-            if (device is null)
-            {
-                response.AddNotFoundErr("Device");
-            }
-
-
-            LogFile logFile = new LogFile
-            {
-                FileUrl = await minioService.PutFileAsync(command.File, new String[] { "drone-hub-api", "logs", $"{device.ID}_{device.Name}" }),
-            };
-
-            device.LogFiles.Add(logFile);
-
-            await deviceRepository.UpdateAsync(device);
-
-
-            response.SetCreatedObject(logFile);
-
             return response.ToIActionResult();
         }
 

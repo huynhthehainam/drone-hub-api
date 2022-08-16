@@ -34,6 +34,27 @@ namespace MiSmart.API.Controllers
         public FlightStatsController(IActionResponseFactory actionResponseFactory) : base(actionResponseFactory)
         {
         }
+        [HttpPost("UpdateFromTMUser")]
+        [AllowAnonymous]
+        public async Task<IActionResult> UpdateFlightStatFromTMUser([FromBody] UpdatingFlightStatsFromTMUserCommand command, [FromServices] FlightStatRepository flightStatRepository, [FromServices] IOptions<FarmAppSettings> options)
+        {
+            ActionResponse actionResponse = actionResponseFactory.CreateInstance();
+            var settings = options.Value;
+            if (command.SecretKey != settings.SecretKey)
+            {
+                actionResponse.AddAuthorizationErr();
+            }
+
+            var flightStat = await flightStatRepository.GetAsync(ww => ww.ID == command.FlightStatID);
+            if (flightStat is null)
+            {
+                actionResponse.AddInvalidErr("FlightStatID");
+            }
+            flightStat.Medicines = command.Medicines;
+            await flightStatRepository.UpdateAsync(flightStat);
+            actionResponse.SetUpdatedMessage();
+            return actionResponse.ToIActionResult();
+        }
 
         [HttpPost("UpdateFromTM")]
         [AllowAnonymous]
