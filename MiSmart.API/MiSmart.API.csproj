@@ -24,11 +24,13 @@
 		<PackageReference Include="FirebaseAdmin" Version="2.3.0"/>
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.3.1"/>
 		<PackageReference Include="MIConvexHull" Version="1.1.19.1019" />
+		<PackageReference Include="SSH.NET" Version="2020.0.2" />
 	</ItemGroup>
 	<ItemGroup>
 		<Protobuf Include="Protos/auth.proto" GrpcServices="Client"/>
 		<None Include="HTMLTemplates/**" CopyToOutputDirectory="PreserveNewest"/>
 		<None Include="google_services.json" CopyToOutputDirectory="PreserveNewest"/>
+		<None Include="svgh-mismart.pem" CopyToOutputDirectory="PreserveNewest"/>
 	</ItemGroup>
 	<ItemGroup>
 		<!-- <None Include="Seeding/**" CopyToOutputDirectory="PreserveNewest" /> -->

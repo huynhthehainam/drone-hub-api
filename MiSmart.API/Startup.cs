@@ -230,7 +230,7 @@ namespace MiSmart.API
                 o.CronExpression = "*/10 * * * * *";
                 o.TimeZoneInfo = TimeZoneInfo.Utc;
             });
-             services.AddCronJob<UpdatingFlightStatBoundary>(o =>
+            services.AddCronJob<UpdatingFlightStatBoundary>(o =>
             {
                 o.CronExpression = "*/5 * * * * *";
                 o.TimeZoneInfo = TimeZoneInfo.Utc;
@@ -241,6 +241,13 @@ namespace MiSmart.API
                 o.CronExpression = "0 0 15 * * *";
                 o.TimeZoneInfo = TimeZoneInfo.Utc;
             });
+            services.AddCronJob<SynchronizingLog>(o =>
+            {
+                o.CronExpression = "*/20 * * * * *";
+                o.TimeZoneInfo = TimeZoneInfo.Utc;
+            });
+
+
 
             //     services.AddCronJob<UpdatingCostFlightStatsTask>(o =>
             //    {
