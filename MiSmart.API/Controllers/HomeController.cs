@@ -25,6 +25,8 @@ namespace MiSmart.API.Controllers
                 AllowedVersions = Constants.AllowedVersions,
                 Count = countingService.Count,
                 Count2 = countingService.Count2,
+                Count3 = countingService.Count3,
+                Count4 = countingService.Count4,
             });
             return Task.FromResult(response.ToIActionResult());
         }
