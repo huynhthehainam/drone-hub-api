@@ -60,11 +60,12 @@ namespace MiSmart.API.ScheduledTasks
                                                 var time = new DateTime(year, month, day, hour, minute, second);
                                                 var utcTime = TimeZoneInfo.ConvertTimeToUtc(time, seaTimeZone);
                                                 var logPath = Path.Join(deviceFolder, logFile.Name);
-                                                Console.WriteLine($"log path: {logPath}");
+
                                                 MemoryStream ms = new MemoryStream();
                                                 try
                                                 {
                                                     client.DownloadFile(logPath, ms);
+                                                    Console.WriteLine($"Download file: {logPath}");
                                                     var byteArr = ms.ToArray();
                                                     var dbLogFile = new LogFile() { DeviceID = device.ID, FileBytes = byteArr, LoggingTime = utcTime, FileName = logFile.Name };
                                                     databaseContext.LogFiles.Add(dbLogFile);
@@ -73,6 +74,29 @@ namespace MiSmart.API.ScheduledTasks
                                                 catch (Exception)
                                                 {
                                                     Console.WriteLine("Cannot download file from scp");
+                                                }
+                                            }
+                                            else
+                                            {
+
+                                                var now = DateTime.UtcNow.AddDays(-1);
+                                                if (existedDBLogFile.LoggingTime > now)
+                                                {
+
+                                                    var logPath = Path.Join(deviceFolder, logFile.Name);
+                                                    MemoryStream ms = new MemoryStream();
+                                                    try
+                                                    {
+                                                        client.DownloadFile(logPath, ms);
+                                                        var byteArr = ms.ToArray();
+                                                        existedDBLogFile.FileBytes = byteArr;
+                                                        databaseContext.Update(existedDBLogFile);
+                                                        databaseContext.SaveChanges();
+                                                    }
+                                                    catch (Exception)
+                                                    {
+                                                        Console.WriteLine("Cannot download file from scp");
+                                                    }
                                                 }
                                             }
                                         }
