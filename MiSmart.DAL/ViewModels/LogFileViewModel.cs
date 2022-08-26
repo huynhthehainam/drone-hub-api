@@ -9,12 +9,14 @@ namespace MiSmart.DAL.ViewModels
         public Guid ID { get; set; }
         public String FileName { get; set; }
         public Int32 DeviceID { get; set; }
+        public String DeviceName {get;set;}
         public DateTime LoggingTime { get; set; }
         public void LoadFrom(LogFile entity)
         {
             ID = entity.ID;
             FileName = entity.FileName;
             DeviceID = entity.DeviceID;
+            DeviceName = entity.Device.Name;
             LoggingTime = entity.LoggingTime;
         }
     }
