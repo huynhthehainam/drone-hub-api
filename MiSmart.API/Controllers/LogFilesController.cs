@@ -8,6 +8,8 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using MiSmart.DAL.ViewModels;
 using MiSmart.Infrastructure.Commands;
+using MiSmart.Infrastructure.Permissions;
+using MiSmart.API.Permissions;
 
 namespace MiSmart.API.Controllers
 {
@@ -18,30 +20,22 @@ namespace MiSmart.API.Controllers
         }
 
         [HttpGet]
+        [HasPermission(typeof(MaintainerPermission))]
         public async Task<IActionResult> GetList([FromQuery] PageCommand pageCommand, [FromServices] LogFileRepository logFileRepository,
         [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository)
         {
             ActionResponse actionResponse = actionResponseFactory.CreateInstance();
-            
-            ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.UUID);
-            if (executionCompanyUser is null)
-            {
-                actionResponse.AddNotAllowedErr();
-            }
+
             var listResponse = await logFileRepository.GetListResponseViewAsync<LogFileViewModel>(pageCommand, ww => true, ww => ww.LoggingTime, false);
 
             listResponse.SetResponse(actionResponse);
             return actionResponse.ToIActionResult();
         }
         [HttpGet("{id:Guid}/File")]
+        [HasPermission(typeof(MaintainerPermission))]
         public async Task<IActionResult> GetFile([FromRoute] Guid id, [FromServices] LogFileRepository logFileRepository, [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository)
         {
             ActionResponse actionResponse = actionResponseFactory.CreateInstance();
-            ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.UUID);
-            if (executionCompanyUser is null)
-            {
-                actionResponse.AddNotAllowedErr();
-            }
             Expression<Func<LogFile, Boolean>> query = ww => (ww.ID == id);
             var logFile = await logFileRepository.GetAsync(query);
             if (logFile is null)
