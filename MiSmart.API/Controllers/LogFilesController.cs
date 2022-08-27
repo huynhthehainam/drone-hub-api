@@ -25,7 +25,7 @@ namespace MiSmart.API.Controllers
         [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository)
         {
             ActionResponse actionResponse = actionResponseFactory.CreateInstance();
-            Expression<Func<LogFile, Boolean>> query = ww => (ww.DeviceID == deviceID);
+            Expression<Func<LogFile, Boolean>> query = ww => deviceID.HasValue ? (ww.DeviceID == deviceID.Value) : true;
 
             var listResponse = await logFileRepository.GetListResponseViewAsync<LogFileViewModel>(pageCommand, query, ww => ww.LoggingTime, false);
 
