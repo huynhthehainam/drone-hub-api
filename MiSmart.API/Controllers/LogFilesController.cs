@@ -25,8 +25,9 @@ namespace MiSmart.API.Controllers
         [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository)
         {
             ActionResponse actionResponse = actionResponseFactory.CreateInstance();
+            Expression<Func<LogFile, Boolean>> query = ww => (ww.FileBytes.Length > 0);
 
-            var listResponse = await logFileRepository.GetListResponseViewAsync<LogFileViewModel>(pageCommand, ww => true, ww => ww.LoggingTime, false);
+            var listResponse = await logFileRepository.GetListResponseViewAsync<LogFileViewModel>(pageCommand, query, ww => ww.LoggingTime, false);
 
             listResponse.SetResponse(actionResponse);
             return actionResponse.ToIActionResult();
