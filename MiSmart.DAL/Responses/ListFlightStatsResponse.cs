@@ -17,7 +17,7 @@ namespace MiSmart.DAL.Responses
             response.TotalFlightDuration = TotalFlightDuration;
             response.TotalTaskArea = TotalTaskArea;
             response.TotalFlights = TotalFlights;
-            response.TotalCost = TotalCost;
+            response.TotalCost = TotalCost == 0 ? 0.1 : TotalCost;
             return response;
         }
     }

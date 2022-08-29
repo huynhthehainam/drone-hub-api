@@ -78,7 +78,6 @@ namespace MiSmart.API.Controllers
                 item.FieldPoints.Add(new LocationPoint { Latitude = item.FieldPoints[0].Latitude, Longitude = item.FieldPoints[0].Longitude });
                 foreach (var point in item.FieldPoints)
                 {
-                    Console.WriteLine($"{{lng: {point.Longitude}, lat: {point.Latitude}}},");
                     coords.Add(new Coordinate(point.Longitude.GetValueOrDefault(), point.Latitude.GetValueOrDefault()));
                 }
                 var polygon = geometryFactory.CreatePolygon(coords.ToArray());
