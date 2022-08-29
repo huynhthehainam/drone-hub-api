@@ -21,12 +21,13 @@ namespace MiSmart.API.Controllers
 
         [HttpGet]
         [HasPermission(typeof(MaintainerPermission))]
-        public async Task<IActionResult> GetList([FromQuery] PageCommand pageCommand, [FromServices] LogFileRepository logFileRepository,
+        public async Task<IActionResult> GetList([FromQuery] PageCommand pageCommand, [FromQuery] Int32? deviceID, [FromServices] LogFileRepository logFileRepository, 
         [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository)
         {
             ActionResponse actionResponse = actionResponseFactory.CreateInstance();
+            Expression<Func<LogFile, Boolean>> query = ww => deviceID.HasValue ? (ww.DeviceID == deviceID.Value) : true;
 
-            var listResponse = await logFileRepository.GetListResponseViewAsync<LogFileViewModel>(pageCommand, ww => true, ww => ww.LoggingTime, false);
+            var listResponse = await logFileRepository.GetListResponseViewAsync<LogFileViewModel>(pageCommand, query, ww => ww.LoggingTime, false);
 
             listResponse.SetResponse(actionResponse);
             return actionResponse.ToIActionResult();
