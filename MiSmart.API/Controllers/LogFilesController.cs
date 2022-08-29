@@ -27,8 +27,7 @@ namespace MiSmart.API.Controllers
             ActionResponse actionResponse = actionResponseFactory.CreateInstance();
 
             Expression<Func<LogFile, Boolean>> query = ww => 
-            (deviceID.HasValue ? (ww.DeviceID == deviceID.Value) : true) 
-            && (ww.FileBytes.Length > 0 ? (ww.FileBytes[0] > 0) : false);
+            (deviceID.HasValue ? (ww.DeviceID == deviceID.Value) : true);
 
             var listResponse = await logFileRepository.GetListResponseViewAsync<LogFileViewModel>(pageCommand, query, ww => ww.LoggingTime, false);
 

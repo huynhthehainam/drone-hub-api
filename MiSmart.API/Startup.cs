@@ -232,7 +232,7 @@ namespace MiSmart.API
             });
             services.AddCronJob<UpdatingFlightStatBoundary>(o =>
             {
-                o.CronExpression = "*/5 * * * * *";
+                o.CronExpression = "*/30 * * * * *";
                 o.TimeZoneInfo = TimeZoneInfo.Utc;
             });
 
