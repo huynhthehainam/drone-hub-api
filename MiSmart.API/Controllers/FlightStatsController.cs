@@ -81,7 +81,7 @@ namespace MiSmart.API.Controllers
                     coords.Add(new Coordinate(point.Longitude.GetValueOrDefault(), point.Latitude.GetValueOrDefault()));
                 }
                 var polygon = geometryFactory.CreatePolygon(coords.ToArray());
-                var flightStats = await flightStatRepository.GetListEntitiesAsync(new PageCommand(), ww => ww.IsBoundaryArchived && ww.Boundary != null && !ww.IsTMInformationArchived, ww => ww.FlightTime, false);
+                var flightStats = await flightStatRepository.GetListEntitiesAsync(new PageCommand() { PageIndex = 0, PageSize = 50 }, ww => ww.IsBoundaryArchived && ww.Boundary != null && !ww.IsTMInformationArchived, ww => ww.FlightTime, false);
 
                 foreach (var flightStat in flightStats)
                 {
