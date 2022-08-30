@@ -243,7 +243,7 @@ namespace MiSmart.API
             });
             services.AddCronJob<SynchronizingLog>(o =>
             {
-                o.CronExpression = "*/30 * * * * *";
+                o.CronExpression = "*/20 * * * * *";
                 o.TimeZoneInfo = TimeZoneInfo.Utc;
             });
 
