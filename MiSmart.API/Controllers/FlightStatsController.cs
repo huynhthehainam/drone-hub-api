@@ -81,8 +81,8 @@ namespace MiSmart.API.Controllers
                     coords.Add(new Coordinate(point.Longitude.GetValueOrDefault(), point.Latitude.GetValueOrDefault()));
                 }
                 var polygon = geometryFactory.CreatePolygon(coords.ToArray());
-                var flightStats = await flightStatRepository.GetListEntitiesAsync(new PageCommand() { PageIndex = 0, PageSize = 50 }, ww => ww.IsBoundaryArchived && ww.Boundary != null && !ww.IsTMInformationArchived, ww => ww.FlightTime, false);
-
+                var flightStats = await flightStatRepository.GetListEntitiesAsync(new PageCommand() { PageIndex = 0, PageSize = 20 }, ww => ww.IsBoundaryArchived && ww.Boundary != null && !ww.IsTMInformationArchived, ww => ww.FlightTime, false);
+                Console.WriteLine($"update last {flightStats.Count}");
                 foreach (var flightStat in flightStats)
                 {
                     Polygon intersection = (Polygon)polygon.Intersection(flightStat.Boundary);
