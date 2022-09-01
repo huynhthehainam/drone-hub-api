@@ -67,7 +67,8 @@ namespace MiSmart.API.Controllers
                 actionResponse.AddAuthorizationErr();
             }
             var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
-
+            var flightStats = await flightStatRepository.GetListEntitiesAsync(new PageCommand() { }, ww => ww.IsBoundaryArchived && ww.Boundary != null && !ww.IsTMInformationArchived, ww => ww.FlightTime, false);
+            List<Guid> handledIDs = new List<Guid>();
             foreach (var item in command.Data)
             {
                 var coords = new List<Coordinate>();
@@ -81,30 +82,32 @@ namespace MiSmart.API.Controllers
                     coords.Add(new Coordinate(point.Longitude.GetValueOrDefault(), point.Latitude.GetValueOrDefault()));
                 }
                 var polygon = geometryFactory.CreatePolygon(coords.ToArray());
-                var flightStats = await flightStatRepository.GetListEntitiesAsync(new PageCommand() { PageIndex = 0, PageSize = 20 }, ww => ww.IsBoundaryArchived && ww.Boundary != null && !ww.IsTMInformationArchived, ww => ww.FlightTime, false);
-                Console.WriteLine($"update last {flightStats.Count}");
                 foreach (var flightStat in flightStats)
                 {
-                    Polygon intersection = (Polygon)polygon.Intersection(flightStat.Boundary);
-
-                    var fieldPoints = new List<Object>();
-
-
-                    if (intersection.Coordinates.Count() > 0)
+                    if (!handledIDs.Contains(flightStat.ID))
                     {
-                        var intersectionArea = intersection.Area;
-                        var boundaryArea = flightStat.Boundary.Area;
-                        var iou = intersectionArea / boundaryArea;
-                        if (iou > settings.IOU)
+                        Polygon intersection = (Polygon)polygon.Intersection(flightStat.Boundary);
+
+                        var fieldPoints = new List<Object>();
+
+
+                        if (intersection.Coordinates.Count() > 0)
                         {
-                            flightStat.TMUserUUID = item.User.UUID;
-                            flightStat.TMUser = JsonDocument.Parse(JsonSerializer.Serialize(item.User, JsonSerializerDefaultOptions.CamelOptions));
-                            flightStat.TMPlantID = item.Plant.ID;
-                            flightStat.TMPlant = JsonDocument.Parse(JsonSerializer.Serialize(item.Plant, JsonSerializerDefaultOptions.CamelOptions));
-                            flightStat.TMFieldID = item.ID;
-                            flightStat.TMField = JsonDocument.Parse(JsonSerializer.Serialize(new { ID = item.ID }, JsonSerializerDefaultOptions.CamelOptions));
-                            flightStat.IsTMInformationArchived = true;
-                            await flightStatRepository.UpdateAsync(flightStat);
+                            var intersectionArea = intersection.Area;
+                            var boundaryArea = flightStat.Boundary.Area;
+                            var iou = intersectionArea / boundaryArea;
+                            if (iou > settings.IOU)
+                            {
+                                flightStat.TMUserUUID = item.User.UUID;
+                                flightStat.TMUser = JsonDocument.Parse(JsonSerializer.Serialize(item.User, JsonSerializerDefaultOptions.CamelOptions));
+                                flightStat.TMPlantID = item.Plant.ID;
+                                flightStat.TMPlant = JsonDocument.Parse(JsonSerializer.Serialize(item.Plant, JsonSerializerDefaultOptions.CamelOptions));
+                                flightStat.TMFieldID = item.ID;
+                                flightStat.TMField = JsonDocument.Parse(JsonSerializer.Serialize(new { ID = item.ID }, JsonSerializerDefaultOptions.CamelOptions));
+                                flightStat.IsTMInformationArchived = true;
+                                handledIDs.Add(flightStat.ID);
+                                await flightStatRepository.UpdateAsync(flightStat);
+                            }
                         }
                     }
 
