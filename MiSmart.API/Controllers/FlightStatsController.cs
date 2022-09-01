@@ -67,7 +67,7 @@ namespace MiSmart.API.Controllers
                 actionResponse.AddAuthorizationErr();
             }
             var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
-            var flightStats = await flightStatRepository.GetListEntitiesAsync(new PageCommand() { }, ww => ww.IsBoundaryArchived && ww.Boundary != null && !ww.IsTMInformationArchived, ww => ww.FlightTime, false);
+            var flightStats = await flightStatRepository.GetListEntitiesAsync(new PageCommand() { PageIndex = 0, PageSize = 100 }, ww => ww.IsBoundaryArchived && ww.Boundary != null && !ww.IsTMInformationArchived, ww => ww.FlightTime, false);
             List<Guid> handledIDs = new List<Guid>();
             foreach (var item in command.Data)
             {
