@@ -35,44 +35,42 @@ namespace MiSmart.API.RabbitMQ
 
         private void InitRabbitMQ()
         {
-            var factory = new ConnectionFactory { HostName = rabbitOptions.HostName };
+            var factory = new ConnectionFactory
+            {
+                HostName = rabbitOptions.HostName,
+                UserName = rabbitOptions.UserName,
+                Password = rabbitOptions.Password
+            };
 
             // create connection  
             connection = factory.CreateConnection();
 
             // create channel  
             channel = connection.CreateModel();
-
-
-            channel.ExchangeDeclare("mismart.exchange.auth.dotnetcore", ExchangeType.Topic, true, false, null);
-            channel.QueueDeclare("mismart.queue.log", false, false, false, null);
-            channel.QueueBind("mismart.queue.log", "mismart.exchange.auth.dotnetcore", "mismart.queue.*", null);
             channel.BasicQos(0, 1, false);
+            var queueName = channel.QueueDeclare("mismart.queue.drone", false, false, false, null);
 
-            connection.ConnectionShutdown += RabbitMQConnectionShutdown;
+            channel.QueueBind(queueName, "mismart", "mismart.queue.*", null);
+            var consumer = new EventingBasicConsumer(channel);
+            consumer.Received += (ch, ea) =>
+                       {
+                           // received message  
+                           var content = System.Text.Encoding.UTF8.GetString(ea.Body.ToArray());
+
+                           // handle the received message  
+                           HandleMessage(content);
+                           channel.BasicAck(ea.DeliveryTag, false);
+                       };
+            channel.BasicConsume("mismart.queue.drone", false, consumer);
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
             stoppingToken.ThrowIfCancellationRequested();
 
-            var consumer = new EventingBasicConsumer(channel);
-            consumer.Received += (ch, ea) =>
-            {
-                // received message  
-                var content = System.Text.Encoding.UTF8.GetString(ea.Body.ToArray());
 
-                // handle the received message  
-                HandleMessage(content);
-                channel.BasicAck(ea.DeliveryTag, false);
-            };
 
-            consumer.Shutdown += OnConsumerShutdown;
-            consumer.Registered += OnConsumerRegistered;
-            consumer.Unregistered += OnConsumerUnregistered;
-            consumer.ConsumerCancelled += OnConsumerConsumerCancelled;
 
-            channel.BasicConsume("mismart.queue.log", false, consumer);
             return Task.CompletedTask;
         }
 
