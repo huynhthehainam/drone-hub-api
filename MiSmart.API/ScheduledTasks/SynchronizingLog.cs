@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -43,6 +44,7 @@ namespace MiSmart.API.ScheduledTasks
                                 {
                                     var deviceFolder = Path.Join(logFolder, folder.Name);
                                     var logFiles = client.ListDirectory(deviceFolder);
+                                    List<DateTime> times = new List<DateTime>();
                                     foreach (var logFile in logFiles)
                                     {
                                         var m = binFileRegex.Match(logFile.Name);
@@ -60,7 +62,7 @@ namespace MiSmart.API.ScheduledTasks
                                                 var time = new DateTime(year, month, day, hour, minute, second);
                                                 var utcTime = TimeZoneInfo.ConvertTimeToUtc(time, seaTimeZone);
                                                 var logPath = Path.Join(deviceFolder, logFile.Name);
-
+                                                times.Add(utcTime);
                                                 MemoryStream ms = new MemoryStream();
                                                 try
                                                 {
@@ -78,7 +80,7 @@ namespace MiSmart.API.ScheduledTasks
                                             }
                                             else
                                             {
-
+                                                times.Add(existedDBLogFile.LoggingTime);
                                                 var now = DateTime.UtcNow.AddDays(-1);
                                                 if (existedDBLogFile.LoggingTime > now)
                                                 {
@@ -100,6 +102,11 @@ namespace MiSmart.API.ScheduledTasks
                                                 }
                                             }
                                         }
+                                    }
+                                    if (times.Count > 0)
+                                    {
+                                        times.Sort();
+                                        Console.WriteLine($"Latest time  {times.LastOrDefault()}");
                                     }
                                 }
                             }
