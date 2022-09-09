@@ -60,6 +60,10 @@ namespace MiSmart.API.Controllers
             ActionResponse actionResponse = actionResponseFactory.CreateInstance();
             Expression<Func<LogFile, Boolean>> query = ww => (ww.FileBytes.Length >= 500000) && (deviceID.HasValue ? ww.DeviceID == deviceID.GetValueOrDefault() : true) && (from.HasValue ? ww.LoggingTime >= from.GetValueOrDefault() : true) && (to.HasValue ? ww.LoggingTime <= to.GetValueOrDefault() : true);
             var data = await logFileRepository.GetListEntitiesAsync(pageCommand, query);
+            if (data.Count == 0)
+            {
+                actionResponse.AddNotFoundErr("ZipFile");
+            }
             var groupedData = data.GroupBy(ww => ww.Device);
             using (var ms = new MemoryStream())
             {
