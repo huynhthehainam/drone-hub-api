@@ -10,6 +10,9 @@ using MiSmart.DAL.ViewModels;
 using MiSmart.Infrastructure.Commands;
 using MiSmart.Infrastructure.Permissions;
 using MiSmart.API.Permissions;
+using System.IO;
+using System.IO.Compression;
+using System.Linq;
 
 namespace MiSmart.API.Controllers
 {
@@ -48,6 +51,40 @@ namespace MiSmart.API.Controllers
             }
 
             actionResponse.SetFile(logFile.FileBytes, "application/octet-stream", logFile.FileName);
+            return actionResponse.ToIActionResult();
+        }
+        [HttpGet("GetZipFile")]
+        [HasPermission(typeof(MaintainerPermission))]
+        public async Task<IActionResult> GetZipFile([FromServices] LogFileRepository logFileRepository, [FromQuery] PageCommand pageCommand, [FromQuery] Int32? deviceID, [FromQuery] DateTime? from, [FromQuery] DateTime? to)
+        {
+            ActionResponse actionResponse = actionResponseFactory.CreateInstance();
+            Expression<Func<LogFile, Boolean>> query = ww => (ww.FileBytes.Length >= 500000) && (deviceID.HasValue ? ww.DeviceID == deviceID.GetValueOrDefault() : true) && (from.HasValue ? ww.LoggingTime >= from.GetValueOrDefault() : true) && (to.HasValue ? ww.LoggingTime <= to.GetValueOrDefault() : true);
+            var data = await logFileRepository.GetListEntitiesAsync(pageCommand, query);
+            var groupedData = data.GroupBy(ww => ww.Device);
+            using (var ms = new MemoryStream())
+            {
+                using (var archive = new ZipArchive(ms, ZipArchiveMode.Create))
+                {
+                    foreach (var item in groupedData)
+                    {
+                        foreach (var fileItem in item)
+                        {
+                            var path = $"{item.Key.Name}_{item.Key.ID}/{fileItem.FileName}";
+                            var fileEntry = archive.CreateEntry(path);
+
+                            using (var entryStream = fileEntry.Open())
+                            {
+                                var fileBytes = fileItem.FileBytes;
+                                entryStream.Write(fileBytes, 0, fileBytes.Length);
+                            }
+                        }
+                    }
+                }
+                var compressBytes = ms.ToArray();
+                actionResponse.SetFile(compressBytes, "application/zip", "compress.zip");
+            }
+
+
             return actionResponse.ToIActionResult();
         }
 
