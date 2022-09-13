@@ -376,6 +376,7 @@ namespace MiSmart.API.Controllers
         [FromServices] ExecutionCompanySettingRepository executionCompanySettingRepository,
         [FromServices] ExecutionCompanyUserFlightStatRepository executionCompanyUserFlightStatRepository,
         [FromServices] MyEmailService emailService,
+        [FromServices] BatteryRepository batteryRepository,
         [FromServices] IOptions<FrontEndSettings> options,
         [FromServices] IHttpClientFactory httpClientFactory,
          [FromServices] DeviceRepository deviceRepository, [FromServices] JWTService jwtService)
@@ -509,6 +510,12 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
                             BatteryPercentRemaining = item.BatteryPercentRemaining,
                             IsOnline = false,
                         };
+                        if (!String.IsNullOrEmpty(item.BatterySerialNumber))
+                        {
+                            var battery = await batteryRepository.GetOrCreateBySerialNumberAsync(item.BatterySerialNumber);
+                            stat.Battery = battery;
+                            stat.CycleCount = item.BatteryCycleCount;
+                        }
                         try
                         {
                             stat.TaskLocation = await BingLocationHelper.UpdateFlightStatLocation(stat, httpClientFactory);
@@ -715,6 +722,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
         [FromServices] DatabaseContext databaseContext,
         [FromServices] MyEmailService emailService,
         [FromServices] IOptions<FrontEndSettings> options,
+        [FromServices] BatteryRepository batteryRepository,
         [FromServices] IHttpClientFactory httpClientFactory,
         [FromServices] ExecutionCompanyUserFlightStatRepository executionCompanyUserFlightStatRepository, [FromBody] AddingFlightStatCommand command)
         {
@@ -805,6 +813,8 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
                             ");
             }
 
+
+
             var stat = new FlightStat
             {
                 FlightDuration = command.FlightDuration.GetValueOrDefault(),
@@ -828,6 +838,12 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
                 BatteryPercentRemaining = command.BatteryPercentRemaining,
                 IsOnline = true,
             };
+            if (!String.IsNullOrEmpty(command.BatterySerialNumber))
+            {
+                var battery = await batteryRepository.GetOrCreateBySerialNumberAsync(command.BatterySerialNumber);
+                stat.Battery = battery;
+                stat.CycleCount = command.BatteryCycleCount;
+            }
             if (device.ExecutionCompanyID.HasValue)
             {
                 var latestSetting = executionCompanySettingRepository.GetLatestSetting(device.ExecutionCompanyID.GetValueOrDefault());

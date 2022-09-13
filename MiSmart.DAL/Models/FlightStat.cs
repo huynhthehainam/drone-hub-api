@@ -151,5 +151,14 @@ namespace MiSmart.DAL.Models
             set => flightStatReportRecords = value;
         }
         public Boolean? IsOnline { get; set; }
+
+        private Battery battery;
+        public Battery Battery
+        {
+            get => lazyLoader.Load(this, ref battery);
+            set => battery = value;
+        }
+        public Int32? BatteryID { get; set; }
+        public Int32 CycleCount { get; set; }
     }
 }

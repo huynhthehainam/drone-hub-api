@@ -52,5 +52,12 @@ namespace MiSmart.DAL.Models
         }
         public Int32? ExecutionCompanyID { get; set; }
         public DateTime CreatedTime { get; set; } = DateTime.UtcNow;
+
+        private ICollection<FlightStat> flightStats;
+        public ICollection<FlightStat> FlightStats
+        {
+            get => lazyLoader.Load(this, ref flightStats);
+            set => flightStats = value;
+        }
     }
 }
