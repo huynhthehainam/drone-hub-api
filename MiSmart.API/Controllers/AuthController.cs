@@ -7,6 +7,7 @@ using MiSmart.Infrastructure.Settings;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using System.Threading.Tasks;
+using MiSmart.API.Services;
 
 namespace MiSmart.API.Controllers
 {
@@ -35,6 +36,13 @@ namespace MiSmart.API.Controllers
             response.SetData(new { AccessToken = device.AccessToken });
 
             return response.ToIActionResult();
+        }
+        [HttpPost("Heartbeat")]
+        public Task<IActionResult> Heartbeat([FromServices] CountingService countingService)
+        {
+            var response = actionResponseFactory.CreateInstance();
+            countingService.Heartbeat += 1;
+            return Task.FromResult(response.ToIActionResult());
         }
     }
 }
