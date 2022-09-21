@@ -35,6 +35,9 @@ namespace MiSmart.DAL.DatabaseContexts
         public DbSet<StreamingLink> StreamingLinks { get; set; }
         public DbSet<MaintenanceReport> MaintenanceReports { get; set; }
         public DbSet<FlightStatReportRecord> FlightStatReportRecords { get; set; }
+        public DbSet<LogDetail> LogDetails {get; set; }
+        public DbSet<LogReport> LogReports {get; set; }
+        public DbSet<LogReportResult> LogReportResults {get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -166,6 +169,21 @@ namespace MiSmart.DAL.DatabaseContexts
             modelBuilder.Entity<FlightStatReportRecord>(ww =>
             {
                 ww.HasOne(ww => ww.FlightStat).WithMany(ww => ww.FlightStatReportRecords).HasForeignKey(ww => ww.FlightStatID).OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<LogDetail>(ww => {
+                ww.HasOne(ww => ww.LogFile).WithOne(ww => ww.LogDetail).HasForeignKey<LogDetail>(ww => ww.LogFileID).OnDelete(DeleteBehavior.Cascade);
+            });
+            modelBuilder.Entity<LogReport>(ww => {
+                ww.HasOne(ww => ww.LogFile).WithOne(ww => ww.LogReport).HasForeignKey<LogReport>(ww => ww.LogFileID).OnDelete(DeleteBehavior.Cascade);
+            });
+            modelBuilder.Entity<LogReportResult>(ww => {
+                ww.HasOne(ww => ww.LogFile).WithOne(ww => ww.LogReportResult).HasForeignKey<LogReportResult>(ww => ww.LogFileID).OnDelete(DeleteBehavior.Cascade);
+                ww.HasOne(ww => ww.ExecutionCompany).WithMany(ww => ww.LogReportResults).HasForeignKey(ww => ww.ExecutionCompanyID).OnDelete(DeleteBehavior.Cascade);
+            });
+            modelBuilder.Entity<LogResultDetail>(ww => {
+                ww.HasOne(ww => ww.PartError).WithMany(ww => ww.LogResultDetails).HasForeignKey(ww => ww.PartErrorID).OnDelete(DeleteBehavior.Cascade);
+                ww.HasOne(ww => ww.LogReportResult).WithMany(ww => ww.LogResultDetails).HasForeignKey(ww => ww.LogReportResultID).OnDelete(DeleteBehavior.Cascade);
             });
         }
     }
