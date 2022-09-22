@@ -4,7 +4,7 @@ using MiSmart.Infrastructure.Repositories;
 
 namespace MiSmart.DAL.Repositories
 {
-    public class LogReportResultRepository : RepositoryBase<Field>
+    public class LogReportResultRepository : RepositoryBase<LogReportResult>
     {
         public LogReportResultRepository(DatabaseContext context) : base(context)
         {

@@ -6,6 +6,15 @@ using MiSmart.Infrastructure.Data;
 
 namespace MiSmart.DAL.Models
 {
+    public class XYZ {
+        public Double X {get; set; }
+        public Double Y {get; set; }
+        public Double Z {get; set; }
+    }
+    public class EdgeData {
+        public Double Role {get; set; }
+        public Double Pitch {get; set; }
+    }
     public class LogDetail : EntityBase<Int64>
     {
         public LogDetail() : base() { }
