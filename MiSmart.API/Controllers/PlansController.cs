@@ -25,6 +25,36 @@ namespace MiSmart.API.Controllers
         {
         }
 
+        [HttpPost("UploadGeneral")]
+        public async Task<IActionResult> CreateGeneralPlan([FromForm] AddingPlanCommand command, [FromServices] PlanRepository planRepository)
+        {
+            var response = actionResponseFactory.CreateInstance();
+
+            var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
+            var plan = await planRepository.GetAsync(ww => ww.FileName == command.File.FileName && ww.DeviceID == null);
+            if (plan is null)
+            {
+                plan = new Plan { FileName = command.File.FileName, DeviceID = null };
+            }
+
+            plan.Location = geometryFactory.CreatePoint(new Coordinate(command.Longitude.GetValueOrDefault(), command.Latitude.GetValueOrDefault()));
+            plan.FileName = command.File.FileName;
+            plan.Area = command.Area.GetValueOrDefault();
+            plan.FileBytes = command.GetFileBytes();
+
+            if (plan.ID == 0)
+            {
+                await planRepository.CreateAsync(plan);
+            }
+            else
+            {
+                await planRepository.UpdateAsync(plan);
+            }
+            response.SetCreatedObject(plan);
+
+            return response.ToIActionResult();
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetList([FromQuery] PageCommand pageCommand, [FromServices] PlanRepository planRepository,
         [FromQuery] String search, [FromServices] DatabaseContext databaseContext,
