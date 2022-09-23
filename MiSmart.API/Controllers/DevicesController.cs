@@ -1027,9 +1027,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
             {
                 response.AddNotFoundErr("Device");
             }
-            Expression<Func<Plan, Boolean>> query = ww => (ww.Device.ExecutionCompanyID == device.ExecutionCompanyID)
-
-                       && (ww.Device.ExecutionCompanyID == device.ExecutionCompanyID)
+            Expression<Func<Plan, Boolean>> query = ww => (ww.Device == null || ww.Device.ExecutionCompanyID == device.ExecutionCompanyID)
                        && (ww.ID == command.PlanID);
             var plan = await planRepository.GetAsync(query);
             if (plan is null)
