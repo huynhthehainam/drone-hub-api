@@ -16,6 +16,7 @@ using MiSmart.Infrastructure.Commands;
 using MiSmart.DAL.DatabaseContexts;
 using NetTopologySuite;
 using NetTopologySuite.Geometries;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MiSmart.API.Controllers
 {
@@ -26,6 +27,7 @@ namespace MiSmart.API.Controllers
         }
 
         [HttpPost("UploadGeneral")]
+        [AllowAnonymous]
         public async Task<IActionResult> CreateGeneralPlan([FromForm] AddingPlanCommand command, [FromServices] PlanRepository planRepository)
         {
             var response = actionResponseFactory.CreateInstance();
