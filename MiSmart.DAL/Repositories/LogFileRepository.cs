@@ -30,7 +30,13 @@ namespace MiSmart.DAL.Repositories
                 DeviceID = ww.DeviceID,
                 Device = ww.Device,
                 FileName = ww.FileName,
-                LoggingTime = ww.LoggingTime
+                LoggingTime = ww.LoggingTime,
+                DroneStatus = ww.DroneStatus,
+                Status = ww.Status,
+                Errors = ww.Errors,
+                LogDetail = ww.LogDetail,
+                LogReport = ww.LogReport,
+                LogReportResult = ww.LogReportResult,
             });
             if (pageIndex.HasValue && pageSize.HasValue)
             {

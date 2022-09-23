@@ -69,7 +69,7 @@ namespace MiSmart.API.ScheduledTasks
                                                     client.DownloadFile(logPath, ms);
                                                     Console.WriteLine($"Download file: {logPath}");
                                                     var byteArr = ms.ToArray();
-                                                    var dbLogFile = new LogFile() { DeviceID = device.ID, FileBytes = byteArr, LoggingTime = utcTime, FileName = logFile.Name };
+                                                    var dbLogFile = new LogFile() { DeviceID = device.ID, FileBytes = byteArr, LoggingTime = utcTime, FileName = logFile.Name};
                                                     databaseContext.LogFiles.Add(dbLogFile);
                                                     databaseContext.SaveChanges();
                                                 }

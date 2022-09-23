@@ -87,7 +87,6 @@ namespace MiSmart.API.ScheduledTasks
                     }
                 }
             }
-
             return Task.CompletedTask;
         }
     }

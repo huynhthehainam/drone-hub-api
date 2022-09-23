@@ -67,5 +67,12 @@ namespace MiSmart.DAL.Models
             get => lazyLoader.Load(this, ref settings);
             set => settings = value;
         }
+
+        private ICollection<LogReportResult> logReportResults;
+        public ICollection<LogReportResult> LogReportResults
+        {
+            get => lazyLoader.Load(this, ref logReportResults);
+            set => logReportResults = value;
+        }
     }
 }

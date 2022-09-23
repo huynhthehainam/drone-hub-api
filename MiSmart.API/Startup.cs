@@ -182,7 +182,10 @@ namespace MiSmart.API
             services.AddScoped<MaintenanceReportRepository, MaintenanceReportRepository>();
             services.AddScoped<FlightStatReportRecordRepository, FlightStatReportRecordRepository>();
             services.AddScoped<LogFileRepository, LogFileRepository>();
-
+            services.AddScoped<LogReportRepository, LogReportRepository>();
+            services.AddScoped<LogDetailRepository, LogDetailRepository>();
+            services.AddScoped<LogReportResultRepository, LogReportResultRepository>();
+            services.AddScoped<LogTokenRepository, LogTokenRepository>();
 
             #endregion
 
@@ -246,7 +249,16 @@ namespace MiSmart.API
                 o.CronExpression = "*/20 * * * * *";
                 o.TimeZoneInfo = TimeZoneInfo.Utc;
             });
-
+            services.AddCronJob<RemovingTimeOutToken>(o =>
+            {
+                o.CronExpression = "*/10 * * * * *";
+                o.TimeZoneInfo = TimeZoneInfo.Utc;
+            });
+            // services.AddCronJob<UpdatingLogDetail>(o =>
+            // {
+            //     o.CronExpression = "*/20 * * * * *";
+            //     o.TimeZoneInfo = TimeZoneInfo.Utc;
+            // });
 
 
             //     services.AddCronJob<UpdatingCostFlightStatsTask>(o =>

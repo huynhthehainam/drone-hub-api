@@ -5,6 +5,7 @@ using System.Text.Json;
 using MiSmart.DAL.DatabaseContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -14,9 +15,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MiSmart.API.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20220921094645_AddLogDetail")]
+    partial class AddLogDetail
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -696,9 +698,6 @@ namespace MiSmart.API.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
-                    b.Property<bool>("isAnalyzed")
-                        .HasColumnType("boolean");
-
                     b.HasKey("ID");
 
                     b.HasIndex("DeviceID");
@@ -817,33 +816,6 @@ namespace MiSmart.API.Migrations
                     b.ToTable("LogResultDetail");
                 });
 
-            modelBuilder.Entity("MiSmart.DAL.Models.LogToken", b =>
-                {
-                    b.Property<long>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ID"));
-
-                    b.Property<DateTime>("CreateTime")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<Guid>("LogFileID")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Token")
-                        .HasColumnType("text");
-
-                    b.Property<Guid>("UserUUID")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("LogFileID");
-
-                    b.ToTable("LogTokens");
-                });
-
             modelBuilder.Entity("MiSmart.DAL.Models.MaintenanceReport", b =>
                 {
                     b.Property<int>("ID")
@@ -915,7 +887,7 @@ namespace MiSmart.API.Migrations
                         .HasColumnType("timestamp without time zone")
                         .HasDefaultValueSql("now() at time zone 'utc'");
 
-                    b.Property<int?>("DeviceID")
+                    b.Property<int>("DeviceID")
                         .HasColumnType("integer");
 
                     b.Property<byte[]>("FileBytes")
@@ -1344,17 +1316,6 @@ namespace MiSmart.API.Migrations
                     b.Navigation("PartError");
                 });
 
-            modelBuilder.Entity("MiSmart.DAL.Models.LogToken", b =>
-                {
-                    b.HasOne("MiSmart.DAL.Models.LogFile", "LogFile")
-                        .WithMany("LogTokens")
-                        .HasForeignKey("LogFileID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("LogFile");
-                });
-
             modelBuilder.Entity("MiSmart.DAL.Models.MaintenanceReport", b =>
                 {
                     b.HasOne("MiSmart.DAL.Models.Device", "Device")
@@ -1371,7 +1332,8 @@ namespace MiSmart.API.Migrations
                     b.HasOne("MiSmart.DAL.Models.Device", "Device")
                         .WithMany("Plans")
                         .HasForeignKey("DeviceID")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Device");
                 });
@@ -1529,8 +1491,6 @@ namespace MiSmart.API.Migrations
                     b.Navigation("LogReport");
 
                     b.Navigation("LogReportResult");
-
-                    b.Navigation("LogTokens");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.LogReportResult", b =>
