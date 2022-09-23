@@ -31,7 +31,6 @@ namespace MiSmart.DAL.Models
         public Double PercentFuel {get; set;}
         public JsonDocument Edge {get; set;}
         public Double BatteryCellDeviation {get; set;}
-        public Double Area {get; set;}
         public Double FlySpeed {get;set;}
         public Double Heigh {get; set;}
         public JsonDocument Accel {get;set;} 

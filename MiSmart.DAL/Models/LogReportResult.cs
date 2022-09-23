@@ -17,6 +17,7 @@ namespace MiSmart.DAL.Models
         }
         public String[] ImageUrls {get; set; }
         public String Suggest {get; set; }
+        public String Conclusion {get; set; }
         public String DetailedAnalysis {get; set; }
         public Guid AnalystUUID {get; set; }
         public Guid ApproverUUID {get; set; }

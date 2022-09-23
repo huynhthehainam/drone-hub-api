@@ -29,11 +29,30 @@ namespace MiSmart.API.Commands
     public class AddingLogResultCommand{
         public List<LogResultDetail> ListErrors {get; set; }
         public String Suggest {get; set; }
+        public String Conclusion {get; set; }
         public String DetailedAnalysis {get; set; }
         public Int32? ExecutionCompanyID {get; set;}
         
         [AllowedExtensions(new[] {".jpg",".png","jpeg"})]
         [MaxFileSize(5 * 1024 * 1024)]
         public List<IFormFile> Files {get; set; }
+    }
+    public class AddingLogResultFromMailCommand{
+        public String Token {get; set; }
+        public List<LogResultDetail> ListErrors {get; set; }
+        public String Suggest {get; set; }
+        public String Conclusion {get; set; }
+        public String DetailedAnalysis {get; set; }
+        public Int32? ExecutionCompanyID {get; set;}
+        
+        [AllowedExtensions(new[] {".jpg",".png","jpeg"})]
+        [MaxFileSize(5 * 1024 * 1024)]
+        public List<IFormFile> Files {get; set; }
+    }
+    public class TestDroneLogCommand{
+        public IFormFile File {get; set; }
+    }
+    public class AddingLogErrorCommand{
+        public String Error {get; set; }
     }
 }

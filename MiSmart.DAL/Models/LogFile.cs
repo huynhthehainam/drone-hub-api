@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using MiSmart.Infrastructure.Data;
 
@@ -55,6 +56,12 @@ namespace MiSmart.DAL.Models
         public LogReportResult LogReportResult{
             get => lazyLoader.Load(this, ref logReportResult);
             set => logReportResult = value;
-        } 
+        }
+        private ICollection<LogToken> logTokens;
+        public ICollection<LogToken> LogTokens {
+            get => lazyLoader.Load(this, ref logTokens);
+            set => logTokens = value;
+        }
+        public Boolean isAnalyzed {get; set; } = false;
     }
 }

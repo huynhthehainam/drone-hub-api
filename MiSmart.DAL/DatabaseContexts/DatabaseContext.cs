@@ -38,6 +38,7 @@ namespace MiSmart.DAL.DatabaseContexts
         public DbSet<LogDetail> LogDetails {get; set; }
         public DbSet<LogReport> LogReports {get; set; }
         public DbSet<LogReportResult> LogReportResults {get; set; }
+        public DbSet<LogToken> LogTokens {get; set;}
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -184,6 +185,10 @@ namespace MiSmart.DAL.DatabaseContexts
             modelBuilder.Entity<LogResultDetail>(ww => {
                 ww.HasOne(ww => ww.PartError).WithMany(ww => ww.LogResultDetails).HasForeignKey(ww => ww.PartErrorID).OnDelete(DeleteBehavior.Cascade);
                 ww.HasOne(ww => ww.LogReportResult).WithMany(ww => ww.LogResultDetails).HasForeignKey(ww => ww.LogReportResultID).OnDelete(DeleteBehavior.Cascade);
+            });
+            modelBuilder.Entity<LogToken>(ww =>
+            {
+                ww.HasOne(ww => ww.LogFile).WithMany(ww => ww.LogTokens).HasForeignKey(ww => ww.LogFileID).OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

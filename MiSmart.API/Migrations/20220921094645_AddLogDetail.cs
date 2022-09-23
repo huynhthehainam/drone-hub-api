@@ -44,7 +44,6 @@ namespace MiSmart.API.Migrations
                     PercentFuel = table.Column<double>(type: "double precision", nullable: false),
                     Edge = table.Column<JsonDocument>(type: "jsonb", nullable: true),
                     BatteryCellDeviation = table.Column<double>(type: "double precision", nullable: false),
-                    Area = table.Column<double>(type: "double precision", nullable: false),
                     FlySpeed = table.Column<double>(type: "double precision", nullable: false),
                     Heigh = table.Column<double>(type: "double precision", nullable: false),
                     Accel = table.Column<JsonDocument>(type: "jsonb", nullable: true)
@@ -69,6 +68,7 @@ namespace MiSmart.API.Migrations
                     LogFileID = table.Column<Guid>(type: "uuid", nullable: false),
                     ImageUrls = table.Column<string[]>(type: "text[]", nullable: true),
                     Suggest = table.Column<string>(type: "text", nullable: true),
+                    Conclusion = table.Column<string>(type: "text", nullable: true),
                     DetailedAnalysis = table.Column<string>(type: "text", nullable: true),
                     AnalystUUID = table.Column<Guid>(type: "uuid", nullable: false),
                     ApproverUUID = table.Column<Guid>(type: "uuid", nullable: false),

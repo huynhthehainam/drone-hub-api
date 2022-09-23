@@ -14,7 +14,6 @@ namespace MiSmart.DAL.ViewModels
         public Double PercentFuel {get; set;}
         public JsonDocument Edge {get; set;}
         public Double BatteryCellDeviation {get; set;}
-        public Double Area {get; set;}
         public Double FlySpeed {get;set;}
         public Double Heigh {get; set;}
         public JsonDocument Accel {get;set;}
@@ -27,7 +26,6 @@ namespace MiSmart.DAL.ViewModels
             PercentFuel = entity.PercentFuel;
             Edge = entity.Edge;
             BatteryCellDeviation = entity.BatteryCellDeviation;
-            Area = entity.Area;
             FlySpeed = entity.FlySpeed;
             Heigh = entity.Heigh;
             Accel = entity.Accel;
