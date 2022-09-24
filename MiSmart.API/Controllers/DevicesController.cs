@@ -999,11 +999,10 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
             {
                 centerLocation = geometryFactory.CreatePoint(new Coordinate(longitude.GetValueOrDefault(), latitude.GetValueOrDefault()));
             }
-            Expression<Func<Plan, Boolean>> query = ww => (ww.Device.ExecutionCompanyID == device.ExecutionCompanyID)
+            Expression<Func<Plan, Boolean>> query = ww => (ww.Device == null || ww.Device.ExecutionCompanyID == device.ExecutionCompanyID)
             && (String.IsNullOrWhiteSpace(search) ?
             ((centerLocation != null) ? (ww.Location.Distance(centerLocation) < range.GetValueOrDefault()) : true)
-            : ww.FileName.ToLower().Contains(search.ToLower()))
-            && (ww.Device.ExecutionCompanyID == device.ExecutionCompanyID);
+            : ww.FileName.ToLower().Contains(search.ToLower()));
             var listResponse = await planRepository.GetListResponseViewAsync<SmallPlanViewModel>(pageCommand, query, ww => centerLocation != null ? ww.Location.Distance(centerLocation) : ww.CreatedTime, true);
             if (centerLocation is not null)
             {
@@ -1028,9 +1027,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
             {
                 response.AddNotFoundErr("Device");
             }
-            Expression<Func<Plan, Boolean>> query = ww => (ww.Device.ExecutionCompanyID == device.ExecutionCompanyID)
-
-                       && (ww.Device.ExecutionCompanyID == device.ExecutionCompanyID)
+            Expression<Func<Plan, Boolean>> query = ww => (ww.Device == null || ww.Device.ExecutionCompanyID == device.ExecutionCompanyID)
                        && (ww.ID == command.PlanID);
             var plan = await planRepository.GetAsync(query);
             if (plan is null)

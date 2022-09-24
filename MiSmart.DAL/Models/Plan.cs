@@ -36,7 +36,7 @@ namespace MiSmart.DAL.Models
             get => lazyLoader.Load(this, ref device);
             set => device = value;
         }
-        public Int32 DeviceID { get; set; }
+        public Int32? DeviceID { get; set; }
         public Double Area { get; set; }
         public DateTime CreatedTime { get; set; } = DateTime.UtcNow;
     }

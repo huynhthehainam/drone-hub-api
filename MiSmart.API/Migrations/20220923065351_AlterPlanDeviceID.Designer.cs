@@ -5,6 +5,7 @@ using System.Text.Json;
 using MiSmart.DAL.DatabaseContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -14,9 +15,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MiSmart.API.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20220923065351_AlterPlanDeviceID")]
+    partial class AlterPlanDeviceID
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -620,52 +622,6 @@ namespace MiSmart.API.Migrations
                     b.ToTable("FlightStatReportRecords");
                 });
 
-            modelBuilder.Entity("MiSmart.DAL.Models.LogDetail", b =>
-                {
-                    b.Property<long>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ID"));
-
-                    b.Property<JsonDocument>("Accel")
-                        .HasColumnType("jsonb");
-
-                    b.Property<double>("BatteryCellDeviation")
-                        .HasColumnType("double precision");
-
-                    b.Property<JsonDocument>("Edge")
-                        .HasColumnType("jsonb");
-
-                    b.Property<double>("FlightDuration")
-                        .HasColumnType("double precision");
-
-                    b.Property<double>("FlySpeed")
-                        .HasColumnType("double precision");
-
-                    b.Property<double>("Heigh")
-                        .HasColumnType("double precision");
-
-                    b.Property<Guid>("LogFileID")
-                        .HasColumnType("uuid");
-
-                    b.Property<double>("PercentBattery")
-                        .HasColumnType("double precision");
-
-                    b.Property<double>("PercentFuel")
-                        .HasColumnType("double precision");
-
-                    b.Property<JsonDocument>("Vibe")
-                        .HasColumnType("jsonb");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("LogFileID")
-                        .IsUnique();
-
-                    b.ToTable("LogDetails");
-                });
-
             modelBuilder.Entity("MiSmart.DAL.Models.LogFile", b =>
                 {
                     b.Property<Guid>("ID")
@@ -678,12 +634,6 @@ namespace MiSmart.API.Migrations
                     b.Property<int>("DeviceID")
                         .HasColumnType("integer");
 
-                    b.Property<int>("DroneStatus")
-                        .HasColumnType("integer");
-
-                    b.Property<string[]>("Errors")
-                        .HasColumnType("text[]");
-
                     b.Property<byte[]>("FileBytes")
                         .HasColumnType("bytea");
 
@@ -693,155 +643,11 @@ namespace MiSmart.API.Migrations
                     b.Property<DateTime>("LoggingTime")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
-
-                    b.Property<bool>("isAnalyzed")
-                        .HasColumnType("boolean");
-
                     b.HasKey("ID");
 
                     b.HasIndex("DeviceID");
 
                     b.ToTable("LogFiles");
-                });
-
-            modelBuilder.Entity("MiSmart.DAL.Models.LogReport", b =>
-                {
-                    b.Property<long>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ID"));
-
-                    b.Property<DateTime>("AccidentTime")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<string[]>("ImageUrls")
-                        .HasColumnType("text[]");
-
-                    b.Property<Guid>("LogFileID")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("PilotDescription")
-                        .HasColumnType("text");
-
-                    b.Property<string>("ReporterDescription")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("UpdatedTime")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<Guid>("UserUUID")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("LogFileID")
-                        .IsUnique();
-
-                    b.ToTable("LogReports");
-                });
-
-            modelBuilder.Entity("MiSmart.DAL.Models.LogReportResult", b =>
-                {
-                    b.Property<long>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ID"));
-
-                    b.Property<Guid>("AnalystUUID")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("ApproverUUID")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Conclusion")
-                        .HasColumnType("text");
-
-                    b.Property<string>("DetailedAnalysis")
-                        .HasColumnType("text");
-
-                    b.Property<int?>("ExecutionCompanyID")
-                        .HasColumnType("integer");
-
-                    b.Property<string[]>("ImageUrls")
-                        .HasColumnType("text[]");
-
-                    b.Property<Guid>("LogFileID")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Suggest")
-                        .HasColumnType("text");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("ExecutionCompanyID");
-
-                    b.HasIndex("LogFileID")
-                        .IsUnique();
-
-                    b.ToTable("LogReportResults");
-                });
-
-            modelBuilder.Entity("MiSmart.DAL.Models.LogResultDetail", b =>
-                {
-                    b.Property<long>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ID"));
-
-                    b.Property<string>("Detail")
-                        .HasColumnType("text");
-
-                    b.Property<long>("LogReportResultID")
-                        .HasColumnType("bigint");
-
-                    b.Property<int>("PartErrorID")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Resolve")
-                        .HasColumnType("text");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("LogReportResultID");
-
-                    b.HasIndex("PartErrorID");
-
-                    b.ToTable("LogResultDetail");
-                });
-
-            modelBuilder.Entity("MiSmart.DAL.Models.LogToken", b =>
-                {
-                    b.Property<long>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ID"));
-
-                    b.Property<DateTime>("CreateTime")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<Guid>("LogFileID")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Token")
-                        .HasColumnType("text");
-
-                    b.Property<Guid>("UserUUID")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("LogFileID");
-
-                    b.ToTable("LogTokens");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.MaintenanceReport", b =>
@@ -878,25 +684,6 @@ namespace MiSmart.API.Migrations
                     b.HasIndex("DeviceID");
 
                     b.ToTable("MaintenanceReports");
-                });
-
-            modelBuilder.Entity("MiSmart.DAL.Models.Part", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
-
-                    b.Property<string>("Group")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("text");
-
-                    b.HasKey("ID");
-
-                    b.ToTable("Part");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.Plan", b =>
@@ -1274,17 +1061,6 @@ namespace MiSmart.API.Migrations
                     b.Navigation("FlightStat");
                 });
 
-            modelBuilder.Entity("MiSmart.DAL.Models.LogDetail", b =>
-                {
-                    b.HasOne("MiSmart.DAL.Models.LogFile", "LogFile")
-                        .WithOne("LogDetail")
-                        .HasForeignKey("MiSmart.DAL.Models.LogDetail", "LogFileID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("LogFile");
-                });
-
             modelBuilder.Entity("MiSmart.DAL.Models.LogFile", b =>
                 {
                     b.HasOne("MiSmart.DAL.Models.Device", "Device")
@@ -1294,65 +1070,6 @@ namespace MiSmart.API.Migrations
                         .IsRequired();
 
                     b.Navigation("Device");
-                });
-
-            modelBuilder.Entity("MiSmart.DAL.Models.LogReport", b =>
-                {
-                    b.HasOne("MiSmart.DAL.Models.LogFile", "LogFile")
-                        .WithOne("LogReport")
-                        .HasForeignKey("MiSmart.DAL.Models.LogReport", "LogFileID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("LogFile");
-                });
-
-            modelBuilder.Entity("MiSmart.DAL.Models.LogReportResult", b =>
-                {
-                    b.HasOne("MiSmart.DAL.Models.ExecutionCompany", "ExecutionCompany")
-                        .WithMany("LogReportResults")
-                        .HasForeignKey("ExecutionCompanyID")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("MiSmart.DAL.Models.LogFile", "LogFile")
-                        .WithOne("LogReportResult")
-                        .HasForeignKey("MiSmart.DAL.Models.LogReportResult", "LogFileID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ExecutionCompany");
-
-                    b.Navigation("LogFile");
-                });
-
-            modelBuilder.Entity("MiSmart.DAL.Models.LogResultDetail", b =>
-                {
-                    b.HasOne("MiSmart.DAL.Models.LogReportResult", "LogReportResult")
-                        .WithMany("LogResultDetails")
-                        .HasForeignKey("LogReportResultID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("MiSmart.DAL.Models.Part", "PartError")
-                        .WithMany("LogResultDetails")
-                        .HasForeignKey("PartErrorID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("LogReportResult");
-
-                    b.Navigation("PartError");
-                });
-
-            modelBuilder.Entity("MiSmart.DAL.Models.LogToken", b =>
-                {
-                    b.HasOne("MiSmart.DAL.Models.LogFile", "LogFile")
-                        .WithMany("LogTokens")
-                        .HasForeignKey("LogFileID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("LogFile");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.MaintenanceReport", b =>
@@ -1501,8 +1218,6 @@ namespace MiSmart.API.Migrations
 
                     b.Navigation("FlightStats");
 
-                    b.Navigation("LogReportResults");
-
                     b.Navigation("Settings");
 
                     b.Navigation("Teams");
@@ -1520,27 +1235,6 @@ namespace MiSmart.API.Migrations
                     b.Navigation("ExecutionCompanyUserFlightStats");
 
                     b.Navigation("FlightStatReportRecords");
-                });
-
-            modelBuilder.Entity("MiSmart.DAL.Models.LogFile", b =>
-                {
-                    b.Navigation("LogDetail");
-
-                    b.Navigation("LogReport");
-
-                    b.Navigation("LogReportResult");
-
-                    b.Navigation("LogTokens");
-                });
-
-            modelBuilder.Entity("MiSmart.DAL.Models.LogReportResult", b =>
-                {
-                    b.Navigation("LogResultDetails");
-                });
-
-            modelBuilder.Entity("MiSmart.DAL.Models.Part", b =>
-                {
-                    b.Navigation("LogResultDetails");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.Team", b =>
