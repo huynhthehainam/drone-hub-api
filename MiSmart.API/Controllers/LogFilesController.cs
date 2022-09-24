@@ -33,7 +33,10 @@ namespace MiSmart.API.Controllers
     }
     public class LogFilesController : AuthorizedAPIControllerBase
     {
-        private List<UserEmail> listEmail = new List<UserEmail>{
+        private List<UserEmail> listEmailForLog = new List<UserEmail>{
+            new UserEmail("dotientrung201030@gmail.com",new Guid("0c1fb569-05f0-4ccb-b439-1dbed807f38d")),
+        };
+        private List<UserEmail> listEmailForError = new List<UserEmail>{
             new UserEmail("dotientrung201030@gmail.com",new Guid("0c1fb569-05f0-4ccb-b439-1dbed807f38d")),
         };
         public LogFilesController(IActionResponseFactory actionResponseFactory) : base(actionResponseFactory)
@@ -183,10 +186,14 @@ namespace MiSmart.API.Controllers
             
             response.SetCreatedObject(report);
             
-            foreach(UserEmail item in listEmail){
+            foreach(UserEmail item in listEmailForLog){
                 String token = TokenHelper.GenerateToken();
                 await logTokenRepository.CreateAsync(new LogToken(){Token = token, UserUUID = item.UUID, LogFileID = id});
-                await emailService.SendMailAsync(new String[] { item.Email }, new String[] { }, new String[] { }, @$"[Chuyến bay cần phân tích] Mã hiệu drone ({logFile.Device.Name})", @$"Link: https://dronehub.mismart.ai/log-report-result?token={token}");
+                await emailService.SendMailAsync(new String[] { item.Email }, new String[] { }, new String[] { }, @$"[Chuyến bay cần phân tích] Mã hiệu drone ({logFile.Device.Name})", @$"
+                Dear,
+                Phòng Đặc Nhiệm trả kết quả báo cáo hiện tường:
+                Mã hiệu Drone: {logFile.Device.Name}
+                Link Báo cáo tình trạng chuyến bay: https://dronehub.mismart.ai/log-report?token={token}");
             }
 
             return response.ToIActionResult();
@@ -284,9 +291,9 @@ namespace MiSmart.API.Controllers
             await logReportResultRepository.UpdateAsync(logResult);
             return response.ToIActionResult();
         }
-        [HttpPost("ResultFromMail")]
+        [HttpPost("ResultFromEmail")]
         [AllowAnonymous]
-        public async Task<IActionResult> CreateResultFromMail([FromForm] AddingLogResultFromMailCommand command,
+        public async Task<IActionResult> CreateResultFromEmail([FromForm] AddingLogResultFromMailCommand command,
         [FromServices] MinioService minioService, [FromServices] LogTokenRepository tokenRepository,
         [FromServices] LogReportResultRepository logReportResultRepository){
             ActionResponse response = actionResponseFactory.CreateInstance();
@@ -317,8 +324,57 @@ namespace MiSmart.API.Controllers
             await tokenRepository.DeleteRangeAsync(listLogToken);
             return response.ToIActionResult();
         }
+        [HttpPost("ReportFromEmail")]
+        public async Task<IActionResult> CreateReportFromEmail( 
+        [FromForm] AddingLogReportFromEmailCommand command, [FromServices] LogReportRepository logReportRepository, 
+        [FromServices] MinioService minioService, [FromServices] LogTokenRepository tokenRepository){
+            ActionResponse response = actionResponseFactory.CreateInstance();
+            var token = await tokenRepository.GetAsync(ww => ww.Token == command.Token);
+            if (token is null){
+                response.AddNotFoundErr("Token");
+            }
+            if ((DateTime.Now - token.CreateTime).TotalMinutes > 30){
+                response.AddExpiredErr("Token");
+            }
+            var imageUrls = new List<String>();
+            foreach(var file in command.Files){
+                imageUrls.Add(await minioService.PutFileAsync(file, new String[] { "drone-hub-api", "log-reports" }));
+            }
+            var report = await logReportRepository.CreateAsync(new LogReport() 
+            {
+                LogFileID = token.LogFileID,
+                AccidentTime = command.AccidentTime, 
+                ImageUrls = imageUrls.ToArray(),
+                PilotDescription = command.PilotDescription,
+                ReporterDescription = command.ReporterDescription,
+                UserUUID = token.UserUUID, 
+            });
+            
+            response.SetCreatedObject(report);
+            var listLogToken = await tokenRepository.GetListEntitiesAsync(new PageCommand(), ww => ww.Token == command.Token);
+            await tokenRepository.DeleteRangeAsync(listLogToken);
+            return response.ToIActionResult();
+        }
+        [HttpGet("DetailForEmail")]
+        public async Task<IActionResult> GetLogDetailForEmail([FromServices] LogDetailRepository logDetailRepository,
+        [FromServices] LogTokenRepository tokenRepository, [FromBody] AddingLogDetailForEmailCommand command){
+           ActionResponse response = actionResponseFactory.CreateInstance();
+            var token = await tokenRepository.GetAsync(ww => ww.Token == command.Token);
+            if (token is null){
+                response.AddNotFoundErr("Token");
+            }
+            if ((DateTime.Now - token.CreateTime).TotalMinutes > 30){
+                response.AddExpiredErr("Token");
+            }
+            var logDetail = await logDetailRepository.GetAsync(ww => ww.LogFileID == token.LogFileID);
+             if (logDetail is null)
+            {
+                response.AddNotFoundErr("LogDetail");
+            }
+            response.SetData(ViewModelHelpers.ConvertToViewModel<LogDetail, LogDetailViewModel>(logDetail));
+            return response.ToIActionResult();
+        }
         // [HttpPost("Errors")]
-
         // public Task<IActionResult> SendEmailErrors([FromBody] AddingLogErrorCommand command){
         //     ActionResponse response = actionResponseFactory.CreateInstance();
 
