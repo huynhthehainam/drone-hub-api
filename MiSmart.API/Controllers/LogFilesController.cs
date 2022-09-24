@@ -246,7 +246,17 @@ namespace MiSmart.API.Controllers
                 AnalystUUID = CurrentUser.UUID,
                 LogResultDetails = command.ListErrors,
                 Suggest = command.Suggest,
+                Conclusion = command.Conclusion,
             });
+            foreach(UserEmail item in listEmailForLog){
+                String token = TokenHelper.GenerateToken();
+                await logTokenRepository.CreateAsync(new LogToken(){Token = token, UserUUID = item.UUID, LogFileID = id});
+                await emailService.SendMailAsync(new String[] { item.Email }, new String[] { }, new String[] { }, @$"Subject: [Kết quả Phân tích Dữ liệu bay] Mã hiệu drone ({logFile.Device.Name})", @$"
+                Dear,
+                Phòng Điều khiển bay trả Kết quả phân tích Dữ liệu bay:
+                Mã hiệu Drone: {logFile.Device.Name}
+                Kết luận chung: {command.Conclusion}");
+            }
             response.SetCreatedObject(report);
             return response.ToIActionResult();
         }
