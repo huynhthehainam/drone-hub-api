@@ -63,9 +63,10 @@ namespace MiSmart.API.Commands
         public DateTime AccidentTime { get; set; }
     }
     public class AddingLogErrorCommand{
+        public Guid Id {get; set; }
         public String Error {get; set; }
     }
-    public class AddingLogDetailForEmailCommand{
+    public class AddingGetLogForEmailCommand{
         public String Token {get; set; }
     }
 }

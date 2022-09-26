@@ -50,13 +50,14 @@ namespace MiSmart.API.ScheduledTasks
                 using (DatabaseContext databaseContext = scope.ServiceProvider.GetRequiredService<DatabaseContext>())
                 {
                     var client = clientFactory.CreateClient();
-                    var logs = databaseContext.LogFiles.Where(ww => ww.FileBytes.Length > 500000 && !ww.isAnalyzed).OrderByDescending(ww => ww.LoggingTime).Take(2).ToList();
+                    var logs = databaseContext.LogFiles.Where(ww => ww.FileBytes.Length > 500000 && ww.FileBytes.Length < 5000000 && !ww.isAnalyzed).OrderByDescending(ww => ww.LoggingTime).Take(2).ToList();
                     foreach (var log in logs)
                     {
                         var detail = databaseContext.LogDetails.Where(ww => ww.LogFileID == log.ID);
                         var formData = new MultipartFormDataContent();
                         formData.Add(new StreamContent(new MemoryStream(log.FileBytes)), "file", log.FileName);
-                        var response = client.PostAsync("http://localhost:5000/analysis", formData).Result;
+                        try{
+                        var response = client.PostAsync("http://node1.dronelog.mismart.ai/analysis", formData).GetAwaiter().GetResult();
                         if (response.IsSuccessStatusCode)
                         {
                             string responseString = response.Content.ReadAsStringAsync().Result;
@@ -76,10 +77,14 @@ namespace MiSmart.API.ScheduledTasks
                                 };
                                 databaseContext.LogDetails.Add(model);
                             }
-                            log.isAnalyzed = true;
-                            databaseContext.Update(log);
-                            databaseContext.SaveChanges();
                         }
+                        }catch (AggregateException)
+                        {
+                            
+                        }
+                        log.isAnalyzed = true;
+                        databaseContext.Update(log);
+                        databaseContext.SaveChanges();
                     }
                 }
             }
