@@ -729,6 +729,9 @@ namespace MiSmart.API.Migrations
                     b.Property<string>("ReporterDescription")
                         .HasColumnType("text");
 
+                    b.Property<string>("Suggest")
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("UpdatedTime")
                         .HasColumnType("timestamp without time zone");
 
@@ -814,7 +817,7 @@ namespace MiSmart.API.Migrations
 
                     b.HasIndex("PartErrorID");
 
-                    b.ToTable("LogResultDetail");
+                    b.ToTable("LogResultDetails");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.LogToken", b =>
@@ -896,7 +899,7 @@ namespace MiSmart.API.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("Part");
+                    b.ToTable("Parts");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.Plan", b =>

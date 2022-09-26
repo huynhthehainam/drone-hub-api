@@ -49,10 +49,24 @@ namespace MiSmart.API.Commands
         [MaxFileSize(5 * 1024 * 1024)]
         public List<IFormFile> Files {get; set; }
     }
-    public class TestDroneLogCommand{
-        public IFormFile File {get; set; }
+    // public class TestDroneLogCommand{
+    //     public IFormFile File {get; set; }
+    // }
+    public class AddingLogReportFromEmailCommand{
+        public String Token {get; set; }
+
+        [AllowedExtensions(new[] {".jpg",".png","jpeg"})]
+        [MaxFileSize(5 * 1024 * 1024)]
+        public List<IFormFile> Files {get; set; } = new List<IFormFile>();
+        public String PilotDescription {get; set; }
+        public String ReporterDescription {get; set; }
+        public DateTime AccidentTime { get; set; }
     }
     public class AddingLogErrorCommand{
+        public Guid Id {get; set; }
         public String Error {get; set; }
+    }
+    public class AddingGetLogForEmailCommand{
+        public String Token {get; set; }
     }
 }

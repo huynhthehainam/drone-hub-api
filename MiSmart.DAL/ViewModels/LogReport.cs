@@ -13,6 +13,7 @@ namespace MiSmart.DAL.ViewModels
         public String[] ImageUrls {get;set;} 
         public DateTime AccidentTime{get; set;}
         public DateTime UpdatedTime {get; set;} = DateTime.UtcNow;
+        public String Suggest {get; set; }
         public void LoadFrom(LogReport entity)
         {
             LogFileID = entity.LogFileID;
@@ -22,6 +23,7 @@ namespace MiSmart.DAL.ViewModels
             ImageUrls = entity.ImageUrls;
             AccidentTime = entity.AccidentTime;
             UpdatedTime = entity.UpdatedTime;
+            Suggest = entity.Suggest;
         }
     }
 }

@@ -7,10 +7,18 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace MiSmart.API.Migrations
 {
-    public partial class AddLogDetail : Migration
+    public partial class AddLogReport : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AlterColumn<int>(
+                name: "DeviceID",
+                table: "Plans",
+                type: "integer",
+                nullable: true,
+                oldClrType: typeof(int),
+                oldType: "integer");
+
             migrationBuilder.AddColumn<int>(
                 name: "DroneStatus",
                 table: "LogFiles",
@@ -30,6 +38,13 @@ namespace MiSmart.API.Migrations
                 type: "integer",
                 nullable: false,
                 defaultValue: 0);
+
+            migrationBuilder.AddColumn<bool>(
+                name: "isAnalyzed",
+                table: "LogFiles",
+                type: "boolean",
+                nullable: false,
+                defaultValue: false);
 
             migrationBuilder.CreateTable(
                 name: "LogDetails",
@@ -103,7 +118,8 @@ namespace MiSmart.API.Migrations
                     ReporterDescription = table.Column<string>(type: "text", nullable: true),
                     ImageUrls = table.Column<string[]>(type: "text[]", nullable: true),
                     AccidentTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    UpdatedTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false)
+                    UpdatedTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    Suggest = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -117,7 +133,29 @@ namespace MiSmart.API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Part",
+                name: "LogTokens",
+                columns: table => new
+                {
+                    ID = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    LogFileID = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserUUID = table.Column<Guid>(type: "uuid", nullable: false),
+                    Token = table.Column<string>(type: "text", nullable: true),
+                    CreateTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LogTokens", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_LogTokens_LogFiles_LogFileID",
+                        column: x => x.LogFileID,
+                        principalTable: "LogFiles",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Parts",
                 columns: table => new
                 {
                     ID = table.Column<int>(type: "integer", nullable: false)
@@ -127,11 +165,11 @@ namespace MiSmart.API.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Part", x => x.ID);
+                    table.PrimaryKey("PK_Parts", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
-                name: "LogResultDetail",
+                name: "LogResultDetails",
                 columns: table => new
                 {
                     ID = table.Column<long>(type: "bigint", nullable: false)
@@ -144,17 +182,17 @@ namespace MiSmart.API.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_LogResultDetail", x => x.ID);
+                    table.PrimaryKey("PK_LogResultDetails", x => x.ID);
                     table.ForeignKey(
-                        name: "FK_LogResultDetail_LogReportResults_LogReportResultID",
+                        name: "FK_LogResultDetails_LogReportResults_LogReportResultID",
                         column: x => x.LogReportResultID,
                         principalTable: "LogReportResults",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_LogResultDetail_Part_PartErrorID",
+                        name: "FK_LogResultDetails_Parts_PartErrorID",
                         column: x => x.PartErrorID,
-                        principalTable: "Part",
+                        principalTable: "Parts",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -183,14 +221,19 @@ namespace MiSmart.API.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_LogResultDetail_LogReportResultID",
-                table: "LogResultDetail",
+                name: "IX_LogResultDetails_LogReportResultID",
+                table: "LogResultDetails",
                 column: "LogReportResultID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_LogResultDetail_PartErrorID",
-                table: "LogResultDetail",
+                name: "IX_LogResultDetails_PartErrorID",
+                table: "LogResultDetails",
                 column: "PartErrorID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LogTokens_LogFileID",
+                table: "LogTokens",
+                column: "LogFileID");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -202,13 +245,16 @@ namespace MiSmart.API.Migrations
                 name: "LogReports");
 
             migrationBuilder.DropTable(
-                name: "LogResultDetail");
+                name: "LogResultDetails");
+
+            migrationBuilder.DropTable(
+                name: "LogTokens");
 
             migrationBuilder.DropTable(
                 name: "LogReportResults");
 
             migrationBuilder.DropTable(
-                name: "Part");
+                name: "Parts");
 
             migrationBuilder.DropColumn(
                 name: "DroneStatus",
@@ -221,6 +267,20 @@ namespace MiSmart.API.Migrations
             migrationBuilder.DropColumn(
                 name: "Status",
                 table: "LogFiles");
+
+            migrationBuilder.DropColumn(
+                name: "isAnalyzed",
+                table: "LogFiles");
+
+            migrationBuilder.AlterColumn<int>(
+                name: "DeviceID",
+                table: "Plans",
+                type: "integer",
+                nullable: false,
+                defaultValue: 0,
+                oldClrType: typeof(int),
+                oldType: "integer",
+                oldNullable: true);
         }
     }
 }

@@ -21,5 +21,6 @@ namespace MiSmart.DAL.Models
         public String[] ImageUrls {get;set;} 
         public DateTime AccidentTime{get; set;}
         public DateTime UpdatedTime {get; set;} = DateTime.UtcNow;
+        public String Suggest {get; set; }
     }
 }

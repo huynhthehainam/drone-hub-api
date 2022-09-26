@@ -39,12 +39,12 @@ namespace MiSmart.DAL.DatabaseContexts
         public DbSet<LogReport> LogReports {get; set; }
         public DbSet<LogReportResult> LogReportResults {get; set; }
         public DbSet<LogToken> LogTokens {get; set;}
+        public DbSet<Part> Parts {get; set; }
+        public DbSet<LogResultDetail> LogResultDetails {get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.HasPostgresExtension("postgis");
-
-
 
             modelBuilder.Entity<StreamingLink>(ww =>
             {
