@@ -223,43 +223,43 @@ namespace MiSmart.API.Controllers
             await logReportRepository.UpdateAsync(logReport);
             return response.ToIActionResult();
         }
-        [HttpPost("{id:Guid}/Result")]
-        public async Task<IActionResult> CreateReportResult([FromRoute] Guid id, [FromForm] AddingLogResultCommand command, [FromServices] LogReportResultRepository logReportResultRepository, [FromServices] LogFileRepository logFileRepository, [FromServices] MinioService minioService){
-            ActionResponse response = actionResponseFactory.CreateInstance();
-            if(!CurrentUser.IsAdministrator && CurrentUser.RoleID != 3){
-                response.AddNotAllowedErr();
-            }
-            var logFile = logFileRepository.GetAsync(ww => ww.ID == id);
-            if (logFile is null){
-                response.AddNotFoundErr("LogFile");
-            }
-            var imageUrls = new List<String>();
-            foreach(var file in command.Files){
-                imageUrls.Add(await minioService.PutFileAsync(file, new String[] { "drone-hub-api", "log-reports" }));
-            }
-            var report = await logReportResultRepository.CreateAsync(new LogReportResult() 
-            {
-                ImageUrls = imageUrls.ToArray(),
-                ExecutionCompanyID = command.ExecutionCompanyID,
-                DetailedAnalysis = command.DetailedAnalysis,
-                LogFileID = id,
-                AnalystUUID = CurrentUser.UUID,
-                LogResultDetails = command.ListErrors,
-                Suggest = command.Suggest,
-                Conclusion = command.Conclusion,
-            });
-            foreach(UserEmail item in listEmailForLog){
-                String token = TokenHelper.GenerateToken();
-                await logTokenRepository.CreateAsync(new LogToken(){Token = token, UserUUID = item.UUID, LogFileID = id});
-                await emailService.SendMailAsync(new String[] { item.Email }, new String[] { }, new String[] { }, @$"Subject: [Kết quả Phân tích Dữ liệu bay] Mã hiệu drone ({logFile.Device.Name})", @$"
-                Dear,
-                Phòng Điều khiển bay trả Kết quả phân tích Dữ liệu bay:
-                Mã hiệu Drone: {logFile.Device.Name}
-                Kết luận chung: {command.Conclusion}");
-            }
-            response.SetCreatedObject(report);
-            return response.ToIActionResult();
-        }
+        // [HttpPost("{id:Guid}/Result")]
+        // public async Task<IActionResult> CreateReportResult([FromRoute] Guid id, [FromForm] AddingLogResultCommand command, [FromServices] LogReportResultRepository logReportResultRepository, [FromServices] LogFileRepository logFileRepository, [FromServices] MinioService minioService){
+        //     ActionResponse response = actionResponseFactory.CreateInstance();
+        //     if(!CurrentUser.IsAdministrator && CurrentUser.RoleID != 3){
+        //         response.AddNotAllowedErr();
+        //     }
+        //     var logFile = logFileRepository.GetAsync(ww => ww.ID == id);
+        //     if (logFile is null){
+        //         response.AddNotFoundErr("LogFile");
+        //     }
+        //     var imageUrls = new List<String>();
+        //     foreach(var file in command.Files){
+        //         imageUrls.Add(await minioService.PutFileAsync(file, new String[] { "drone-hub-api", "log-reports" }));
+        //     }
+        //     var report = await logReportResultRepository.CreateAsync(new LogReportResult() 
+        //     {
+        //         ImageUrls = imageUrls.ToArray(),
+        //         ExecutionCompanyID = command.ExecutionCompanyID,
+        //         DetailedAnalysis = command.DetailedAnalysis,
+        //         LogFileID = id,
+        //         AnalystUUID = CurrentUser.UUID,
+        //         LogResultDetails = command.ListErrors,
+        //         Suggest = command.Suggest,
+        //         Conclusion = command.Conclusion,
+        //     });
+        //     foreach(UserEmail item in listEmailForLog){
+        //         String token = TokenHelper.GenerateToken();
+        //         await logTokenRepository.CreateAsync(new LogToken(){Token = token, UserUUID = item.UUID, LogFileID = id});
+        //         await emailService.SendMailAsync(new String[] { item.Email }, new String[] { }, new String[] { }, @$"Subject: [Kết quả Phân tích Dữ liệu bay] Mã hiệu drone ({logFile.Device.Name})", @$"
+        //         Dear,
+        //         Phòng Điều khiển bay trả Kết quả phân tích Dữ liệu bay:
+        //         Mã hiệu Drone: {logFile.Device.Name}
+        //         Kết luận chung: {command.Conclusion}");
+        //     }
+        //     response.SetCreatedObject(report);
+        //     return response.ToIActionResult();
+        // }
         [HttpPatch("{id:Guid}/Result")]
         public async Task<IActionResult> UpdateReportResult([FromRoute] Guid id, [FromForm] AddingLogResultCommand command, [FromServices] LogReportResultRepository logReportResultRepository, [FromServices] MinioService minioService){
             ActionResponse response = actionResponseFactory.CreateInstance();

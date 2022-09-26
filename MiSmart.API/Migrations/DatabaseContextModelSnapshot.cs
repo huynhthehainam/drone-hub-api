@@ -814,7 +814,7 @@ namespace MiSmart.API.Migrations
 
                     b.HasIndex("PartErrorID");
 
-                    b.ToTable("LogResultDetail");
+                    b.ToTable("LogResultDetails");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.LogToken", b =>
@@ -896,7 +896,7 @@ namespace MiSmart.API.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("Part");
+                    b.ToTable("Parts");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.Plan", b =>
