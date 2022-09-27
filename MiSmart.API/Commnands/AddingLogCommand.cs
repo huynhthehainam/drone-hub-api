@@ -12,7 +12,6 @@ namespace MiSmart.API.Commands
         public List<IFormFile> Files {get; set; } = new List<IFormFile>();
         public String PilotDescription {get; set; }
         public String ReporterDescription {get; set; }
-        public String Suggest {get; set; }
         public DateTime AccidentTime { get; set; }
     }
     public class AddingLogDetailCommand{
@@ -61,7 +60,6 @@ namespace MiSmart.API.Commands
         public List<IFormFile> Files {get; set; } = new List<IFormFile>();
         public String PilotDescription {get; set; }
         public String ReporterDescription {get; set; }
-        public String Suggest {get; set; }
         public DateTime AccidentTime { get; set; }
     }
     public class AddingLogErrorCommand{
