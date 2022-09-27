@@ -255,11 +255,11 @@ namespace MiSmart.API
                 o.CronExpression = "*/10 * * * * *";
                 o.TimeZoneInfo = TimeZoneInfo.Utc;
             });
-            // services.AddCronJob<UpdatingLogDetail>(o =>
-            // {
-            //     o.CronExpression = "*/20 * * * * *";
-            //     o.TimeZoneInfo = TimeZoneInfo.Utc;
-            // });
+            services.AddCronJob<UpdatingLogDetail>(o =>
+            {
+                o.CronExpression = "*/20 * * * * *";
+                o.TimeZoneInfo = TimeZoneInfo.Utc;
+            });
 
 
             //     services.AddCronJob<UpdatingCostFlightStatsTask>(o =>
