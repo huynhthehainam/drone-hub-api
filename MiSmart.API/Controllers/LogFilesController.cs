@@ -232,7 +232,8 @@ namespace MiSmart.API.Controllers
         [HttpPost("{id:Guid}/Result")]
         public async Task<IActionResult> CreateReportResult([FromRoute] Guid id, [FromForm] AddingLogResultCommand command, 
         [FromServices] LogReportResultRepository logReportResultRepository, [FromServices] LogFileRepository logFileRepository, 
-        [FromServices] MinioService minioService, [FromServices] LogTokenRepository logTokenRepository, [FromServices] MyEmailService emailService){
+        [FromServices] MinioService minioService, [FromServices] LogTokenRepository logTokenRepository, [FromServices] MyEmailService emailService,
+        [FromServices] LogResultDetailRepository logResultDetailRepository){
             ActionResponse response = actionResponseFactory.CreateInstance();
             if(!CurrentUser.IsAdministrator && CurrentUser.RoleID != 3){
                 response.AddNotAllowedErr();
@@ -252,11 +253,15 @@ namespace MiSmart.API.Controllers
                 DetailedAnalysis = command.DetailedAnalysis,
                 LogFileID = id,
                 AnalystUUID = CurrentUser.UUID,
-                LogResultDetails = command.ListErrors,
                 Suggest = command.Suggest,
                 Conclusion = command.Conclusion,
             };
-            await logReportResultRepository.CreateAsync(result);
+            var res = await logReportResultRepository.CreateAsync(result);
+
+            foreach(LogResultDetail item in command.ListErrors){
+                item.LogReportResultID = res.ID;
+                await logResultDetailRepository.CreateAsync(item);
+            }
             
             foreach(UserEmail item in listEmailForLog){
                 String token = TokenHelper.GenerateToken();
