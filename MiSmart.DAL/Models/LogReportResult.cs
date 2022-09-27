@@ -20,7 +20,7 @@ namespace MiSmart.DAL.Models
         public String Conclusion {get; set; }
         public String DetailedAnalysis {get; set; }
         public Guid AnalystUUID {get; set; }
-        public Guid ApproverUUID {get; set; }
+        public Guid? ApproverUUID {get; set; }
         public Int32? ExecutionCompanyID {get; set;}
         private ExecutionCompany executionCompany;
         public ExecutionCompany ExecutionCompany
