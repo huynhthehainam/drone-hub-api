@@ -190,7 +190,6 @@ namespace MiSmart.API.Controllers
                 ImageUrls = imageUrls.ToArray(),
                 PilotDescription = command.PilotDescription,
                 ReporterDescription = command.ReporterDescription,
-                Suggest = command.Suggest,
                 UserUUID = CurrentUser.UUID, 
             };
             await logReportRepository.CreateAsync(report);
@@ -199,7 +198,7 @@ namespace MiSmart.API.Controllers
                 String token = TokenHelper.GenerateToken();
                 await logTokenRepository.CreateAsync(new LogToken {Token = token, UserUUID = item.UUID, LogFileID = id});
                 await emailService.SendMailAsync(new String[] { item.Email }, new String[] { }, new String[] { }, @$"[Chuyến bay cần phân tích] Mã hiệu drone ({logFile.Device.Name})", 
-                $"Dear,\nPhòng Đặc Nhiệm trả kết quả báo cáo hiện tường:\nMã hiệu Drone: {logFile.Device.Name}\nLink Báo cáo tình trạng chuyến bay: https://dronehub.mismart.ai/log-report-result?token={token}");
+                $"Dear,\nPhòng Đặc Nhiệm trả kết quả báo cáo hiện tường:\nMã hiệu Drone: {logFile.Device.Name}\nLink Báo cáo tình trạng chuyến bay: https://dronehub.mismart.ai/log-report?token={token}");
             }
             response.SetCreatedObject(report);
             return response.ToIActionResult();
@@ -223,7 +222,7 @@ namespace MiSmart.API.Controllers
             }
             logReport.UpdatedTime = new DateTime();
             logReport.AccidentTime = command.AccidentTime;
-            logReport.Suggest = command.Suggest;
+
             logReport.PilotDescription = command.PilotDescription;
             logReport.ReporterDescription = command.ReporterDescription;
             await logReportRepository.UpdateAsync(logReport);
@@ -312,7 +311,7 @@ namespace MiSmart.API.Controllers
         }
         [HttpGet("ResultForEmail")]
         [AllowAnonymous]
-        public async Task<IActionResult> GetResultForEmail([FromBody] AddingGetLogForEmailCommand command,
+        public async Task<IActionResult> GetResultForEmail([FromForm] AddingLogResultFromMailCommand command,
         [FromServices] MinioService minioService, [FromServices] LogTokenRepository tokenRepository,
         [FromServices] LogReportResultRepository logReportResultRepository){
             ActionResponse response = actionResponseFactory.CreateInstance();
@@ -401,7 +400,7 @@ namespace MiSmart.API.Controllers
         [HttpGet("ReportForEmail")]
         [AllowAnonymous]
         public async Task<IActionResult> GetReportForEmail( 
-        [FromBody] AddingGetLogForEmailCommand command, [FromServices] LogReportRepository logReportRepository, 
+        [FromForm] AddingGetLogForEmailCommand command, [FromServices] LogReportRepository logReportRepository, 
         [FromServices] MinioService minioService, [FromServices] LogTokenRepository tokenRepository){
             ActionResponse response = actionResponseFactory.CreateInstance();
             var token = await tokenRepository.GetAsync(ww => ww.Token == command.Token);
@@ -437,7 +436,6 @@ namespace MiSmart.API.Controllers
                 ImageUrls = imageUrls.ToArray(),
                 PilotDescription = command.PilotDescription,
                 ReporterDescription = command.ReporterDescription,
-                Suggest = command.Suggest, 
                 UserUUID = token.UserUUID, 
             };
             await logReportRepository.CreateAsync(report);
@@ -473,7 +471,6 @@ namespace MiSmart.API.Controllers
             }
             logReport.UpdatedTime = new DateTime();
             logReport.AccidentTime = command.AccidentTime;
-            logReport.Suggest = command.Suggest;
             logReport.PilotDescription = command.PilotDescription;
             logReport.ReporterDescription = command.ReporterDescription;
 
