@@ -17,6 +17,7 @@ namespace MiSmart.DAL.ViewModels
         public String[] Errors {get; set;}
         public String ExecutionCompanyName {get; set;}
         public JsonDocument Detail {get; set;}
+        public Boolean isAnalyzed {get; set; }
         public void LoadFrom(LogFile entity)
         {
             ID = entity.ID;
@@ -27,6 +28,7 @@ namespace MiSmart.DAL.ViewModels
             DroneStatus = entity.DroneStatus;
             Status = entity.Status;
             Errors = entity.Errors;
+            isAnalyzed = entity.isAnalyzed;
         }
     }
 }

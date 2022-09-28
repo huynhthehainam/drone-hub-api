@@ -15,7 +15,7 @@ namespace MiSmart.DAL.ViewModels
     public class LogReportResultViewModel : IViewModel<LogReportResult>
     {
         public Guid LogFileID {get; set;}
-        public String[] ImageUrls{get; set;}
+        public List<String> ImageUrls{get; set;}
         public String Suggest {get; set;}
         public Guid AnalystUUID {get; set;}
         public Guid? ApproverUUID {get; set;}

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using MiSmart.DAL.Models;
 using MiSmart.Infrastructure.ViewModels;
 
@@ -10,7 +11,7 @@ namespace MiSmart.DAL.ViewModels
         public Guid UserUUID { get; set; }
         public String PilotDescription {get;set;}
         public String ReporterDescription {get;set;}
-        public String[] ImageUrls {get;set;} 
+        public List<String> ImageUrls {get;set;} 
         public DateTime AccidentTime{get; set;}
         public DateTime UpdatedTime {get; set;} = DateTime.UtcNow;
         public String Suggest {get; set; }
