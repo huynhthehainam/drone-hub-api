@@ -146,9 +146,8 @@ namespace MiSmart.API.Controllers
             var logReport = await logReportRepository.GetAsync(ww => ww.LogFileID == id);
             if (logReport is null)
             {
-                actionResponse.AddNotFoundErr("LogReport");
-            }
-            actionResponse.SetData(ViewModelHelpers.ConvertToViewModel<LogReport, LogReportViewModel>(logReport));
+                actionResponse.SetNoContent();
+            } else actionResponse.SetData(ViewModelHelpers.ConvertToViewModel<LogReport, LogReportViewModel>(logReport));
             return actionResponse.ToIActionResult();
         }
         [HttpGet("{id:Guid}/Result")]
@@ -161,9 +160,9 @@ namespace MiSmart.API.Controllers
             var logReportResult = await logReportResultRepository.GetAsync(ww => ww.LogFileID == id);
             if (logReportResult is null)
             {
-                actionResponse.AddNotFoundErr("LogReport");
+                actionResponse.SetNoContent();
             }
-            actionResponse.SetData(ViewModelHelpers.ConvertToViewModel<LogReportResult, LogReportResultViewModel>(logReportResult));
+            else actionResponse.SetData(ViewModelHelpers.ConvertToViewModel<LogReportResult, LogReportResultViewModel>(logReportResult));
             return actionResponse.ToIActionResult();
         }
         [HttpPost("{id:Guid}/Report")]
