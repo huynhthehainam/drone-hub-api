@@ -15,13 +15,22 @@ using MiSmart.Infrastructure.ScheduledTasks;
 namespace MiSmart.API.ScheduledTasks
 {
     public class DroneLogAPIResponse
-    {
-        public class Location{
-            public Double Lag {get; set; }
-            public Double Lng {get; set; }
-        }
+    {        
         public class DroneLogAPIData
         {
+            public class Location{
+                public Double Lat {get; set; }
+                public Double Lng {get; set; }
+            }
+            public class XYZ {
+                public Double X {get; set; }
+                public Double Y {get; set; }
+                public Double Z {get; set; }
+            }
+            public class EdgeData {
+                public Double Roll {get; set; }
+                public Double Pitch {get; set; }
+            }
             public Double flight_time {get; set; }
             public Double fuel_avg_per {get; set; }
             public XYZ max_accel {get; set; }
@@ -64,16 +73,24 @@ namespace MiSmart.API.ScheduledTasks
                             DroneLogAPIResponse droneLogAPIResponse = JsonSerializer.Deserialize<DroneLogAPIResponse>(responseString, JsonSerializerDefaultOptions.CamelOptions);
                             if (droneLogAPIResponse.Result is not null){
                                 var model = new LogDetail(){
-                                    Accel = JsonDocument.Parse(JsonSerializer.Serialize(droneLogAPIResponse.Result.max_accel, JsonSerializerDefaultOptions.CamelOptions)),
+                                    AccelX = droneLogAPIResponse.Result.max_accel.X,
+                                    AccelY = droneLogAPIResponse.Result.max_accel.Y,
+                                    AccelZ = droneLogAPIResponse.Result.max_accel.Z,
                                     PercentFuel = droneLogAPIResponse.Result.fuel_avg_per,
                                     BatteryCellDeviation = droneLogAPIResponse.Result.max_battery_deviation,
-                                    Vibe = JsonDocument.Parse(JsonSerializer.Serialize(droneLogAPIResponse.Result.max_vibe, JsonSerializerDefaultOptions.CamelOptions)),
+                                    VibeX = droneLogAPIResponse.Result.max_vibe.X,
+                                    VibeY = droneLogAPIResponse.Result.max_vibe.Y,
+                                    VibeZ = droneLogAPIResponse.Result.max_vibe.Z,
                                     FlySpeed = droneLogAPIResponse.Result.max_speed,
                                     Height = droneLogAPIResponse.Result.max_height,
-                                    Edge = JsonDocument.Parse(JsonSerializer.Serialize(droneLogAPIResponse.Result.max_angle, JsonSerializerDefaultOptions.CamelOptions)),
+                                    Roll = droneLogAPIResponse.Result.max_angle.Roll,
+                                    Pitch =droneLogAPIResponse.Result.max_angle.Pitch,
                                     FlightDuration = droneLogAPIResponse.Result.flight_time,
                                     PercentBattery = droneLogAPIResponse.Result.pin_min_per,
                                     LogFileID = log.ID,
+                                    Latitude = droneLogAPIResponse.Result.max_cordinate.Lat,
+                                    Longitude = droneLogAPIResponse.Result.max_cordinate.Lng,
+                                    IsBingLocation = false,
                                 };
                                 databaseContext.LogDetails.Add(model);
                             }
