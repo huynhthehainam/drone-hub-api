@@ -37,6 +37,7 @@ namespace MiSmart.DAL.Repositories
                 LogDetail = ww.LogDetail,
                 LogReport = ww.LogReport,
                 LogReportResult = ww.LogReportResult,
+                isAnalyzed = ww.isAnalyzed,
             });
             if (pageIndex.HasValue && pageSize.HasValue)
             {
