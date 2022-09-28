@@ -15,7 +15,7 @@ namespace MiSmart.DAL.Models
             get => lazyLoader.Load(this, ref logFile);
             set => logFile = value;
         }
-        public String[] ImageUrls {get; set; }
+        public List<String> ImageUrls {get; set; }
         public String Suggest {get; set; }
         public String Conclusion {get; set; }
         public String DetailedAnalysis {get; set; }
