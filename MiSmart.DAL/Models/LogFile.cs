@@ -62,6 +62,6 @@ namespace MiSmart.DAL.Models
             get => lazyLoader.Load(this, ref logTokens);
             set => logTokens = value;
         }
-        public Boolean isAnalyzed {get; set; } = false;
+        public Boolean isAnalyzed {get; set; }
     }
 }
