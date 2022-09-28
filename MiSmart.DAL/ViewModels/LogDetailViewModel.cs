@@ -15,7 +15,7 @@ namespace MiSmart.DAL.ViewModels
         public JsonDocument Edge {get; set;}
         public Double BatteryCellDeviation {get; set;}
         public Double FlySpeed {get;set;}
-        public Double Heigh {get; set;}
+        public Double Height {get; set;}
         public JsonDocument Accel {get;set;}
         public void LoadFrom(LogDetail entity)
         {
@@ -27,7 +27,7 @@ namespace MiSmart.DAL.ViewModels
             Edge = entity.Edge;
             BatteryCellDeviation = entity.BatteryCellDeviation;
             FlySpeed = entity.FlySpeed;
-            Heigh = entity.Heigh;
+            Height = entity.Height;
             Accel = entity.Accel;
         }
     }

@@ -12,7 +12,7 @@ namespace MiSmart.DAL.Models
         public Double Z {get; set; }
     }
     public class EdgeData {
-        public Double Role {get; set; }
+        public Double Roll {get; set; }
         public Double Pitch {get; set; }
     }
     public class LogDetail : EntityBase<Int64>
@@ -32,7 +32,7 @@ namespace MiSmart.DAL.Models
         public JsonDocument Edge {get; set;}
         public Double BatteryCellDeviation {get; set;}
         public Double FlySpeed {get;set;}
-        public Double Heigh {get; set;}
+        public Double Height {get; set;}
         public JsonDocument Accel {get;set;} 
     }
 }

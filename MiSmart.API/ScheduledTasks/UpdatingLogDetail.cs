@@ -69,7 +69,7 @@ namespace MiSmart.API.ScheduledTasks
                                     BatteryCellDeviation = droneLogAPIResponse.Result.max_battery_deviation,
                                     Vibe = JsonDocument.Parse(JsonSerializer.Serialize(droneLogAPIResponse.Result.max_vibe, JsonSerializerDefaultOptions.CamelOptions)),
                                     FlySpeed = droneLogAPIResponse.Result.max_speed,
-                                    Heigh = droneLogAPIResponse.Result.max_height,
+                                    Height = droneLogAPIResponse.Result.max_height,
                                     Edge = JsonDocument.Parse(JsonSerializer.Serialize(droneLogAPIResponse.Result.max_angle, JsonSerializerDefaultOptions.CamelOptions)),
                                     FlightDuration = droneLogAPIResponse.Result.flight_time,
                                     PercentBattery = droneLogAPIResponse.Result.pin_min_per,
