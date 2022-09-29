@@ -20,25 +20,14 @@ using System.Collections.Generic;
 using MiSmart.API.Services;
 using MiSmart.Infrastructure.Helpers;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Options;
+using MiSmart.API.Settings;
+using static MiSmart.API.Settings.TargetEmailSettings;
 
 namespace MiSmart.API.Controllers
 {
-    class UserEmail{
-        public UserEmail(String Email, Guid UUID){
-            this.Email = Email;
-            this.UUID = UUID;
-        }
-        public String Email {get; set;}
-        public Guid UUID {get; set;}
-    }
     public class LogFilesController : AuthorizedAPIControllerBase
     {
-        private List<UserEmail> listEmailForLog = new List<UserEmail>{
-            new UserEmail("dotientrung201030@gmail.com",new Guid("0c1fb569-05f0-4ccb-b439-1dbed807f38d")),
-        };
-        private List<String> listEmailForError = new List<String>{
-           "dotientrung201030@gmail.com",
-        };
         public LogFilesController(IActionResponseFactory actionResponseFactory) : base(actionResponseFactory)
         {
         }
@@ -169,8 +158,10 @@ namespace MiSmart.API.Controllers
         public async Task<IActionResult> CreateReport([FromRoute] Guid id, 
         [FromBody] AddingLogReportCommand command, [FromServices] LogReportRepository logReportRepository, 
         [FromServices] LogFileRepository logFileRepository, 
-        [FromServices] MyEmailService emailService, [FromServices] LogTokenRepository logTokenRepository){
+        [FromServices] MyEmailService emailService, [FromServices] LogTokenRepository logTokenRepository,
+        [FromServices] IOptions<TargetEmailSettings> options){
             ActionResponse response = actionResponseFactory.CreateInstance();
+            TargetEmailSettings settings =  options.Value;
             if(CurrentUser.RoleID != 3){
                 response.AddNotAllowedErr();
             }
@@ -192,11 +183,11 @@ namespace MiSmart.API.Controllers
             };
             await logReportRepository.CreateAsync(report);
             
-            foreach(UserEmail item in listEmailForLog){
+            foreach(UserEmail item in settings.LogReport){
                 String token = TokenHelper.GenerateToken();
-                await logTokenRepository.CreateAsync(new LogToken {Token = token, UserUUID = item.UUID, LogFileID = id});
+                await logTokenRepository.CreateAsync(new LogToken {Token = token, UserUUID = new Guid(item.UUID), LogFileID = id});
                 await emailService.SendMailAsync(new String[] { item.Email }, new String[] { }, new String[] { }, @$"[Chuyến bay cần phân tích] Mã hiệu drone ({logFile.Device.Name})", 
-                $"Dear,\nPhòng Đặc Nhiệm trả kết quả báo cáo hiện tường:\nMã hiệu Drone: {logFile.Device.Name}\nLink Báo cáo tình trạng chuyến bay: https://dronehub.mismart.ai/log-report-result?token={token}");
+                $"Dear,\n\nPhòng Đặc Nhiệm trả kết quả báo cáo hiện tường:\n\nMã hiệu Drone: {logFile.Device.Name}\n\nLink Báo cáo tình trạng chuyến bay: https://dronehub.mismart.ai/log-report-result?token={token} \n\nThank you");
             }
             response.SetCreatedObject(report);
             return response.ToIActionResult();
@@ -225,8 +216,9 @@ namespace MiSmart.API.Controllers
         public async Task<IActionResult> CreateReportResult([FromRoute] Guid id, [FromBody] AddingLogResultCommand command, 
         [FromServices] LogReportResultRepository logReportResultRepository, [FromServices] LogFileRepository logFileRepository, 
         [FromServices] LogTokenRepository logTokenRepository, [FromServices] MyEmailService emailService,
-        [FromServices] LogResultDetailRepository logResultDetailRepository){
+        [FromServices] LogResultDetailRepository logResultDetailRepository, [FromServices] IOptions<TargetEmailSettings> options){
             ActionResponse response = actionResponseFactory.CreateInstance();
+            TargetEmailSettings settings =  options.Value;
             if(!CurrentUser.IsAdministrator && CurrentUser.RoleID != 3){
                 response.AddNotAllowedErr();
             }
@@ -257,11 +249,11 @@ namespace MiSmart.API.Controllers
                 await logResultDetailRepository.CreateAsync(error);
             }
             
-            foreach(UserEmail item in listEmailForLog){
+            foreach(UserEmail item in settings.LogReport){
                 String token = TokenHelper.GenerateToken();
-                await logTokenRepository.CreateAsync(new LogToken(){Token = token, UserUUID = item.UUID, LogFileID = id});
+                await logTokenRepository.CreateAsync(new LogToken(){Token = token, UserUUID = new Guid(item.UUID), LogFileID = id});
                 await emailService.SendMailAsync(new String[] { item.Email }, new String[] { }, new String[] { }, @$"Subject: [Kết quả Phân tích Dữ liệu bay] Mã hiệu drone ({logFile.Device.Name})", 
-                $"Dear,\nPhòng Điều khiển bay trả Kết quả phân tích Dữ liệu bay:\nMã hiệu Drone: {logFile.Device.Name}\nKết luận chung: {command.Conclusion}");
+                $"Dear,\n\nPhòng Điều khiển bay trả Kết quả phân tích Dữ liệu bay:\n\nMã hiệu Drone: {logFile.Device.Name}\n\nKết luận chung: {command.Conclusion}\n\nThank you");
             }
             response.SetCreatedObject(result);
             return response.ToIActionResult();
@@ -337,7 +329,7 @@ namespace MiSmart.API.Controllers
         }
         [HttpPost("ResultFromEmail")]
         [AllowAnonymous]
-        public async Task<IActionResult> CreateResultFromEmail([FromForm] AddingLogResultFromMailCommand command,
+        public async Task<IActionResult> CreateResultFromEmail([FromBody] AddingLogResultFromMailCommand command,
         [FromServices] MinioService minioService, [FromServices] LogTokenRepository tokenRepository,
         [FromServices] LogReportResultRepository logReportResultRepository, [FromServices] LogResultDetailRepository logResultDetailRepository){
             ActionResponse response = actionResponseFactory.CreateInstance();
@@ -376,7 +368,7 @@ namespace MiSmart.API.Controllers
         }
         [HttpPatch("ResultFromEmail")]
         [AllowAnonymous]
-        public async Task<IActionResult> UpdateReportResultFromEmail([FromForm] AddingLogResultFromMailCommand command, [FromServices] LogReportResultRepository logReportResultRepository, 
+        public async Task<IActionResult> UpdateReportResultFromEmail([FromBody] AddingLogResultFromMailCommand command, [FromServices] LogReportResultRepository logReportResultRepository, 
         [FromServices] MinioService minioService, [FromServices] LogTokenRepository tokenRepository, [FromServices] LogResultDetailRepository logResultDetailRepository){
             ActionResponse response = actionResponseFactory.CreateInstance();
             var token = await tokenRepository.GetAsync(ww => ww.Token == command.Token);
@@ -429,7 +421,7 @@ namespace MiSmart.API.Controllers
         }
         [HttpPost("ReportFromEmail")]
         public async Task<IActionResult> CreateReportFromEmail( 
-        [FromForm] AddingLogReportFromEmailCommand command, [FromServices] LogReportRepository logReportRepository, 
+        [FromBody] AddingLogReportFromEmailCommand command, [FromServices] LogReportRepository logReportRepository, 
         [FromServices] MinioService minioService, [FromServices] LogTokenRepository tokenRepository){
             ActionResponse response = actionResponseFactory.CreateInstance();
             var token = await tokenRepository.GetAsync(ww => ww.Token == command.Token);
@@ -460,7 +452,7 @@ namespace MiSmart.API.Controllers
         }
         [HttpPatch("ReportFromEmail")]
         public async Task<IActionResult> UpdateReportFromEmail( 
-        [FromForm] AddingLogReportFromEmailCommand command, [FromServices] LogReportRepository logReportRepository, 
+        [FromBody] AddingLogReportFromEmailCommand command, [FromServices] LogReportRepository logReportRepository, 
         [FromServices] MinioService minioService, [FromServices] LogTokenRepository tokenRepository){
             ActionResponse response = actionResponseFactory.CreateInstance();
             var token = await tokenRepository.GetAsync(ww => ww.Token == command.Token);
@@ -507,8 +499,9 @@ namespace MiSmart.API.Controllers
         }
         [HttpPost("Errors")]
         public async Task<IActionResult> SendEmailErrors([FromBody] AddingLogErrorCommand command, [FromServices] LogFileRepository logFileRepository,
-        [FromServices] MyEmailService emailService){
+        [FromServices] MyEmailService emailService, [FromServices] IOptions<TargetEmailSettings> options){
             ActionResponse response = actionResponseFactory.CreateInstance();
+            TargetEmailSettings settings =  options.Value;
             if(!CurrentUser.IsAdministrator && CurrentUser.RoleID != 3){
                 response.AddNotAllowedErr();
             }
@@ -524,14 +517,12 @@ namespace MiSmart.API.Controllers
             }
             else {
                 errorString = "Báo cáo có mâu thuẫn";
-                contentString = "Phòng DroneControl sẽ mở luồng mail trao dổi kỹ hơn trong vòng 1 ngày";
+                contentString = "Phòng DroneControl sẽ mở luồng mail trao đổi kỹ hơn trong vòng 1 ngày";
             }
-            foreach(var item in listEmailForError){
-                String token = TokenHelper.GenerateToken();
-                await emailService.SendMailAsync(new String[] { item }, new String[] { }, new String[] { }, @$"Subject: [Kết quả Phân tích Dữ liệu bay] Mã hiệu drone ({logFile.Device.Name})", 
-                $"Dear,\nPhòng Điều khiển bay trả Kết quả phân tích Dữ liệu bay:\nMã hiệu Drone: {logFile.Device.Name}\nTình trạng: {errorString}\n{contentString}");
+ 
+            await emailService.SendMailAsync(settings.LogError.ToArray(), new String[] { }, new String[] { }, @$"Subject: [Kết quả Phân tích Dữ liệu bay] Mã hiệu drone ({logFile.Device.Name})", 
+            $"Dear,\n\nPhòng Điều khiển bay trả Kết quả phân tích Dữ liệu bay:\n\nMã hiệu Drone: {logFile.Device.Name}\n\nTình trạng: {errorString}\n\n{contentString}\n\nThank you");
 
-            }
             return response.ToIActionResult();
         }
         [HttpPost("{id:Guid}/UploadReportImage")]
