@@ -15,6 +15,8 @@ namespace MiSmart.DAL.ViewModels
         public DateTime AccidentTime{get; set;}
         public DateTime UpdatedTime {get; set;} = DateTime.UtcNow;
         public String Suggest {get; set; }
+        public String PilotName {get; set; }
+        public String PartnerCompanyName {get; set; }
         public void LoadFrom(LogReport entity)
         {
             LogFileID = entity.LogFileID;
@@ -25,6 +27,8 @@ namespace MiSmart.DAL.ViewModels
             AccidentTime = entity.AccidentTime;
             UpdatedTime = entity.UpdatedTime;
             Suggest = entity.Suggest;
+            PilotName = entity.PilotName;
+            PartnerCompanyName = entity.PartnerCompanyName;
         }
     }
 }

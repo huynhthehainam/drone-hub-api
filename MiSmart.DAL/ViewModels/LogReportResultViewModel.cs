@@ -20,11 +20,15 @@ namespace MiSmart.DAL.ViewModels
         public Guid AnalystUUID {get; set;}
         public Guid? ApproverUUID {get; set;}
         public List<LogResultDetailViewModel> ListErrors {get; set; }
+        public String Conclusion {get; set; }
+        public String DetailAnalysis {get; set; }
         public void LoadFrom(LogReportResult entity)
         {
             LogFileID = entity.LogFileID;
             ImageUrls = entity.ImageUrls;
             Suggest = entity.Suggest;
+            Conclusion = entity.Conclusion;
+            DetailAnalysis = entity.DetailedAnalysis;
             AnalystUUID = entity.AnalystUUID;
             ApproverUUID = entity.ApproverUUID;
             ListErrors = new List<LogResultDetailViewModel>();
