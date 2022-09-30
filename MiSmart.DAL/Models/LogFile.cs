@@ -1,16 +1,19 @@
 using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using MiSmart.Infrastructure.Data;
 
 namespace MiSmart.DAL.Models
 {
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum DroneStatus
     {
         Stable,
         Unstable,
         Fall,
     }
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum LogStatus
     {
         NotReceive,
@@ -39,8 +42,8 @@ namespace MiSmart.DAL.Models
         public DateTime CreationTime { get; set; } = DateTime.UtcNow;
         public DateTime LoggingTime { get; set; } = DateTime.UtcNow;
         public DroneStatus DroneStatus { get; set; }
-        public LogStatus Status {get; set; }
-        public String[] Errors {get; set;}
+        public LogStatus Status { get; set; }
+        public String[] Errors { get; set; }
         private LogDetail logDetail;
         public LogDetail LogDetail
         {
@@ -48,20 +51,23 @@ namespace MiSmart.DAL.Models
             set => logDetail = value;
         }
         private LogReport logReport;
-        public LogReport LogReport{
+        public LogReport LogReport
+        {
             get => lazyLoader.Load(this, ref logReport);
             set => logReport = value;
         }
         private LogReportResult logReportResult;
-        public LogReportResult LogReportResult{
+        public LogReportResult LogReportResult
+        {
             get => lazyLoader.Load(this, ref logReportResult);
             set => logReportResult = value;
         }
         private ICollection<LogToken> logTokens;
-        public ICollection<LogToken> LogTokens {
+        public ICollection<LogToken> LogTokens
+        {
             get => lazyLoader.Load(this, ref logTokens);
             set => logTokens = value;
         }
-        public Boolean isAnalyzed {get; set; } = false;
+        public Boolean isAnalyzed { get; set; } = false;
     }
 }
