@@ -18,6 +18,7 @@ namespace MiSmart.DAL.ViewModels
         public String ExecutionCompanyName {get; set;}
         public JsonDocument Detail {get; set;}
         public Boolean isAnalyzed {get; set; }
+        public String Location {get; set; }
         public void LoadFrom(LogFile entity)
         {
             ID = entity.ID;
@@ -29,6 +30,7 @@ namespace MiSmart.DAL.ViewModels
             Status = entity.Status;
             Errors = entity.Errors;
             isAnalyzed = entity.isAnalyzed;
+            Location = entity?.LogDetail?.Location;
         }
     }
 }
