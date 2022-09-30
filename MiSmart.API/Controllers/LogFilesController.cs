@@ -192,6 +192,9 @@ namespace MiSmart.API.Controllers
             };
             await logReportRepository.CreateAsync(report);
 
+            logFile.Status = LogStatus.Warning;
+            await logFileRepository.UpdateAsync(logFile);
+
             foreach (UserEmail item in settings.LogReport)
             {
                 String token = TokenHelper.GenerateToken();
@@ -272,6 +275,10 @@ namespace MiSmart.API.Controllers
                 };
                 await logResultDetailRepository.CreateAsync(error);
             }
+
+            logFile.Status = LogStatus.Completed;
+            await logFileRepository.UpdateAsync(logFile);
+
             response.SetCreatedObject(result);
             return response.ToIActionResult();
         }
@@ -339,6 +346,9 @@ namespace MiSmart.API.Controllers
                 await emailService.SendMailAsync(new String[] { item.Email }, new String[] { }, new String[] { }, @$"Subject: [Kết quả Phân tích Dữ liệu bay] Mã hiệu drone ({logFile.Device.Name})",
                 $"Dear,\n\nPhòng Điều khiển bay trả Kết quả phân tích Dữ liệu bay:\n\nMã hiệu Drone: {logFile.Device.Name}\n\nKết luận chung: {logResult.Conclusion}\n\nThank you");
             }
+
+            logFile.Status = LogStatus.Approved;
+            await logFileRepository.UpdateAsync(logFile);
 
             await logReportResultRepository.UpdateAsync(logResult);
             return response.ToIActionResult();
