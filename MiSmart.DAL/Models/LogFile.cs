@@ -16,10 +16,10 @@ namespace MiSmart.DAL.Models
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum LogStatus
     {
-        NotReceive,
-        Processing,
-        Error,
-        Approval,
+        Normal,
+        Warning,
+        Completed,
+        Approved,
     }
     public class LogFile : EntityBase<Guid>
     {
