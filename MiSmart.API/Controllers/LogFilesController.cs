@@ -367,7 +367,7 @@ namespace MiSmart.API.Controllers
         [FromServices] LogReportResultRepository logReportResultRepository)
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
-            var resToken = await tokenRepository.GetAsync(ww => ww.Token == token);
+            var resToken = await tokenRepository.GetAsync(ww => String.Equals(ww.Token,token));
             if (resToken is null)
             {
                 response.AddNotFoundErr("Token");
@@ -454,7 +454,7 @@ namespace MiSmart.API.Controllers
         [FromServices] MinioService minioService, [FromServices] LogTokenRepository tokenRepository)
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
-            var resToken = await tokenRepository.GetAsync(ww => ww.Token == token);
+            var resToken = await tokenRepository.GetAsync(ww => String.Equals(ww.Token,token));
             if (resToken is null)
             {
                 response.AddNotFoundErr("Token");
@@ -508,7 +508,7 @@ namespace MiSmart.API.Controllers
         [FromServices] LogTokenRepository tokenRepository, [FromQuery] String token)
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
-            var resToken = await tokenRepository.GetAsync(ww => ww.Token == token);
+            var resToken = await tokenRepository.GetAsync(ww => String.Equals(ww.Token,token));
             if (resToken is null)
             {
                 response.AddNotFoundErr("Token");
