@@ -319,7 +319,7 @@ namespace MiSmart.API.Controllers
             if (token is null){
                 response.AddNotFoundErr("Token");
             }
-            if ((DateTime.Now - token.CreateTime).TotalMinutes > 30){
+            if ((DateTime.Now - token.CreateTime).TotalHours > 24){
                 response.AddExpiredErr("Token");
             }
             var logReportResult = await logReportResultRepository.GetAsync(ww => ww.LogFileID == token.LogFileID);
@@ -340,7 +340,7 @@ namespace MiSmart.API.Controllers
             if (token is null){
                 response.AddNotFoundErr("Token");
             }
-            if ((DateTime.Now - token.CreateTime).TotalMinutes > 30){
+            if ((DateTime.Now - token.CreateTime).TotalHours > 24){
                 response.AddExpiredErr("Token");
             }
             var result = await logReportResultRepository.CreateAsync(new LogReportResult() 
@@ -378,7 +378,7 @@ namespace MiSmart.API.Controllers
             if (token is null){
                 response.AddNotFoundErr("Token");
             }
-            if ((DateTime.Now - token.CreateTime).TotalMinutes > 30){
+            if ((DateTime.Now - token.CreateTime).TotalHours > 24){
                 response.AddExpiredErr("Token");
             }
             var logResult = await logReportResultRepository.GetAsync(ww => ww.LogFileID == token.LogFileID);
@@ -415,7 +415,7 @@ namespace MiSmart.API.Controllers
             if (token is null){
                 response.AddNotFoundErr("Token");
             }
-            if ((DateTime.Now - token.CreateTime).TotalMinutes > 30){
+            if ((DateTime.Now - token.CreateTime).TotalHours > 24){
                 response.AddExpiredErr("Token");
             }
             var log = await logReportRepository.GetAsync(ww => ww.LogFileID == token.LogFileID);
@@ -431,7 +431,7 @@ namespace MiSmart.API.Controllers
             if (token is null){
                 response.AddNotFoundErr("Token");
             }
-            if ((DateTime.Now - token.CreateTime).TotalMinutes > 30){
+            if ((DateTime.Now - token.CreateTime).TotalHours > 24){
                 response.AddExpiredErr("Token");
             }
             var report = new LogReport{
@@ -462,7 +462,7 @@ namespace MiSmart.API.Controllers
             if (token is null){
                 response.AddNotFoundErr("Token");
             }
-            if ((DateTime.Now - token.CreateTime).TotalMinutes > 30){
+            if ((DateTime.Now - token.CreateTime).TotalHours > 24){
                 response.AddExpiredErr("Token");
             }
             var logReport = await logReportRepository.GetAsync(ww => ww.LogFileID == token.LogFileID);
@@ -489,7 +489,7 @@ namespace MiSmart.API.Controllers
             if (token is null){
                 response.AddNotFoundErr("Token");
             }
-            if ((DateTime.Now - token.CreateTime).TotalMinutes > 30){
+            if ((DateTime.Now - token.CreateTime).TotalHours > 24){
                 response.AddExpiredErr("Token");
             }
             var logDetail = await logDetailRepository.GetAsync(ww => ww.LogFileID == token.LogFileID);
@@ -583,7 +583,7 @@ namespace MiSmart.API.Controllers
             if (token is null){
                 actionResponse.AddNotFoundErr("Token");
             }
-            if ((DateTime.Now - token.CreateTime).TotalMinutes > 30){
+            if ((DateTime.Now - token.CreateTime).TotalHours > 24){
                 actionResponse.AddExpiredErr("Token");
             }
             var report = await logReportRepository.GetAsync(ww => ww.LogFileID == id);
@@ -611,7 +611,7 @@ namespace MiSmart.API.Controllers
             if (token is null){
                 actionResponse.AddNotFoundErr("Token");
             }
-            if ((DateTime.Now - token.CreateTime).TotalMinutes > 30){
+            if ((DateTime.Now - token.CreateTime).TotalHours > 24){
                 actionResponse.AddExpiredErr("Token");
             }
             var report = await logReportRepository.GetAsync(ww => ww.LogFileID == id);
@@ -640,7 +640,7 @@ namespace MiSmart.API.Controllers
             if (token is null){
                 response.AddNotFoundErr("Token");
             }
-            if ((DateTime.Now - token.CreateTime).TotalMinutes > 30){
+            if ((DateTime.Now - token.CreateTime).TotalHours > 24){
                 response.AddExpiredErr("Token");
             }
             var logResult = await logReportResultRepository.GetAsync(ww => ww.LogFileID == token.LogFileID);
