@@ -39,7 +39,7 @@ namespace MiSmart.API.Controllers
         [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository)
         {
             ActionResponse actionResponse = actionResponseFactory.CreateInstance();
-            
+
             Expression<Func<LogFile, Boolean>> query = ww =>
             (deviceID.HasValue ? (ww.DeviceID == deviceID.Value) : true)
             && (ww.FileBytes.Length > 500000)
@@ -105,28 +105,32 @@ namespace MiSmart.API.Controllers
         }
         [HttpGet("{id:Guid}/Detail")]
         public async Task<IActionResult> GetLogDetail([FromRoute] Guid id, [FromServices] LogDetailRepository logDetailRepository,
-        [FromServices] LogFileRepository logFileRepository){
+        [FromServices] LogFileRepository logFileRepository)
+        {
             ActionResponse actionResponse = actionResponseFactory.CreateInstance();
             if (!CurrentUser.IsAdministrator && CurrentUser.RoleID != 3)
             {
                 actionResponse.AddNotAllowedErr();
             }
             var logFile = await logFileRepository.GetAsync(ww => ww.ID == id);
-            if (logFile is null){
+            if (logFile is null)
+            {
                 actionResponse.AddNotFoundErr("LogFile");
             }
-            if (!logFile.isAnalyzed){
+            if (!logFile.isAnalyzed)
+            {
                 actionResponse.AddNotFoundErr("LogDetail");
             }
             var logDetail = await logDetailRepository.GetAsync(ww => ww.LogFileID == id);
             if (logDetail is null)
-                actionResponse.SetNoContent();
-            else
-                actionResponse.SetData(ViewModelHelpers.ConvertToViewModel<LogDetail, LogDetailViewModel>(logDetail));
+                actionResponse.AddNotFoundErr("Detail");
+
+            actionResponse.SetData(ViewModelHelpers.ConvertToViewModel<LogDetail, LogDetailViewModel>(logDetail));
             return actionResponse.ToIActionResult();
         }
         [HttpGet("{id:Guid}/Report")]
-        public async Task<IActionResult> GetLogReport([FromRoute] Guid id, [FromServices] LogReportRepository logReportRepository){
+        public async Task<IActionResult> GetLogReport([FromRoute] Guid id, [FromServices] LogReportRepository logReportRepository)
+        {
             ActionResponse actionResponse = actionResponseFactory.CreateInstance();
             if (!CurrentUser.IsAdministrator && CurrentUser.RoleID != 3)
             {
@@ -135,12 +139,14 @@ namespace MiSmart.API.Controllers
             var logReport = await logReportRepository.GetAsync(ww => ww.LogFileID == id);
             if (logReport is null)
             {
-                actionResponse.SetNoContent();
-            } else actionResponse.SetData(ViewModelHelpers.ConvertToViewModel<LogReport, LogReportViewModel>(logReport));
+                actionResponse.AddNotFoundErr("Report");
+            }
+            actionResponse.SetData(ViewModelHelpers.ConvertToViewModel<LogReport, LogReportViewModel>(logReport));
             return actionResponse.ToIActionResult();
         }
         [HttpGet("{id:Guid}/Result")]
-        public async Task<IActionResult> GetLogResult([FromRoute] Guid id, [FromServices] LogReportResultRepository logReportResultRepository){
+        public async Task<IActionResult> GetLogResult([FromRoute] Guid id, [FromServices] LogReportResultRepository logReportResultRepository)
+        {
             ActionResponse actionResponse = actionResponseFactory.CreateInstance();
             if (!CurrentUser.IsAdministrator && CurrentUser.RoleID != 3)
             {
@@ -149,57 +155,64 @@ namespace MiSmart.API.Controllers
             var logReportResult = await logReportResultRepository.GetAsync(ww => ww.LogFileID == id);
             if (logReportResult is null)
             {
-                actionResponse.SetNoContent();
+                actionResponse.AddNotFoundErr("ReportResult");
             }
-            else actionResponse.SetData(ViewModelHelpers.ConvertToViewModel<LogReportResult, LogReportResultViewModel>(logReportResult));
+            actionResponse.SetData(ViewModelHelpers.ConvertToViewModel<LogReportResult, LogReportResultViewModel>(logReportResult));
             return actionResponse.ToIActionResult();
         }
         [HttpPost("{id:Guid}/Report")]
-        public async Task<IActionResult> CreateReport([FromRoute] Guid id, 
-        [FromBody] AddingLogReportCommand command, [FromServices] LogReportRepository logReportRepository, 
-        [FromServices] LogFileRepository logFileRepository, 
+        public async Task<IActionResult> CreateReport([FromRoute] Guid id,
+        [FromBody] AddingLogReportCommand command, [FromServices] LogReportRepository logReportRepository,
+        [FromServices] LogFileRepository logFileRepository,
         [FromServices] MyEmailService emailService, [FromServices] LogTokenRepository logTokenRepository,
-        [FromServices] IOptions<TargetEmailSettings> options){
+        [FromServices] IOptions<TargetEmailSettings> options)
+        {
             ActionResponse response = actionResponseFactory.CreateInstance();
-            TargetEmailSettings settings =  options.Value;
-            if(CurrentUser.RoleID != 3){
+            TargetEmailSettings settings = options.Value;
+            if (CurrentUser.RoleID != 3)
+            {
                 response.AddNotAllowedErr();
             }
             var logFile = await logFileRepository.GetAsync(ww => ww.ID == id);
-            if (logFile is null){
+            if (logFile is null)
+            {
                 response.AddNotFoundErr("LogFile");
             }
             var report = new LogReport
             {
                 LogFileID = id,
-                AccidentTime = command.AccidentTime, 
+                AccidentTime = command.AccidentTime,
                 ImageUrls = new List<String> { },
                 PilotDescription = command.PilotDescription,
                 ReporterDescription = command.ReporterDescription,
                 Suggest = command.Suggest,
                 PilotName = command.PilotName,
                 PartnerCompanyName = command.PartnerCompanyName,
-                UserUUID = CurrentUser.UUID, 
+                UserUUID = CurrentUser.UUID,
             };
             await logReportRepository.CreateAsync(report);
-            
-            foreach(UserEmail item in settings.LogReport){
+
+            foreach (UserEmail item in settings.LogReport)
+            {
                 String token = TokenHelper.GenerateToken();
-                await logTokenRepository.CreateAsync(new LogToken {Token = token, UserUUID = new Guid(item.UUID), LogFileID = id});
-                await emailService.SendMailAsync(new String[] { item.Email }, new String[] { }, new String[] { }, @$"[Chuyến bay cần phân tích] Mã hiệu drone ({logFile.Device.Name})", 
+                await logTokenRepository.CreateAsync(new LogToken { Token = token, UserUUID = new Guid(item.UUID), LogFileID = id });
+                await emailService.SendMailAsync(new String[] { item.Email }, new String[] { }, new String[] { }, @$"[Chuyến bay cần phân tích] Mã hiệu drone ({logFile.Device.Name})",
                 $"Dear,\n\nPhòng Đặc Nhiệm trả kết quả báo cáo hiện tường:\n\nMã hiệu Drone: {logFile.Device.Name}\n\nLink Báo cáo tình trạng chuyến bay: https://dronehub.mismart.ai/log-report-result?token={token} \n\nThank you");
             }
             response.SetCreatedObject(report);
             return response.ToIActionResult();
         }
         [HttpPatch("{id:Guid}/Report")]
-        public async Task<IActionResult> UpdateReport([FromRoute] Guid id, [FromBody] AddingLogReportCommand command, [FromServices] LogReportRepository logReportRepository, [FromServices] LogFileRepository logFileRepository){
+        public async Task<IActionResult> UpdateReport([FromRoute] Guid id, [FromBody] AddingLogReportCommand command, [FromServices] LogReportRepository logReportRepository, [FromServices] LogFileRepository logFileRepository)
+        {
             ActionResponse response = actionResponseFactory.CreateInstance();
-            if(CurrentUser.RoleID != 3){
+            if (CurrentUser.RoleID != 3)
+            {
                 response.AddNotAllowedErr();
             }
             var logReport = await logReportRepository.GetAsync(ww => ww.LogFileID == id);
-            if (logReport is null){
+            if (logReport is null)
+            {
                 response.AddNotFoundErr("LogReport");
             }
             logReport.UpdatedTime = DateTime.UtcNow;
@@ -213,22 +226,26 @@ namespace MiSmart.API.Controllers
             return response.ToIActionResult();
         }
         [HttpPost("{id:Guid}/Result")]
-        public async Task<IActionResult> CreateReportResult([FromRoute] Guid id, [FromBody] AddingLogResultCommand command, 
-        [FromServices] LogReportResultRepository logReportResultRepository, [FromServices] LogFileRepository logFileRepository, 
+        public async Task<IActionResult> CreateReportResult([FromRoute] Guid id, [FromBody] AddingLogResultCommand command,
+        [FromServices] LogReportResultRepository logReportResultRepository, [FromServices] LogFileRepository logFileRepository,
         [FromServices] LogTokenRepository logTokenRepository, [FromServices] MyEmailService emailService,
-        [FromServices] LogResultDetailRepository logResultDetailRepository){
+        [FromServices] PartRepository partRepository,
+        [FromServices] LogResultDetailRepository logResultDetailRepository)
+        {
             ActionResponse response = actionResponseFactory.CreateInstance();
 
-            if(!CurrentUser.IsAdministrator && CurrentUser.RoleID != 3){
+            if (!CurrentUser.IsAdministrator && CurrentUser.RoleID != 3)
+            {
                 response.AddNotAllowedErr();
             }
             var logFile = await logFileRepository.GetAsync(ww => ww.ID == id);
-            if (logFile is null){
+            if (logFile is null)
+            {
                 response.AddNotFoundErr("LogFile");
             }
             var result = new LogReportResult
             {
-                ImageUrls = new List<String>{},
+                ImageUrls = new List<String> { },
                 ExecutionCompanyID = command.ExecutionCompanyID,
                 DetailedAnalysis = command.DetailedAnalysis,
                 LogFileID = id,
@@ -238,11 +255,18 @@ namespace MiSmart.API.Controllers
             };
             var res = await logReportResultRepository.CreateAsync(result);
 
-            foreach(AddingLogResultDetailCommand item in command.ListErrors){
-                var error = new LogResultDetail{
+            foreach (AddingLogResultDetailCommand item in command.ListErrors)
+            {
+                var part = await partRepository.GetAsync(ww => ww.ID == item.PartID.GetValueOrDefault());
+                if (part is null)
+                {
+                    continue;
+                }
+                var error = new LogResultDetail
+                {
                     Detail = item.Detail,
                     LogReportResultID = res.ID,
-                    PartErrorID = item.PartID,
+                    PartErrorID = item.PartID.GetValueOrDefault(),
                     Resolve = item.Resolve,
                     Status = item.Status,
                 };
@@ -251,22 +275,27 @@ namespace MiSmart.API.Controllers
             response.SetCreatedObject(result);
             return response.ToIActionResult();
         }
-        
+
         [HttpPatch("{id:Guid}/Result")]
-        public async Task<IActionResult> UpdateReportResult([FromRoute] Guid id, [FromBody] AddingLogResultCommand command, 
+        public async Task<IActionResult> UpdateReportResult([FromRoute] Guid id, [FromBody] AddingLogResultCommand command,
         [FromServices] LogReportResultRepository logReportResultRepository, [FromServices] MinioService minioService,
-        [FromServices] LogResultDetailRepository logResultDetailRepository){
+        [FromServices] LogResultDetailRepository logResultDetailRepository)
+        {
             ActionResponse response = actionResponseFactory.CreateInstance();
-            if(CurrentUser.RoleID != 3){
+            if (CurrentUser.RoleID != 3)
+            {
                 response.AddNotAllowedErr();
             }
             var logResult = await logReportResultRepository.GetAsync(ww => ww.LogFileID == id);
-            if (logResult is null){
+            if (logResult is null)
+            {
                 response.AddNotFoundErr("LogResult");
             }
-            foreach(AddingLogResultDetailCommand item in command.ListErrors){
-                var error = await logResultDetailRepository.GetAsync(ww => ww.PartErrorID == item.PartID && ww.LogReportResultID == logResult.ID);
-                if (error is null){
+            foreach (AddingLogResultDetailCommand item in command.ListErrors)
+            {
+                var error = await logResultDetailRepository.GetAsync(ww => ww.PartErrorID == item.PartID.GetValueOrDefault() && ww.LogReportResultID == logResult.ID);
+                if (error is null)
+                {
                     response.AddNotFoundErr("LogResultDetail");
                 }
                 error.Detail = item.Detail;
@@ -287,26 +316,30 @@ namespace MiSmart.API.Controllers
         [HttpPost("{id:Guid}/ApprovedResult")]
         public async Task<IActionResult> ApprovedResult([FromRoute] Guid id, [FromServices] LogReportResultRepository logReportResultRepository,
         [FromServices] IOptions<TargetEmailSettings> options, [FromServices] LogTokenRepository logTokenRepository, [FromServices] MyEmailService emailService,
-        [FromServices] LogFileRepository logFileRepository){
+        [FromServices] LogFileRepository logFileRepository)
+        {
             ActionResponse response = actionResponseFactory.CreateInstance();
-            TargetEmailSettings settings =  options.Value;
-            if(CurrentUser.RoleID != 3){
+            TargetEmailSettings settings = options.Value;
+            if (CurrentUser.RoleID != 3)
+            {
                 response.AddNotAllowedErr();
             }
             var logResult = await logReportResultRepository.GetAsync(ww => ww.LogFileID == id);
-            if (logResult is null){
+            if (logResult is null)
+            {
                 response.AddNotFoundErr("LogResult");
             }
             logResult.ApproverUUID = CurrentUser.UUID;
             var logFile = await logFileRepository.GetAsync(ww => ww.ID == id);
 
-            foreach(UserEmail item in settings.LogReport){
+            foreach (UserEmail item in settings.LogReport)
+            {
                 String token = TokenHelper.GenerateToken();
-                await logTokenRepository.CreateAsync(new LogToken(){Token = token, UserUUID = new Guid(item.UUID), LogFileID = id});
-                await emailService.SendMailAsync(new String[] { item.Email }, new String[] { }, new String[] { }, @$"Subject: [Kết quả Phân tích Dữ liệu bay] Mã hiệu drone ({logFile.Device.Name})", 
+                await logTokenRepository.CreateAsync(new LogToken() { Token = token, UserUUID = new Guid(item.UUID), LogFileID = id });
+                await emailService.SendMailAsync(new String[] { item.Email }, new String[] { }, new String[] { }, @$"Subject: [Kết quả Phân tích Dữ liệu bay] Mã hiệu drone ({logFile.Device.Name})",
                 $"Dear,\n\nPhòng Điều khiển bay trả Kết quả phân tích Dữ liệu bay:\n\nMã hiệu Drone: {logFile.Device.Name}\n\nKết luận chung: {logResult.Conclusion}\n\nThank you");
             }
-            
+
             await logReportResultRepository.UpdateAsync(logResult);
             return response.ToIActionResult();
         }
@@ -314,13 +347,16 @@ namespace MiSmart.API.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> GetResultForEmail([FromBody] AddingGetLogForEmailCommand command,
         [FromServices] MinioService minioService, [FromServices] LogTokenRepository tokenRepository,
-        [FromServices] LogReportResultRepository logReportResultRepository){
+        [FromServices] LogReportResultRepository logReportResultRepository)
+        {
             ActionResponse response = actionResponseFactory.CreateInstance();
             var token = await tokenRepository.GetAsync(ww => ww.Token == command.Token);
-            if (token is null){
+            if (token is null)
+            {
                 response.AddNotFoundErr("Token");
             }
-            if ((DateTime.UtcNow - token.CreateTime).TotalHours > Constants.LogReportTokenDurationHours){
+            if ((DateTime.UtcNow - token.CreateTime).TotalHours > Constants.LogReportTokenDurationHours)
+            {
                 response.AddExpiredErr("Token");
             }
             var logReportResult = await logReportResultRepository.GetAsync(ww => ww.LogFileID == token.LogFileID);
@@ -335,30 +371,49 @@ namespace MiSmart.API.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> CreateResultFromEmail([FromBody] AddingLogResultFromMailCommand command,
         [FromServices] MinioService minioService, [FromServices] LogTokenRepository tokenRepository,
-        [FromServices] LogReportResultRepository logReportResultRepository, [FromServices] LogResultDetailRepository logResultDetailRepository){
+        [FromServices] ExecutionCompanyRepository executionCompanyRepository, [FromServices] PartRepository partRepository,
+        [FromServices] LogReportResultRepository logReportResultRepository, [FromServices] LogResultDetailRepository logResultDetailRepository)
+        {
             ActionResponse response = actionResponseFactory.CreateInstance();
             var token = await tokenRepository.GetAsync(ww => ww.Token == command.Token);
-            if (token is null){
+            if (token is null)
+            {
                 response.AddNotFoundErr("Token");
             }
-            if ((DateTime.UtcNow - token.CreateTime).TotalHours > Constants.LogReportTokenDurationHours){
+            if ((DateTime.UtcNow - token.CreateTime).TotalHours > Constants.LogReportTokenDurationHours)
+            {
                 response.AddExpiredErr("Token");
             }
-            var result = await logReportResultRepository.CreateAsync(new LogReportResult() 
+            if (command.ExecutionCompanyID.HasValue)
+            {
+                var company = await executionCompanyRepository.GetAsync(ww => ww.ID == command.ExecutionCompanyID.GetValueOrDefault());
+                if (company is null)
+                {
+                    response.AddInvalidErr("ExecutionCompanyID");
+                }
+            }
+            var result = await logReportResultRepository.CreateAsync(new LogReportResult()
             {
                 AnalystUUID = token.UserUUID,
                 Conclusion = command.Conclusion,
                 DetailedAnalysis = command.DetailedAnalysis,
                 ExecutionCompanyID = command.ExecutionCompanyID,
-                ImageUrls = new List<String>{},
+                ImageUrls = new List<String> { },
                 LogFileID = token.LogFileID,
                 Suggest = command.Suggest,
             });
-            foreach(AddingLogResultDetailCommand item in command.ListErrors){
-                var error = new LogResultDetail{
+            foreach (AddingLogResultDetailCommand item in command.ListErrors)
+            {
+                var part = await partRepository.GetAsync(ww => ww.ID == item.PartID.GetValueOrDefault());
+                if (part is null)
+                {
+                    continue;
+                }
+                var error = new LogResultDetail
+                {
                     Detail = item.Detail,
                     LogReportResultID = result.ID,
-                    PartErrorID = item.PartID,
+                    PartErrorID = item.PartID.GetValueOrDefault(),
                     Resolve = item.Resolve,
                     Status = item.Status,
                 };
@@ -370,53 +425,21 @@ namespace MiSmart.API.Controllers
             response.SetCreatedObject(result);
             return response.ToIActionResult();
         }
-        [HttpPatch("ResultFromEmail")]
-        [AllowAnonymous]
-        public async Task<IActionResult> UpdateReportResultFromEmail([FromBody] AddingLogResultFromMailCommand command, [FromServices] LogReportResultRepository logReportResultRepository, 
-        [FromServices] MinioService minioService, [FromServices] LogTokenRepository tokenRepository, [FromServices] LogResultDetailRepository logResultDetailRepository){
-            ActionResponse response = actionResponseFactory.CreateInstance();
-            var token = await tokenRepository.GetAsync(ww => ww.Token == command.Token);
-            if (token is null){
-                response.AddNotFoundErr("Token");
-            }
-            if ((DateTime.UtcNow - token.CreateTime).TotalHours > Constants.LogReportTokenDurationHours){
-                response.AddExpiredErr("Token");
-            }
-            var logResult = await logReportResultRepository.GetAsync(ww => ww.LogFileID == token.LogFileID);
-            if (logResult is null){
-                response.AddNotFoundErr("LogResult");
-            }
-            foreach(AddingLogResultDetailCommand item in command.ListErrors){
-                var error = await logResultDetailRepository.GetAsync(ww => ww.PartErrorID == item.PartID && ww.LogReportResultID == logResult.ID);
-                if (error is null){
-                    response.AddNotFoundErr("LogResultDetail");
-                }
-                error.Detail = item.Detail;
-                error.Resolve = item.Resolve;
-                error.Status = item.Status;
-                await logResultDetailRepository.UpdateAsync(error);
-            }
-            logResult.ExecutionCompanyID = command.ExecutionCompanyID;
-            logResult.DetailedAnalysis = command.DetailedAnalysis;
-            logResult.AnalystUUID = CurrentUser.UUID;
-            logResult.Suggest = command.Suggest;
-            logResult.Conclusion = command.Conclusion;
-            logResult.ImageUrls = new List<String> {};
-
-            await logReportResultRepository.UpdateAsync(logResult);
-            return response.ToIActionResult();
-        }
+      
         [HttpGet("ReportForEmail")]
         [AllowAnonymous]
-        public async Task<IActionResult> GetReportForEmail( 
-        [FromBody] AddingGetLogForEmailCommand command, [FromServices] LogReportRepository logReportRepository, 
-        [FromServices] MinioService minioService, [FromServices] LogTokenRepository tokenRepository){
+        public async Task<IActionResult> GetReportForEmail(
+        [FromBody] AddingGetLogForEmailCommand command, [FromServices] LogReportRepository logReportRepository,
+        [FromServices] MinioService minioService, [FromServices] LogTokenRepository tokenRepository)
+        {
             ActionResponse response = actionResponseFactory.CreateInstance();
             var token = await tokenRepository.GetAsync(ww => ww.Token == command.Token);
-            if (token is null){
+            if (token is null)
+            {
                 response.AddNotFoundErr("Token");
             }
-            if ((DateTime.UtcNow - token.CreateTime).TotalHours > Constants.LogReportTokenDurationHours){
+            if ((DateTime.UtcNow - token.CreateTime).TotalHours > Constants.LogReportTokenDurationHours)
+            {
                 response.AddExpiredErr("Token");
             }
             var log = await logReportRepository.GetAsync(ww => ww.LogFileID == token.LogFileID);
@@ -424,77 +447,57 @@ namespace MiSmart.API.Controllers
             return response.ToIActionResult();
         }
         [HttpPost("ReportFromEmail")]
-        public async Task<IActionResult> CreateReportFromEmail( 
-        [FromBody] AddingLogReportFromEmailCommand command, [FromServices] LogReportRepository logReportRepository, 
-        [FromServices] MinioService minioService, [FromServices] LogTokenRepository tokenRepository){
+        public async Task<IActionResult> CreateReportFromEmail(
+        [FromBody] AddingLogReportFromEmailCommand command, [FromServices] LogReportRepository logReportRepository,
+        [FromServices] MinioService minioService, [FromServices] LogTokenRepository tokenRepository)
+        {
             ActionResponse response = actionResponseFactory.CreateInstance();
             var token = await tokenRepository.GetAsync(ww => ww.Token == command.Token);
-            if (token is null){
+            if (token is null)
+            {
                 response.AddNotFoundErr("Token");
             }
-            if ((DateTime.UtcNow - token.CreateTime).TotalHours > Constants.LogReportTokenDurationHours){
+            if ((DateTime.UtcNow - token.CreateTime).TotalHours > Constants.LogReportTokenDurationHours)
+            {
                 response.AddExpiredErr("Token");
             }
-            var report = new LogReport{
+            var report = new LogReport
+            {
                 LogFileID = token.LogFileID,
-                AccidentTime = command.AccidentTime, 
-                ImageUrls = new List<String>{ },
+                AccidentTime = command.AccidentTime,
+                ImageUrls = new List<String> { },
                 PilotDescription = command.PilotDescription,
                 ReporterDescription = command.ReporterDescription,
-                Suggest = command.Suggest, 
-                UserUUID = token.UserUUID, 
+                Suggest = command.Suggest,
+                UserUUID = token.UserUUID,
                 PilotName = command.PilotName,
                 PartnerCompanyName = command.PartnerCompanyName,
             };
             await logReportRepository.CreateAsync(report);
-            
+
             var listLogToken = await tokenRepository.GetListEntitiesAsync(new PageCommand(), ww => ww.Token == command.Token);
             await tokenRepository.DeleteRangeAsync(listLogToken);
 
             response.SetCreatedObject(report);
             return response.ToIActionResult();
         }
-        [HttpPatch("ReportFromEmail")]
-        public async Task<IActionResult> UpdateReportFromEmail( 
-        [FromBody] AddingLogReportFromEmailCommand command, [FromServices] LogReportRepository logReportRepository, 
-        [FromServices] MinioService minioService, [FromServices] LogTokenRepository tokenRepository){
-            ActionResponse response = actionResponseFactory.CreateInstance();
-            var token = await tokenRepository.GetAsync(ww => ww.Token == command.Token);
-            if (token is null){
-                response.AddNotFoundErr("Token");
-            }
-            if ((DateTime.UtcNow - token.CreateTime).TotalHours > Constants.LogReportTokenDurationHours){
-                response.AddExpiredErr("Token");
-            }
-            var logReport = await logReportRepository.GetAsync(ww => ww.LogFileID == token.LogFileID);
-            if (logReport is null){
-                response.AddNotFoundErr("LogReport");
-            }
-            logReport.UpdatedTime = DateTime.UtcNow;
-            logReport.AccidentTime = command.AccidentTime;
-            logReport.Suggest = command.Suggest;
-            logReport.PilotDescription = command.PilotDescription;
-            logReport.ReporterDescription = command.ReporterDescription;
-            logReport.ImageUrls = new List<String>{};
-            logReport.PilotName = command.PilotName;
-            logReport.PartnerCompanyName = command.PartnerCompanyName;
 
-            await logReportRepository.UpdateAsync(logReport);
-            return response.ToIActionResult();
-        }
         [HttpGet("DetailForEmail")]
         public async Task<IActionResult> GetLogDetailForEmail([FromServices] LogDetailRepository logDetailRepository,
-        [FromServices] LogTokenRepository tokenRepository, [FromBody] AddingGetLogForEmailCommand command){
-           ActionResponse response = actionResponseFactory.CreateInstance();
+        [FromServices] LogTokenRepository tokenRepository, [FromBody] AddingGetLogForEmailCommand command)
+        {
+            ActionResponse response = actionResponseFactory.CreateInstance();
             var token = await tokenRepository.GetAsync(ww => ww.Token == command.Token);
-            if (token is null){
+            if (token is null)
+            {
                 response.AddNotFoundErr("Token");
             }
-            if ((DateTime.UtcNow - token.CreateTime).TotalHours > Constants.LogReportTokenDurationHours){
+            if ((DateTime.UtcNow - token.CreateTime).TotalHours > Constants.LogReportTokenDurationHours)
+            {
                 response.AddExpiredErr("Token");
             }
             var logDetail = await logDetailRepository.GetAsync(ww => ww.LogFileID == token.LogFileID);
-             if (logDetail is null)
+            if (logDetail is null)
             {
                 response.AddNotFoundErr("LogDetail");
             }
@@ -503,28 +506,33 @@ namespace MiSmart.API.Controllers
         }
         [HttpPost("Errors")]
         public async Task<IActionResult> SendEmailErrors([FromBody] AddingLogErrorCommand command, [FromServices] LogFileRepository logFileRepository,
-        [FromServices] MyEmailService emailService, [FromServices] IOptions<TargetEmailSettings> options){
+        [FromServices] MyEmailService emailService, [FromServices] IOptions<TargetEmailSettings> options)
+        {
             ActionResponse response = actionResponseFactory.CreateInstance();
-            TargetEmailSettings settings =  options.Value;
-            if(!CurrentUser.IsAdministrator && CurrentUser.RoleID != 3){
+            TargetEmailSettings settings = options.Value;
+            if (!CurrentUser.IsAdministrator && CurrentUser.RoleID != 3)
+            {
                 response.AddNotAllowedErr();
             }
             var logFile = await logFileRepository.GetAsync(ww => ww.ID == command.Id);
-            if (logFile is null){
+            if (logFile is null)
+            {
                 response.AddNotFoundErr("LogFile");
             }
             var errorString = String.Empty;
             var contentString = String.Empty;
-            if (command.Error == "log") {
+            if (command.Error == "log")
+            {
                 errorString = "File Log bị lỗi";
                 contentString = "Yêu cầu phòng IT kiểm tra hệ thống DroneHub và gửi thông tin cho phòng DC sớm nhất có thể";
             }
-            else {
+            else
+            {
                 errorString = "Báo cáo có mâu thuẫn";
                 contentString = "Phòng DroneControl sẽ mở luồng mail trao đổi kỹ hơn trong vòng 1 ngày";
             }
- 
-            await emailService.SendMailAsync(settings.LogError.ToArray(), new String[] { }, new String[] { }, @$"Subject: [Dữ liệu bay bị lỗi] Mã hiệu drone ({logFile.Device.Name})", 
+
+            await emailService.SendMailAsync(settings.LogError.ToArray(), new String[] { }, new String[] { }, @$"Subject: [Dữ liệu bay bị lỗi] Mã hiệu drone ({logFile.Device.Name})",
             $"Dear,\n\nPhòng Điều khiển bay trả Kết quả phân tích Dữ liệu bay:\n\nMã hiệu Drone: {logFile.Device.Name}\n\nTình trạng: {errorString}\n\n{contentString}\n\nThank you");
 
             return response.ToIActionResult();
@@ -541,7 +549,8 @@ namespace MiSmart.API.Controllers
                 actionResponse.AddNotFoundErr("LogReport");
             }
 
-            for(var i = 0; i < command.Files.Count; i++){
+            for (var i = 0; i < command.Files.Count; i++)
+            {
                 var fileLink = await minioService.PutFileAsync(command.Files[i], new String[] { "drone-hub-api", "log-reports", $"{id}" });
                 report.ImageUrls.Add(fileLink);
             }
@@ -555,7 +564,8 @@ namespace MiSmart.API.Controllers
         public async Task<IActionResult> UploadResultImage([FromRoute] Guid id, [FromServices] LogReportRepository logReportRepository, [FromServices] MinioService minioService, [FromForm] AddingLogImageLinkCommand command)
         {
             ActionResponse actionResponse = actionResponseFactory.CreateInstance();
-            if(!CurrentUser.IsAdministrator && CurrentUser.RoleID != 3){
+            if (!CurrentUser.IsAdministrator && CurrentUser.RoleID != 3)
+            {
                 actionResponse.AddNotAllowedErr();
             }
             var report = await logReportRepository.GetAsync(ww => ww.LogFileID == id);
@@ -565,7 +575,8 @@ namespace MiSmart.API.Controllers
                 actionResponse.AddNotFoundErr("LogReport");
             }
 
-            for(var i = 0; i < command.Files.Count; i++){
+            for (var i = 0; i < command.Files.Count; i++)
+            {
                 var fileLink = await minioService.PutFileAsync(command.Files[i], new String[] { "drone-hub-api", "log-results", $"{id}" });
                 report.ImageUrls.Add(fileLink);
             }
@@ -575,58 +586,26 @@ namespace MiSmart.API.Controllers
             actionResponse.SetUpdatedMessage();
             return actionResponse.ToIActionResult();
         }
-        [HttpPost("{id:Guid}/UploadReportImageFromEmail")]
+       
+        [HttpPost("UploadResultImageFromEmail")]
         [AllowAnonymous]
-        public async Task<IActionResult> UploadReportImageFromEmail([FromRoute] Guid id, [FromServices] LogReportRepository logReportRepository, [FromServices] MinioService minioService, [FromForm] AddingLogImageLinkFromEmailCommand command, [FromServices] LogTokenRepository logTokenRepository)
+        public async Task<IActionResult> UploadResultImageFromEmail( [FromServices] LogReportResultRepository logReportResultRepository, [FromServices] MinioService minioService, [FromForm] AddingLogImageLinkFromEmailCommand command, [FromServices] LogTokenRepository logTokenRepository)
         {
             ActionResponse actionResponse = actionResponseFactory.CreateInstance();
-            var token = await logTokenRepository.GetAsync(ww => ww.Token == command.Token);
-            if (token is null){
-                actionResponse.AddNotFoundErr("Token");
-            }
-            if ((DateTime.UtcNow - token.CreateTime).TotalHours > Constants.LogReportTokenDurationHours){
-                actionResponse.AddExpiredErr("Token");
-            }
-            var report = await logReportRepository.GetAsync(ww => ww.LogFileID == id);
-            if (report is null)
+         
+            var result = await logReportResultRepository.GetAsync(ww => ww.Token == command.Token);
+            if (result is null)
             {
                 actionResponse.AddNotFoundErr("LogReport");
             }
 
-            for(var i = 0; i < command.Files.Count; i++){
-                var fileLink = await minioService.PutFileAsync(command.Files[i], new String[] { "drone-hub-api", "log-reports", $"{id}" });
-                report.ImageUrls.Add(fileLink);
-            }
-
-            await logReportRepository.UpdateAsync(report);
-
-            actionResponse.SetUpdatedMessage();
-            return actionResponse.ToIActionResult();
-        }
-        [HttpPost("{id:Guid}/UploadResultImageFromEmail")]
-        [AllowAnonymous]
-        public async Task<IActionResult> UploadResultImageFromEmail([FromRoute] Guid id, [FromServices] LogReportRepository logReportRepository, [FromServices] MinioService minioService, [FromForm] AddingLogImageLinkFromEmailCommand command, [FromServices] LogTokenRepository logTokenRepository)
-        {
-            ActionResponse actionResponse = actionResponseFactory.CreateInstance();
-            var token = await logTokenRepository.GetAsync(ww => ww.Token == command.Token);
-            if (token is null){
-                actionResponse.AddNotFoundErr("Token");
-            }
-            if ((DateTime.UtcNow - token.CreateTime).TotalHours > Constants.LogReportTokenDurationHours){
-                actionResponse.AddExpiredErr("Token");
-            }
-            var report = await logReportRepository.GetAsync(ww => ww.LogFileID == id);
-            if (report is null)
+            for (var i = 0; i < command.Files.Count; i++)
             {
-                actionResponse.AddNotFoundErr("LogReport");
+                var fileLink = await minioService.PutFileAsync(command.Files[i], new String[] { "drone-hub-api", "log-reports", $"{result.ID}" });
+                result.ImageUrls.Add(fileLink);
             }
 
-            for(var i = 0; i < command.Files.Count; i++){
-                var fileLink = await minioService.PutFileAsync(command.Files[i], new String[] { "drone-hub-api", "log-reports", $"{id}" });
-                report.ImageUrls.Add(fileLink);
-            }
-
-            await logReportRepository.UpdateAsync(report);
+            await logReportResultRepository.UpdateAsync(result);
 
             actionResponse.SetUpdatedMessage();
             return actionResponse.ToIActionResult();
@@ -634,26 +613,31 @@ namespace MiSmart.API.Controllers
         [HttpPost("ApprovedResultFromEmail")]
         public async Task<IActionResult> ApprovedResultFromEmail([FromBody] AddingGetLogForEmailCommand command, [FromServices] LogReportResultRepository logReportResultRepository,
         [FromServices] IOptions<TargetEmailSettings> options, [FromServices] LogTokenRepository logTokenRepository, [FromServices] MyEmailService emailService,
-        [FromServices] LogFileRepository logFileRepository){
+        [FromServices] LogFileRepository logFileRepository)
+        {
             ActionResponse response = actionResponseFactory.CreateInstance();
-            TargetEmailSettings settings =  options.Value;
+            TargetEmailSettings settings = options.Value;
             var token = await logTokenRepository.GetAsync(ww => ww.Token == command.Token);
-            if (token is null){
+            if (token is null)
+            {
                 response.AddNotFoundErr("Token");
             }
-            if ((DateTime.UtcNow - token.CreateTime).TotalHours > Constants.LogReportTokenDurationHours){
+            if ((DateTime.UtcNow - token.CreateTime).TotalHours > Constants.LogReportTokenDurationHours)
+            {
                 response.AddExpiredErr("Token");
             }
             var logResult = await logReportResultRepository.GetAsync(ww => ww.LogFileID == token.LogFileID);
-            if (logResult is null){
+            if (logResult is null)
+            {
                 response.AddNotFoundErr("LogResult");
             }
             logResult.ApproverUUID = CurrentUser.UUID;
             var logFile = await logFileRepository.GetAsync(ww => ww.ID == token.LogFileID);
-            foreach(UserEmail item in settings.LogReport){
+            foreach (UserEmail item in settings.LogReport)
+            {
                 String generateToken = TokenHelper.GenerateToken();
-                await logTokenRepository.CreateAsync(new LogToken(){Token = generateToken, UserUUID = new Guid(item.UUID), LogFileID = token.LogFileID});
-                await emailService.SendMailAsync(new String[] { item.Email }, new String[] { }, new String[] { }, @$"Subject: [Kết quả Phân tích Dữ liệu bay] Mã hiệu drone ({logFile.Device.Name})", 
+                await logTokenRepository.CreateAsync(new LogToken() { Token = generateToken, UserUUID = new Guid(item.UUID), LogFileID = token.LogFileID });
+                await emailService.SendMailAsync(new String[] { item.Email }, new String[] { }, new String[] { }, @$"Subject: [Kết quả Phân tích Dữ liệu bay] Mã hiệu drone ({logFile.Device.Name})",
                 $"Dear,\n\nPhòng Điều khiển bay trả Kết quả phân tích Dữ liệu bay:\n\nMã hiệu Drone: {logFile.Device.Name}\n\nKết luận chung: {logResult.Conclusion}\n\nThank you");
             }
             await logReportResultRepository.UpdateAsync(logResult);

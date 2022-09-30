@@ -1,10 +1,13 @@
 using System;
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using MiSmart.Infrastructure.Data;
 
 namespace MiSmart.DAL.Models
 {
-    public enum StatusError{
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public enum StatusError
+    {
         Good,
         Follow,
         Bad,
@@ -14,18 +17,20 @@ namespace MiSmart.DAL.Models
     {
         public LogResultDetail() : base() { }
         public LogResultDetail(ILazyLoader lazyLoader) : base(lazyLoader) { }
-        public Int32 PartErrorID {get; set; }
+        public Int32 PartErrorID { get; set; }
         private Part partError;
-        public Part PartError {
+        public Part PartError
+        {
             get => lazyLoader.Load(this, ref partError);
             set => partError = value;
         }
-        public StatusError Status {get; set; }
-        public String Detail {get; set; }
-        public String Resolve {get; set; }
-        public Int64 LogReportResultID {get; set; }
+        public StatusError Status { get; set; }
+        public String Detail { get; set; }
+        public String Resolve { get; set; }
+        public Int64 LogReportResultID { get; set; }
         private LogReportResult logReportResult;
-        public LogReportResult LogReportResult{
+        public LogReportResult LogReportResult
+        {
             get => lazyLoader.Load(this, ref logReportResult);
             set => logReportResult = value;
         }
