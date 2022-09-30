@@ -251,11 +251,11 @@ namespace MiSmart.API
                 o.CronExpression = "*/20 * * * * *";
                 o.TimeZoneInfo = TimeZoneInfo.Utc;
             });
-            services.AddCronJob<RemovingTimeOutToken>(o =>
-            {
-                o.CronExpression = "0 0 0 * * *";
-                o.TimeZoneInfo = TimeZoneInfo.Utc;
-            });
+            // services.AddCronJob<RemovingTimeOutToken>(o =>
+            // {
+            //     o.CronExpression = "0 0 0 * * *";
+            //     o.TimeZoneInfo = TimeZoneInfo.Utc;
+            // });
             services.AddCronJob<UpdatingLogDetail>(o =>
             {
                 o.CronExpression = "*/20 * * * * *";
