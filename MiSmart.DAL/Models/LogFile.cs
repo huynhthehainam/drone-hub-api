@@ -20,6 +20,7 @@ namespace MiSmart.DAL.Models
         Warning,
         Completed,
         Approved,
+        SecondWarning,
     }
     public class LogFile : EntityBase<Guid>
     {
@@ -69,5 +70,11 @@ namespace MiSmart.DAL.Models
             set => logTokens = value;
         }
         public Boolean isAnalyzed { get; set; } = false;
+        private SecondLogReport secondLogReport;
+        public SecondLogReport SecondLogReport
+        {
+            get => lazyLoader.Load(this, ref secondLogReport);
+            set => secondLogReport = value;
+        }
     }
 }
