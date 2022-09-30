@@ -178,6 +178,10 @@ namespace MiSmart.API.Controllers
             {
                 response.AddNotFoundErr("LogFile");
             }
+            var logReport = await logReportRepository.GetAsync(ww => ww.LogFileID == id);
+            if (logReport is not null){
+                response.AddExistedErr("LogReport");
+            }
             var report = new LogReport
             {
                 LogFileID = id,
@@ -246,6 +250,9 @@ namespace MiSmart.API.Controllers
             {
                 response.AddNotFoundErr("LogFile");
             }
+            var logResult = await logReportResultRepository.GetAsync(ww => ww.LogFileID == id);
+            if (logResult is not null)
+                response.AddExistedErr("ResultReport");
             var result = new LogReportResult
             {
                 ImageUrls = new List<String> { },
@@ -401,6 +408,10 @@ namespace MiSmart.API.Controllers
                 {
                     response.AddInvalidErr("ExecutionCompanyID");
                 }
+            }
+            var logResult = logReportResultRepository.GetAsync(ww => ww.LogFileID == token.LogFileID);
+            if (logResult is not null){
+                response.AddExistedErr("ResultReport");
             }
             var result = await logReportResultRepository.CreateAsync(new LogReportResult()
             {
