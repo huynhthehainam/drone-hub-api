@@ -59,7 +59,7 @@ namespace MiSmart.API.ScheduledTasks
                 using (DatabaseContext databaseContext = scope.ServiceProvider.GetRequiredService<DatabaseContext>())
                 {
                     var client = clientFactory.CreateClient();
-                    var logs = databaseContext.LogFiles.Where(ww => ww.FileBytes.Length > 500000 && ww.FileBytes.Length < 5000000 && !ww.isAnalyzed).OrderByDescending(ww => ww.LoggingTime).Take(2).ToList();
+                    var logs = databaseContext.LogFiles.Where(ww => ww.FileBytes.Length > 5000000 && ww.FileBytes.Length < 50000000 && !ww.isAnalyzed).OrderByDescending(ww => ww.LoggingTime).Take(2).ToList();
                     foreach (var log in logs)
                     {
                         var detail = databaseContext.LogDetails.Where(ww => ww.LogFileID == log.ID);
