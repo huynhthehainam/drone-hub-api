@@ -362,21 +362,21 @@ namespace MiSmart.API.Controllers
         }
         [HttpGet("ResultForEmail")]
         [AllowAnonymous]
-        public async Task<IActionResult> GetResultForEmail([FromBody] AddingGetLogForEmailCommand command,
+        public async Task<IActionResult> GetResultForEmail([FromQuery] String token,
         [FromServices] MinioService minioService, [FromServices] LogTokenRepository tokenRepository,
         [FromServices] LogReportResultRepository logReportResultRepository)
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
-            var token = await tokenRepository.GetAsync(ww => ww.Token == command.Token);
-            if (token is null)
+            var resToken = await tokenRepository.GetAsync(ww => ww.Token == token);
+            if (resToken is null)
             {
                 response.AddNotFoundErr("Token");
             }
-            if ((DateTime.UtcNow - token.CreateTime).TotalHours > Constants.LogReportTokenDurationHours)
+            if ((DateTime.UtcNow - resToken.CreateTime).TotalHours > Constants.LogReportTokenDurationHours)
             {
                 response.AddExpiredErr("Token");
             }
-            var logReportResult = await logReportResultRepository.GetAsync(ww => ww.LogFileID == token.LogFileID);
+            var logReportResult = await logReportResultRepository.GetAsync(ww => ww.LogFileID == resToken.LogFileID);
             if (logReportResult is null)
             {
                 response.AddNotFoundErr("LogReport");
@@ -450,20 +450,20 @@ namespace MiSmart.API.Controllers
         [HttpGet("ReportForEmail")]
         [AllowAnonymous]
         public async Task<IActionResult> GetReportForEmail(
-        [FromBody] AddingGetLogForEmailCommand command, [FromServices] LogReportRepository logReportRepository,
+        [FromQuery] String token, [FromServices] LogReportRepository logReportRepository,
         [FromServices] MinioService minioService, [FromServices] LogTokenRepository tokenRepository)
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
-            var token = await tokenRepository.GetAsync(ww => ww.Token == command.Token);
-            if (token is null)
+            var resToken = await tokenRepository.GetAsync(ww => ww.Token == token);
+            if (resToken is null)
             {
                 response.AddNotFoundErr("Token");
             }
-            if ((DateTime.UtcNow - token.CreateTime).TotalHours > Constants.LogReportTokenDurationHours)
+            if ((DateTime.UtcNow - resToken.CreateTime).TotalHours > Constants.LogReportTokenDurationHours)
             {
                 response.AddExpiredErr("Token");
             }
-            var log = await logReportRepository.GetAsync(ww => ww.LogFileID == token.LogFileID);
+            var log = await logReportRepository.GetAsync(ww => ww.LogFileID == resToken.LogFileID);
             response.SetData(ViewModelHelpers.ConvertToViewModel<LogReport, LogReportViewModel>(log));
             return response.ToIActionResult();
         }
@@ -505,19 +505,19 @@ namespace MiSmart.API.Controllers
 
         [HttpGet("DetailForEmail")]
         public async Task<IActionResult> GetLogDetailForEmail([FromServices] LogDetailRepository logDetailRepository,
-        [FromServices] LogTokenRepository tokenRepository, [FromBody] AddingGetLogForEmailCommand command)
+        [FromServices] LogTokenRepository tokenRepository, [FromQuery] String token)
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
-            var token = await tokenRepository.GetAsync(ww => ww.Token == command.Token);
-            if (token is null)
+            var resToken = await tokenRepository.GetAsync(ww => ww.Token == token);
+            if (resToken is null)
             {
                 response.AddNotFoundErr("Token");
             }
-            if ((DateTime.UtcNow - token.CreateTime).TotalHours > Constants.LogReportTokenDurationHours)
+            if ((DateTime.UtcNow - resToken.CreateTime).TotalHours > Constants.LogReportTokenDurationHours)
             {
                 response.AddExpiredErr("Token");
             }
-            var logDetail = await logDetailRepository.GetAsync(ww => ww.LogFileID == token.LogFileID);
+            var logDetail = await logDetailRepository.GetAsync(ww => ww.LogFileID == resToken.LogFileID);
             if (logDetail is null)
             {
                 response.AddNotFoundErr("LogDetail");
