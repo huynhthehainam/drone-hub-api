@@ -202,7 +202,7 @@ namespace MiSmart.API.Controllers
             if (logReport is null){
                 response.AddNotFoundErr("LogReport");
             }
-            logReport.UpdatedTime = DateTime.Now;
+            logReport.UpdatedTime = DateTime.UtcNow;
             logReport.AccidentTime = command.AccidentTime;
             logReport.Suggest = command.Suggest;
             logReport.ImageUrls = new List<String> { };
@@ -299,6 +299,7 @@ namespace MiSmart.API.Controllers
             }
             logResult.ApproverUUID = CurrentUser.UUID;
             var logFile = await logFileRepository.GetAsync(ww => ww.ID == id);
+
             foreach(UserEmail item in settings.LogReport){
                 String token = TokenHelper.GenerateToken();
                 await logTokenRepository.CreateAsync(new LogToken(){Token = token, UserUUID = new Guid(item.UUID), LogFileID = id});
@@ -319,7 +320,7 @@ namespace MiSmart.API.Controllers
             if (token is null){
                 response.AddNotFoundErr("Token");
             }
-            if ((DateTime.Now - token.CreateTime).TotalHours > 24){
+            if ((DateTime.UtcNow - token.CreateTime).TotalHours > Constants.LogReportTokenDurationHours){
                 response.AddExpiredErr("Token");
             }
             var logReportResult = await logReportResultRepository.GetAsync(ww => ww.LogFileID == token.LogFileID);
@@ -340,7 +341,7 @@ namespace MiSmart.API.Controllers
             if (token is null){
                 response.AddNotFoundErr("Token");
             }
-            if ((DateTime.Now - token.CreateTime).TotalHours > 24){
+            if ((DateTime.UtcNow - token.CreateTime).TotalHours > Constants.LogReportTokenDurationHours){
                 response.AddExpiredErr("Token");
             }
             var result = await logReportResultRepository.CreateAsync(new LogReportResult() 
@@ -378,7 +379,7 @@ namespace MiSmart.API.Controllers
             if (token is null){
                 response.AddNotFoundErr("Token");
             }
-            if ((DateTime.Now - token.CreateTime).TotalHours > 24){
+            if ((DateTime.UtcNow - token.CreateTime).TotalHours > Constants.LogReportTokenDurationHours){
                 response.AddExpiredErr("Token");
             }
             var logResult = await logReportResultRepository.GetAsync(ww => ww.LogFileID == token.LogFileID);
@@ -415,7 +416,7 @@ namespace MiSmart.API.Controllers
             if (token is null){
                 response.AddNotFoundErr("Token");
             }
-            if ((DateTime.Now - token.CreateTime).TotalHours > 24){
+            if ((DateTime.UtcNow - token.CreateTime).TotalHours > Constants.LogReportTokenDurationHours){
                 response.AddExpiredErr("Token");
             }
             var log = await logReportRepository.GetAsync(ww => ww.LogFileID == token.LogFileID);
@@ -431,7 +432,7 @@ namespace MiSmart.API.Controllers
             if (token is null){
                 response.AddNotFoundErr("Token");
             }
-            if ((DateTime.Now - token.CreateTime).TotalHours > 24){
+            if ((DateTime.UtcNow - token.CreateTime).TotalHours > Constants.LogReportTokenDurationHours){
                 response.AddExpiredErr("Token");
             }
             var report = new LogReport{
@@ -462,14 +463,14 @@ namespace MiSmart.API.Controllers
             if (token is null){
                 response.AddNotFoundErr("Token");
             }
-            if ((DateTime.Now - token.CreateTime).TotalHours > 24){
+            if ((DateTime.UtcNow - token.CreateTime).TotalHours > Constants.LogReportTokenDurationHours){
                 response.AddExpiredErr("Token");
             }
             var logReport = await logReportRepository.GetAsync(ww => ww.LogFileID == token.LogFileID);
             if (logReport is null){
                 response.AddNotFoundErr("LogReport");
             }
-            logReport.UpdatedTime = DateTime.Now;
+            logReport.UpdatedTime = DateTime.UtcNow;
             logReport.AccidentTime = command.AccidentTime;
             logReport.Suggest = command.Suggest;
             logReport.PilotDescription = command.PilotDescription;
@@ -489,7 +490,7 @@ namespace MiSmart.API.Controllers
             if (token is null){
                 response.AddNotFoundErr("Token");
             }
-            if ((DateTime.Now - token.CreateTime).TotalHours > 24){
+            if ((DateTime.UtcNow - token.CreateTime).TotalHours > Constants.LogReportTokenDurationHours){
                 response.AddExpiredErr("Token");
             }
             var logDetail = await logDetailRepository.GetAsync(ww => ww.LogFileID == token.LogFileID);
@@ -583,7 +584,7 @@ namespace MiSmart.API.Controllers
             if (token is null){
                 actionResponse.AddNotFoundErr("Token");
             }
-            if ((DateTime.Now - token.CreateTime).TotalHours > 24){
+            if ((DateTime.UtcNow - token.CreateTime).TotalHours > Constants.LogReportTokenDurationHours){
                 actionResponse.AddExpiredErr("Token");
             }
             var report = await logReportRepository.GetAsync(ww => ww.LogFileID == id);
@@ -611,7 +612,7 @@ namespace MiSmart.API.Controllers
             if (token is null){
                 actionResponse.AddNotFoundErr("Token");
             }
-            if ((DateTime.Now - token.CreateTime).TotalHours > 24){
+            if ((DateTime.UtcNow - token.CreateTime).TotalHours > Constants.LogReportTokenDurationHours){
                 actionResponse.AddExpiredErr("Token");
             }
             var report = await logReportRepository.GetAsync(ww => ww.LogFileID == id);
@@ -640,7 +641,7 @@ namespace MiSmart.API.Controllers
             if (token is null){
                 response.AddNotFoundErr("Token");
             }
-            if ((DateTime.Now - token.CreateTime).TotalHours > 24){
+            if ((DateTime.UtcNow - token.CreateTime).TotalHours > Constants.LogReportTokenDurationHours){
                 response.AddExpiredErr("Token");
             }
             var logResult = await logReportResultRepository.GetAsync(ww => ww.LogFileID == token.LogFileID);

@@ -21,6 +21,6 @@ namespace MiSmart.DAL.Models
         }
         public Guid UserUUID {get; set; }
         public String Token {get; set; }
-        public DateTime CreateTime {get; set; }
+        public DateTime CreateTime {get; set; } = DateTime.UtcNow;
     }
 }
