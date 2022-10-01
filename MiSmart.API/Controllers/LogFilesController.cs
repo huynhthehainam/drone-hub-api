@@ -475,6 +475,9 @@ namespace MiSmart.API.Controllers
             var listLogToken = await tokenRepository.GetListEntitiesAsync(new PageCommand(), ww => ww.LogFileID == token.LogFileID);
             await tokenRepository.DeleteRangeAsync(listLogToken);
 
+            logFile.Status = LogStatus.Completed;
+            await logFileRepository.UpdateAsync(logFile);
+
             response.SetData(ViewModelHelpers.ConvertToViewModel<LogReportResult, LogReportResultViewModel>(res));
             return response.ToIActionResult();
         }
