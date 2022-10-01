@@ -523,7 +523,7 @@ namespace MiSmart.API.Controllers
             {
                 response.AddNotFoundErr("LogDetail");
             }
-            response.SetData(ViewModelHelpers.ConvertToViewModel<LogDetail, LogDetailViewModel>(logDetail));
+            response.SetData(ViewModelHelpers.ConvertToViewModel<LogDetail, LargeLogDetailViewModel>(logDetail));
             return response.ToIActionResult();
         }
         [HttpPost("Errors")]
