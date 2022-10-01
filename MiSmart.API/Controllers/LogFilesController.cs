@@ -409,7 +409,7 @@ namespace MiSmart.API.Controllers
                     response.AddInvalidErr("ExecutionCompanyID");
                 }
             }
-            var logResult = logReportResultRepository.GetAsync(ww => ww.LogFileID == token.LogFileID);
+            var logResult = await logReportResultRepository.GetAsync(ww => ww.LogFileID == token.LogFileID);
             if (logResult is not null){
                 response.AddExistedErr("ResultReport");
             }
