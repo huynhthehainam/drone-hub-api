@@ -777,12 +777,12 @@ namespace MiSmart.API.Controllers
                 PilotName = command.PilotName,
                 PartnerCompanyName = command.PartnerCompanyName,
             };
-            await secondLogReportRepository.CreateAsync(report);
+            var secondReport = await secondLogReportRepository.CreateAsync(report);
 
             var logToken = await logTokenRepository.GetAsync(ww => ww.Token == command.Token);
             await logTokenRepository.DeleteAsync(logToken);
 
-            response.SetCreatedObject(report);
+            response.SetData(ViewModelHelpers.ConvertToViewModel<SecondLogReport, SecondLogReportViewModel>(secondReport));
 
             foreach (UserEmail item in settings.LogReport)
             {
