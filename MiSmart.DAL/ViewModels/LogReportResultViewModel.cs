@@ -23,6 +23,7 @@ namespace MiSmart.DAL.ViewModels
         public String Conclusion {get; set; }
         public String DetailAnalysis {get; set; }
         public ResponsibleCompany ResponsibleCompany {get; set; }
+        public String Token {get; set; }
         public void LoadFrom(LogReportResult entity)
         {
             LogFileID = entity.LogFileID;
@@ -43,6 +44,7 @@ namespace MiSmart.DAL.ViewModels
                 ListErrors.Add(detail);
             }
             ResponsibleCompany = entity.ResponsibleCompany;
+            Token = entity.Token;
         }
     }
 }
