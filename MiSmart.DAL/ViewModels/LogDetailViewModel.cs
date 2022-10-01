@@ -64,6 +64,7 @@ namespace MiSmart.DAL.ViewModels
         public DateTime LoggingTime {get; set; }
         public DroneStatus DroneStatus {get; set;}
         public LogStatus LogStatus {get; set; }
+        public Boolean isAnalyzed {get; set; }
        public void LoadFrom(LogDetail entity)
         {
             LogFileID = entity.LogFileID;
@@ -86,6 +87,7 @@ namespace MiSmart.DAL.ViewModels
             LoggingTime = entity.LogFile.LoggingTime;
             DroneStatus = entity.LogFile.DroneStatus;
             LogStatus = entity.LogFile.Status;
+            isAnalyzed = entity.LogFile.isAnalyzed;
         }
     }
 }
