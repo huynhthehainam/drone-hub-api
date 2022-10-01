@@ -237,7 +237,7 @@ namespace MiSmart.API.Controllers
         [FromServices] LogReportResultRepository logReportResultRepository, [FromServices] LogFileRepository logFileRepository,
         [FromServices] LogTokenRepository logTokenRepository, [FromServices] MyEmailService emailService,
         [FromServices] PartRepository partRepository,
-        [FromServices] LogResultDetailRepository logResultDetailRepository)
+        [FromServices] LogResultDetailRepository logResultDetailRepository, [FromServices] ExecutionCompanyRepository executionCompanyRepository)
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
 
@@ -256,13 +256,23 @@ namespace MiSmart.API.Controllers
             var result = new LogReportResult
             {
                 ImageUrls = new List<String> { },
-                ExecutionCompanyID = command.ExecutionCompanyID,
                 DetailedAnalysis = command.DetailedAnalysis,
                 LogFileID = id,
                 AnalystUUID = CurrentUser.UUID,
                 Suggest = command.Suggest,
                 Conclusion = command.Conclusion,
+                ResponsibleCompany = command.ResponsibleCompany,
             };
+            if (command.ResponsibleCompany == ResponsibleCompany.MiSmart)
+            {
+                var executionCompany = await executionCompanyRepository.GetAsync(ww => String.Equals(ww.Name, "Công ty khai thác MiSmart")); 
+                result.ExecutionCompany = executionCompany;
+            }
+            else if (command.ResponsibleCompany == ResponsibleCompany.AnotherCompany)
+            {
+                var executionCompany = await executionCompanyRepository.GetAsync(ww => ww.ID == logFile.Device.ExecutionCompanyID);
+                result.ExecutionCompany = executionCompany;
+            }
             var res = await logReportResultRepository.CreateAsync(result);
 
             foreach (AddingLogResultDetailCommand item in command.ListErrors)
@@ -293,7 +303,7 @@ namespace MiSmart.API.Controllers
         [HttpPatch("{id:Guid}/Result")]
         public async Task<IActionResult> UpdateReportResult([FromRoute] Guid id, [FromBody] AddingLogResultCommand command,
         [FromServices] LogReportResultRepository logReportResultRepository, [FromServices] MinioService minioService,
-        [FromServices] LogResultDetailRepository logResultDetailRepository)
+        [FromServices] LogResultDetailRepository logResultDetailRepository, [FromServices] ExecutionCompanyRepository executionCompanyRepository)
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
             if (CurrentUser.RoleID != 3)
@@ -317,7 +327,16 @@ namespace MiSmart.API.Controllers
                 error.Status = item.Status;
                 await logResultDetailRepository.UpdateAsync(error);
             }
-            logResult.ExecutionCompanyID = command.ExecutionCompanyID;
+             if (command.ResponsibleCompany == ResponsibleCompany.MiSmart)
+            {
+                var executionCompany = await executionCompanyRepository.GetAsync(ww => String.Equals(ww.Name, "Công ty khai thác MiSmart")); 
+                logResult.ExecutionCompany = executionCompany;
+            }
+            else if (command.ResponsibleCompany == ResponsibleCompany.AnotherCompany)
+            {
+                var executionCompany = await executionCompanyRepository.GetAsync(ww => ww.ID == logResult.LogFile.Device.ExecutionCompanyID);
+                logResult.ExecutionCompany = executionCompany;
+            }
             logResult.DetailedAnalysis = command.DetailedAnalysis;
             logResult.AnalystUUID = CurrentUser.UUID;
             logResult.Suggest = command.Suggest;
@@ -389,7 +408,8 @@ namespace MiSmart.API.Controllers
         public async Task<IActionResult> CreateResultFromEmail([FromBody] AddingLogResultFromMailCommand command,
         [FromServices] MinioService minioService, [FromServices] LogTokenRepository tokenRepository,
         [FromServices] ExecutionCompanyRepository executionCompanyRepository, [FromServices] PartRepository partRepository,
-        [FromServices] LogReportResultRepository logReportResultRepository, [FromServices] LogResultDetailRepository logResultDetailRepository)
+        [FromServices] LogReportResultRepository logReportResultRepository, [FromServices] LogResultDetailRepository logResultDetailRepository,
+        [FromServices] LogFileRepository logFileRepository)
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
             var token = await tokenRepository.GetAsync(ww => String.Equals(ww.Token, command.Token));
@@ -401,28 +421,40 @@ namespace MiSmart.API.Controllers
             {
                 response.AddExpiredErr("Token");
             }
-            if (command.ExecutionCompanyID.HasValue)
-            {
-                var company = await executionCompanyRepository.GetAsync(ww => ww.ID == command.ExecutionCompanyID.GetValueOrDefault());
-                if (company is null)
-                {
-                    response.AddInvalidErr("ExecutionCompanyID");
-                }
-            }
+            // if (command.ExecutionCompanyID.HasValue)
+            // {
+            //     var company = await executionCompanyRepository.GetAsync(ww => ww.ID == command.ExecutionCompanyID.GetValueOrDefault());
+            //     if (company is null)
+            //     {
+            //         response.AddInvalidErr("ExecutionCompanyID");
+            //     }
+            // }
             var logResult = await logReportResultRepository.GetAsync(ww => ww.LogFileID == token.LogFileID);
             if (logResult is not null){
                 response.AddExistedErr("ResultReport");
             }
-            var result = await logReportResultRepository.CreateAsync(new LogReportResult()
+            var result = new LogReportResult()
             {
                 AnalystUUID = token.UserUUID,
                 Conclusion = command.Conclusion,
                 DetailedAnalysis = command.DetailedAnalysis,
-                ExecutionCompanyID = command.ExecutionCompanyID,
                 ImageUrls = new List<String> { },
                 LogFileID = token.LogFileID,
                 Suggest = command.Suggest,
-            });
+                ResponsibleCompany = command.ResponsibleCompany,
+            };
+            var logFile = await logFileRepository.GetAsync(ww => ww.ID == token.LogFileID);
+            if (command.ResponsibleCompany == ResponsibleCompany.MiSmart)
+            {
+                var executionCompany = await executionCompanyRepository.GetAsync(ww => String.Equals(ww.Name, "Công ty khai thác MiSmart")); 
+                result.ExecutionCompany = executionCompany;
+            }
+            else if (command.ResponsibleCompany == ResponsibleCompany.AnotherCompany)
+            {
+                var executionCompany = await executionCompanyRepository.GetAsync(ww => ww.ID == logFile.Device.ExecutionCompanyID);
+                result.ExecutionCompany = executionCompany;
+            }
+            var res = await logReportResultRepository.CreateAsync(result);
             foreach (AddingLogResultDetailCommand item in command.ListErrors)
             {
                 var part = await partRepository.GetAsync(ww => ww.ID == item.PartID.GetValueOrDefault());
@@ -433,7 +465,7 @@ namespace MiSmart.API.Controllers
                 var error = new LogResultDetail
                 {
                     Detail = item.Detail,
-                    LogReportResultID = result.ID,
+                    LogReportResultID = res.ID,
                     PartErrorID = item.PartID.GetValueOrDefault(),
                     Resolve = item.Resolve,
                     Status = item.Status,
@@ -443,7 +475,7 @@ namespace MiSmart.API.Controllers
             var listLogToken = await tokenRepository.GetListEntitiesAsync(new PageCommand(), ww => ww.LogFileID == token.LogFileID);
             await tokenRepository.DeleteRangeAsync(listLogToken);
 
-            response.SetCreatedObject(result);
+            response.SetData(ViewModelHelpers.ConvertToViewModel<LogReportResult, LogReportResultViewModel>(res));
             return response.ToIActionResult();
         }
       

@@ -1,11 +1,18 @@
 using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using MiSmart.Infrastructure.Data;
 using MiSmart.Infrastructure.Helpers;
 
 namespace MiSmart.DAL.Models
 {
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public enum ResponsibleCompany{
+        MiSmart,
+        NoCompany,
+        AnotherCompany,
+    }
     public class LogReportResult : EntityBase<Int64>
     {
         public LogReportResult() : base() { }
@@ -37,5 +44,6 @@ namespace MiSmart.DAL.Models
             get => lazyLoader.Load(this, ref logResultDetails);
             set => logResultDetails = value;
         }
+        public ResponsibleCompany ResponsibleCompany {get; set; }
     }
 }

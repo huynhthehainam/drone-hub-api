@@ -22,7 +22,7 @@ namespace MiSmart.API.Commands
         public String Suggest { get; set; }
         public String Conclusion { get; set; }
         public String DetailedAnalysis { get; set; }
-        public Int32? ExecutionCompanyID { get; set; }
+        public ResponsibleCompany ResponsibleCompany {get; set; }
     }
     public class AddingLogResultDetailCommand
     {
@@ -41,7 +41,7 @@ namespace MiSmart.API.Commands
         public String Suggest { get; set; }
         public String Conclusion { get; set; }
         public String DetailedAnalysis { get; set; }
-        public Int32? ExecutionCompanyID { get; set; }
+        public ResponsibleCompany ResponsibleCompany {get; set; }
     }
     public class AddingLogReportFromEmailCommand
     {
