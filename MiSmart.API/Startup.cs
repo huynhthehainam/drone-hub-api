@@ -188,6 +188,7 @@ namespace MiSmart.API
             services.AddScoped<LogTokenRepository, LogTokenRepository>();
             services.AddScoped<PartRepository, PartRepository>();
             services.AddScoped<LogResultDetailRepository, LogResultDetailRepository>();
+            services.AddScoped<SecondLogReportRepository, SecondLogReportRepository>();
 
             #endregion
 
