@@ -379,7 +379,7 @@ namespace MiSmart.API.Controllers
             var logReportResult = await logReportResultRepository.GetAsync(ww => ww.LogFileID == resToken.LogFileID);
             if (logReportResult is null)
             {
-                response.AddNotFoundErr("LogReport");
+                response.AddNotFoundErr("ReportResult");
             }
             response.SetData(ViewModelHelpers.ConvertToViewModel<LogReportResult, LogReportResultViewModel>(logReportResult));
             return response.ToIActionResult();
