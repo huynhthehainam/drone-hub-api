@@ -837,5 +837,19 @@ namespace MiSmart.API.Controllers
             actionResponse.SetData((ViewModelHelpers.ConvertToViewModel<SecondLogReport, SecondLogReportViewModel>(secondReport)));
             return actionResponse.ToIActionResult();
         }
+        [HttpGet("{id:Guid}/SecondReport")]
+        public async Task<IActionResult> GetSecondReport([FromRoute] Guid id, [FromServices] SecondLogReportRepository secondLogReportRepository,
+        [FromServices] LogTokenRepository logTokenRepository){
+            ActionResponse actionResponse = actionResponseFactory.CreateInstance();
+            if (!CurrentUser.IsAdministrator && CurrentUser.RoleID != 3)
+            {
+                actionResponse.AddNotAllowedErr();
+            }
+            var secondReport = await secondLogReportRepository.GetAsync(ww => ww.LogFileID == id);
+            if (secondReport is null)
+                actionResponse.AddNotFoundErr("SecondReport");
+            actionResponse.SetData((ViewModelHelpers.ConvertToViewModel<SecondLogReport, SecondLogReportViewModel>(secondReport)));
+            return actionResponse.ToIActionResult();
+        }
     }
 }
