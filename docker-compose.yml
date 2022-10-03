@@ -28,6 +28,7 @@ services:
 
   mismartapi:
     image: mismartapi
+    restart: unless-stopped
     build:
       context: .
       dockerfile: MiSmart.API/Dockerfile
