@@ -26,5 +26,6 @@ namespace MiSmart.DAL.Models
         public String PilotName {get; set; }
         public String PartnerCompanyName {get; set; }
         public String Token { get; set; } = TokenHelper.GenerateToken(17);
+        public String Username { get; set; }
     }
 }
