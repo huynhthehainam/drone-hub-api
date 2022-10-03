@@ -338,7 +338,8 @@ namespace MiSmart.API.Controllers
         }
         [HttpPatch("{id:int}")]
         [HasPermission(typeof(AdminPermission))]
-        public async Task<IActionResult> PatchDevice([FromServices] DeviceRepository deviceRepository, [FromServices] DeviceModelRepository deviceModelRepository, [FromRoute] Int32 id, [FromBody] PatchingDeviceCommand command)
+        public async Task<IActionResult> PatchDevice([FromServices] DeviceRepository deviceRepository, [FromServices] DeviceModelRepository deviceModelRepository, [FromRoute] Int32 id, [FromBody] PatchingDeviceCommand command,
+        [FromServices] ExecutionCompanyRepository executionCompanyRepository)
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
 
@@ -359,6 +360,16 @@ namespace MiSmart.API.Controllers
                     response.AddInvalidErr("DeviceModelID");
                 }
                 device.DeviceModel = deviceModel;
+            }
+
+            if (command.ExecutionCompanyID.HasValue)
+            {
+                var executionCompany = await executionCompanyRepository.GetAsync(ww => ww.ID == command.ExecutionCompanyID.GetValueOrDefault());
+                if (executionCompany is null)
+                {
+                    response.AddInvalidErr("ExecutionCompanyID");
+                }
+                device.ExecutionCompany = executionCompany;
             }
 
 
