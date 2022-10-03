@@ -33,17 +33,25 @@ namespace MiSmart.API.Controllers
         }
 
         [HttpGet]
-        [HasPermission(typeof(MaintainerPermission))]
         public async Task<IActionResult> GetList([FromQuery] PageCommand pageCommand, [FromQuery] Int32? deviceID, [FromServices] LogFileRepository logFileRepository,
         [FromQuery] Boolean? isStable,
-        [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository)
+        [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, [FromQuery] String relation = "Maintainer")
         {
             ActionResponse actionResponse = actionResponseFactory.CreateInstance();
-
-            Expression<Func<LogFile, Boolean>> query = ww =>
-            (deviceID.HasValue ? (ww.DeviceID == deviceID.Value) : true)
-            && (ww.FileBytes.Length > 500000)
-            && (isStable == false ? (ww.DroneStatus != DroneStatus.Stable) : true);
+            if (!CurrentUser.IsAdministrator && CurrentUser.RoleID != 3){
+                actionResponse.AddNotAllowedErr();
+            }
+            Expression<Func<LogFile, Boolean>> query = ww => false; 
+            if (relation == "Maintainer") {
+                query = ww => (deviceID.HasValue ? (ww.DeviceID == deviceID.Value) : true)
+                                && (ww.FileBytes.Length > 500000)
+                                && (isStable == false ? (ww.DroneStatus != DroneStatus.Stable) : true);
+            } else if (relation == "Administrator") {
+                query = ww => (deviceID.HasValue ? (ww.DeviceID == deviceID.Value) : true)
+                                && (ww.FileBytes.Length > 500000)
+                                && (isStable == false ? (ww.DroneStatus != DroneStatus.Stable) : true)
+                                && (ww.Status == LogStatus.Completed);
+            }
 
             var listResponse = await logFileRepository.GetListResponseViewAsync<LogFileViewModel>(pageCommand, query, ww => ww.LoggingTime, false);
 
