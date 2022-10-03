@@ -17,6 +17,7 @@ namespace MiSmart.DAL.Models
             set => logFile = value;
         }
         public Guid UserUUID { get; set; }
+        public String Username { get; set; }
         public String PilotDescription {get;set;}
         public String ReporterDescription {get;set;}
         public List<String> ImageUrls {get;set;} 

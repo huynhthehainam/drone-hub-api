@@ -17,6 +17,7 @@ namespace MiSmart.DAL.ViewModels
         public String Suggest {get; set; }
         public String PilotName {get; set; }
         public String PartnerCompanyName {get; set; }
+        public String Username { get; set; }
         public void LoadFrom(LogReport entity)
         {
             LogFileID = entity.LogFileID;
@@ -29,6 +30,7 @@ namespace MiSmart.DAL.ViewModels
             Suggest = entity.Suggest;
             PilotName = entity.PilotName;
             PartnerCompanyName = entity.PartnerCompanyName;
+            Username = entity.Username;
         }
     }
 }

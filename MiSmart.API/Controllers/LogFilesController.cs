@@ -193,6 +193,7 @@ namespace MiSmart.API.Controllers
                 PilotName = command.PilotName,
                 PartnerCompanyName = command.PartnerCompanyName,
                 UserUUID = CurrentUser.UUID,
+                Username = command.Username,
             };
             await logReportRepository.CreateAsync(report);
 
@@ -776,6 +777,7 @@ namespace MiSmart.API.Controllers
                 UserUUID = token.UserUUID,
                 PilotName = command.PilotName,
                 PartnerCompanyName = command.PartnerCompanyName,
+                Username = command.Username,
             };
             var secondReport = await secondLogReportRepository.CreateAsync(report);
 
@@ -849,6 +851,31 @@ namespace MiSmart.API.Controllers
             if (secondReport is null)
                 actionResponse.AddNotFoundErr("SecondReport");
             actionResponse.SetData((ViewModelHelpers.ConvertToViewModel<SecondLogReport, SecondLogReportViewModel>(secondReport)));
+            return actionResponse.ToIActionResult();
+        }
+        [HttpGet("GetFileForEmail")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetFileForEmail([FromServices] LogFileRepository logFileRepository, [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository,
+        [FromQuery] String token, [FromServices] LogTokenRepository logTokenRepository)
+        {
+            ActionResponse actionResponse = actionResponseFactory.CreateInstance();
+            var resToken = await logTokenRepository.GetAsync(ww => String.Equals(ww.Token, token));
+            if (resToken is null)
+            {
+                actionResponse.AddNotFoundErr("Token");
+            }
+            if ((DateTime.UtcNow - resToken.CreateTime).TotalHours > Constants.LogReportTokenDurationHours)
+            {
+                actionResponse.AddExpiredErr("Token");
+            }
+            Expression<Func<LogFile, Boolean>> query = ww => (ww.ID == resToken.LogFileID);
+            var logFile = await logFileRepository.GetAsync(query);
+            if (logFile is null)
+            {
+                actionResponse.AddNotFoundErr("LogFile");
+            }
+
+            actionResponse.SetFile(logFile.FileBytes, "application/octet-stream", logFile.FileName);
             return actionResponse.ToIActionResult();
         }
     }
