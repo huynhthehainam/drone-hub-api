@@ -708,7 +708,7 @@ namespace MiSmart.API.Controllers
         }
         [HttpPost("ErrorFromEmail")]
         [AllowAnonymous]
-        public async Task<IActionResult> SendEmailErrorFromEmail([FromBody] AddingGetLogForEmailCommand command, [FromServices] LogFileRepository logFileRepository,
+        public async Task<IActionResult> SendEmailErrorFromEmail([FromBody] AddingLogErrorForEmailCommand command, [FromServices] LogFileRepository logFileRepository,
         [FromServices] MyEmailService emailService, [FromServices] IOptions<TargetEmailSettings> options, [FromServices] LogTokenRepository logTokenRepository)
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
@@ -730,7 +730,8 @@ namespace MiSmart.API.Controllers
             
             var errorString = "Báo cáo có mâu thuẫn";
             var contentString = "Vui lòng kiểm tra và cập nhật lại báo cáo theo đường link sau";
-
+            if (command.Message.Length != 0)
+                contentString = "Tin nhắn: " + command.Message + "\n\n" + contentString;
             foreach (UserEmail item in settings.LogReport)
             {
                 String newToken = TokenHelper.GenerateToken();

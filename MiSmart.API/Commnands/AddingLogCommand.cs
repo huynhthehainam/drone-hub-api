@@ -78,5 +78,10 @@ namespace MiSmart.API.Commands
         [Required]
         public List<IFormFile> Files { get; set; }
     }
+    public class AddingLogErrorForEmailCommand
+    {
+        public String Message { get; set; }
+        public String Token { get; set; }
+    }
 
 }
