@@ -205,14 +205,14 @@ namespace MiSmart.API.Controllers
             {
                 response.AddNotFoundErr("Device");
             }
-
-            var team = await teamRepository.GetAsync(ww => ww.ID == command.TeamID.GetValueOrDefault() && ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID);
-            if (team is null)
-            {
-                response.AddInvalidErr("TeamID");
-            }
-
-            device.Team = team;
+            if (command.TeamID.HasValue){
+                var team = await teamRepository.GetAsync(ww => ww.ID == command.TeamID.GetValueOrDefault() && ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID);
+                if (team is null)
+                {
+                    response.AddInvalidErr("TeamID");
+                }
+                device.Team = team;
+            }else device.TeamID = null;
             await deviceRepository.UpdateAsync(device);
             response.SetUpdatedMessage();
 

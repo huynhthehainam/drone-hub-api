@@ -43,10 +43,18 @@ namespace MiSmart.API.Controllers
             }
             Expression<Func<LogFile, Boolean>> query = ww => false; 
             if (relation == "Maintainer") {
-                query = ww => (deviceID.HasValue ? (ww.DeviceID == deviceID.Value) : true)
+                if (CurrentUser.RoleID != 3)
+                {
+                    actionResponse.AddNotAllowedErr();
+                }
+                    query = ww => (deviceID.HasValue ? (ww.DeviceID == deviceID.Value) : true)
                                 && (ww.FileBytes.Length > 500000)
                                 && (isStable == false ? (ww.DroneStatus != DroneStatus.Stable) : true);
             } else if (relation == "Administrator") {
+                if (!CurrentUser.IsAdministrator)
+                {
+                    actionResponse.AddNotAllowedErr();
+                }
                 query = ww => (deviceID.HasValue ? (ww.DeviceID == deviceID.Value) : true)
                                 && (ww.FileBytes.Length > 500000)
                                 && (isStable == false ? (ww.DroneStatus != DroneStatus.Stable) : true)
@@ -201,8 +209,11 @@ namespace MiSmart.API.Controllers
                 PilotName = command.PilotName,
                 PartnerCompanyName = command.PartnerCompanyName,
                 UserUUID = CurrentUser.UUID,
-                Username = command.Username,
             };
+            if (command.Username.Length != 0){
+                report.Username = command.Username;
+            }
+
             await logReportRepository.CreateAsync(report);
 
             logFile.Status = LogStatus.Warning;
@@ -211,7 +222,7 @@ namespace MiSmart.API.Controllers
             foreach (UserEmail item in settings.LogReport)
             {
                 String token = TokenHelper.GenerateToken();
-                await logTokenRepository.CreateAsync(new LogToken { Token = token, UserUUID = new Guid(item.UUID), LogFileID = id });
+                await logTokenRepository.CreateAsync(new LogToken { Token = token, UserUUID = new Guid(item.UUID), LogFileID = id, Username = item.Email });
                 await emailService.SendMailAsync(new String[] { item.Email }, new String[] { }, new String[] { }, @$"[Chuyến bay cần phân tích] Mã hiệu drone ({logFile.Device.Name})",
                 $"Dear,\n\nPhòng Đặc Nhiệm trả kết quả báo cáo hiện tường:\n\nMã hiệu Drone: {logFile.Device.Name}\n\nLink Báo cáo tình trạng chuyến bay: https://dronehub.mismart.ai/log-report-result?token={token} \n\nThank you");
             }
@@ -735,17 +746,20 @@ namespace MiSmart.API.Controllers
             {
                 response.AddNotFoundErr("LogFile");
             }
+
+            var listLogToken = await logTokenRepository.GetListEntitiesAsync(new PageCommand(), ww => ww.LogFileID == token.LogFileID);
+            await logTokenRepository.DeleteRangeAsync(listLogToken);
             
             var errorString = "Báo cáo có mâu thuẫn";
             var contentString = "Vui lòng kiểm tra và cập nhật lại báo cáo theo đường link sau";
             if (command.Message.Length != 0)
                 contentString = "Tin nhắn: " + command.Message + "\n\n" + contentString;
-            foreach (UserEmail item in settings.LogReport)
+            if (logFile.LogReport.Username is not null && logFile.LogReport.Username?.Length != 0)
             {
                 String newToken = TokenHelper.GenerateToken();
-                await logTokenRepository.CreateAsync(new LogToken() { Token = newToken, UserUUID = new Guid(item.UUID), LogFileID = logFile.ID });
-                await emailService.SendMailAsync(new String[] { item.Email }, new String[] { }, new String[] { }, @$"Subject: [Báo cáo lỗi] Mã hiệu drone ({logFile.Device.Name})",
-            $"Dear,\n\nPhòng Điều khiển bay trả Kết quả phân tích Dữ liệu bay:\n\nMã hiệu Drone: {logFile.Device.Name}\n\nTình trạng: {errorString}\n\n{contentString}\n\nLink: https://dronehub.mismart.ai/second-log-report?token={newToken}\n\nThank you");
+                await logTokenRepository.CreateAsync(new LogToken() { Token = newToken, UserUUID = logFile.LogReport.UserUUID, LogFileID = logFile.ID, Username = logFile.LogReport.Username });
+                await emailService.SendMailAsync(new String[] { logFile.LogReport.Username }, new String[] { }, new String[] { }, @$"Subject: [Báo cáo lỗi] Mã hiệu drone ({logFile.Device.Name})",
+                $"Dear,\n\nPhòng Điều khiển bay trả Kết quả phân tích Dữ liệu bay:\n\nMã hiệu Drone: {logFile.Device.Name}\n\nTình trạng: {errorString}\n\n{contentString}\n\nLink: https://dronehub.mismart.ai/second-log-report?token={newToken}\n\nThank you");
             }
 
             logFile.Status = LogStatus.SecondWarning;
@@ -798,7 +812,7 @@ namespace MiSmart.API.Controllers
             foreach (UserEmail item in settings.LogReport)
             {
                 String newToken = TokenHelper.GenerateToken();
-                await logTokenRepository.CreateAsync(new LogToken { Token = newToken, UserUUID = new Guid(item.UUID), LogFileID = logFile.ID });
+                await logTokenRepository.CreateAsync(new LogToken { Token = newToken, UserUUID = new Guid(item.UUID), LogFileID = logFile.ID, Username = item.Email });
                 await emailService.SendMailAsync(new String[] { item.Email }, new String[] { }, new String[] { }, @$"[Chuyến bay cần phân tích lần 2] Mã hiệu drone ({logFile.Device.Name})",
                 $"Dear,\n\nPhòng Đặc Nhiệm trả kết quả báo cáo hiện tường:\n\nMã hiệu Drone: {logFile.Device.Name}\n\nLink Báo cáo tình trạng chuyến bay: https://dronehub.mismart.ai/second-log-result?token={newToken} \n\nThank you");
             }
@@ -885,6 +899,23 @@ namespace MiSmart.API.Controllers
             }
 
             actionResponse.SetFile(logFile.FileBytes, "application/octet-stream", logFile.FileName);
+            return actionResponse.ToIActionResult();
+        }
+        [HttpGet("UsernameFromToken")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetUsernameFromToken([FromQuery] String token, [FromServices] LogTokenRepository logTokenRepository)
+        {
+            ActionResponse actionResponse = actionResponseFactory.CreateInstance();
+            var resToken = await logTokenRepository.GetAsync(ww => String.Equals(ww.Token, token));
+            if (resToken is null)
+            {
+                actionResponse.AddNotFoundErr("Token");
+            }
+            if ((DateTime.UtcNow - resToken.CreateTime).TotalHours > Constants.LogReportTokenDurationHours)
+            {
+                actionResponse.AddExpiredErr("Token");
+            }
+            actionResponse.SetData(new {name = resToken.Username});
             return actionResponse.ToIActionResult();
         }
     }
