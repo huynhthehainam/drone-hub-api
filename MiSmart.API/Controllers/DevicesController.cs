@@ -317,6 +317,14 @@ namespace MiSmart.API.Controllers
                 }
                 query = ww => (ww.ID == id);
             }
+            else if (relation == "Maintainer")
+            {
+                if (CurrentUser.RoleID != 3)
+                {
+                    response.AddNotAllowedErr();
+                }
+                query = ww => (ww.ID == id);
+            }
             else
             {
                 ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.UUID);
