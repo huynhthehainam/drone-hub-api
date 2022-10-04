@@ -17,7 +17,6 @@
             "env": {
                 "ASPNETCORE_ENVIRONMENT": "Development",
                 "GOOGLE_APPLICATION_CREDENTIALS": "google_services.json",
-                "ASPNETCORE_URLS": "http://0.0.0.0:5001",
             },
             "sourceFileMap": {
                 "/Views": "${workspaceFolder}/Views"

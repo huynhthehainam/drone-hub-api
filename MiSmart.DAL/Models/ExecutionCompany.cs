@@ -74,5 +74,7 @@ namespace MiSmart.DAL.Models
             get => lazyLoader.Load(this, ref logReportResults);
             set => logReportResults = value;
         }
+
+        public List<String> Emails { get; set; }
     }
 }

@@ -9,6 +9,7 @@ using MiSmart.Infrastructure.Services;
 using MiSmart.Infrastructure.Settings;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MiSmart.API.Services;
 
@@ -70,7 +71,17 @@ public class MyEmailService : EmailService
             $"{frontEndSettings.Domain}/apps/execution-flight-statistics/map/{stat.ID}",
             ""
         );
-        await SendMailAsync(targetEmailSettings.LowBattery.ToArray(), new String[] { }, new String[] { }, $"[{stat.Device.Name}] Báo cáo chuyến bay phần trăm Pin thấp", html, true);
+        var rawTargetEmails = targetEmailSettings.LowBattery;
+        var executionCompanyTargetEmails = stat.Device.ExecutionCompany?.Emails ?? new List<String>();
+        rawTargetEmails.AddRange(executionCompanyTargetEmails);
+        rawTargetEmails.Distinct();
+        var targetEmails = new List<String>();
+        foreach(var email in rawTargetEmails){
+            if (!targetEmails.Contains(email)){
+                targetEmails.Add(email);
+            }
+        }
+        await SendMailAsync(targetEmails.ToArray(), new String[] { }, new String[] { }, $"[{stat.Device.Name}] Báo cáo chuyến bay phần trăm Pin thấp", html, true);
     }
     private String generateLowBatteryDailyReport(List<FlightStat> listStat, DateTime localNow)
     {
