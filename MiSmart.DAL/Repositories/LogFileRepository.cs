@@ -33,7 +33,6 @@ namespace MiSmart.DAL.Repositories
                 LoggingTime = ww.LoggingTime,
                 DroneStatus = ww.DroneStatus,
                 Status = ww.Status,
-                Errors = ww.Errors,
                 LogDetail = ww.LogDetail,
                 LogReport = ww.LogReport,
                 LogReportResult = ww.LogReportResult,

@@ -205,14 +205,16 @@ namespace MiSmart.API.Controllers
             {
                 response.AddNotFoundErr("Device");
             }
-
-            var team = await teamRepository.GetAsync(ww => ww.ID == command.TeamID.GetValueOrDefault() && ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID);
-            if (team is null)
+            if (command.TeamID.HasValue)
             {
-                response.AddInvalidErr("TeamID");
+                var team = await teamRepository.GetAsync(ww => ww.ID == command.TeamID.GetValueOrDefault() && ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID);
+                if (team is null)
+                {
+                    response.AddInvalidErr("TeamID");
+                }
+                device.Team = team;
             }
-
-            device.Team = team;
+            else device.TeamID = null;
             await deviceRepository.UpdateAsync(device);
             response.SetUpdatedMessage();
 
@@ -317,6 +319,14 @@ namespace MiSmart.API.Controllers
                 }
                 query = ww => (ww.ID == id);
             }
+            else if (relation == "Maintainer")
+            {
+                if (CurrentUser.RoleID != 3)
+                {
+                    response.AddNotAllowedErr();
+                }
+                query = ww => (ww.ID == id);
+            }
             else
             {
                 ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.UUID);
@@ -337,11 +347,14 @@ namespace MiSmart.API.Controllers
             return response.ToIActionResult();
         }
         [HttpPatch("{id:int}")]
-        [HasPermission(typeof(AdminPermission))]
-        public async Task<IActionResult> PatchDevice([FromServices] DeviceRepository deviceRepository, [FromServices] DeviceModelRepository deviceModelRepository, [FromRoute] Int32 id, [FromBody] PatchingDeviceCommand command)
+        public async Task<IActionResult> PatchDevice([FromServices] DeviceRepository deviceRepository, [FromServices] DeviceModelRepository deviceModelRepository, [FromRoute] Int32 id, [FromBody] PatchingDeviceCommand command,
+        [FromServices] ExecutionCompanyRepository executionCompanyRepository)
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
-
+            if (!CurrentUser.IsAdministrator && CurrentUser.RoleID != 3)
+            {
+                response.AddNotAllowedErr();
+            }
             var device = await deviceRepository.GetAsync(ww => ww.ID == id);
             if (device is null)
             {
@@ -359,6 +372,16 @@ namespace MiSmart.API.Controllers
                     response.AddInvalidErr("DeviceModelID");
                 }
                 device.DeviceModel = deviceModel;
+            }
+
+            if (command.ExecutionCompanyID.HasValue)
+            {
+                var executionCompany = await executionCompanyRepository.GetAsync(ww => ww.ID == command.ExecutionCompanyID.GetValueOrDefault());
+                if (executionCompany is null)
+                {
+                    response.AddInvalidErr("ExecutionCompanyID");
+                }
+                device.ExecutionCompany = executionCompany;
             }
 
 
@@ -514,7 +537,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
                         {
                             var battery = await batteryRepository.GetOrCreateBySerialNumberAsync(item.BatterySerialNumber);
                             stat.Battery = battery;
-                            stat.CycleCount = item.BatteryCycleCount;
+                            stat.CycleCount = item.BatteryCycleCount.GetValueOrDefault();
                         }
                         try
                         {
@@ -842,7 +865,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
             {
                 var battery = await batteryRepository.GetOrCreateBySerialNumberAsync(command.BatterySerialNumber);
                 stat.Battery = battery;
-                stat.CycleCount = command.BatteryCycleCount;
+                stat.CycleCount = command.BatteryCycleCount.GetValueOrDefault();
             }
             if (device.ExecutionCompanyID.HasValue)
             {

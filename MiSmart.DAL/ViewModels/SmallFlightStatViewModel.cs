@@ -51,6 +51,7 @@ namespace MiSmart.DAL.ViewModels
         public CoordinateViewModel FirstPoint { get; set; }
         public Boolean IsBingLocation { get; set; }
         public FlightStatStatus? Status { get; set; }
+        public List<CoordinateViewModel> Boundary { get; set; }
 
         public List<FlightStatReportRecordViewModel> ReportRecords { get; set; }
         public void LoadFrom(FlightStat entity)
@@ -83,6 +84,10 @@ namespace MiSmart.DAL.ViewModels
                 FirstPoint = new CoordinateViewModel(entity.FlywayPoints.Coordinates.FirstOrDefault());
             }
             ReportRecords = entity.FlightStatReportRecords.Select(ww => ViewModelHelpers.ConvertToViewModel<FlightStatReportRecord, FlightStatReportRecordViewModel>(ww)).ToList();
+            if (entity.Boundary is not null)
+            {
+                Boundary = entity.Boundary.Coordinates.Select(ww => new CoordinateViewModel(ww)).ToList();
+            }
         }
     }
 }

@@ -33,17 +33,43 @@ namespace MiSmart.API.Controllers
         }
 
         [HttpGet]
-        [HasPermission(typeof(MaintainerPermission))]
         public async Task<IActionResult> GetList([FromQuery] PageCommand pageCommand, [FromQuery] Int32? deviceID, [FromServices] LogFileRepository logFileRepository,
         [FromQuery] Boolean? isStable,
-        [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository)
+        [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, [FromQuery] String relation = "Maintainer")
         {
             ActionResponse actionResponse = actionResponseFactory.CreateInstance();
-
-            Expression<Func<LogFile, Boolean>> query = ww =>
-            (deviceID.HasValue ? (ww.DeviceID == deviceID.Value) : true)
-            && (ww.FileBytes.Length > 500000)
-            && (isStable == false ? (ww.DroneStatus != DroneStatus.Stable) : true);
+            Expression<Func<LogFile, Boolean>> query = ww => false; 
+            if (relation == "Maintainer") 
+            {
+                if (CurrentUser.RoleID != 3)
+                {
+                    actionResponse.AddNotAllowedErr();
+                }
+                    query = ww => (deviceID.HasValue ? (ww.DeviceID == deviceID.Value) : true)
+                                && (ww.FileBytes.Length > 500000)
+                                && (isStable == false ? (ww.DroneStatus != DroneStatus.Stable) : true);
+            } 
+            else if (relation == "Administrator") 
+            {
+                if (!CurrentUser.IsAdministrator)
+                {
+                    actionResponse.AddNotAllowedErr();
+                }
+                query = ww => (deviceID.HasValue ? (ww.DeviceID == deviceID.Value) : true)
+                                && (ww.FileBytes.Length > 500000)
+                                && (isStable == false ? (ww.DroneStatus != DroneStatus.Stable) : true)
+                                && (ww.Status == LogStatus.Completed);
+            } 
+            else if (relation == "LogAnalyst")
+            {
+                if (CurrentUser.RoleID != 4){
+                    actionResponse.AddNotAllowedErr();
+                }
+                query = ww => ((deviceID.HasValue ? (ww.DeviceID == deviceID.Value) : true)
+                                && (ww.FileBytes.Length > 500000)
+                                && (isStable == false ? (ww.DroneStatus != DroneStatus.Stable) : true)
+                                && (ww.Status == LogStatus.Warning || ww.Status == LogStatus.SecondWarning || ww.Status == LogStatus.Completed));
+            }
 
             var listResponse = await logFileRepository.GetListResponseViewAsync<LogFileViewModel>(pageCommand, query, ww => ww.LoggingTime, false);
 
@@ -108,7 +134,7 @@ namespace MiSmart.API.Controllers
         [FromServices] LogFileRepository logFileRepository)
         {
             ActionResponse actionResponse = actionResponseFactory.CreateInstance();
-            if (!CurrentUser.IsAdministrator && CurrentUser.RoleID != 3)
+            if (!CurrentUser.IsAdministrator && CurrentUser.RoleID != 3 && CurrentUser.RoleID != 4)
             {
                 actionResponse.AddNotAllowedErr();
             }
@@ -132,7 +158,7 @@ namespace MiSmart.API.Controllers
         public async Task<IActionResult> GetLogReport([FromRoute] Guid id, [FromServices] LogReportRepository logReportRepository)
         {
             ActionResponse actionResponse = actionResponseFactory.CreateInstance();
-            if (!CurrentUser.IsAdministrator && CurrentUser.RoleID != 3)
+            if (!CurrentUser.IsAdministrator && CurrentUser.RoleID != 3 && CurrentUser.RoleID != 4)
             {
                 actionResponse.AddNotAllowedErr();
             }
@@ -148,7 +174,7 @@ namespace MiSmart.API.Controllers
         public async Task<IActionResult> GetLogResult([FromRoute] Guid id, [FromServices] LogReportResultRepository logReportResultRepository)
         {
             ActionResponse actionResponse = actionResponseFactory.CreateInstance();
-            if (!CurrentUser.IsAdministrator && CurrentUser.RoleID != 3)
+            if (!CurrentUser.IsAdministrator && CurrentUser.RoleID != 3 && CurrentUser.RoleID != 4)
             {
                 actionResponse.AddNotAllowedErr();
             }
@@ -169,7 +195,7 @@ namespace MiSmart.API.Controllers
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
             TargetEmailSettings settings = options.Value;
-            if (CurrentUser.RoleID != 3)
+            if (!CurrentUser.IsAdministrator && CurrentUser.RoleID != 3)
             {
                 response.AddNotAllowedErr();
             }
@@ -178,8 +204,13 @@ namespace MiSmart.API.Controllers
             {
                 response.AddNotFoundErr("LogFile");
             }
+            if (logFile.Status != LogStatus.Normal)
+            {
+                response.AddInvalidErr("LogStatus");
+            }
             var logReport = await logReportRepository.GetAsync(ww => ww.LogFileID == id);
-            if (logReport is not null){
+            if (logReport is not null)
+            {
                 response.AddExistedErr("LogReport");
             }
             var report = new LogReport
@@ -194,15 +225,21 @@ namespace MiSmart.API.Controllers
                 PartnerCompanyName = command.PartnerCompanyName,
                 UserUUID = CurrentUser.UUID,
             };
+            if (command.Username?.Length != 0)
+            {
+                report.Username = command.Username;
+            }
+
             await logReportRepository.CreateAsync(report);
 
             logFile.Status = LogStatus.Warning;
+            logFile.DroneStatus = DroneStatus.Fall;
             await logFileRepository.UpdateAsync(logFile);
 
             foreach (UserEmail item in settings.LogReport)
             {
                 String token = TokenHelper.GenerateToken();
-                await logTokenRepository.CreateAsync(new LogToken { Token = token, UserUUID = new Guid(item.UUID), LogFileID = id });
+                await logTokenRepository.CreateAsync(new LogToken { Token = token, UserUUID = new Guid(item.UUID), LogFileID = id, Username = item.Email });
                 await emailService.SendMailAsync(new String[] { item.Email }, new String[] { }, new String[] { }, @$"[Chuyến bay cần phân tích] Mã hiệu drone ({logFile.Device.Name})",
                 $"Dear,\n\nPhòng Đặc Nhiệm trả kết quả báo cáo hiện tường:\n\nMã hiệu Drone: {logFile.Device.Name}\n\nLink Báo cáo tình trạng chuyến bay: https://dronehub.mismart.ai/log-report-result?token={token} \n\nThank you");
             }
@@ -213,11 +250,20 @@ namespace MiSmart.API.Controllers
         public async Task<IActionResult> UpdateReport([FromRoute] Guid id, [FromBody] AddingLogReportCommand command, [FromServices] LogReportRepository logReportRepository, [FromServices] LogFileRepository logFileRepository)
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
-            if (CurrentUser.RoleID != 3)
+            if (!CurrentUser.IsAdministrator && CurrentUser.RoleID != 3)
             {
                 response.AddNotAllowedErr();
             }
-            var logReport = await logReportRepository.GetAsync(ww => ww.LogFileID == id);
+            var logFile = await logFileRepository.GetAsync(ww => ww.ID == id);
+            if (logFile is null)
+            {
+                response.AddNotFoundErr("LogFile");
+            }
+            if (logFile.Status != LogStatus.Normal)
+            {
+                response.AddInvalidErr("LogStatus");
+            }
+            var logReport = await logReportRepository.GetAsync(ww => ww.LogFileID == logFile.ID);
             if (logReport is null)
             {
                 response.AddNotFoundErr("LogReport");
@@ -241,7 +287,7 @@ namespace MiSmart.API.Controllers
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
 
-            if (!CurrentUser.IsAdministrator && CurrentUser.RoleID != 3)
+            if (!CurrentUser.IsAdministrator && CurrentUser.RoleID != 4)
             {
                 response.AddNotAllowedErr();
             }
@@ -250,7 +296,11 @@ namespace MiSmart.API.Controllers
             {
                 response.AddNotFoundErr("LogFile");
             }
-            var logResult = await logReportResultRepository.GetAsync(ww => ww.LogFileID == id);
+            if (logFile.Status == LogStatus.Approved)
+            {
+                response.AddInvalidErr("LogStatus");
+            }
+            var logResult = await logReportResultRepository.GetAsync(ww => ww.LogFileID == logFile.ID);
             if (logResult is not null)
                 response.AddExistedErr("ResultReport");
             var result = new LogReportResult
@@ -270,8 +320,11 @@ namespace MiSmart.API.Controllers
             }
             else if (command.ResponsibleCompany == ResponsibleCompany.AnotherCompany)
             {
-                var executionCompany = await executionCompanyRepository.GetAsync(ww => ww.ID == logFile.Device.ExecutionCompanyID);
-                result.ExecutionCompany = executionCompany;
+                var executionCompany = await executionCompanyRepository.GetAsync(ww => ww.ID == logFile.Device.ExecutionCompanyID.GetValueOrDefault());
+                if (executionCompany is not null)
+                {
+                    result.ExecutionCompany = executionCompany;
+                }
             }
             var res = await logReportResultRepository.CreateAsync(result);
 
@@ -303,12 +356,22 @@ namespace MiSmart.API.Controllers
         [HttpPatch("{id:Guid}/Result")]
         public async Task<IActionResult> UpdateReportResult([FromRoute] Guid id, [FromBody] AddingLogResultCommand command,
         [FromServices] LogReportResultRepository logReportResultRepository, [FromServices] MinioService minioService,
-        [FromServices] LogResultDetailRepository logResultDetailRepository, [FromServices] ExecutionCompanyRepository executionCompanyRepository)
+        [FromServices] LogResultDetailRepository logResultDetailRepository, [FromServices] ExecutionCompanyRepository executionCompanyRepository,
+        [FromServices] LogFileRepository logFileRepository)
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
-            if (CurrentUser.RoleID != 3)
+            if (!CurrentUser.IsAdministrator && CurrentUser.RoleID != 4)
             {
                 response.AddNotAllowedErr();
+            }
+            var logFile = await logFileRepository.GetAsync(ww => ww.ID == id);
+            if (logFile is null)
+            {
+                response.AddNotFoundErr("LogFile");
+            }
+            if (logFile.Status == LogStatus.Approved)
+            {
+                response.AddInvalidErr("LogStatus");
             }
             var logResult = await logReportResultRepository.GetAsync(ww => ww.LogFileID == id);
             if (logResult is null)
@@ -327,7 +390,7 @@ namespace MiSmart.API.Controllers
                 error.Status = item.Status;
                 await logResultDetailRepository.UpdateAsync(error);
             }
-             if (command.ResponsibleCompany == ResponsibleCompany.MiSmart)
+            if (command.ResponsibleCompany == ResponsibleCompany.MiSmart)
             {
                 var executionCompany = await executionCompanyRepository.GetAsync(ww => String.Equals(ww.Name, "Công ty khai thác MiSmart")); 
                 logResult.ExecutionCompany = executionCompany;
@@ -335,7 +398,8 @@ namespace MiSmart.API.Controllers
             else if (command.ResponsibleCompany == ResponsibleCompany.AnotherCompany)
             {
                 var executionCompany = await executionCompanyRepository.GetAsync(ww => ww.ID == logResult.LogFile.Device.ExecutionCompanyID);
-                logResult.ExecutionCompany = executionCompany;
+                if (executionCompany is not null)
+                    logResult.ExecutionCompany = executionCompany;
             }
             logResult.DetailedAnalysis = command.DetailedAnalysis;
             logResult.AnalystUUID = CurrentUser.UUID;
@@ -421,16 +485,20 @@ namespace MiSmart.API.Controllers
             {
                 response.AddExpiredErr("Token");
             }
-            // if (command.ExecutionCompanyID.HasValue)
-            // {
-            //     var company = await executionCompanyRepository.GetAsync(ww => ww.ID == command.ExecutionCompanyID.GetValueOrDefault());
-            //     if (company is null)
-            //     {
-            //         response.AddInvalidErr("ExecutionCompanyID");
-            //     }
-            // }
-            var logResult = await logReportResultRepository.GetAsync(ww => ww.LogFileID == token.LogFileID);
-            if (logResult is not null){
+            
+            var logFile = await logFileRepository.GetAsync(ww => ww.ID == token.LogFileID);
+            if (logFile is null)
+            {
+                response.AddNotFoundErr("LogFile");
+            }
+            if (logFile.Status == LogStatus.Approved)
+            {
+                response.AddInvalidErr("LogStatus");
+            }
+            
+            var logResult = await logReportResultRepository.GetAsync(ww => ww.LogFileID == logFile.ID);
+            if (logResult is not null)
+            {
                 response.AddExistedErr("ResultReport");
             }
             var result = new LogReportResult()
@@ -443,7 +511,7 @@ namespace MiSmart.API.Controllers
                 Suggest = command.Suggest,
                 ResponsibleCompany = command.ResponsibleCompany,
             };
-            var logFile = await logFileRepository.GetAsync(ww => ww.ID == token.LogFileID);
+            
             if (command.ResponsibleCompany == ResponsibleCompany.MiSmart)
             {
                 var executionCompany = await executionCompanyRepository.GetAsync(ww => String.Equals(ww.Name, "Công ty khai thác MiSmart")); 
@@ -452,7 +520,8 @@ namespace MiSmart.API.Controllers
             else if (command.ResponsibleCompany == ResponsibleCompany.AnotherCompany)
             {
                 var executionCompany = await executionCompanyRepository.GetAsync(ww => ww.ID == logFile.Device.ExecutionCompanyID);
-                result.ExecutionCompany = executionCompany;
+                if (executionCompany is not null)
+                    result.ExecutionCompany = executionCompany;
             }
             var res = await logReportResultRepository.CreateAsync(result);
             foreach (AddingLogResultDetailCommand item in command.ListErrors)
@@ -707,7 +776,7 @@ namespace MiSmart.API.Controllers
         }
         [HttpPost("ErrorFromEmail")]
         [AllowAnonymous]
-        public async Task<IActionResult> SendEmailErrorFromEmail([FromBody] AddingGetLogForEmailCommand command, [FromServices] LogFileRepository logFileRepository,
+        public async Task<IActionResult> SendEmailErrorFromEmail([FromBody] AddingLogErrorForEmailCommand command, [FromServices] LogFileRepository logFileRepository,
         [FromServices] MyEmailService emailService, [FromServices] IOptions<TargetEmailSettings> options, [FromServices] LogTokenRepository logTokenRepository)
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
@@ -726,16 +795,20 @@ namespace MiSmart.API.Controllers
             {
                 response.AddNotFoundErr("LogFile");
             }
+
+            var listLogToken = await logTokenRepository.GetListEntitiesAsync(new PageCommand(), ww => ww.LogFileID == token.LogFileID);
+            await logTokenRepository.DeleteRangeAsync(listLogToken);
             
             var errorString = "Báo cáo có mâu thuẫn";
             var contentString = "Vui lòng kiểm tra và cập nhật lại báo cáo theo đường link sau";
-
-            foreach (UserEmail item in settings.LogReport)
+            if (command.Message.Length != 0)
+                contentString = "Tin nhắn: " + command.Message + "\n\n" + contentString;
+            if (logFile.LogReport.Username is not null && logFile.LogReport.Username?.Length != 0)
             {
                 String newToken = TokenHelper.GenerateToken();
-                await logTokenRepository.CreateAsync(new LogToken() { Token = newToken, UserUUID = new Guid(item.UUID), LogFileID = logFile.ID });
-                await emailService.SendMailAsync(new String[] { item.Email }, new String[] { }, new String[] { }, @$"Subject: [Báo cáo lỗi] Mã hiệu drone ({logFile.Device.Name})",
-            $"Dear,\n\nPhòng Điều khiển bay trả Kết quả phân tích Dữ liệu bay:\n\nMã hiệu Drone: {logFile.Device.Name}\n\nTình trạng: {errorString}\n\n{contentString}\n\nLink: https://dronehub.mismart.ai/second-log-report?token={newToken}\n\nThank you");
+                await logTokenRepository.CreateAsync(new LogToken() { Token = newToken, UserUUID = logFile.LogReport.UserUUID, LogFileID = logFile.ID, Username = logFile.LogReport.Username });
+                await emailService.SendMailAsync(new String[] { logFile.LogReport.Username }, new String[] { }, new String[] { }, @$"Subject: [Báo cáo lỗi] Mã hiệu drone ({logFile.Device.Name})",
+                $"Dear,\n\nPhòng Điều khiển bay trả Kết quả phân tích Dữ liệu bay:\n\nMã hiệu Drone: {logFile.Device.Name}\n\nTình trạng: {errorString}\n\n{contentString}\n\nLink: https://dronehub.mismart.ai/second-log-report?token={newToken}\n\nThank you");
             }
 
             logFile.Status = LogStatus.SecondWarning;
@@ -776,6 +849,7 @@ namespace MiSmart.API.Controllers
                 UserUUID = token.UserUUID,
                 PilotName = command.PilotName,
                 PartnerCompanyName = command.PartnerCompanyName,
+                Username = command.Username,
             };
             var secondReport = await secondLogReportRepository.CreateAsync(report);
 
@@ -787,7 +861,7 @@ namespace MiSmart.API.Controllers
             foreach (UserEmail item in settings.LogReport)
             {
                 String newToken = TokenHelper.GenerateToken();
-                await logTokenRepository.CreateAsync(new LogToken { Token = newToken, UserUUID = new Guid(item.UUID), LogFileID = logFile.ID });
+                await logTokenRepository.CreateAsync(new LogToken { Token = newToken, UserUUID = new Guid(item.UUID), LogFileID = logFile.ID, Username = item.Email });
                 await emailService.SendMailAsync(new String[] { item.Email }, new String[] { }, new String[] { }, @$"[Chuyến bay cần phân tích lần 2] Mã hiệu drone ({logFile.Device.Name})",
                 $"Dear,\n\nPhòng Đặc Nhiệm trả kết quả báo cáo hiện tường:\n\nMã hiệu Drone: {logFile.Device.Name}\n\nLink Báo cáo tình trạng chuyến bay: https://dronehub.mismart.ai/second-log-result?token={newToken} \n\nThank you");
             }
@@ -849,6 +923,48 @@ namespace MiSmart.API.Controllers
             if (secondReport is null)
                 actionResponse.AddNotFoundErr("SecondReport");
             actionResponse.SetData((ViewModelHelpers.ConvertToViewModel<SecondLogReport, SecondLogReportViewModel>(secondReport)));
+            return actionResponse.ToIActionResult();
+        }
+        [HttpGet("GetFileForEmail")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetFileForEmail([FromServices] LogFileRepository logFileRepository, [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository,
+        [FromQuery] String token, [FromServices] LogTokenRepository logTokenRepository)
+        {
+            ActionResponse actionResponse = actionResponseFactory.CreateInstance();
+            var resToken = await logTokenRepository.GetAsync(ww => String.Equals(ww.Token, token));
+            if (resToken is null)
+            {
+                actionResponse.AddNotFoundErr("Token");
+            }
+            if ((DateTime.UtcNow - resToken.CreateTime).TotalHours > Constants.LogReportTokenDurationHours)
+            {
+                actionResponse.AddExpiredErr("Token");
+            }
+            Expression<Func<LogFile, Boolean>> query = ww => (ww.ID == resToken.LogFileID);
+            var logFile = await logFileRepository.GetAsync(query);
+            if (logFile is null)
+            {
+                actionResponse.AddNotFoundErr("LogFile");
+            }
+
+            actionResponse.SetFile(logFile.FileBytes, "application/octet-stream", logFile.FileName);
+            return actionResponse.ToIActionResult();
+        }
+        [HttpGet("UsernameFromToken")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetUsernameFromToken([FromQuery] String token, [FromServices] LogTokenRepository logTokenRepository)
+        {
+            ActionResponse actionResponse = actionResponseFactory.CreateInstance();
+            var resToken = await logTokenRepository.GetAsync(ww => String.Equals(ww.Token, token));
+            if (resToken is null)
+            {
+                actionResponse.AddNotFoundErr("Token");
+            }
+            if ((DateTime.UtcNow - resToken.CreateTime).TotalHours > Constants.LogReportTokenDurationHours)
+            {
+                actionResponse.AddExpiredErr("Token");
+            }
+            actionResponse.SetData(new {name = resToken.Username});
             return actionResponse.ToIActionResult();
         }
     }

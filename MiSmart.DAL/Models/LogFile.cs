@@ -44,7 +44,6 @@ namespace MiSmart.DAL.Models
         public DateTime LoggingTime { get; set; } = DateTime.UtcNow;
         public DroneStatus DroneStatus { get; set; }
         public LogStatus Status { get; set; }
-        public String[] Errors { get; set; }
         private LogDetail logDetail;
         public LogDetail LogDetail
         {

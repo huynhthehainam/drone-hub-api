@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Text.Json;
 using MiSmart.DAL.Models;
 using MiSmart.Infrastructure.ViewModels;
@@ -14,7 +15,7 @@ namespace MiSmart.DAL.ViewModels
         public DateTime LoggingTime { get; set; }
         public DroneStatus DroneStatus { get; set; }
         public LogStatus Status {get; set;}
-        public String[] Errors {get; set;}
+        public List<String> Errors {get; set;}
         public String ExecutionCompanyName {get; set;}
         public JsonDocument Detail {get; set;}
         public Boolean isAnalyzed {get; set; }
@@ -28,9 +29,17 @@ namespace MiSmart.DAL.ViewModels
             LoggingTime = entity.LoggingTime;
             DroneStatus = entity.DroneStatus;
             Status = entity.Status;
-            Errors = entity.Errors;
             isAnalyzed = entity.isAnalyzed;
             Location = entity?.LogDetail?.Location;
+            Errors = new List<String>();
+            if (entity.LogReportResult is not null && entity.LogReportResult.LogResultDetails is not null)
+            {
+                foreach(var item in entity.LogReportResult.LogResultDetails)
+                {
+                    if (item.Status == StatusError.Bad)
+                        Errors.Add(item.PartError.Name);
+                }
+            }
         }
     }
 }

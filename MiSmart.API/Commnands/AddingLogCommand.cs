@@ -14,6 +14,7 @@ namespace MiSmart.API.Commands
         public DateTime AccidentTime { get; set; } = DateTime.UtcNow;
         public String PilotName { get; set; }
         public String PartnerCompanyName { get; set; }
+        public String Username { get; set; }
 
     }
     public class AddingLogResultCommand
@@ -53,6 +54,7 @@ namespace MiSmart.API.Commands
         public DateTime AccidentTime { get; set; }
         public String PilotName { get; set; }
         public String PartnerCompanyName { get; set; }
+        public String Username { get; set; }
     }
     public class AddingLogErrorCommand
     {
@@ -75,6 +77,11 @@ namespace MiSmart.API.Commands
         public String Token { get; set; }
         [Required]
         public List<IFormFile> Files { get; set; }
+    }
+    public class AddingLogErrorForEmailCommand
+    {
+        public String Message { get; set; }
+        public String Token { get; set; }
     }
 
 }

@@ -34,7 +34,8 @@ namespace MiSmart.DAL.ViewModels
             AnalystUUID = entity.AnalystUUID;
             ApproverUUID = entity.ApproverUUID;
             ListErrors = new List<LogResultDetailViewModel>();
-            foreach(var error in entity.LogResultDetails){
+            foreach(var error in entity.LogResultDetails)
+            {
                 LogResultDetailViewModel detail = new LogResultDetailViewModel{
                     Detail = error.Detail,
                     PartErrorID = error.PartErrorID,

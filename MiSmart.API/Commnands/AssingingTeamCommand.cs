@@ -15,7 +15,6 @@ namespace MiSmart.API.Commands
     }
     public class AssigningDeviceTeamCommand
     {
-        [Required]
         public Int32? TeamID { get; set; }
     }
 }
