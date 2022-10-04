@@ -195,7 +195,7 @@ namespace MiSmart.API.Controllers
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
             TargetEmailSettings settings = options.Value;
-            if (CurrentUser.RoleID != 3)
+            if (!CurrentUser.IsAdministrator && CurrentUser.RoleID != 3)
             {
                 response.AddNotAllowedErr();
             }
@@ -225,7 +225,7 @@ namespace MiSmart.API.Controllers
                 PartnerCompanyName = command.PartnerCompanyName,
                 UserUUID = CurrentUser.UUID,
             };
-            if (command.Username.Length != 0)
+            if (command.Username?.Length != 0)
             {
                 report.Username = command.Username;
             }
@@ -250,7 +250,7 @@ namespace MiSmart.API.Controllers
         public async Task<IActionResult> UpdateReport([FromRoute] Guid id, [FromBody] AddingLogReportCommand command, [FromServices] LogReportRepository logReportRepository, [FromServices] LogFileRepository logFileRepository)
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
-            if (CurrentUser.RoleID != 3)
+            if (!CurrentUser.IsAdministrator && CurrentUser.RoleID != 3)
             {
                 response.AddNotAllowedErr();
             }
