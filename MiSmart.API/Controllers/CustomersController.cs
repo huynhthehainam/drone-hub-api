@@ -25,7 +25,7 @@ namespace MiSmart.API.Controllers
         {
         }
         [HttpPost]
-        [HasPermission(typeof(AdminPermission))]
+        [HasPermission(typeof(AdminPermission), typeof(MaintainerPermission))]
         public async Task<IActionResult> Create([FromServices] CustomerRepository customerRepository, [FromBody] AddingCustomerCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
