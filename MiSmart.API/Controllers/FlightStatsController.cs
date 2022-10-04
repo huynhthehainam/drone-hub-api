@@ -383,17 +383,6 @@ namespace MiSmart.API.Controllers
                     });
                 }
             }
-
-
-            // flightStat.FieldName = String.IsNullOrEmpty(command.FieldName) ? flightStat.FieldName : command.FieldName;
-            // flightStat.TaskLocation = String.IsNullOrEmpty(command.TaskLocation) ? flightStat.TaskLocation : command.TaskLocation;
-            // if (command.TMUser is not null)
-            // {
-            //     flightStat.TMUser = JsonDocument.Parse(JsonSerializer.Serialize(command.TMUser, JsonSerializerDefaultOptions.CamelOptions));
-            //     flightStat.TMUserUID = command.TMUser.UID;
-            // }
-
-            // flightStat.Medicines = command.Medicines.Count == 0 ? flightStat.Medicines : JsonDocument.Parse(JsonSerializer.Serialize(command.Medicines, JsonSerializerDefaultOptions.CamelOptions));
             await flightStatRepository.UpdateAsync(flightStat);
             response.SetUpdatedMessage();
 
