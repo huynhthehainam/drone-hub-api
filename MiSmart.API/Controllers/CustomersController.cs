@@ -25,11 +25,14 @@ namespace MiSmart.API.Controllers
         {
         }
         [HttpPost]
-        [HasPermission(typeof(AdminPermission))]
+
         public async Task<IActionResult> Create([FromServices] CustomerRepository customerRepository, [FromBody] AddingCustomerCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
-
+            if (!CurrentUser.IsAdministrator && CurrentUser.RoleID != 3)
+            {
+                response.AddNotAllowedErr();
+            }
 
             var customer = await customerRepository.CreateAsync(new Customer { Name = command.Name, Address = command.Address });
             response.SetCreatedObject(customer);
@@ -182,12 +185,15 @@ namespace MiSmart.API.Controllers
         }
 
         [HttpPost("{id:int}/Devices")]
-        [HasPermission(typeof(AdminPermission))]
         public async Task<IActionResult> AddDevice([FromRoute] Int32 id, [FromServices] DeviceModelRepository deviceModelRepository, [FromServices] CustomerRepository customerRepository,
          [FromBody] AddingDeviceCommand command)
 
         {
             var response = actionResponseFactory.CreateInstance();
+            if (!CurrentUser.IsAdministrator && CurrentUser.RoleID != 3)
+            {
+                response.AddNotAllowedErr();
+            }
             var customer = await customerRepository.GetAsync(ww => ww.ID == id);
             if (customer is null)
             {
