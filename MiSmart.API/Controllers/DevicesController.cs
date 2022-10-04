@@ -347,12 +347,14 @@ namespace MiSmart.API.Controllers
             return response.ToIActionResult();
         }
         [HttpPatch("{id:int}")]
-        [HasPermission(typeof(AdminPermission), typeof(MaintainerPermission))]
         public async Task<IActionResult> PatchDevice([FromServices] DeviceRepository deviceRepository, [FromServices] DeviceModelRepository deviceModelRepository, [FromRoute] Int32 id, [FromBody] PatchingDeviceCommand command,
         [FromServices] ExecutionCompanyRepository executionCompanyRepository)
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
-
+            if (!CurrentUser.IsAdministrator && CurrentUser.RoleID != 3)
+            {
+                response.AddNotAllowedErr();
+            }
             var device = await deviceRepository.GetAsync(ww => ww.ID == id);
             if (device is null)
             {

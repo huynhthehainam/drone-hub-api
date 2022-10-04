@@ -25,11 +25,14 @@ namespace MiSmart.API.Controllers
         {
         }
         [HttpPost]
-        [HasPermission(typeof(AdminPermission), typeof(MaintainerPermission))]
+
         public async Task<IActionResult> Create([FromServices] CustomerRepository customerRepository, [FromBody] AddingCustomerCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
-
+            if (!CurrentUser.IsAdministrator && CurrentUser.RoleID != 3)
+            {
+                response.AddNotAllowedErr();
+            }
 
             var customer = await customerRepository.CreateAsync(new Customer { Name = command.Name, Address = command.Address });
             response.SetCreatedObject(customer);
