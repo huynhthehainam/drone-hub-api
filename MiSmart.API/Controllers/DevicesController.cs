@@ -205,14 +205,16 @@ namespace MiSmart.API.Controllers
             {
                 response.AddNotFoundErr("Device");
             }
-            if (command.TeamID.HasValue){
+            if (command.TeamID.HasValue)
+            {
                 var team = await teamRepository.GetAsync(ww => ww.ID == command.TeamID.GetValueOrDefault() && ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID);
                 if (team is null)
                 {
                     response.AddInvalidErr("TeamID");
                 }
                 device.Team = team;
-            }else device.TeamID = null;
+            }
+            else device.TeamID = null;
             await deviceRepository.UpdateAsync(device);
             response.SetUpdatedMessage();
 
@@ -345,7 +347,7 @@ namespace MiSmart.API.Controllers
             return response.ToIActionResult();
         }
         [HttpPatch("{id:int}")]
-        [HasPermission(typeof(AdminPermission))]
+        [HasPermission(typeof(AdminPermission), typeof(MaintainerPermission))]
         public async Task<IActionResult> PatchDevice([FromServices] DeviceRepository deviceRepository, [FromServices] DeviceModelRepository deviceModelRepository, [FromRoute] Int32 id, [FromBody] PatchingDeviceCommand command,
         [FromServices] ExecutionCompanyRepository executionCompanyRepository)
         {
