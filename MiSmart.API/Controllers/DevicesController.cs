@@ -525,7 +525,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
                         {
                             var battery = await batteryRepository.GetOrCreateBySerialNumberAsync(item.BatterySerialNumber);
                             stat.Battery = battery;
-                            stat.CycleCount = item.BatteryCycleCount;
+                            stat.CycleCount = item.BatteryCycleCount.GetValueOrDefault();
                         }
                         try
                         {
@@ -853,7 +853,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
             {
                 var battery = await batteryRepository.GetOrCreateBySerialNumberAsync(command.BatterySerialNumber);
                 stat.Battery = battery;
-                stat.CycleCount = command.BatteryCycleCount;
+                stat.CycleCount = command.BatteryCycleCount.GetValueOrDefault();
             }
             if (device.ExecutionCompanyID.HasValue)
             {
