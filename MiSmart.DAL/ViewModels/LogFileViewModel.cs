@@ -32,8 +32,10 @@ namespace MiSmart.DAL.ViewModels
             isAnalyzed = entity.isAnalyzed;
             Location = entity?.LogDetail?.Location;
             Errors = new List<String>();
-            foreach(var item in entity.LogReportResult?.LogResultDetails){
-                Errors.Add(item.PartError.Name);
+            if (entity.LogReportResult is not null){
+                foreach(var item in entity.LogReportResult.LogResultDetails){
+                    Errors.Add(item.PartError.Name);
+                }
             }
         }
     }
