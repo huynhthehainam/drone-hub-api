@@ -24,7 +24,7 @@ namespace MiSmart.API.ScheduledTasks
             {
                 using (DatabaseContext databaseContext = scope.ServiceProvider.GetRequiredService<DatabaseContext>())
                 {
-                    List<LogToken> tokens = databaseContext.LogTokens.Where(g => g.CreateTime > DateTime.UtcNow.AddHours(-24)).ToList();
+                    List<LogToken> tokens = databaseContext.LogTokens.Where(g => g.CreateTime < DateTime.UtcNow.AddHours(-24)).ToList();
                     databaseContext.LogTokens.RemoveRange(tokens);
                     databaseContext.SaveChanges();
                 }
