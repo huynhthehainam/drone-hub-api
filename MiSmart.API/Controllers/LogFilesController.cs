@@ -671,7 +671,7 @@ namespace MiSmart.API.Controllers
         public async Task<IActionResult> UploadResultImage([FromRoute] Guid id, [FromServices] LogReportRepository logReportRepository, [FromServices] MinioService minioService, [FromForm] AddingLogImageLinkCommand command)
         {
             ActionResponse actionResponse = actionResponseFactory.CreateInstance();
-            if (!CurrentUser.IsAdministrator && CurrentUser.RoleID != 3)
+            if (!CurrentUser.IsAdministrator && CurrentUser.RoleID != 4)
             {
                 actionResponse.AddNotAllowedErr();
             }
