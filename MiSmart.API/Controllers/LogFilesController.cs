@@ -247,23 +247,14 @@ namespace MiSmart.API.Controllers
             return response.ToIActionResult();
         }
         [HttpPatch("{id:Guid}/Report")]
-        public async Task<IActionResult> UpdateReport([FromRoute] Guid id, [FromBody] AddingLogReportCommand command, [FromServices] LogReportRepository logReportRepository, [FromServices] LogFileRepository logFileRepository)
+        public async Task<IActionResult> UpdateReport([FromRoute] Guid id, [FromBody] AddingLogReportCommand command, [FromServices] LogReportRepository logReportRepository)
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
             if (!CurrentUser.IsAdministrator && CurrentUser.RoleID != 3)
             {
                 response.AddNotAllowedErr();
             }
-            var logFile = await logFileRepository.GetAsync(ww => ww.ID == id);
-            if (logFile is null)
-            {
-                response.AddNotFoundErr("LogFile");
-            }
-            if (logFile.Status != LogStatus.Normal)
-            {
-                response.AddInvalidErr("LogStatus");
-            }
-            var logReport = await logReportRepository.GetAsync(ww => ww.LogFileID == logFile.ID);
+            var logReport = await logReportRepository.GetAsync(ww => ww.LogFileID == id);
             if (logReport is null)
             {
                 response.AddNotFoundErr("LogReport");
@@ -296,7 +287,7 @@ namespace MiSmart.API.Controllers
             {
                 response.AddNotFoundErr("LogFile");
             }
-            if (logFile.Status == LogStatus.Approved)
+            if (logFile.Status != LogStatus.Warning && logFile.Status != LogStatus.SecondWarning)
             {
                 response.AddInvalidErr("LogStatus");
             }
@@ -356,22 +347,12 @@ namespace MiSmart.API.Controllers
         [HttpPatch("{id:Guid}/Result")]
         public async Task<IActionResult> UpdateReportResult([FromRoute] Guid id, [FromBody] AddingLogResultCommand command,
         [FromServices] LogReportResultRepository logReportResultRepository, [FromServices] MinioService minioService,
-        [FromServices] LogResultDetailRepository logResultDetailRepository, [FromServices] ExecutionCompanyRepository executionCompanyRepository,
-        [FromServices] LogFileRepository logFileRepository)
+        [FromServices] LogResultDetailRepository logResultDetailRepository, [FromServices] ExecutionCompanyRepository executionCompanyRepository)
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
             if (!CurrentUser.IsAdministrator && CurrentUser.RoleID != 4)
             {
                 response.AddNotAllowedErr();
-            }
-            var logFile = await logFileRepository.GetAsync(ww => ww.ID == id);
-            if (logFile is null)
-            {
-                response.AddNotFoundErr("LogFile");
-            }
-            if (logFile.Status == LogStatus.Approved)
-            {
-                response.AddInvalidErr("LogStatus");
             }
             var logResult = await logReportResultRepository.GetAsync(ww => ww.LogFileID == id);
             if (logResult is null)
@@ -491,7 +472,7 @@ namespace MiSmart.API.Controllers
             {
                 response.AddNotFoundErr("LogFile");
             }
-            if (logFile.Status == LogStatus.Approved)
+            if (logFile.Status != LogStatus.Warning && logFile.Status != LogStatus.SecondWarning)
             {
                 response.AddInvalidErr("LogStatus");
             }
@@ -838,6 +819,10 @@ namespace MiSmart.API.Controllers
             {
                 response.AddNotFoundErr("LogFile");
             }
+            if (logFile.Status != LogStatus.SecondWarning)
+            {
+                response.AddInvalidErr("LogStatus");
+            }
             var report = new SecondLogReport
             {
                 LogFileID = token.LogFileID,
@@ -915,7 +900,7 @@ namespace MiSmart.API.Controllers
         public async Task<IActionResult> GetSecondReport([FromRoute] Guid id, [FromServices] SecondLogReportRepository secondLogReportRepository,
         [FromServices] LogTokenRepository logTokenRepository){
             ActionResponse actionResponse = actionResponseFactory.CreateInstance();
-            if (!CurrentUser.IsAdministrator && CurrentUser.RoleID != 3)
+            if (!CurrentUser.IsAdministrator && CurrentUser.RoleID != 3 && CurrentUser.RoleID != 4)
             {
                 actionResponse.AddNotAllowedErr();
             }
