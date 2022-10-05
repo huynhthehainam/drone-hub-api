@@ -34,7 +34,7 @@ namespace MiSmart.API.Controllers
 
         [HttpGet]
         public async Task<IActionResult> GetList([FromQuery] PageCommand pageCommand, [FromQuery] Int32? deviceID, [FromServices] LogFileRepository logFileRepository,
-        [FromQuery] Boolean? isStable,
+        [FromQuery] Boolean? isUnstable,
         [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, [FromQuery] String relation = "Maintainer")
         {
             ActionResponse actionResponse = actionResponseFactory.CreateInstance();
@@ -47,7 +47,7 @@ namespace MiSmart.API.Controllers
                 }
                     query = ww => (deviceID.HasValue ? (ww.DeviceID == deviceID.Value) : true)
                                 && (ww.FileBytes.Length > 500000)
-                                && (isStable == false ? (ww.DroneStatus != DroneStatus.Stable) : true);
+                                && (isUnstable == true ? (ww.DroneStatus != DroneStatus.Stable) : true);
             } 
             else if (relation == "Administrator") 
             {
@@ -57,7 +57,7 @@ namespace MiSmart.API.Controllers
                 }
                 query = ww => (deviceID.HasValue ? (ww.DeviceID == deviceID.Value) : true)
                                 && (ww.FileBytes.Length > 500000)
-                                && (isStable == false ? (ww.DroneStatus != DroneStatus.Stable) : true)
+                                && (isUnstable == true ? (ww.DroneStatus != DroneStatus.Stable) : true)
                                 && (ww.Status == LogStatus.Completed);
             } 
             else if (relation == "LogAnalyst")
@@ -67,7 +67,7 @@ namespace MiSmart.API.Controllers
                 }
                 query = ww => ((deviceID.HasValue ? (ww.DeviceID == deviceID.Value) : true)
                                 && (ww.FileBytes.Length > 500000)
-                                && (isStable == false ? (ww.DroneStatus != DroneStatus.Stable) : true)
+                                && (isUnstable == true ? (ww.DroneStatus != DroneStatus.Stable) : true)
                                 && (ww.Status == LogStatus.Warning || ww.Status == LogStatus.SecondWarning || ww.Status == LogStatus.Completed));
             }
 
