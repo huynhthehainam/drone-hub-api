@@ -398,7 +398,7 @@ namespace MiSmart.API.Controllers
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
             TargetEmailSettings settings = options.Value;
-            if (CurrentUser.RoleID != 3)
+            if (!CurrentUser.IsAdministrator)
             {
                 response.AddNotAllowedErr();
             }
