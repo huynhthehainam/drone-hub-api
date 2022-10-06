@@ -23,6 +23,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
 using MiSmart.API.Settings;
 using static MiSmart.API.Settings.TargetEmailSettings;
+using System.Text;
 
 namespace MiSmart.API.Controllers
 {
@@ -303,6 +304,7 @@ namespace MiSmart.API.Controllers
                 Suggest = command.Suggest,
                 Conclusion = command.Conclusion,
                 ResponsibleCompany = command.ResponsibleCompany,
+                AnalystName = CurrentUser.Email
             };
             if (command.ResponsibleCompany == ResponsibleCompany.MiSmart)
             {
@@ -384,6 +386,7 @@ namespace MiSmart.API.Controllers
             }
             logResult.DetailedAnalysis = command.DetailedAnalysis;
             logResult.AnalystUUID = CurrentUser.UUID;
+            logResult.AnalystName = CurrentUser.Email;
             logResult.Suggest = command.Suggest;
             logResult.Conclusion = command.Conclusion;
             logResult.ImageUrls = new List<String> { };
@@ -408,6 +411,7 @@ namespace MiSmart.API.Controllers
                 response.AddNotFoundErr("LogResult");
             }
             logResult.ApproverUUID = CurrentUser.UUID;
+            logResult.ApproverName = CurrentUser.Email;
             var logFile = await logFileRepository.GetAsync(ww => ww.ID == id);
 
             foreach (UserEmail item in settings.LogReport)
@@ -491,6 +495,7 @@ namespace MiSmart.API.Controllers
                 LogFileID = token.LogFileID,
                 Suggest = command.Suggest,
                 ResponsibleCompany = command.ResponsibleCompany,
+                AnalystName = token.Username,
             };
             
             if (command.ResponsibleCompany == ResponsibleCompany.MiSmart)
@@ -739,7 +744,9 @@ namespace MiSmart.API.Controllers
             {
                 response.AddNotFoundErr("LogResult");
             }
-            logResult.ApproverUUID = CurrentUser.UUID;
+            logResult.ApproverUUID = token.UserUUID;
+            logResult.ApproverName = token.Username;
+
             var logFile = await logFileRepository.GetAsync(ww => ww.ID == token.LogFileID);
             foreach (UserEmail item in settings.LogReport)
             {
@@ -950,6 +957,112 @@ namespace MiSmart.API.Controllers
                 actionResponse.AddExpiredErr("Token");
             }
             actionResponse.SetData(new {name = resToken.Username});
+            return actionResponse.ToIActionResult();
+        }
+
+        [HttpGet("DownloadResultReport")]
+        [AllowAnonymous]
+        public async Task<IActionResult> DownloadResultReport([FromQuery] Guid id, [FromServices] LogReportRepository logReportRepository,
+        [FromServices] SecondLogReportRepository secondLogReportRepository, [FromServices] LogReportResultRepository logReportResultRepository,
+        [FromServices] LogFileRepository logFileRepository, [FromServices] MyEmailService emailService){
+            ActionResponse actionResponse = actionResponseFactory.CreateInstance();
+            var name = "ResultWithOneReport";
+            var logReport = await logReportRepository.GetAsync(ww => ww.LogFileID == id);
+            if (logReport is null)
+                actionResponse.AddNotFoundErr("LogReport");
+            var secondLogReport = await secondLogReportRepository.GetAsync(ww => ww.LogFileID == id);
+            if (secondLogReport is not null)
+                name = "ResultWithTwoReport";
+            var logResult = await logReportResultRepository.GetAsync(ww => ww.LogFileID == id);
+            if (logResult is null)
+                actionResponse.AddNotFoundErr("ResultReport");
+            var html = emailService.getHTML(name);
+            StringBuilder htmlString = new StringBuilder(html);
+            TimeZoneInfo seaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+            if (name == "OneReport")
+            {
+                htmlString.Replace("id", "Chưa định danh");
+                htmlString.Replace("time", TimeZoneInfo.ConvertTimeFromUtc(logResult.UpdatedTime, seaTimeZone).ToString());
+                htmlString.Replace("name", logReport.Username);
+                htmlString.Replace("drone_id", logReport.LogFile.Device.Name);
+                htmlString.Replace("location", logReport.LogFile.LogDetail?.Location);
+                htmlString.Replace("accident_time", TimeZoneInfo.ConvertTimeFromUtc(logReport.AccidentTime, seaTimeZone).ToString());
+                htmlString.Replace("pilot", logReport.PilotName);
+                htmlString.Replace("partner_company", logReport.LogFile.Device.ExecutionCompany?.Name);
+                htmlString.Replace("pilot_description", logReport.PilotDescription);
+                htmlString.Replace("reporter_description", logReport.ReporterDescription);
+                var listError = logResult.LogResultDetails.ToArray();
+                var tableData = "";
+                for (int i = 0; i < listError.Count(); i++)
+                {
+                    var error = listError[i];
+                    var row = emailService.getHTML("ResultDetailRow");
+                    row = row.Replace("stt", (i + 1).ToString());
+                    row = row.Replace("name_error", error.PartError.Name);
+                    if (error.Status == StatusError.Good)
+                        row = row.Replace("status_good", "checked");
+                    else if (error.Status == StatusError.Bad)
+                        row = row.Replace("status_bad", "checked");
+                    else
+                        row = row.Replace("status_follow", "checked");
+                    row = row.Replace("error_detail", error.PartError.Name);
+                    row = row.Replace("measure", error.Resolve);
+                    tableData += row;
+                }
+                htmlString.Replace("responsible_company", logResult.ResponsibleCompany.ToString());
+                htmlString.Replace("conclusion", logResult.Conclusion);
+                htmlString.Replace("detailed_analysis", logResult.DetailedAnalysis);
+                htmlString.Replace("result_suggestion", logResult.Suggest);
+                htmlString.Replace("analyst", logResult.AnalystName);
+                htmlString.Replace("approver", logResult.ApproverName);
+            }
+            else
+            {
+                htmlString.Replace("id", "Chưa định danh");
+                htmlString.Replace("time", TimeZoneInfo.ConvertTimeFromUtc(logResult.UpdatedTime, seaTimeZone).ToString());
+                htmlString.Replace("name_1", logReport.Username);
+                htmlString.Replace("drone_id_1", logReport.LogFile.Device.Name);
+                htmlString.Replace("location_1", logReport.LogFile.LogDetail?.Location);
+                htmlString.Replace("accident_time_1", TimeZoneInfo.ConvertTimeFromUtc(logReport.AccidentTime, seaTimeZone).ToString());
+                htmlString.Replace("pilot_1", logReport.PilotName);
+                htmlString.Replace("partner_company_1", logReport.LogFile.Device.ExecutionCompany?.Name);
+                htmlString.Replace("pilot_description_1", logReport.PilotDescription);
+                htmlString.Replace("reporter_description_1", logReport.ReporterDescription);
+                
+                htmlString.Replace("name_2", logReport.Username);
+                htmlString.Replace("drone_id_2", logReport.LogFile.Device.Name);
+                htmlString.Replace("location_2", logReport.LogFile.LogDetail?.Location);
+                htmlString.Replace("accident_time_2", TimeZoneInfo.ConvertTimeFromUtc(logReport.AccidentTime, seaTimeZone).ToString());
+                htmlString.Replace("pilot_2", logReport.PilotName);
+                htmlString.Replace("partner_company_2", logReport.LogFile.Device.ExecutionCompany?.Name);
+                htmlString.Replace("pilot_description_2", logReport.PilotDescription);
+                htmlString.Replace("reporter_description_2", logReport.ReporterDescription);
+                var listError = logResult.LogResultDetails.ToArray();
+                var tableData = "";
+                for (int i = 0; i < listError.Count(); i++)
+                {
+                    var error = listError[i];
+                    var row = emailService.getHTML("ResultDetailRow");
+                    row = row.Replace("stt", (i + 1).ToString());
+                    row = row.Replace("name_error", error.PartError.Name);
+                    if (error.Status == StatusError.Good)
+                        row = row.Replace("status_good", "checked");
+                    else if (error.Status == StatusError.Bad)
+                        row = row.Replace("status_bad", "checked");
+                    else
+                        row = row.Replace("status_follow", "checked");
+                    row = row.Replace("error_detail", error.PartError.Name);
+                    row = row.Replace("measure", error.Resolve);
+                    tableData += row;
+                }
+                htmlString.Replace("responsible_company", logResult.ResponsibleCompany.ToString());
+                htmlString.Replace("conclusion", logResult.Conclusion);
+                htmlString.Replace("detailed_analysis", logResult.DetailedAnalysis);
+                htmlString.Replace("result_suggestion", logResult.Suggest);
+                htmlString.Replace("analyst", logResult.AnalystName);
+                htmlString.Replace("approver", logResult.ApproverName);
+            }
+            actionResponse.Data = htmlString;
             return actionResponse.ToIActionResult();
         }
     }

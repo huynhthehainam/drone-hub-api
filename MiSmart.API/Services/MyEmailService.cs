@@ -25,7 +25,7 @@ public class MyEmailService : EmailService
         this.frontEndSettings = options3.Value;
     }
 
-    private String getHTML(String name)
+    public String getHTML(String name)
     {
         var path = $"{htmlFolderPath}/{name}.html";
         if (File.Exists(path))
