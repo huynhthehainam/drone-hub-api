@@ -272,7 +272,7 @@ namespace MiSmart.API.Controllers
                 && (executionCompanyUser.Type == ExecutionCompanyUserType.Member ? (teamIDs.Contains(ww.TeamID.GetValueOrDefault())) : true)
                  && (!String.IsNullOrWhiteSpace(search) ? ww.Name.ToLower().Contains(search.ToLower()) : true);
             }
-            var listResponse = await deviceRepository.GetListResponseViewAsync<SmallDeviceViewModel>(pageCommand, query);
+            var listResponse = await deviceRepository.GetListResponseViewAsync<SmallDeviceViewModel>(pageCommand, query, ww => ww.Status);
             foreach (var item in listResponse.Data)
             {
                 if (item.LastBatteryGroupIDs is not null)
