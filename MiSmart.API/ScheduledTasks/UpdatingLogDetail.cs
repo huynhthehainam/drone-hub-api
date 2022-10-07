@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,32 +16,45 @@ using MiSmart.Infrastructure.ScheduledTasks;
 namespace MiSmart.API.ScheduledTasks
 {
     public class DroneLogAPIResponse
-    {        
+    {
         public class DroneLogAPIData
         {
-            public class Location{
-                public Double Lat {get; set; }
-                public Double Lng {get; set; }
+            public class Location
+            {
+                public Double Lat { get; set; }
+                public Double Lng { get; set; }
             }
-            public class XYZ {
-                public Double X {get; set; }
-                public Double Y {get; set; }
-                public Double Z {get; set; }
+            public class XYZ
+            {
+                public Double X { get; set; }
+                public Double Y { get; set; }
+                public Double Z { get; set; }
             }
-            public class EdgeData {
-                public Double Roll {get; set; }
-                public Double Pitch {get; set; }
+            public class EdgeData
+            {
+                public Double Roll { get; set; }
+                public Double Pitch { get; set; }
             }
-            public Double flight_time {get; set; }
-            public Double fuel_avg_per {get; set; }
-            public XYZ max_accel {get; set; }
-            public EdgeData max_angle {get; set; }
-            public Double max_battery_deviation {get; set; }
-            public Location max_cordinate {get; set;}
-            public Double max_height {get; set; }
-            public Double max_speed {get; set; }
-            public XYZ max_vibe {get; set; }
-            public Double pin_min_per {get; set; }
+            [JsonPropertyName("flight_time")]
+            public Double FlightTime { get; set; }
+            [JsonPropertyName("fuel_avg_per")]
+            public Double FuelAvgPercent { get; set; }
+            [JsonPropertyName("max_accel")]
+            public XYZ MaxAccel { get; set; }
+            [JsonPropertyName("max_angle")]
+            public EdgeData MaxAngle { get; set; }
+            [JsonPropertyName("max_battery_deviation")]
+            public Double MaxBatteryDeviation { get; set; }
+            [JsonPropertyName("max_cordinate")]
+            public Location MaxCoordinate { get; set; }
+            [JsonPropertyName("max_height")]
+            public Double MaxHeight { get; set; }
+            [JsonPropertyName("max_speed")]
+            public Double MaxSpeed { get; set; }
+            [JsonPropertyName("max_vibe")]
+            public XYZ MaxVibe { get; set; }
+            [JsonPropertyName("pin_min_per")]
+            public Double BatteryMinPercent { get; set; }
         }
         public DroneLogAPIData Result { get; set; }
     }
@@ -65,39 +79,43 @@ namespace MiSmart.API.ScheduledTasks
                         var detail = databaseContext.LogDetails.Where(ww => ww.LogFileID == log.ID);
                         var formData = new MultipartFormDataContent();
                         formData.Add(new StreamContent(new MemoryStream(log.FileBytes)), "file", log.FileName);
-                        try{
-                        var response = client.PostAsync("http://node1.dronelog.mismart.ai/analysis", formData).GetAwaiter().GetResult();
-                        if (response.IsSuccessStatusCode)
+                        try
                         {
-                            string responseString = response.Content.ReadAsStringAsync().Result;
-                            DroneLogAPIResponse droneLogAPIResponse = JsonSerializer.Deserialize<DroneLogAPIResponse>(responseString, JsonSerializerDefaultOptions.CamelOptions);
-                            if (droneLogAPIResponse.Result is not null){
-                                var model = new LogDetail(){
-                                    AccelX = droneLogAPIResponse.Result.max_accel.X,
-                                    AccelY = droneLogAPIResponse.Result.max_accel.Y,
-                                    AccelZ = droneLogAPIResponse.Result.max_accel.Z,
-                                    PercentFuel = droneLogAPIResponse.Result.fuel_avg_per,
-                                    BatteryCellDeviation = droneLogAPIResponse.Result.max_battery_deviation,
-                                    VibeX = droneLogAPIResponse.Result.max_vibe.X,
-                                    VibeY = droneLogAPIResponse.Result.max_vibe.Y,
-                                    VibeZ = droneLogAPIResponse.Result.max_vibe.Z,
-                                    FlySpeed = droneLogAPIResponse.Result.max_speed,
-                                    Height = droneLogAPIResponse.Result.max_height,
-                                    Roll = droneLogAPIResponse.Result.max_angle.Roll,
-                                    Pitch =droneLogAPIResponse.Result.max_angle.Pitch,
-                                    FlightDuration = droneLogAPIResponse.Result.flight_time,
-                                    PercentBattery = droneLogAPIResponse.Result.pin_min_per,
-                                    LogFileID = log.ID,
-                                    Latitude = droneLogAPIResponse.Result.max_cordinate.Lat,
-                                    Longitude = droneLogAPIResponse.Result.max_cordinate.Lng,
-                                    IsBingLocation = false,
-                                };
-                                databaseContext.LogDetails.Add(model);
+                            var response = client.PostAsync("http://node1.dronelog.mismart.ai/analysis", formData).GetAwaiter().GetResult();
+                            if (response.IsSuccessStatusCode)
+                            {
+                                string responseString = response.Content.ReadAsStringAsync().Result;
+                                DroneLogAPIResponse droneLogAPIResponse = JsonSerializer.Deserialize<DroneLogAPIResponse>(responseString, JsonSerializerDefaultOptions.CamelOptions);
+                                if (droneLogAPIResponse.Result is not null)
+                                {
+                                    var model = new LogDetail()
+                                    {
+                                        AccelX = droneLogAPIResponse.Result.MaxAccel.X,
+                                        AccelY = droneLogAPIResponse.Result.MaxAccel.Y,
+                                        AccelZ = droneLogAPIResponse.Result.MaxAccel.Z,
+                                        PercentFuel = droneLogAPIResponse.Result.FuelAvgPercent,
+                                        BatteryCellDeviation = droneLogAPIResponse.Result.MaxBatteryDeviation,
+                                        VibeX = droneLogAPIResponse.Result.MaxVibe.X,
+                                        VibeY = droneLogAPIResponse.Result.MaxVibe.Y,
+                                        VibeZ = droneLogAPIResponse.Result.MaxVibe.Z,
+                                        FlySpeed = droneLogAPIResponse.Result.MaxSpeed,
+                                        Height = droneLogAPIResponse.Result.MaxHeight,
+                                        Roll = droneLogAPIResponse.Result.MaxAngle.Roll,
+                                        Pitch = droneLogAPIResponse.Result.MaxAngle.Pitch,
+                                        FlightDuration = droneLogAPIResponse.Result.FlightTime,
+                                        PercentBattery = droneLogAPIResponse.Result.BatteryMinPercent,
+                                        LogFileID = log.ID,
+                                        Latitude = droneLogAPIResponse.Result.MaxCoordinate.Lat,
+                                        Longitude = droneLogAPIResponse.Result.MaxCoordinate.Lng,
+                                        IsBingLocation = false,
+                                    };
+                                    databaseContext.LogDetails.Add(model);
+                                }
                             }
                         }
-                        }catch (AggregateException)
+                        catch (AggregateException)
                         {
-                            
+
                         }
                         log.isAnalyzed = true;
                         databaseContext.Update(log);

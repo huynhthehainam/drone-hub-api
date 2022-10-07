@@ -202,7 +202,7 @@ namespace MiSmart.API
 
             #region AddingCors
 
-            var customCorsUrls = new List<String>() { "http://localhost:4200", "http://localhost:3000", "https://dronehub.mismart.ai" };
+            var customCorsUrls = new List<String>() { "http://localhost:4200", "http://localhost:3000", "https://dronehub.mismart.ai", "http://172.25.254.0:10103" };
             services.AddCors(options =>
             {
                 options.AddPolicy(name: Keys.AllowedOrigin, builder =>
@@ -335,9 +335,9 @@ namespace MiSmart.API
             var env = scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
 
             TargetEmailSettings targetEmailSettings = scope.ServiceProvider.GetRequiredService<IOptions<TargetEmailSettings>>().Value;
-            foreach (var email in targetEmailSettings.LowBattery)
+            foreach (var email in targetEmailSettings.LogReport)
             {
-                Console.WriteLine(email);
+                Console.WriteLine(email.Email);
             }
             if (!env.IsDevelopment())
             {
