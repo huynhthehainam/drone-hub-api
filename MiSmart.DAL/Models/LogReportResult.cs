@@ -45,5 +45,8 @@ namespace MiSmart.DAL.Models
             set => logResultDetails = value;
         }
         public ResponsibleCompany ResponsibleCompany {get; set; }
+        public String ApproverName { get; set; }
+        public String AnalystName { get; set; }
+        public DateTime UpdatedTime { get; set; } = DateTime.UtcNow;
     }
 }

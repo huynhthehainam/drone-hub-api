@@ -979,9 +979,9 @@ namespace MiSmart.API.Controllers
             var html = emailService.getHTML(name);
             StringBuilder htmlString = new StringBuilder(html);
             TimeZoneInfo seaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
-            if (name == "OneReport")
+            if (name == "ResultWithOneReport")
             {
-                htmlString.Replace("id", "Chưa định danh");
+                htmlString.Replace("flight_id", "Chưa định danh");
                 htmlString.Replace("time", TimeZoneInfo.ConvertTimeFromUtc(logResult.UpdatedTime, seaTimeZone).ToString());
                 htmlString.Replace("name", logReport.Username);
                 htmlString.Replace("drone_id", logReport.LogFile.Device.Name);
@@ -991,6 +991,13 @@ namespace MiSmart.API.Controllers
                 htmlString.Replace("partner_company", logReport.LogFile.Device.ExecutionCompany?.Name);
                 htmlString.Replace("pilot_description", logReport.PilotDescription);
                 htmlString.Replace("reporter_description", logReport.ReporterDescription);
+                var listImageReport = "";
+                foreach(var ImageUrl in logReport.ImageUrls){
+                    var item = emailService.getHTML("ImageItem");
+                    item = item.Replace("img_src", ImageUrl);
+                    listImageReport += item;
+                }
+                htmlString.Replace("list_image_report", listImageReport);
                 var listError = logResult.LogResultDetails.ToArray();
                 var tableData = "";
                 for (int i = 0; i < listError.Count(); i++)
@@ -998,6 +1005,7 @@ namespace MiSmart.API.Controllers
                     var error = listError[i];
                     var row = emailService.getHTML("ResultDetailRow");
                     row = row.Replace("stt", (i + 1).ToString());
+                    row = row.Replace("group", error.PartError.Group);
                     row = row.Replace("name_error", error.PartError.Name);
                     if (error.Status == StatusError.Good)
                         row = row.Replace("status_good", "checked");
@@ -1005,16 +1013,24 @@ namespace MiSmart.API.Controllers
                         row = row.Replace("status_bad", "checked");
                     else
                         row = row.Replace("status_follow", "checked");
-                    row = row.Replace("error_detail", error.PartError.Name);
+                    row = row.Replace("error_detail", error.Detail);
                     row = row.Replace("measure", error.Resolve);
                     tableData += row;
                 }
+                htmlString.Replace("table_data_indicator", tableData);
                 htmlString.Replace("responsible_company", logResult.ResponsibleCompany.ToString());
                 htmlString.Replace("conclusion", logResult.Conclusion);
                 htmlString.Replace("detailed_analysis", logResult.DetailedAnalysis);
                 htmlString.Replace("result_suggestion", logResult.Suggest);
                 htmlString.Replace("analyst", logResult.AnalystName);
                 htmlString.Replace("approver", logResult.ApproverName);
+                var listImageResult = "";
+                foreach(var ImageUrl in logResult.ImageUrls){
+                    var item = emailService.getHTML("ImageItem");
+                    item = item.Replace("img_src", ImageUrl);
+                    listImageResult += item;
+                }
+                htmlString.Replace("list_image_result", listImageResult);
             }
             else
             {
@@ -1055,6 +1071,7 @@ namespace MiSmart.API.Controllers
                     row = row.Replace("measure", error.Resolve);
                     tableData += row;
                 }
+                htmlString.Replace("table_data_indicator", tableData);
                 htmlString.Replace("responsible_company", logResult.ResponsibleCompany.ToString());
                 htmlString.Replace("conclusion", logResult.Conclusion);
                 htmlString.Replace("detailed_analysis", logResult.DetailedAnalysis);
@@ -1062,7 +1079,10 @@ namespace MiSmart.API.Controllers
                 htmlString.Replace("analyst", logResult.AnalystName);
                 htmlString.Replace("approver", logResult.ApproverName);
             }
-            actionResponse.Data = htmlString;
+            var resultData = htmlString.ToString().Replace("\n",string.Empty);
+            resultData = resultData.Replace("\r",string.Empty);
+            resultData = resultData.Replace(@"\", string.Empty);
+            actionResponse.SetData(resultData);
             return actionResponse.ToIActionResult();
         }
     }

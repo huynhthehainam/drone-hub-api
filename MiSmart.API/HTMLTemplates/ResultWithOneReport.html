@@ -12,7 +12,7 @@
      
        
         <div style="margin-left:30%">
-            <div style="color:#64786A">Mã chuyến bay: <span style="color:black">id</span></div>
+            <div style="color:#64786A">Mã chuyến bay: <span style="color:black">flight_id</span></div>
             <div style="color:#64786A">Cập nhật lúc: <span style="color:black">time</span></div>
         </div>
         
@@ -31,9 +31,12 @@
                 <div style="font-size: 16px;font-weight: 700;margin-top: 12px;color:#64786A">
                     Hình ảnh từ hiện trường
                 </div>
+                <div style="display: grid; grid-template-columns: 200px 200px 200px; grid-gap: 20px;">
+                    list_image_report
+                </div>
             </div>
         </div>
-        <div style="margin-left: 50%;">
+        <div style="margin-left: 70px;">
             <div style="font-size: 16px;font-weight: 700;color:#64786A">Mô tả từ phi công</div>
             <div style="font-size: 16px;">pilot_description</div>
     
@@ -85,6 +88,9 @@
     <div style="font-size: 16px;font-weight: 700;margin-top: 1rem;color:#64786A">
         Hình ảnh liên quan đến lỗi
     </div>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); grid-gap: 15px;">
+        list_image_result
+    </div>
     <div style="display:flex;margin-top: 2rem;">
         <div>
             <div style="font-size: 16px;font-weight: 700;color:#64786A">
@@ -96,11 +102,11 @@
         </div>
         <div style="margin-left:45%;">
           <div style="font-size: 16px;font-weight: 700;color:#64786A">
-            Phân tích bởi <span>analyst</span>             
+            Phân tích bởi <span style="color:black">analyst</span>             
           </div>
           <div>
           <div style="font-size: 16px;font-weight: 700;color:#64786A; margin-top: 1rem;">
-            Xét duyệt bởi <span>approver</span>       
+            Xét duyệt bởi <span style="color:black">approver</span>       
           </div>
         </div>
     </div>
