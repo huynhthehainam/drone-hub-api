@@ -25,7 +25,7 @@ public class MyEmailService : EmailService
         this.frontEndSettings = options3.Value;
     }
 
-    public String getHTML(String name)
+    public String GetHTML(String name)
     {
         var path = $"{htmlFolderPath}/{name}.html";
         if (File.Exists(path))
@@ -37,7 +37,7 @@ public class MyEmailService : EmailService
     }
     private String generateLowBatteryReportHTML(String problemStatus, DateTime flightTime, String pilotName, String teamName, String pilotPhone, String pilotEmail, String deviceName, String customerName, String locationName, Double batteryPercent, String reportLink, String documentLink)
     {
-        var html = getHTML("LowBatteryReport");
+        var html = GetHTML("LowBatteryReport");
         html = html.Replace("problem_status_indicator", problemStatus);
         html = html.Replace("flight_time_indicator", flightTime.ToString());
         html = html.Replace("pilot_name_indicator", pilotName);
@@ -90,7 +90,7 @@ public class MyEmailService : EmailService
         for (int i = 0; i < listStat.Count; i++)
         {
             var flightStat = listStat[i];
-            var row = getHTML("LowBatteryRow");
+            var row = GetHTML("LowBatteryRow");
             var localFlightTime = TimeZoneInfo.ConvertTimeFromUtc(flightStat.FlightTime, seaTimeZone);
             row = row.Replace("index", (i + 1).ToString());
             row = row.Replace("time", localFlightTime.ToString());
@@ -102,7 +102,7 @@ public class MyEmailService : EmailService
             tableData += row;
         }
 
-        var html = getHTML("LowBatteryDailyReport");
+        var html = GetHTML("LowBatteryDailyReport");
         html = html.Replace("table_data_indicator ", tableData);
 
         html = html.Replace("DDMMYYYY", localNow.ToString("yyyy-MM-dd"));
