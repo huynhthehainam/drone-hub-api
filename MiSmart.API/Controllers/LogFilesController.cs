@@ -63,7 +63,7 @@ namespace MiSmart.API.Controllers
                 query = ww => (deviceID.HasValue ? (ww.DeviceID == deviceID.Value) : true)
                                 && (ww.FileBytes.Length > 500000)
                                 && (isUnstable == true ? (ww.DroneStatus != DroneStatus.Stable) : true)
-                                && (ww.Status == LogStatus.Completed);
+                                && (ww.Status == LogStatus.Completed || ww.Status == LogStatus.Approved);
             } 
             else if (relation == "LogAnalyst")
             {
@@ -73,7 +73,7 @@ namespace MiSmart.API.Controllers
                 query = ww => ((deviceID.HasValue ? (ww.DeviceID == deviceID.Value) : true)
                                 && (ww.FileBytes.Length > 500000)
                                 && (isUnstable == true ? (ww.DroneStatus != DroneStatus.Stable) : true)
-                                && (ww.Status == LogStatus.Warning || ww.Status == LogStatus.SecondWarning || ww.Status == LogStatus.Completed)
+                                && (ww.Status == LogStatus.Warning || ww.Status == LogStatus.SecondWarning || ww.Status == LogStatus.Completed || ww.Status == LogStatus.Approved)
                                 && (PartErrorID.HasValue ? ww.LogReportResult.LogResultDetails.Any(ww => ww.PartErrorID == PartErrorID.Value) : true)
                                 && (from.HasValue ? (ww.LoggingTime >= from.Value) : true)
                                 && (to.HasValue ? (ww.LoggingTime <= to.Value) : true));
