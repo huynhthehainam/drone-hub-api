@@ -991,9 +991,9 @@ namespace MiSmart.API.Controllers
             var html = emailService.GetHTML(name);
             StringBuilder htmlString = new StringBuilder(html);
             TimeZoneInfo seaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
-            if (name == "OneReport")
+            if (name == "ResultWithOneReport")
             {
-                htmlString.Replace("id", "Chưa định danh");
+                htmlString.Replace("flight_id", "Chưa định danh");
                 htmlString.Replace("time", TimeZoneInfo.ConvertTimeFromUtc(logResult.UpdatedTime, seaTimeZone).ToString());
                 htmlString.Replace("name", logReport.Username);
                 htmlString.Replace("drone_id", logReport.LogFile.Device.Name);
@@ -1003,6 +1003,13 @@ namespace MiSmart.API.Controllers
                 htmlString.Replace("partner_company", logReport.LogFile.Device.ExecutionCompany?.Name);
                 htmlString.Replace("pilot_description", logReport.PilotDescription);
                 htmlString.Replace("reporter_description", logReport.ReporterDescription);
+                var listImageReport = "";
+                foreach(var ImageUrl in logReport.ImageUrls){
+                    var item = emailService.GetHTML("ImageItem");
+                    item = item.Replace("img_src", ImageUrl);
+                    listImageReport += item;
+                }
+                htmlString.Replace("list_image_report", listImageReport);
                 var listError = logResult.LogResultDetails.ToArray();
                 var tableData = "";
                 for (int i = 0; i < listError.Count(); i++)
@@ -1010,6 +1017,7 @@ namespace MiSmart.API.Controllers
                     var error = listError[i];
                     var row = emailService.GetHTML("ResultDetailRow");
                     row = row.Replace("stt", (i + 1).ToString());
+                    row = row.Replace("group", error.PartError.Group);
                     row = row.Replace("name_error", error.PartError.Name);
                     if (error.Status == StatusError.Good)
                         row = row.Replace("status_good", "checked");
@@ -1017,20 +1025,28 @@ namespace MiSmart.API.Controllers
                         row = row.Replace("status_bad", "checked");
                     else
                         row = row.Replace("status_follow", "checked");
-                    row = row.Replace("error_detail", error.PartError.Name);
+                    row = row.Replace("error_detail", error.Detail);
                     row = row.Replace("measure", error.Resolve);
                     tableData += row;
                 }
+                htmlString.Replace("table_data_indicator", tableData);
                 htmlString.Replace("responsible_company", logResult.ResponsibleCompany.ToString());
                 htmlString.Replace("conclusion", logResult.Conclusion);
                 htmlString.Replace("detailed_analysis", logResult.DetailedAnalysis);
                 htmlString.Replace("result_suggestion", logResult.Suggest);
                 htmlString.Replace("analyst", logResult.AnalystName);
                 htmlString.Replace("approver", logResult.ApproverName);
+                var listImageResult = "";
+                foreach(var ImageUrl in logResult.ImageUrls){
+                    var item = emailService.GetHTML("ImageItem");
+                    item = item.Replace("img_src", ImageUrl);
+                    listImageResult += item;
+                }
+                htmlString.Replace("list_image_result", listImageResult);
             }
             else
             {
-                htmlString.Replace("id", "Chưa định danh");
+                htmlString.Replace("flight_id", "Chưa định danh");
                 htmlString.Replace("time", TimeZoneInfo.ConvertTimeFromUtc(logResult.UpdatedTime, seaTimeZone).ToString());
                 htmlString.Replace("name_1", logReport.Username);
                 htmlString.Replace("drone_id_1", logReport.LogFile.Device.Name);
@@ -1040,15 +1056,32 @@ namespace MiSmart.API.Controllers
                 htmlString.Replace("partner_company_1", logReport.LogFile.Device.ExecutionCompany?.Name);
                 htmlString.Replace("pilot_description_1", logReport.PilotDescription);
                 htmlString.Replace("reporter_description_1", logReport.ReporterDescription);
+                
+                var listImageReport1 = "";
+                foreach(var ImageUrl in logReport.ImageUrls){
+                    var item = emailService.GetHTML("ImageItem");
+                    item = item.Replace("img_src", ImageUrl);
+                    listImageReport1 += item;
+                }
+                htmlString.Replace("list_image_report_1", listImageReport1);
+                
+                htmlString.Replace("name_2", secondLogReport.Username);
+                htmlString.Replace("drone_id_2", secondLogReport.LogFile.Device.Name);
+                htmlString.Replace("location_2", secondLogReport.LogFile.LogDetail?.Location);
+                htmlString.Replace("accident_time_2", TimeZoneInfo.ConvertTimeFromUtc(secondLogReport.AccidentTime, seaTimeZone).ToString());
+                htmlString.Replace("pilot_2", secondLogReport.PilotName);
+                htmlString.Replace("partner_company_2", secondLogReport.LogFile.Device.ExecutionCompany?.Name);
+                htmlString.Replace("pilot_description_2", secondLogReport.PilotDescription);
+                htmlString.Replace("reporter_description_2", secondLogReport.ReporterDescription);
 
-                htmlString.Replace("name_2", logReport.Username);
-                htmlString.Replace("drone_id_2", logReport.LogFile.Device.Name);
-                htmlString.Replace("location_2", logReport.LogFile.LogDetail?.Location);
-                htmlString.Replace("accident_time_2", TimeZoneInfo.ConvertTimeFromUtc(logReport.AccidentTime, seaTimeZone).ToString());
-                htmlString.Replace("pilot_2", logReport.PilotName);
-                htmlString.Replace("partner_company_2", logReport.LogFile.Device.ExecutionCompany?.Name);
-                htmlString.Replace("pilot_description_2", logReport.PilotDescription);
-                htmlString.Replace("reporter_description_2", logReport.ReporterDescription);
+                var listImageReport2 = "";
+                foreach(var ImageUrl in secondLogReport.ImageUrls){
+                    var item = emailService.GetHTML("ImageItem");
+                    item = item.Replace("img_src", ImageUrl);
+                    listImageReport2 += item;
+                }
+                htmlString.Replace("list_image_report_2", listImageReport2);
+
                 var listError = logResult.LogResultDetails.ToArray();
                 var tableData = "";
                 for (int i = 0; i < listError.Count(); i++)
@@ -1067,6 +1100,7 @@ namespace MiSmart.API.Controllers
                     row = row.Replace("measure", error.Resolve);
                     tableData += row;
                 }
+                htmlString.Replace("table_data_indicator", tableData);
                 htmlString.Replace("responsible_company", logResult.ResponsibleCompany.ToString());
                 htmlString.Replace("conclusion", logResult.Conclusion);
                 htmlString.Replace("detailed_analysis", logResult.DetailedAnalysis);
