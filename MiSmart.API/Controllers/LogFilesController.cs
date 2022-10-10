@@ -35,8 +35,12 @@ namespace MiSmart.API.Controllers
 
         [HttpGet]
         public async Task<IActionResult> GetList([FromQuery] PageCommand pageCommand, [FromQuery] Int32? deviceID, [FromServices] LogFileRepository logFileRepository,
-        [FromQuery] Boolean? isUnstable,
-        [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, [FromQuery] String relation = "Maintainer")
+        [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, 
+        [FromQuery] Int32? PartErrorID, 
+        [FromQuery] DateTime? from,
+        [FromQuery] DateTime? to,
+        [FromQuery] Boolean isUnstable = false, 
+        [FromQuery] String relation = "Maintainer")
         {
             ActionResponse actionResponse = actionResponseFactory.CreateInstance();
             Expression<Func<LogFile, Boolean>> query = ww => false; 
@@ -69,7 +73,10 @@ namespace MiSmart.API.Controllers
                 query = ww => ((deviceID.HasValue ? (ww.DeviceID == deviceID.Value) : true)
                                 && (ww.FileBytes.Length > 500000)
                                 && (isUnstable == true ? (ww.DroneStatus != DroneStatus.Stable) : true)
-                                && (ww.Status == LogStatus.Warning || ww.Status == LogStatus.SecondWarning || ww.Status == LogStatus.Completed));
+                                && (ww.Status == LogStatus.Warning || ww.Status == LogStatus.SecondWarning || ww.Status == LogStatus.Completed)
+                                && (PartErrorID.HasValue ? ww.LogReportResult.LogResultDetails.Any(ww => ww.PartErrorID == PartErrorID.Value) : true)
+                                && (from.HasValue ? (ww.LoggingTime >= from.Value) : true)
+                                && (to.HasValue ? (ww.LoggingTime <= to.Value) : true));
             }
 
             var listResponse = await logFileRepository.GetListResponseViewAsync<LogFileViewModel>(pageCommand, query, ww => ww.LoggingTime, false);
