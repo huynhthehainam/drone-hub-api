@@ -25,6 +25,8 @@
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.3.1"/>
 		<PackageReference Include="MIConvexHull" Version="1.1.19.1019" />
 		<PackageReference Include="SSH.NET" Version="2020.0.2" />
+		<PackageReference Include="itext7" Version="7.2.3" />
+		<PackageReference Include="itext7.pdfhtml" Version="4.0.3" />
 	</ItemGroup>
 	<ItemGroup>
 		<Protobuf Include="Protos/auth.proto" GrpcServices="Client"/>
