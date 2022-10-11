@@ -93,10 +93,14 @@ namespace MiSmart.API.Controllers
             return actionResponse.ToIActionResult();
         }
         [HttpGet("{id:Guid}/File")]
-        [HasPermission(typeof(MaintainerPermission))]
+
         public async Task<IActionResult> GetFile([FromRoute] Guid id, [FromServices] LogFileRepository logFileRepository, [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository)
         {
             ActionResponse actionResponse = actionResponseFactory.CreateInstance();
+            if (CurrentUser.RoleID != 3 && CurrentUser.RoleID != 4)
+            {
+                actionResponse.AddNotAllowedErr();
+            }
             Expression<Func<LogFile, Boolean>> query = ww => (ww.ID == id);
             var logFile = await logFileRepository.GetAsync(query);
             if (logFile is null)
