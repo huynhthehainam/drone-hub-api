@@ -53,7 +53,10 @@ namespace MiSmart.API.Controllers
                 }
                 query = ww => (deviceID.HasValue ? (ww.DeviceID == deviceID.Value) : true)
                             && (ww.FileBytes.Length > 500000)
-                            && (isUnstable == true ? (ww.DroneStatus != DroneStatus.Stable) : true);
+                            && (isUnstable == true ? (ww.DroneStatus != DroneStatus.Stable) : true)
+                                && (PartErrorID.HasValue ? ww.LogReportResult.LogResultDetails.Any(ww => ww.PartErrorID == PartErrorID.Value) : true)
+                                && (from.HasValue ? (ww.LoggingTime >= from.Value) : true)
+                                && (to.HasValue ? (ww.LoggingTime <= to.Value) : true);
             }
             else if (relation == "Administrator")
             {
@@ -64,21 +67,24 @@ namespace MiSmart.API.Controllers
                 query = ww => (deviceID.HasValue ? (ww.DeviceID == deviceID.Value) : true)
                                 && (ww.FileBytes.Length > 500000)
                                 && (isUnstable == true ? (ww.DroneStatus != DroneStatus.Stable) : true)
-                                && (ww.Status == LogStatus.Completed || ww.Status == LogStatus.Approved);
-            } 
+                                && (ww.Status == LogStatus.Completed || ww.Status == LogStatus.Approved)
+                                            && (PartErrorID.HasValue ? ww.LogReportResult.LogResultDetails.Any(ww => ww.PartErrorID == PartErrorID.Value) : true)
+                                && (from.HasValue ? (ww.LoggingTime >= from.Value) : true)
+                                && (to.HasValue ? (ww.LoggingTime <= to.Value) : true);
+            }
             else if (relation == "LogAnalyst")
             {
                 if (CurrentUser.RoleID != 4)
                 {
                     actionResponse.AddNotAllowedErr();
                 }
-                query = ww => ((deviceID.HasValue ? (ww.DeviceID == deviceID.Value) : true)
+                query = ww => (deviceID.HasValue ? (ww.DeviceID == deviceID.Value) : true)
                                 && (ww.FileBytes.Length > 500000)
                                 && (isUnstable == true ? (ww.DroneStatus != DroneStatus.Stable) : true)
                                 && (ww.Status == LogStatus.Warning || ww.Status == LogStatus.SecondWarning || ww.Status == LogStatus.Completed || ww.Status == LogStatus.Approved)
                                 && (PartErrorID.HasValue ? ww.LogReportResult.LogResultDetails.Any(ww => ww.PartErrorID == PartErrorID.Value) : true)
                                 && (from.HasValue ? (ww.LoggingTime >= from.Value) : true)
-                                && (to.HasValue ? (ww.LoggingTime <= to.Value) : true));
+                                && (to.HasValue ? (ww.LoggingTime <= to.Value) : true);
             }
 
             var listResponse = await logFileRepository.GetListResponseViewAsync<LogFileViewModel>(pageCommand, query, ww => ww.LoggingTime, false);
@@ -973,7 +979,7 @@ namespace MiSmart.API.Controllers
 
         [HttpGet("DownloadResultReport")]
         [AllowAnonymous]
-        public async Task<IActionResult>  DownloadResultReport([FromQuery] Guid id, [FromServices] LogReportRepository logReportRepository,
+        public async Task<IActionResult> DownloadResultReport([FromQuery] Guid id, [FromServices] LogReportRepository logReportRepository,
         [FromServices] SecondLogReportRepository secondLogReportRepository, [FromServices] LogReportResultRepository logReportResultRepository,
         [FromServices] LogFileRepository logFileRepository, [FromServices] MyEmailService emailService)
         {
@@ -1004,7 +1010,8 @@ namespace MiSmart.API.Controllers
                 htmlString.Replace("pilot_description", logReport.PilotDescription);
                 htmlString.Replace("reporter_description", logReport.ReporterDescription);
                 var listImageReport = "";
-                foreach(var ImageUrl in logReport.ImageUrls){
+                foreach (var ImageUrl in logReport.ImageUrls)
+                {
                     var item = emailService.GetHTML("ImageItem");
                     item = item.Replace("img_src", ImageUrl);
                     listImageReport += item;
@@ -1037,7 +1044,8 @@ namespace MiSmart.API.Controllers
                 htmlString.Replace("analyst", logResult.AnalystName);
                 htmlString.Replace("approver", logResult.ApproverName);
                 var listImageResult = "";
-                foreach(var ImageUrl in logResult.ImageUrls){
+                foreach (var ImageUrl in logResult.ImageUrls)
+                {
                     var item = emailService.GetHTML("ImageItem");
                     item = item.Replace("img_src", ImageUrl);
                     listImageResult += item;
@@ -1056,15 +1064,16 @@ namespace MiSmart.API.Controllers
                 htmlString.Replace("partner_company_1", logReport.LogFile.Device.ExecutionCompany?.Name);
                 htmlString.Replace("pilot_description_1", logReport.PilotDescription);
                 htmlString.Replace("reporter_description_1", logReport.ReporterDescription);
-                
+
                 var listImageReport1 = "";
-                foreach(var ImageUrl in logReport.ImageUrls){
+                foreach (var ImageUrl in logReport.ImageUrls)
+                {
                     var item = emailService.GetHTML("ImageItem");
                     item = item.Replace("img_src", ImageUrl);
                     listImageReport1 += item;
                 }
                 htmlString.Replace("list_image_report_1", listImageReport1);
-                
+
                 htmlString.Replace("name_2", secondLogReport.Username);
                 htmlString.Replace("drone_id_2", secondLogReport.LogFile.Device.Name);
                 htmlString.Replace("location_2", secondLogReport.LogFile.LogDetail?.Location);
@@ -1075,7 +1084,8 @@ namespace MiSmart.API.Controllers
                 htmlString.Replace("reporter_description_2", secondLogReport.ReporterDescription);
 
                 var listImageReport2 = "";
-                foreach(var ImageUrl in secondLogReport.ImageUrls){
+                foreach (var ImageUrl in secondLogReport.ImageUrls)
+                {
                     var item = emailService.GetHTML("ImageItem");
                     item = item.Replace("img_src", ImageUrl);
                     listImageReport2 += item;
