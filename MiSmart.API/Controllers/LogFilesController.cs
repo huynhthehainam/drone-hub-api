@@ -635,7 +635,7 @@ namespace MiSmart.API.Controllers
             response.SetData(ViewModelHelpers.ConvertToViewModel<LogDetail, LargeLogDetailViewModel>(logDetail));
             return response.ToIActionResult();
         }
-        [HttpPost("{id: Guid}/SendEmailErrors")]
+        [HttpPost("{id:Guid}/SendEmailErrors")]
         public async Task<IActionResult> SendEmailErrors([FromRoute] Guid id, [FromBody] AddingLogErrorCommand command, [FromServices] LogFileRepository logFileRepository,
         [FromServices] MyEmailService emailService, [FromServices] IOptions<TargetEmailSettings> options,
         [FromServices] LogTokenRepository logTokenRepository)
