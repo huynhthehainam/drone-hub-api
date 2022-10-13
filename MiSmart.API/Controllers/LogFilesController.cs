@@ -1004,12 +1004,12 @@ namespace MiSmart.API.Controllers
             if (name == "ResultWithOneReport")
             {
                 htmlString.Replace("flight_id", "Chưa định danh");
-                htmlString.Replace("time", TimeZoneInfo.ConvertTimeFromUtc(logResult.UpdatedTime, seaTimeZone).ToString());
-                htmlString.Replace("name", logReport.Username);
+                htmlString.Replace("updated_time", TimeZoneInfo.ConvertTimeFromUtc(logResult.UpdatedTime, seaTimeZone).ToString("dd/MM/yyyy HH:mm:ss"));
+                htmlString.Replace("reporter_name", logReport.Username);
                 htmlString.Replace("drone_id", logReport.LogFile.Device.Name);
-                htmlString.Replace("location", logReport.LogFile.LogDetail?.Location);
+                htmlString.Replace("flight_location", logReport.LogFile.LogDetail?.Location);
                 htmlString.Replace("accident_time", TimeZoneInfo.ConvertTimeFromUtc(logReport.AccidentTime, seaTimeZone).ToString());
-                htmlString.Replace("pilot", logReport.PilotName);
+                htmlString.Replace("pilot_name", logReport.PilotName);
                 htmlString.Replace("partner_company", logReport.LogFile.Device.ExecutionCompany?.Name);
                 htmlString.Replace("pilot_description", logReport.PilotDescription);
                 htmlString.Replace("reporter_description", logReport.ReporterDescription);
@@ -1041,12 +1041,17 @@ namespace MiSmart.API.Controllers
                     tableData += row;
                 }
                 htmlString.Replace("table_data_indicator", tableData);
-                htmlString.Replace("responsible_company", logResult.ResponsibleCompany.ToString());
+                if (logResult.ResponsibleCompany == ResponsibleCompany.MiSmart)
+                    htmlString.Replace("responsible_company", "Công ty khai thác MiSmart");
+                else if (logResult.ResponsibleCompany == ResponsibleCompany.NoCompany)
+                    htmlString.Replace("responsible_company", "Không có công ty");
+                else if (logReport.LogFile.Device.ExecutionCompany != null)
+                    htmlString.Replace("responsible_company", logReport.LogFile.Device.ExecutionCompany?.Name);
                 htmlString.Replace("conclusion", logResult.Conclusion);
                 htmlString.Replace("detailed_analysis", logResult.DetailedAnalysis);
                 htmlString.Replace("result_suggestion", logResult.Suggest);
-                htmlString.Replace("analyst", logResult.AnalystName);
-                htmlString.Replace("approver", logResult.ApproverName);
+                htmlString.Replace("by_analyst", logResult.AnalystName);
+                htmlString.Replace("by_approver", logResult.ApproverName);
                 var listImageResult = "";
                 foreach (var ImageUrl in logResult.ImageUrls)
                 {
@@ -1059,12 +1064,12 @@ namespace MiSmart.API.Controllers
             else
             {
                 htmlString.Replace("flight_id", "Chưa định danh");
-                htmlString.Replace("time", TimeZoneInfo.ConvertTimeFromUtc(logResult.UpdatedTime, seaTimeZone).ToString());
-                htmlString.Replace("name_1", logReport.Username);
+                htmlString.Replace("updated_time", TimeZoneInfo.ConvertTimeFromUtc(logResult.UpdatedTime, seaTimeZone).ToString());
+                htmlString.Replace("reporter_name_1", logReport.Username);
                 htmlString.Replace("drone_id_1", logReport.LogFile.Device.Name);
-                htmlString.Replace("location_1", logReport.LogFile.LogDetail?.Location);
+                htmlString.Replace("flight_location_1", logReport.LogFile.LogDetail?.Location);
                 htmlString.Replace("accident_time_1", TimeZoneInfo.ConvertTimeFromUtc(logReport.AccidentTime, seaTimeZone).ToString());
-                htmlString.Replace("pilot_1", logReport.PilotName);
+                htmlString.Replace("pilot_name_1", logReport.PilotName);
                 htmlString.Replace("partner_company_1", logReport.LogFile.Device.ExecutionCompany?.Name);
                 htmlString.Replace("pilot_description_1", logReport.PilotDescription);
                 htmlString.Replace("reporter_description_1", logReport.ReporterDescription);
@@ -1078,11 +1083,11 @@ namespace MiSmart.API.Controllers
                 }
                 htmlString.Replace("list_image_report_1", listImageReport1);
 
-                htmlString.Replace("name_2", secondLogReport.Username);
+                htmlString.Replace("reporter_name_2", secondLogReport.Username);
                 htmlString.Replace("drone_id_2", secondLogReport.LogFile.Device.Name);
-                htmlString.Replace("location_2", secondLogReport.LogFile.LogDetail?.Location);
+                htmlString.Replace("flight_location_2", secondLogReport.LogFile.LogDetail?.Location);
                 htmlString.Replace("accident_time_2", TimeZoneInfo.ConvertTimeFromUtc(secondLogReport.AccidentTime, seaTimeZone).ToString());
-                htmlString.Replace("pilot_2", secondLogReport.PilotName);
+                htmlString.Replace("pilot_name_2", secondLogReport.PilotName);
                 htmlString.Replace("partner_company_2", secondLogReport.LogFile.Device.ExecutionCompany?.Name);
                 htmlString.Replace("pilot_description_2", secondLogReport.PilotDescription);
                 htmlString.Replace("reporter_description_2", secondLogReport.ReporterDescription);
@@ -1119,8 +1124,8 @@ namespace MiSmart.API.Controllers
                 htmlString.Replace("conclusion", logResult.Conclusion);
                 htmlString.Replace("detailed_analysis", logResult.DetailedAnalysis);
                 htmlString.Replace("result_suggestion", logResult.Suggest);
-                htmlString.Replace("analyst", logResult.AnalystName);
-                htmlString.Replace("approver", logResult.ApproverName);
+                htmlString.Replace("by_analyst", logResult.AnalystName);
+                htmlString.Replace("by_approver", logResult.ApproverName);
             }
             Byte[] bytes = null;
             System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);

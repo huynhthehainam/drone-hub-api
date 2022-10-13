@@ -1,42 +1,30 @@
 <!DOCTYPE html>
 <html>
 <head><link rel="stylesheet" href="invoice.css"></head>
-<body style="padding-left: 10rem;padding-right:  10rem;padding-top: 4rem;">
+<body style="font-family: arial, sans-serif;">
     <img alt="" src=""/>
     <div style="display: flex ">
         <div >
             <div style="font-size: 28px;font-weight: 700; color:#64786A">Kết quả phân tích dữ liệu bay</div>
             <div style="border: 1px solid #64786A; width: 40%; height: 0px; margin-top: 24px;"></div>
         </div>
-           
-     
-       
-        <div style="margin-left:30%">
+        <div style="padding-left: 50px;">
             <div style="color:#64786A">Mã chuyến bay: <span style="color:black">flight_id</span></div>
-            <div style="color:#64786A">Cập nhật lúc: <span style="color:black">time</span></div>
+            <div style="color:#64786A">Cập nhật lúc: <span style="color:black">updated_time</span></div>
         </div>
         
-        </div>
     </div>
     <div style="display:flex;margin-top: 32px;">
         <div style="font-size: 16px;font-weight: 500;">
-            Họ tên người báo cáo: <span>name</span> <br />
+            Họ tên người báo cáo: <span>reporter_name</span> <br />
             Bộ phận: <span>Drone Control</span><br/>
             Mã Drone: <span>drone_id</span><br/>
-            Khu vực bay: <span>location</span><br/>
+            Khu vực bay: <span>flight_location</span><br/>
             Thời gian xảy ra sự cố: <span>accident_time</span><br/>
-            Phi công: <span>pilot</span><br/>
+            Phi công: <span>pilot_name</span><br/>
             Đối tác: <span>partner_company</span><br/>
-            <div>
-                <div style="font-size: 16px;font-weight: 700;margin-top: 12px;color:#64786A">
-                    Hình ảnh từ hiện trường
-                </div>
-                <div style="display: grid; grid-template-columns: 200px 200px 200px; grid-gap: 20px;">
-                    list_image_report
-                </div>
-            </div>
         </div>
-        <div style="margin-left: 70px;">
+        <div style="margin-left: 50px;">
             <div style="font-size: 16px;font-weight: 700;color:#64786A">Mô tả từ phi công</div>
             <div style="font-size: 16px;">pilot_description</div>
     
@@ -45,50 +33,47 @@
     
         </div>
     </div>
-
-
-    
-
-   
-</div>
-    
-<div style="font-size: 16px;font-weight: 700;margin-top: 2rem;color:#64786A">Kết quả phân tích dữ liệu bay (hình ảnh kèm theo nếu có lỗi):</div>
-<table class="table" style="width:100%">
-    <thead style="color:#fff;background-color: #64786A;">
-        <tr>
-            <th style="border: 1px solid white;" rowspan="2">STT</th>
-            <th style="border: 1px solid white;" rowspan="2">Nhóm</th>
-            <th style="border: 1px solid white;" rowspan="2">Chi tiết</th>
-            <th style="border: 1px solid white;" colspan="3">Tình trạng</th>
-            <th style="border: 1px solid white;" rowspan="2">Chi tiết</th>
-            <th style="border: 1px solid white;" rowspan="2">Cách xử lý (đề xuất)</th>
-        </tr>
-        <tr>
-            <th style="border: 1px solid white;">Tốt</th>
-            <th style="border: 1px solid white;">Theo dõi</th>
-            <th style="border: 1px solid white;">Xấu</th>
-        </tr>
+    <div>
+        <div style="font-size: 16px;font-weight: 700;margin-top: 12px;color:#64786A">
+            Hình ảnh từ hiện trường
+        </div>
+        <div style="display: flex; flex-direction: row; width: 100%;">
+            list_image_report
+        </div>
+    </div>
         
-    </thead>
-    table_data_indicator
-    <tfoot >
+    <div style="font-size: 16px;font-weight: 700;margin-top: 2rem;color:#64786A">Kết quả phân tích dữ liệu bay (hình ảnh kèm theo nếu có lỗi):</div>
+    <table class="table" style="width:100%; border-collapse: collapse;">
+        <thead style="color:#fff;">
+            <tr>
+                <th style="border: 1px solid #000000; background-color: #64786A;" rowspan="2">STT</th>
+                <th style="border: 1px solid #000000; background-color: #64786A;" rowspan="2">Nhóm</th>
+                <th style="border: 1px solid #000000; background-color: #64786A;" rowspan="2">Chi tiết</th>
+                <th style="border: 1px solid #000000; background-color: #64786A;" colspan="3">Tình trạng</th>
+                <th style="border: 1px solid #000000; background-color: #64786A;" rowspan="2">Chi tiết</th>
+                <th style="border: 1px solid #000000; background-color: #64786A;" rowspan="2">Cách xử lý (đề xuất)</th>
+            </tr>
+            <tr>
+                <th style="border: 1px solid #000000; background-color: #64786A;">Tốt</th>
+                <th style="border: 1px solid #000000; background-color: #64786A;">Theo dõi</th>
+                <th style="border: 1px solid #000000; background-color: #64786A;">Xấu</th>
+            </tr> 
+        </thead>
+        table_data_indicator
         <tr style="background-color: #E2E0E0;">
-            <td style="color:#64786A" class="text-end" colspan="1"><strong>Kết luận:</strong></td>
-            <td class="text-end" colspan="2">Do responsible_company</td>
-            <td class="text-end" colspan="5">conclusion</td>
-
+            <td style="color:#64786A; border: 1px solid #000000;" class="text-end" colspan="1"><strong>Kết luận:</strong></td>
+            <td style="border: 1px solid #000000;" colspan="2">Do responsible_company</td>
+            <td style="border: 1px solid #000000;" colspan="5">conclusion</td>
         </tr>
         <tr style="background-color: #E2E0E0;">
-            <td style="color:#64786A" class="text-end" colspan="1"><strong>Thông số chi tiết:</strong></td>
-            <td class="text-end" colspan="7" >detailed_analysis</td>
-
+            <td style="color:#64786A; border: 1px solid #000000;" class="text-end" colspan="1"><strong>Thông số chi tiết:</strong></td>
+            <td style="border: 1px solid #000000;" colspan="7" >detailed_analysis</td>
         </tr>
-    </tfoot>
-</table>
+    </table>
     <div style="font-size: 16px;font-weight: 700;margin-top: 1rem;color:#64786A">
         Hình ảnh liên quan đến lỗi
     </div>
-    <div style="display: grid; grid-template-columns: repeat(3, 1fr); grid-gap: 15px;">
+    <div style="display: flex; flex-direction: row; width: 100%;">
         list_image_result
     </div>
     <div style="display:flex;margin-top: 2rem;">
@@ -100,13 +85,14 @@
                 result_suggestion
             </div>
         </div>
-        <div style="margin-left:45%;">
-          <div style="font-size: 16px;font-weight: 700;color:#64786A">
-            Phân tích bởi <span style="color:black">analyst</span>             
+        <div style="margin-left:50px">
+          <div style="font-size: 16px;font-weight: 700;color:#64786A; display: flex; flex-direction: row;">
+            <div>Phân tích bởi</div> 
+            <div style="color:black">by_analyst</div>             
           </div>
-          <div>
-          <div style="font-size: 16px;font-weight: 700;color:#64786A; margin-top: 1rem;">
-            Xét duyệt bởi <span style="color:black">approver</span>       
+          <div style="font-size: 16px;font-weight: 700;color:#64786A; margin-top: 1rem; display: flex; flex-direction: row;">
+            <div>Xét duyệt bởi</div> 
+            <div style="color:black">by_approver</div>       
           </div>
         </div>
     </div>
