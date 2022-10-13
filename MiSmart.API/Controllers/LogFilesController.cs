@@ -635,9 +635,10 @@ namespace MiSmart.API.Controllers
             response.SetData(ViewModelHelpers.ConvertToViewModel<LogDetail, LargeLogDetailViewModel>(logDetail));
             return response.ToIActionResult();
         }
-        [HttpPost("Errors")]
-        public async Task<IActionResult> SendEmailErrors([FromBody] AddingLogErrorCommand command, [FromServices] LogFileRepository logFileRepository,
-        [FromServices] MyEmailService emailService, [FromServices] IOptions<TargetEmailSettings> options)
+        [HttpPost("{id: Guid}/SendEmailErrors")]
+        public async Task<IActionResult> SendEmailErrors([FromRoute] Guid id, [FromBody] AddingLogErrorCommand command, [FromServices] LogFileRepository logFileRepository,
+        [FromServices] MyEmailService emailService, [FromServices] IOptions<TargetEmailSettings> options,
+        [FromServices] LogTokenRepository logTokenRepository)
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
             TargetEmailSettings settings = options.Value;
@@ -645,26 +646,26 @@ namespace MiSmart.API.Controllers
             {
                 response.AddNotAllowedErr();
             }
-            var logFile = await logFileRepository.GetAsync(ww => ww.ID == command.Id);
+            var logFile = await logFileRepository.GetAsync(ww => ww.ID == id);
             if (logFile is null)
             {
                 response.AddNotFoundErr("LogFile");
             }
-            var errorString = String.Empty;
-            var contentString = String.Empty;
-            if (command.Error == "log")
+
+            var errorString = "Báo cáo có mâu thuẫn";
+            var contentString = "Vui lòng kiểm tra và cập nhật lại báo cáo theo đường link sau";
+            if (command.Message.Length != 0)
+                contentString = "Tin nhắn: " + command.Message + "\n\n" + contentString;
+            if (logFile.LogReport.Username is not null && logFile.LogReport.Username?.Length != 0)
             {
-                errorString = "File Log bị lỗi";
-                contentString = "Yêu cầu phòng IT kiểm tra hệ thống DroneHub và gửi thông tin cho phòng DC sớm nhất có thể";
-            }
-            else
-            {
-                errorString = "Báo cáo có mâu thuẫn";
-                contentString = "Phòng DroneControl sẽ mở luồng mail trao đổi kỹ hơn trong vòng 1 ngày";
+                String newToken = TokenHelper.GenerateToken();
+                await logTokenRepository.CreateAsync(new LogToken() { Token = newToken, UserUUID = logFile.LogReport.UserUUID, LogFileID = logFile.ID, Username = logFile.LogReport.Username });
+                await emailService.SendMailAsync(new String[] { logFile.LogReport.Username }, new String[] { }, new String[] { }, @$"Subject: [Báo cáo lỗi] Mã hiệu drone ({logFile.Device.Name})",
+                $"Dear,\n\nPhòng Điều khiển bay trả Kết quả phân tích Dữ liệu bay:\n\nMã hiệu Drone: {logFile.Device.Name}\n\nTình trạng: {errorString}\n\n{contentString}\n\nLink: https://dronehub.mismart.ai/second-log-report?token={newToken}\n\nThank you");
             }
 
-            await emailService.SendMailAsync(settings.LogError.ToArray(), new String[] { }, new String[] { }, @$"Subject: [Dữ liệu bay bị lỗi] Mã hiệu drone ({logFile.Device.Name})",
-            $"Dear,\n\nPhòng Điều khiển bay trả Kết quả phân tích Dữ liệu bay:\n\nMã hiệu Drone: {logFile.Device.Name}\n\nTình trạng: {errorString}\n\n{contentString}\n\nThank you");
+            logFile.Status = LogStatus.SecondWarning;
+            await logFileRepository.UpdateAsync(logFile);
 
             return response.ToIActionResult();
         }
