@@ -25,6 +25,7 @@ using MiSmart.API.Settings;
 
 using System.Text;
 using iText.Html2pdf;
+using iText.Html2pdf.Resolver.Font;
 
 namespace MiSmart.API.Controllers
 {
@@ -68,7 +69,7 @@ namespace MiSmart.API.Controllers
                                 && (ww.FileBytes.Length > 500000)
                                 && (isUnstable == true ? (ww.DroneStatus != DroneStatus.Stable) : true)
                                 && (ww.Status == LogStatus.Completed || ww.Status == LogStatus.Approved)
-                                            && (PartErrorID.HasValue ? ww.LogReportResult.LogResultDetails.Any(ww => ww.PartErrorID == PartErrorID.Value) : true)
+                                && (PartErrorID.HasValue ? ww.LogReportResult.LogResultDetails.Any(ww => ww.PartErrorID == PartErrorID.Value && ww.Status == StatusError.Bad) : true)
                                 && (from.HasValue ? (ww.LoggingTime >= from.Value) : true)
                                 && (to.HasValue ? (ww.LoggingTime <= to.Value) : true);
             }
@@ -416,7 +417,7 @@ namespace MiSmart.API.Controllers
         [HttpPost("{id:Guid}/ApprovedResult")]
         public async Task<IActionResult> ApprovedResult([FromRoute] Guid id, [FromServices] LogReportResultRepository logReportResultRepository,
         [FromServices] IOptions<TargetEmailSettings> options, [FromServices] LogTokenRepository logTokenRepository, [FromServices] MyEmailService emailService,
-        [FromServices] LogFileRepository logFileRepository)
+        [FromServices] LogFileRepository logFileRepository, [FromServices] LogReportRepository logReportRepository, [FromServices] SecondLogReportRepository secondLogReportRepository)
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
             TargetEmailSettings settings = options.Value;
@@ -424,21 +425,44 @@ namespace MiSmart.API.Controllers
             {
                 response.AddNotAllowedErr();
             }
+            
             var logResult = await logReportResultRepository.GetAsync(ww => ww.LogFileID == id);
             if (logResult is null)
             {
                 response.AddNotFoundErr("LogResult");
             }
+            
+            var logReport = await logReportRepository.GetAsync(ww => ww.LogFileID == id);
+            if (logReport is null)
+            {
+                response.AddNotFoundErr("LogReport");
+            }
+            
             logResult.ApproverUUID = CurrentUser.UUID;
             logResult.ApproverName = CurrentUser.Email;
+            
             var logFile = await logFileRepository.GetAsync(ww => ww.ID == id);
-
-            foreach (UserEmail item in settings.LogReport)
+            if (logReport is null)
             {
+                response.AddNotFoundErr("LogFile");
+            }
+            
+            var secondLogReport = await secondLogReportRepository.GetAsync(ww => ww.LogFileID == id);
+
+            StringBuilder html = emailService.GenerateResultLogReport(logResult, logReport, secondLogReport);
+            
+            Byte[] bytes = null;
+            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+            using (MemoryStream ms = new MemoryStream())
+            {
+                ConverterProperties properties = new ConverterProperties();
+                properties.SetFontProvider(new DefaultFontProvider(true, true, true));
+                HtmlConverter.ConvertToPdf(html.ToString(), ms);
+                bytes = ms.ToArray();
                 String token = TokenHelper.GenerateToken();
-                await logTokenRepository.CreateAsync(new LogToken() { Token = token, UserUUID = new Guid(item.UUID), LogFileID = id });
-                await emailService.SendMailAsync(new String[] { item.Email }, new String[] { }, new String[] { }, @$"Subject: [Kết quả Phân tích Dữ liệu bay] Mã hiệu drone ({logFile.Device.Name})",
-                $"Dear,\n\nPhòng Điều khiển bay trả Kết quả phân tích Dữ liệu bay:\n\nMã hiệu Drone: {logFile.Device.Name}\n\nKết luận chung: {logResult.Conclusion}\n\nThank you");
+                await logTokenRepository.CreateAsync(new LogToken() { Token = token, UserUUID = logReport.UserUUID, LogFileID = id });
+                await emailService.SendMailAttachmentAsync(new String[] { logReport.Username }, new String[] { }, new String[] { }, @$"Subject: [Kết quả Phân tích Dữ liệu bay] Mã hiệu drone ({logFile.Device.Name})",
+                $"Dear,\n\nPhòng Điều khiển bay trả Kết quả phân tích Dữ liệu bay:\n\nThank you",false, null, null, bytes, "Kết quả");   
             }
 
             logFile.Status = LogStatus.Approved;
@@ -642,7 +666,7 @@ namespace MiSmart.API.Controllers
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
             TargetEmailSettings settings = options.Value;
-            if (!CurrentUser.IsAdministrator && CurrentUser.RoleID != 3)
+            if (CurrentUser.RoleID != 4)
             {
                 response.AddNotAllowedErr();
             }
@@ -989,150 +1013,21 @@ namespace MiSmart.API.Controllers
         [FromServices] LogFileRepository logFileRepository, [FromServices] MyEmailService emailService)
         {
             ActionResponse actionResponse = actionResponseFactory.CreateInstance();
-            var name = "ResultWithOneReport";
             var logReport = await logReportRepository.GetAsync(ww => ww.LogFileID == id);
             if (logReport is null)
                 actionResponse.AddNotFoundErr("LogReport");
             var secondLogReport = await secondLogReportRepository.GetAsync(ww => ww.LogFileID == id);
-            if (secondLogReport is not null)
-                name = "ResultWithTwoReport";
             var logResult = await logReportResultRepository.GetAsync(ww => ww.LogFileID == id);
             if (logResult is null)
                 actionResponse.AddNotFoundErr("ResultReport");
-            var html = emailService.GetHTML(name);
-            StringBuilder htmlString = new StringBuilder(html);
-            TimeZoneInfo seaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
-            if (name == "ResultWithOneReport")
-            {
-                htmlString.Replace("flight_id", "Chưa định danh");
-                htmlString.Replace("updated_time", TimeZoneInfo.ConvertTimeFromUtc(logResult.UpdatedTime, seaTimeZone).ToString("dd/MM/yyyy HH:mm:ss"));
-                htmlString.Replace("reporter_name", logReport.Username);
-                htmlString.Replace("drone_id", logReport.LogFile.Device.Name);
-                htmlString.Replace("flight_location", logReport.LogFile.LogDetail?.Location);
-                htmlString.Replace("accident_time", TimeZoneInfo.ConvertTimeFromUtc(logReport.AccidentTime, seaTimeZone).ToString());
-                htmlString.Replace("pilot_name", logReport.PilotName);
-                htmlString.Replace("partner_company", logReport.LogFile.Device.ExecutionCompany?.Name);
-                htmlString.Replace("pilot_description", logReport.PilotDescription);
-                htmlString.Replace("reporter_description", logReport.ReporterDescription);
-                var listImageReport = "";
-                foreach (var ImageUrl in logReport.ImageUrls)
-                {
-                    var item = emailService.GetHTML("ImageItem");
-                    item = item.Replace("img_src", ImageUrl);
-                    listImageReport += item;
-                }
-                htmlString.Replace("list_image_report", listImageReport);
-                var listError = logResult.LogResultDetails.ToArray();
-                var tableData = "";
-                for (int i = 0; i < listError.Count(); i++)
-                {
-                    var error = listError[i];
-                    var row = emailService.GetHTML("ResultDetailRow");
-                    row = row.Replace("stt", (i + 1).ToString());
-                    row = row.Replace("group", error.PartError.Group);
-                    row = row.Replace("name_error", error.PartError.Name);
-                    if (error.Status == StatusError.Good)
-                        row = row.Replace("status_good", "checked");
-                    else if (error.Status == StatusError.Bad)
-                        row = row.Replace("status_bad", "checked");
-                    else
-                        row = row.Replace("status_follow", "checked");
-                    row = row.Replace("error_detail", error.Detail);
-                    row = row.Replace("measure", error.Resolve);
-                    tableData += row;
-                }
-                htmlString.Replace("table_data_indicator", tableData);
-                if (logResult.ResponsibleCompany == ResponsibleCompany.MiSmart)
-                    htmlString.Replace("responsible_company", "Công ty khai thác MiSmart");
-                else if (logResult.ResponsibleCompany == ResponsibleCompany.NoCompany)
-                    htmlString.Replace("responsible_company", "Không có công ty");
-                else if (logReport.LogFile.Device.ExecutionCompany != null)
-                    htmlString.Replace("responsible_company", logReport.LogFile.Device.ExecutionCompany?.Name);
-                htmlString.Replace("conclusion", logResult.Conclusion);
-                htmlString.Replace("detailed_analysis", logResult.DetailedAnalysis);
-                htmlString.Replace("result_suggestion", logResult.Suggest);
-                htmlString.Replace("by_analyst", logResult.AnalystName);
-                htmlString.Replace("by_approver", logResult.ApproverName);
-                var listImageResult = "";
-                foreach (var ImageUrl in logResult.ImageUrls)
-                {
-                    var item = emailService.GetHTML("ImageItem");
-                    item = item.Replace("img_src", ImageUrl);
-                    listImageResult += item;
-                }
-                htmlString.Replace("list_image_result", listImageResult);
-            }
-            else
-            {
-                htmlString.Replace("flight_id", "Chưa định danh");
-                htmlString.Replace("updated_time", TimeZoneInfo.ConvertTimeFromUtc(logResult.UpdatedTime, seaTimeZone).ToString());
-                htmlString.Replace("reporter_name_1", logReport.Username);
-                htmlString.Replace("drone_id_1", logReport.LogFile.Device.Name);
-                htmlString.Replace("flight_location_1", logReport.LogFile.LogDetail?.Location);
-                htmlString.Replace("accident_time_1", TimeZoneInfo.ConvertTimeFromUtc(logReport.AccidentTime, seaTimeZone).ToString());
-                htmlString.Replace("pilot_name_1", logReport.PilotName);
-                htmlString.Replace("partner_company_1", logReport.LogFile.Device.ExecutionCompany?.Name);
-                htmlString.Replace("pilot_description_1", logReport.PilotDescription);
-                htmlString.Replace("reporter_description_1", logReport.ReporterDescription);
-
-                var listImageReport1 = "";
-                foreach (var ImageUrl in logReport.ImageUrls)
-                {
-                    var item = emailService.GetHTML("ImageItem");
-                    item = item.Replace("img_src", ImageUrl);
-                    listImageReport1 += item;
-                }
-                htmlString.Replace("list_image_report_1", listImageReport1);
-
-                htmlString.Replace("reporter_name_2", secondLogReport.Username);
-                htmlString.Replace("drone_id_2", secondLogReport.LogFile.Device.Name);
-                htmlString.Replace("flight_location_2", secondLogReport.LogFile.LogDetail?.Location);
-                htmlString.Replace("accident_time_2", TimeZoneInfo.ConvertTimeFromUtc(secondLogReport.AccidentTime, seaTimeZone).ToString());
-                htmlString.Replace("pilot_name_2", secondLogReport.PilotName);
-                htmlString.Replace("partner_company_2", secondLogReport.LogFile.Device.ExecutionCompany?.Name);
-                htmlString.Replace("pilot_description_2", secondLogReport.PilotDescription);
-                htmlString.Replace("reporter_description_2", secondLogReport.ReporterDescription);
-
-                var listImageReport2 = "";
-                foreach (var ImageUrl in secondLogReport.ImageUrls)
-                {
-                    var item = emailService.GetHTML("ImageItem");
-                    item = item.Replace("img_src", ImageUrl);
-                    listImageReport2 += item;
-                }
-                htmlString.Replace("list_image_report_2", listImageReport2);
-
-                var listError = logResult.LogResultDetails.ToArray();
-                var tableData = "";
-                for (int i = 0; i < listError.Count(); i++)
-                {
-                    var error = listError[i];
-                    var row = emailService.GetHTML("ResultDetailRow");
-                    row = row.Replace("stt", (i + 1).ToString());
-                    row = row.Replace("name_error", error.PartError.Name);
-                    if (error.Status == StatusError.Good)
-                        row = row.Replace("status_good", "checked");
-                    else if (error.Status == StatusError.Bad)
-                        row = row.Replace("status_bad", "checked");
-                    else
-                        row = row.Replace("status_follow", "checked");
-                    row = row.Replace("error_detail", error.PartError.Name);
-                    row = row.Replace("measure", error.Resolve);
-                    tableData += row;
-                }
-                htmlString.Replace("table_data_indicator", tableData);
-                htmlString.Replace("responsible_company", logResult.ResponsibleCompany.ToString());
-                htmlString.Replace("conclusion", logResult.Conclusion);
-                htmlString.Replace("detailed_analysis", logResult.DetailedAnalysis);
-                htmlString.Replace("result_suggestion", logResult.Suggest);
-                htmlString.Replace("by_analyst", logResult.AnalystName);
-                htmlString.Replace("by_approver", logResult.ApproverName);
-            }
+            
+            StringBuilder html = emailService.GenerateResultLogReport(logResult, logReport, secondLogReport);
+            
             Byte[] bytes = null;
             System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
             using (MemoryStream ms = new MemoryStream())
             {
-                HtmlConverter.ConvertToPdf(htmlString.ToString(), ms);
+                HtmlConverter.ConvertToPdf(html.ToString(), ms);
                 bytes = ms.ToArray();
             }
             actionResponse.SetFile(bytes, "application/pdf", "report.pdf");
