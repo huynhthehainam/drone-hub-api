@@ -848,9 +848,9 @@ namespace MiSmart.API.Controllers
 
             return response.ToIActionResult();
         }
-        [HttpPost("SecondReport")]
+        [HttpPost("CreateSecondReportFromEmail")]
         [AllowAnonymous]
-        public async Task<IActionResult> CreateSecondReport([FromBody] AddingLogReportFromEmailCommand command, [FromServices] LogFileRepository logFileRepository,
+        public async Task<IActionResult> CreateSecondReportFromEmail([FromBody] AddingLogReportFromEmailCommand command, [FromServices] LogFileRepository logFileRepository,
         [FromServices] MyEmailService emailService, [FromServices] IOptions<TargetEmailSettings> options,
         [FromServices] LogTokenRepository logTokenRepository, [FromServices] SecondLogReportRepository secondLogReportRepository)
         {
@@ -1031,6 +1031,74 @@ namespace MiSmart.API.Controllers
                 bytes = ms.ToArray();
             }
             actionResponse.SetFile(bytes, "application/pdf", "report.pdf");
+            return actionResponse.ToIActionResult();
+        }
+        
+        [HttpPost("{id:Guid}/CreateSecondReport")]
+        public async Task<IActionResult> CreateSecondReport([FromRoute] Guid id, [FromBody] AddingLogReportCommand command, [FromServices] LogFileRepository logFileRepository,
+        [FromServices] MyEmailService emailService, [FromServices] IOptions<TargetEmailSettings> options,
+        [FromServices] SecondLogReportRepository secondLogReportRepository, [FromServices] LogTokenRepository logTokenRepository)
+        {
+            ActionResponse response = actionResponseFactory.CreateInstance();
+            TargetEmailSettings settings = options.Value;
+            if (CurrentUser.RoleID != 3 && !CurrentUser.IsAdministrator){
+                response.AddNotAllowedErr();
+            }
+            var logFile = await logFileRepository.GetAsync(ww => ww.ID == id);
+            if (logFile is null)
+            {
+                response.AddNotFoundErr("LogFile");
+            }
+            if (logFile.Status != LogStatus.SecondWarning)
+            {
+                response.AddInvalidErr("LogStatus");
+            }
+            var report = new SecondLogReport
+            {
+                LogFileID = id,
+                AccidentTime = command.AccidentTime,
+                ImageUrls = new List<String> { },
+                PilotDescription = command.PilotDescription,
+                ReporterDescription = command.ReporterDescription,
+                Suggest = command.Suggest,
+                UserUUID = CurrentUser.UUID,
+                PilotName = command.PilotName,
+                PartnerCompanyName = command.PartnerCompanyName,
+                Username = command.Username,
+            };
+            var secondReport = await secondLogReportRepository.CreateAsync(report);
+
+            foreach (UserEmail item in settings.LogReport)
+            {
+                String newToken = TokenHelper.GenerateToken();
+                await logTokenRepository.CreateAsync(new LogToken { Token = newToken, UserUUID = new Guid(item.UUID), LogFileID = logFile.ID, Username = item.Email });
+                await emailService.SendMailAsync(new String[] { item.Email }, new String[] { }, new String[] { }, @$"[Chuyến bay cần phân tích lần 2] Mã hiệu drone ({logFile.Device.Name})",
+                $"Dear,\n\nPhòng Đặc Nhiệm trả kết quả báo cáo hiện tường:\n\nMã hiệu Drone: {logFile.Device.Name}\n\nLink Báo cáo tình trạng chuyến bay: https://dronehub.mismart.ai/second-log-result?token={newToken} \n\nThank you");
+            }
+
+            return response.ToIActionResult();
+        }
+        [HttpPost("{id:Guid}/UploadSecondReportImage")]
+        [HasPermission(typeof(MaintainerPermission))]
+        public async Task<IActionResult> UploadSecondReportImage([FromRoute] Guid id, [FromServices] SecondLogReportRepository secondLogReportRepository, [FromServices] MinioService minioService, [FromForm] AddingLogImageLinkCommand command)
+        {
+            ActionResponse actionResponse = actionResponseFactory.CreateInstance();
+            var report = await secondLogReportRepository.GetAsync(ww => ww.LogFileID == id);
+            // Console.WriteLine(report);
+            if (report is null)
+            {
+                actionResponse.AddNotFoundErr("LogReport");
+            }
+
+            for (var i = 0; i < command.Files.Count; i++)
+            {
+                var fileLink = await minioService.PutFileAsync(command.Files[i], new String[] { "drone-hub-api", "second-log-reports", $"{id}" });
+                report.ImageUrls.Add(fileLink);
+            }
+
+            await secondLogReportRepository.UpdateAsync(report);
+
+            actionResponse.SetUpdatedMessage();
             return actionResponse.ToIActionResult();
         }
     }
