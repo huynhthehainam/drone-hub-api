@@ -10,6 +10,9 @@ using MiSmart.Infrastructure.Settings;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Net.Mail;
+using System.Net;
 
 namespace MiSmart.API.Services;
 
@@ -19,8 +22,12 @@ public class MyEmailService : EmailService
     private const String htmlFolderPath = "./HTMLTemplates";
     private readonly TargetEmailSettings targetEmailSettings;
     private readonly FrontEndSettings frontEndSettings;
+    private SmtpSettings smtpSettings;
+    private EmailSettings emailSettings;
     public MyEmailService(IOptions<SmtpSettings> options, IOptions<EmailSettings> options1, IOptions<TargetEmailSettings> options2, IOptions<FrontEndSettings> options3) : base(options, options1)
     {
+        this.emailSettings = options1.Value;
+        this.smtpSettings = options.Value;
         this.targetEmailSettings = options2.Value;
         this.frontEndSettings = options3.Value;
     }
@@ -114,5 +121,176 @@ public class MyEmailService : EmailService
         var html = generateLowBatteryDailyReport(flightStats, localNow);
 
         await SendMailAsync(targetEmailSettings.DailyReport.ToArray(), new String[] { }, new String[] { }, "Báo cáo cảnh báo vận hành pin sai cách " + localNow.ToString("yyyy-MM-dd"), html, true);
+    }
+
+    public StringBuilder GenerateResultLogReport(LogReportResult logResult, LogReport logReport, SecondLogReport secondLogReport)
+    {
+        TimeZoneInfo seaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+        var html = GetHTML("ResultLogReport");
+        StringBuilder htmlStringBuilder = new StringBuilder(html);
+
+        htmlStringBuilder.Replace("analysis_day", logResult.UpdatedTime.Day.ToString());
+        htmlStringBuilder.Replace("analysis_month", logResult.UpdatedTime.Month.ToString());
+        htmlStringBuilder.Replace("analysis_year", logResult.UpdatedTime.Year.ToString());
+        if (secondLogReport is null)
+        {
+            htmlStringBuilder.Replace("flight_id", "Chưa định danh");
+            htmlStringBuilder.Replace("updated_time", TimeZoneInfo.ConvertTimeFromUtc(logResult.UpdatedTime, seaTimeZone).ToString("dd/MM/yyyy HH:mm:ss"));
+            htmlStringBuilder.Replace("reporter_name", logReport.Username);
+            htmlStringBuilder.Replace("drone_id", logReport.LogFile.Device.Name);
+            htmlStringBuilder.Replace("flight_location", logReport.LogFile.LogDetail?.Location);
+            htmlStringBuilder.Replace("accident_time", TimeZoneInfo.ConvertTimeFromUtc(logReport.AccidentTime, seaTimeZone).ToString());
+            htmlStringBuilder.Replace("pilot_name", logReport.PilotName);
+            htmlStringBuilder.Replace("partner_company", logReport.LogFile.Device.ExecutionCompany?.Name);
+            htmlStringBuilder.Replace("pilot_description", logReport.PilotDescription);
+            htmlStringBuilder.Replace("reporter_description", logReport.ReporterDescription);
+            var listImageReport = "";
+            foreach (var ImageUrl in logReport.ImageUrls)
+            {
+                var item = GetHTML("ImageItem");
+                item = item.Replace("img_src", ImageUrl);
+                listImageReport += item;
+            }
+            htmlStringBuilder.Replace("list_image_report", listImageReport);
+            var listError = logResult.LogResultDetails.ToArray();
+            var tableData = "";
+            for (int i = 0; i < listError.Count(); i++)
+            {
+                var error = listError[i];
+                var row = GetHTML("ResultDetailRow");
+                row = row.Replace("stt", (i + 1).ToString());
+                row = row.Replace("group", error.PartError.Group);
+                row = row.Replace("name_error", error.PartError.Name);
+                if (error.Status == StatusError.Good)
+                    row = row.Replace("status_good", "checked");
+                else if (error.Status == StatusError.Bad)
+                    row = row.Replace("status_bad", "checked");
+                else
+                    row = row.Replace("status_follow", "checked");
+                row = row.Replace("error_detail", error.Detail);
+                row = row.Replace("measure", error.Resolve);
+                tableData += row;
+            }
+            htmlStringBuilder.Replace("table_data_indicator", tableData);
+            if (logResult.ResponsibleCompany == ResponsibleCompany.MiSmart)
+                htmlStringBuilder.Replace("responsible_company", "Công ty khai thác MiSmart");
+            else if (logResult.ResponsibleCompany == ResponsibleCompany.NoCompany)
+                htmlStringBuilder.Replace("responsible_company", "Không có công ty");
+            else if (logReport.LogFile.Device.ExecutionCompany != null)
+                htmlStringBuilder.Replace("responsible_company", logReport.LogFile.Device.ExecutionCompany?.Name);
+            htmlStringBuilder.Replace("conclusion", logResult.Conclusion);
+            htmlStringBuilder.Replace("detailed_analysis", logResult.DetailedAnalysis);
+            htmlStringBuilder.Replace("result_suggestion", logResult.Suggest);
+            htmlStringBuilder.Replace("by_analyst", logResult.AnalystName);
+            htmlStringBuilder.Replace("by_approver", logResult.ApproverName);
+            var listImageResult = "";
+            foreach (var ImageUrl in logResult.ImageUrls)
+            {
+                var item = GetHTML("ImageItem");
+                item = item.Replace("img_src", ImageUrl);
+                listImageResult += item;
+            }
+            htmlStringBuilder.Replace("list_image_result", listImageResult);
+        }
+        else
+        {
+            htmlStringBuilder.Replace("flight_id", "Chưa định danh");
+            htmlStringBuilder.Replace("updated_time", TimeZoneInfo.ConvertTimeFromUtc(logResult.UpdatedTime, seaTimeZone).ToString("dd/MM/yyyy HH:mm:ss"));
+            htmlStringBuilder.Replace("reporter_name", secondLogReport.Username);
+            htmlStringBuilder.Replace("drone_id", secondLogReport.LogFile.Device.Name);
+            htmlStringBuilder.Replace("flight_location", secondLogReport.LogFile.LogDetail?.Location);
+            htmlStringBuilder.Replace("accident_time", TimeZoneInfo.ConvertTimeFromUtc(secondLogReport.AccidentTime, seaTimeZone).ToString());
+            htmlStringBuilder.Replace("pilot_name", secondLogReport.PilotName);
+            htmlStringBuilder.Replace("partner_company", secondLogReport.LogFile.Device.ExecutionCompany?.Name);
+            htmlStringBuilder.Replace("pilot_description", secondLogReport.PilotDescription);
+            htmlStringBuilder.Replace("reporter_description", secondLogReport.ReporterDescription);
+            var listImageReport = "";
+            foreach (var ImageUrl in secondLogReport.ImageUrls)
+            {
+                var item = GetHTML("ImageItem");
+                item = item.Replace("img_src", ImageUrl);
+                listImageReport += item;
+            }
+            htmlStringBuilder.Replace("list_image_report", listImageReport);
+            var listError = logResult.LogResultDetails.ToArray();
+            var tableData = "";
+            for (int i = 0; i < listError.Count(); i++)
+            {
+                var error = listError[i];
+                var row = GetHTML("ResultDetailRow");
+                row = row.Replace("stt", (i + 1).ToString());
+                row = row.Replace("group", error.PartError.Group);
+                row = row.Replace("name_error", error.PartError.Name);
+                if (error.Status == StatusError.Good)
+                    row = row.Replace("status_good", "checked");
+                else if (error.Status == StatusError.Bad)
+                    row = row.Replace("status_bad", "checked");
+                else
+                    row = row.Replace("status_follow", "checked");
+                row = row.Replace("error_detail", error.Detail);
+                row = row.Replace("measure", error.Resolve);
+                tableData += row;
+            }
+            htmlStringBuilder.Replace("table_data_indicator", tableData);
+            if (logResult.ResponsibleCompany == ResponsibleCompany.MiSmart)
+                htmlStringBuilder.Replace("responsible_company", "Công ty khai thác MiSmart");
+            else if (logResult.ResponsibleCompany == ResponsibleCompany.NoCompany)
+                htmlStringBuilder.Replace("responsible_company", "Không có công ty");
+            else if (secondLogReport.LogFile.Device.ExecutionCompany != null)
+                htmlStringBuilder.Replace("responsible_company", secondLogReport.LogFile.Device.ExecutionCompany?.Name);
+            htmlStringBuilder.Replace("conclusion", logResult.Conclusion);
+            htmlStringBuilder.Replace("detailed_analysis", logResult.DetailedAnalysis);
+            htmlStringBuilder.Replace("result_suggestion", logResult.Suggest);
+            htmlStringBuilder.Replace("by_analyst", logResult.AnalystName);
+            htmlStringBuilder.Replace("by_approver", logResult.ApproverName);
+            var listImageResult = "";
+            foreach (var ImageUrl in logResult.ImageUrls)
+            {
+                var item = GetHTML("ImageItem");
+                item = item.Replace("img_src", ImageUrl);
+                listImageResult += item;
+            }
+            htmlStringBuilder.Replace("list_image_result", listImageResult);
+        }
+        return htmlStringBuilder;
+    }
+    public Task SendMailAttachmentAsync(String[] receivedUsers, String[] cCedUsers, String[] bCCedUsers, String subject, String body, Boolean isBodyHtml = false, String senderName = null, String from = null, Byte[] file = null, String fileName = null)
+    {
+        return Task.Run(() =>
+        {
+            senderName = senderName ?? emailSettings.SenderName;
+            from = from ?? emailSettings.FromEmail;
+            subject = subject ?? "";
+            body = body ?? "";
+            MailMessage mailMessage = new MailMessage();
+            if (String.IsNullOrWhiteSpace(senderName))
+                mailMessage.From = new MailAddress(from);
+            else
+                mailMessage.From = new MailAddress(from, senderName);
+            foreach (var receivedUser in receivedUsers)
+            {
+                mailMessage.To.Add(receivedUser);
+            }
+            foreach (var cCedUser in cCedUsers)
+            {
+                mailMessage.CC.Add(cCedUser);
+            }
+            foreach (var bCCedUser in bCCedUsers)
+            {
+                mailMessage.CC.Add(bCCedUser);
+            }
+            mailMessage.Subject = subject;
+            mailMessage.Body = body;
+            mailMessage.IsBodyHtml = isBodyHtml;
+            if (file is not null)
+                mailMessage.Attachments.Add(new Attachment(new MemoryStream(file), fileName, "application/pdf"));
+            using (var client = new SmtpClient(smtpSettings.Server))
+            {
+                client.Port = smtpSettings.Port;
+                client.Credentials = new NetworkCredential(smtpSettings.UserName, smtpSettings.Password);
+                client.EnableSsl = smtpSettings.EnableSsl;
+                client.Send(mailMessage);
+            }
+        });   
     }
 }
