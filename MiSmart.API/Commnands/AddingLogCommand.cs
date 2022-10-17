@@ -58,8 +58,7 @@ namespace MiSmart.API.Commands
     }
     public class AddingLogErrorCommand
     {
-        public Guid Id { get; set; }
-        public String Error { get; set; }
+        public String Message { get; set; }
     }
     public class AddingGetLogForEmailCommand
     {
