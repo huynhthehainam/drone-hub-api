@@ -770,7 +770,7 @@ namespace MiSmart.API.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> ApprovedResultFromEmail([FromBody] AddingGetLogForEmailCommand command, [FromServices] LogReportResultRepository logReportResultRepository,
         [FromServices] IOptions<TargetEmailSettings> options, [FromServices] LogTokenRepository logTokenRepository, [FromServices] MyEmailService emailService,
-        [FromServices] LogFileRepository logFileRepository)
+        [FromServices] LogFileRepository logFileRepository, [FromServices] LogReportRepository logReportRepository, [FromServices] SecondLogReportRepository secondLogReportRepository)
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
             TargetEmailSettings settings = options.Value;
@@ -792,12 +792,31 @@ namespace MiSmart.API.Controllers
             logResult.ApproverName = token.Username;
 
             var logFile = await logFileRepository.GetAsync(ww => ww.ID == token.LogFileID);
-            foreach (UserEmail item in settings.LogReport)
+            if (logFile is null){
+                response.AddNotFoundErr("LogFile");
+            }
+            
+            var logReport = await logReportRepository.GetAsync(ww => ww.LogFileID == token.LogFileID);
+            if (logReport is null){
+                response.AddNotFoundErr("LogReport");
+            }
+            
+            var secondLogReport = await secondLogReportRepository.GetAsync(ww => ww.LogFileID == token.LogFileID);
+
+            StringBuilder html = emailService.GenerateResultLogReport(logResult, logReport, secondLogReport);
+            
+            Byte[] bytes = null;
+            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+            using (MemoryStream ms = new MemoryStream())
             {
-                String generateToken = TokenHelper.GenerateToken();
-                await logTokenRepository.CreateAsync(new LogToken() { Token = generateToken, UserUUID = new Guid(item.UUID), LogFileID = token.LogFileID });
-                await emailService.SendMailAsync(new String[] { item.Email }, new String[] { }, new String[] { }, @$"Subject: [Kết quả Phân tích Dữ liệu bay] Mã hiệu drone ({logFile.Device.Name})",
-                $"Dear,\n\nPhòng Điều khiển bay trả Kết quả phân tích Dữ liệu bay:\n\nMã hiệu Drone: {logFile.Device.Name}\n\nKết luận chung: {logResult.Conclusion}\n\nThank you");
+                ConverterProperties properties = new ConverterProperties();
+                properties.SetFontProvider(new DefaultFontProvider(true, true, true));
+                HtmlConverter.ConvertToPdf(html.ToString(), ms);
+                bytes = ms.ToArray();
+                String newToken = TokenHelper.GenerateToken();
+                await logTokenRepository.CreateAsync(new LogToken() { Token = newToken, UserUUID = logReport.UserUUID, LogFileID = logFile.ID });
+                await emailService.SendMailAttachmentAsync(new String[] { logReport.Username }, new String[] { }, new String[] { }, @$"Subject: [Kết quả Phân tích Dữ liệu bay] Mã hiệu drone ({logFile.Device.Name})",
+                $"Dear,\n\nPhòng Điều khiển bay trả Kết quả phân tích Dữ liệu bay:\n\nThank you",false, null, null, bytes, "Kết quả");   
             }
 
             logFile.Status = LogStatus.Approved;

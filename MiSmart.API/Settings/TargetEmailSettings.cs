@@ -15,6 +15,5 @@ public class TargetEmailSettings
 
     public List<String> LowBattery { get; set; }
     public List<String> DailyReport { get; set; }
-    public List<String> LogError { get; set; }
     public List<UserEmail> LogReport { get; set; }
 }
