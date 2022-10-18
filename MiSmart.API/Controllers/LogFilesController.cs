@@ -46,6 +46,8 @@ namespace MiSmart.API.Controllers
         {
             ActionResponse actionResponse = actionResponseFactory.CreateInstance();
             Expression<Func<LogFile, Boolean>> query = ww => false;
+
+            
             if (relation == "Maintainer")
             {
                 if (CurrentUser.RoleID != 3)
