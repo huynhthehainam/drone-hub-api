@@ -40,7 +40,7 @@ namespace MiSmart.API.Controllers
         {
             var response = actionResponseFactory.CreateInstance();
             Expression<Func<DeviceModel, Boolean>> query = ww => true;
-            var listResponse = await deviceModelRepository.GetListResponseViewAsync<SmallDeviceModelVieModel>(pageCommand, query);
+            var listResponse = await deviceModelRepository.GetListResponseViewAsync<SmallDeviceModelViewModel>(pageCommand, query);
 
             listResponse.SetResponse(response);
 

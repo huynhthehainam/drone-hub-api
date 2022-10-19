@@ -8,6 +8,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using System.Threading.Tasks;
 using MiSmart.API.Services;
+using MiSmart.Infrastructure.ViewModels;
+using MiSmart.DAL.Models;
+using MiSmart.DAL.ViewModels;
 
 namespace MiSmart.API.Controllers
 {
@@ -33,7 +36,7 @@ namespace MiSmart.API.Controllers
             }
 
 
-            response.SetData(new { AccessToken = device.AccessToken });
+            response.SetData(new { AccessToken = device.AccessToken, DeviceModel = ViewModelHelpers.ConvertToViewModel<DeviceModel, GCSDeviceModelViewModel>(device.DeviceModel) });
 
             return response.ToIActionResult();
         }
