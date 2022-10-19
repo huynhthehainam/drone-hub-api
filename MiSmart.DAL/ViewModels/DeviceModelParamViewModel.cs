@@ -12,6 +12,7 @@ namespace MiSmart.DAL.ViewModels
         public DateTime CreationTime { get; set; }
         public String Description { get; set; }
         public Double YMin { get; set; }
+        public String Name { get; set; }
         public Double YMax { get; set; }
         public Double FuelLevelNumber { get; set; }
         public DeviceModelParamDetailViewModel[] Details { get; set; }
@@ -23,6 +24,7 @@ namespace MiSmart.DAL.ViewModels
             CreationTime = entity.CreationTime;
             Description = entity.Description;
             YMin = entity.YMin;
+            Name = entity.Name;
             YMax = entity.YMax;
             FuelLevelNumber = entity.FuelLevelNumber;
             Details = entity.Details.OrderBy(ww => ww.XMin).Select(ww => ViewModelHelpers.ConvertToViewModel<DeviceModelParamDetail, DeviceModelParamDetailViewModel>(ww)).ToArray();
