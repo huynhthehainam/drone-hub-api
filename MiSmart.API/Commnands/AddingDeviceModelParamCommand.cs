@@ -38,6 +38,10 @@ namespace MiSmart.API.Commands
         [Required]
         public Double? YMax { get; set; }
         [Required]
+        public Double? YCentrifugalMin { get; set; }
+        [Required]
+        public Double? YCentrifugalMax { get; set; }
+        [Required]
         public Double? FuelLevelNumber { get; set; }
         [Required]
         public List<AddingDeviceModelParamDetailCommand> Details { get; set; }
