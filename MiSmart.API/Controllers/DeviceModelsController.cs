@@ -117,7 +117,7 @@ namespace MiSmart.API.Controllers
                 response.AddNotFoundErr("DeviceModel");
             }
 
-            var activeParams = await deviceModelParamRepository.GetListEntitiesAsync(new PageCommand(), ww => ww.IsActive);
+            var activeParams = await deviceModelParamRepository.GetListEntitiesAsync(new PageCommand(), ww => ww.IsActive && ww.DeviceModelID == id);
             foreach (var param in activeParams)
             {
                 param.IsActive = false;
@@ -193,7 +193,7 @@ namespace MiSmart.API.Controllers
             {
                 response.AddNotFoundErr("DeviceModelParam");
             }
-            var activeParams = await deviceModelParamRepository.GetListEntitiesAsync(new PageCommand(), ww => ww.IsActive);
+            var activeParams = await deviceModelParamRepository.GetListEntitiesAsync(new PageCommand(), ww => ww.IsActive && ww.DeviceModelID == id);
             foreach (var param in activeParams)
             {
                 param.IsActive = false;
