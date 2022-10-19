@@ -25,8 +25,8 @@ namespace MiSmart.DAL.ViewModels
             YMin = entity.YMin;
             YMax = entity.YMax;
             FuelLevelNumber = entity.FuelLevelNumber;
-            Details = entity.Details.Select(ww => ViewModelHelpers.ConvertToViewModel<DeviceModelParamDetail, DeviceModelParamDetailViewModel>(ww)).ToArray();
-            CentrifugalDetails = entity.CentrifugalDetails.Select(ww => ViewModelHelpers.ConvertToViewModel<DeviceModelParamCentrifugalDetail, DeviceModelParamCentrifugalDetailViewModel>(ww)).ToArray();
+            Details = entity.Details.OrderBy(ww => ww.XMin).Select(ww => ViewModelHelpers.ConvertToViewModel<DeviceModelParamDetail, DeviceModelParamDetailViewModel>(ww)).ToArray();
+            CentrifugalDetails = entity.CentrifugalDetails.OrderBy(ww => ww.XMin).Select(ww => ViewModelHelpers.ConvertToViewModel<DeviceModelParamCentrifugalDetail, DeviceModelParamCentrifugalDetailViewModel>(ww)).ToArray();
         }
     }
 
