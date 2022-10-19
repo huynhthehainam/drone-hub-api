@@ -22,6 +22,7 @@ namespace MiSmart.DAL.ViewModels
         public String Name { get; set; }
         public Int32 DevicesCount { get; set; }
         public String FileUrl { get; set; }
+        public DeviceModelType Type { get; set; }
         public List<CustomerDeviceSpecificQuantity> SpecificQuantities { get; set; }
         public void LoadFrom(DeviceModel entity)
         {
@@ -30,7 +31,7 @@ namespace MiSmart.DAL.ViewModels
             DevicesCount = entity.Devices.Count;
             Entity = entity;
             FileUrl = entity.FileUrl;
-            
+            Type = entity.Type;
             var group = entity.Devices.GroupBy(ww => ww.Customer).ToList();
             SpecificQuantities = group.Select(ww => new CustomerDeviceSpecificQuantity
             {

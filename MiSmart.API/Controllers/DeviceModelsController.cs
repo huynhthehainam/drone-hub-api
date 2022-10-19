@@ -140,7 +140,13 @@ namespace MiSmart.API.Controllers
                     B = ww.B.GetValueOrDefault(),
                     XMax = ww.XMax.GetValueOrDefault(),
                     XMin = ww.XMin.GetValueOrDefault(),
-
+                }).ToArray(),
+                CentrifugalDetails = command.CentrifugalDetails.Select(ww => new DeviceModelParamCentrifugalDetail()
+                {
+                    A = ww.A.GetValueOrDefault(),
+                    B = ww.B.GetValueOrDefault(),
+                    XMax = ww.XMax.GetValueOrDefault(),
+                    XMin = ww.XMin.GetValueOrDefault(),
                 }).ToArray(),
             });
 

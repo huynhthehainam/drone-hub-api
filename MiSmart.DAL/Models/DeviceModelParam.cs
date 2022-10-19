@@ -42,6 +42,13 @@ namespace MiSmart.DAL.Models
             get => lazyLoader.Load(this, ref details);
             set => details = value;
         }
+
+        private ICollection<DeviceModelParamCentrifugalDetail> centrifugalDetails;
+        public ICollection<DeviceModelParamCentrifugalDetail> CentrifugalDetails
+        {
+            get => lazyLoader.Load(this, ref centrifugalDetails);
+            set => centrifugalDetails = value;
+        }
     }
 
     public class DeviceModelParamDetail : EntityBase<Int32>
@@ -57,8 +64,6 @@ namespace MiSmart.DAL.Models
         public Double XMax { get; set; }
         public Double A { get; set; }
         public Double B { get; set; }
-
-
         private DeviceModelParam deviceModelParam;
         public DeviceModelParam DeviceModelParam
         {
@@ -66,6 +71,27 @@ namespace MiSmart.DAL.Models
             set => deviceModelParam = value;
         }
         public Int32 DeviceModelParamID { get; set; }
+    }
 
+    public class DeviceModelParamCentrifugalDetail : EntityBase<Int32>
+    {
+        public DeviceModelParamCentrifugalDetail()
+        {
+        }
+
+        public DeviceModelParamCentrifugalDetail(ILazyLoader lazyLoader) : base(lazyLoader)
+        {
+        }
+        public Double XMin { get; set; }
+        public Double XMax { get; set; }
+        public Double A { get; set; }
+        public Double B { get; set; }
+        private DeviceModelParam deviceModelParam;
+        public DeviceModelParam DeviceModelParam
+        {
+            get => lazyLoader.Load(this, ref deviceModelParam);
+            set => deviceModelParam = value;
+        }
+        public Int32 DeviceModelParamID { get; set; }
     }
 }

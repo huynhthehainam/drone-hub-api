@@ -45,6 +45,7 @@ namespace MiSmart.DAL.DatabaseContexts
 
         public DbSet<DeviceModelParam> DeviceModelParams { get; set; }
         public DbSet<DeviceModelParamDetail> DeviceModelParamDetails { get; set; }
+        public DbSet<DeviceModelParamCentrifugalDetail> DeviceModelParamCentrifugalDetails { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -210,6 +211,10 @@ namespace MiSmart.DAL.DatabaseContexts
             modelBuilder.Entity<DeviceModelParamDetail>(ww =>
             {
                 ww.HasOne(ww => ww.DeviceModelParam).WithMany(ww => ww.Details).HasForeignKey(ww => ww.DeviceModelParamID).OnDelete(DeleteBehavior.Cascade);
+            });
+            modelBuilder.Entity<DeviceModelParamCentrifugalDetail>(ww =>
+            {
+                ww.HasOne(ww => ww.DeviceModelParam).WithMany(ww => ww.CentrifugalDetails).HasForeignKey(ww => ww.DeviceModelParamID).OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

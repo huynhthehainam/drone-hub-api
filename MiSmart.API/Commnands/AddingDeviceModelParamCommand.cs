@@ -16,6 +16,18 @@ namespace MiSmart.API.Commands
         [Required]
         public Double? B { get; set; }
     }
+
+    public class AddingDeviceModelCentrifugalParamDetailCommand
+    {
+        [Required]
+        public Double? XMin { get; set; }
+        [Required]
+        public Double? XMax { get; set; }
+        [Required]
+        public Double? A { get; set; }
+        [Required]
+        public Double? B { get; set; }
+    }
     public class AddingDeviceModelParamCommand
     {
         [Required]
@@ -29,6 +41,8 @@ namespace MiSmart.API.Commands
         public Double? FuelLevelNumber { get; set; }
         [Required]
         public List<AddingDeviceModelParamDetailCommand> Details { get; set; }
+        [Required]
+        public List<AddingDeviceModelCentrifugalParamDetailCommand> CentrifugalDetails { get; set; }
 
     }
 
