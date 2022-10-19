@@ -13,7 +13,6 @@ namespace MiSmart.DAL.ViewModels
         public String Description { get; set; }
         public String Name {get; set;}
         public Double YMin { get; set; }
-        public String Name { get; set; }
         public Double YMax { get; set; }
         public Double YCentrifugalMin { get; set; }
         public Double YCentrifugalMax { get; set; }
@@ -26,7 +25,7 @@ namespace MiSmart.DAL.ViewModels
             IsActive = entity.IsActive;
             CreationTime = entity.CreationTime;
             Description = entity.Description;
-            Name = entity.Name;
+            
             YMin = entity.YMin;
             Name = entity.Name;
             YMax = entity.YMax;
