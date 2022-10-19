@@ -27,5 +27,12 @@ namespace MiSmart.DAL.Models
             get => lazyLoader.Load(this, ref devices);
             set => devices = value;
         }
+
+        private ICollection<DeviceModelParam> modelParams;
+        public ICollection<DeviceModelParam> ModelParams
+        {
+            get => lazyLoader.Load(this, ref modelParams);
+            set => modelParams = value;
+        }
     }
 }

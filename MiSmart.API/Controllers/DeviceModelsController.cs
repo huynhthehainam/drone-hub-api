@@ -14,6 +14,7 @@ using MiSmart.Infrastructure.Permissions;
 using MiSmart.API.Permissions;
 using MiSmart.Infrastructure.Minio;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace MiSmart.API.Controllers
 {
@@ -99,6 +100,52 @@ namespace MiSmart.API.Controllers
             deviceModel.Name = String.IsNullOrWhiteSpace(command.Name) ? deviceModel.Name : command.Name;
 
             await deviceModelRepository.UpdateAsync(deviceModel);
+
+
+            return response.ToIActionResult();
+        }
+
+        [HttpPost("{id:int}/ModelParams")]
+        [HasPermission(typeof(AdminPermission))]
+        public async Task<IActionResult> CreateModelParam([FromRoute] Int32 id, [FromServices] DeviceModelRepository deviceModelRepository, [FromServices] DeviceModelParamRepository deviceModelParamRepository, [FromBody] AddingDeviceModelParamCommand command)
+        {
+            ActionResponse response = actionResponseFactory.CreateInstance();
+
+            var deviceModel = await deviceModelRepository.GetAsync(ww => ww.ID == id);
+            if (deviceModel is null)
+            {
+                response.AddNotFoundErr("DeviceModel");
+            }
+
+            var activeParams = await deviceModelParamRepository.GetListEntitiesAsync(new PageCommand(), ww => ww.IsActive);
+            foreach (var param in activeParams)
+            {
+                param.IsActive = false;
+                await deviceModelParamRepository.UpdateAsync(param);
+            }
+
+            DeviceModelParam deviceModelParam = await deviceModelParamRepository.CreateAsync(new DeviceModelParam()
+            {
+                CreationTime = DateTime.UtcNow,
+                Description = command.Description,
+                DeviceModel = deviceModel,
+                FuelLevelNumber = command.FuelLevelNumber.GetValueOrDefault(),
+                IsActive = true,
+                Name = command.Name,
+                YMax = command.YMax.GetValueOrDefault(),
+                YMin = command.YMin.GetValueOrDefault(),
+                Details = command.Details.Select(ww => new DeviceModelParamDetail()
+                {
+                    A = ww.A.GetValueOrDefault(),
+                    B = ww.B.GetValueOrDefault(),
+                    XMax = ww.XMax.GetValueOrDefault(),
+                    XMin = ww.XMin.GetValueOrDefault(),
+
+                }).ToArray(),
+            });
+
+            response.SetCreatedObject(deviceModelParam);
+
 
 
             return response.ToIActionResult();

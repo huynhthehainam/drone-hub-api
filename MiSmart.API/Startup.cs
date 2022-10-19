@@ -189,6 +189,7 @@ namespace MiSmart.API
             services.AddScoped<PartRepository, PartRepository>();
             services.AddScoped<LogResultDetailRepository, LogResultDetailRepository>();
             services.AddScoped<SecondLogReportRepository, SecondLogReportRepository>();
+            services.AddScoped<DeviceModelParamRepository, DeviceModelParamRepository>();
 
             #endregion
 
