@@ -11,6 +11,7 @@ namespace MiSmart.DAL.ViewModels
         public Boolean IsActive { get; set; }
         public DateTime CreationTime { get; set; }
         public String Description { get; set; }
+        public String Name {get; set;}
         public Double YMin { get; set; }
         public Double YMax { get; set; }
         public Double FuelLevelNumber { get; set; }
@@ -22,6 +23,7 @@ namespace MiSmart.DAL.ViewModels
             IsActive = entity.IsActive;
             CreationTime = entity.CreationTime;
             Description = entity.Description;
+            Name = entity.Name;
             YMin = entity.YMin;
             YMax = entity.YMax;
             FuelLevelNumber = entity.FuelLevelNumber;

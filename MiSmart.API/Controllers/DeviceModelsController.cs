@@ -156,5 +156,52 @@ namespace MiSmart.API.Controllers
 
             return response.ToIActionResult();
         }
+        [HttpGet("{id:int}/ModelParams")]
+        [HasPermission(typeof(AdminPermission))]
+        public async Task<IActionResult> GetListModelParams([FromRoute] Int32 id, [FromServices] DeviceModelRepository deviceModelRepository, 
+        [FromServices] DeviceModelParamRepository deviceModelParamRepository,[FromQuery] PageCommand pageCommand)
+        {
+            ActionResponse response = actionResponseFactory.CreateInstance();
+
+            var deviceModel = await deviceModelRepository.GetAsync(ww => ww.ID == id);
+            if (deviceModel is null)
+            {
+                response.AddNotFoundErr("DeviceModel");
+            }
+
+            Expression<Func<DeviceModelParam, Boolean>> query = ww => (ww.DeviceModelID == deviceModel.ID);
+            var listResponse = await deviceModelParamRepository.GetListResponseViewAsync<DeviceModelParamViewModel>(pageCommand, query);
+            listResponse.SetResponse(response);
+            
+            return response.ToIActionResult();
+        }
+        [HttpPatch("{id:int}/DeviceModelParams/{modelParamId:int}/ActiveModelParam")]
+        [HasPermission(typeof(AdminPermission))]
+        public async Task<IActionResult> ActiveModelParam([FromRoute] Int32 id, [FromRoute] Int32 modelParamId, [FromServices] DeviceModelRepository deviceModelRepository, 
+        [FromServices] DeviceModelParamRepository deviceModelParamRepository)
+        {
+            ActionResponse response = actionResponseFactory.CreateInstance();
+            var deviceModel = await deviceModelRepository.GetAsync(ww => ww.ID == id);
+            if (deviceModel is null){
+                response.AddNotFoundErr("DeviceModel");
+            }
+
+            var deviceModelParam = await deviceModelParamRepository.GetAsync(ww => ww.ID == modelParamId);
+            if (deviceModelParam is null)
+            {
+                response.AddNotFoundErr("DeviceModelParam");
+            }
+            var activeParams = await deviceModelParamRepository.GetListEntitiesAsync(new PageCommand(), ww => ww.IsActive);
+            foreach (var param in activeParams)
+            {
+                param.IsActive = false;
+                await deviceModelParamRepository.UpdateAsync(param);
+            }
+
+            deviceModelParam.IsActive = true;
+            await deviceModelParamRepository.UpdateAsync(deviceModelParam);
+
+            return response.ToIActionResult();
+        }
     }
 }
