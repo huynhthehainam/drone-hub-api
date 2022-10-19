@@ -134,6 +134,8 @@ namespace MiSmart.API.Controllers
                 Name = command.Name,
                 YMax = command.YMax.GetValueOrDefault(),
                 YMin = command.YMin.GetValueOrDefault(),
+                YCentrifugalMax = command.YCentrifugalMax.GetValueOrDefault(),
+                YCentrifugalMin = command.YCentrifugalMin.GetValueOrDefault(),
                 Details = command.Details.Select(ww => new DeviceModelParamDetail()
                 {
                     A = ww.A.GetValueOrDefault(),

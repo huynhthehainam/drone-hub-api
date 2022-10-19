@@ -24,6 +24,8 @@ namespace MiSmart.DAL.Models
         public String Description { get; set; }
         public Double YMin { get; set; }
         public Double YMax { get; set; }
+        public Double YCentrifugalMin { get; set; }
+        public Double YCentrifugalMax { get; set; }
         public Double FuelLevelNumber { get; set; }
         private DeviceModel deviceModel;
         public DeviceModel DeviceModel
