@@ -30,7 +30,7 @@ namespace MiSmart.API.Controllers
         [FromServices] DeviceModelRepository deviceModelRepository)
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
-            var model = await deviceModelRepository.CreateAsync(new DeviceModel() { Name = command.Name });
+            var model = await deviceModelRepository.CreateAsync(new DeviceModel() { Name = command.Name, Type = command.Type });
             response.SetCreatedObject(model);
 
             return response.ToIActionResult();
