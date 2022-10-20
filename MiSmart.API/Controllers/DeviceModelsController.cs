@@ -160,8 +160,8 @@ namespace MiSmart.API.Controllers
         }
         [HttpGet("{id:int}/ModelParams")]
         [HasPermission(typeof(AdminPermission))]
-        public async Task<IActionResult> GetListModelParams([FromRoute] Int32 id, [FromServices] DeviceModelRepository deviceModelRepository, 
-        [FromServices] DeviceModelParamRepository deviceModelParamRepository,[FromQuery] PageCommand pageCommand)
+        public async Task<IActionResult> GetListModelParams([FromRoute] Int32 id, [FromServices] DeviceModelRepository deviceModelRepository,
+        [FromServices] DeviceModelParamRepository deviceModelParamRepository, [FromQuery] PageCommand pageCommand)
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
 
@@ -172,19 +172,20 @@ namespace MiSmart.API.Controllers
             }
 
             Expression<Func<DeviceModelParam, Boolean>> query = ww => (ww.DeviceModelID == deviceModel.ID);
-            var listResponse = await deviceModelParamRepository.GetListResponseViewAsync<DeviceModelParamViewModel>(pageCommand, query);
+            var listResponse = await deviceModelParamRepository.GetListResponseViewAsync<DeviceModelParamViewModel>(pageCommand, query, ww => ww.CreationTime, false);
             listResponse.SetResponse(response);
-            
+
             return response.ToIActionResult();
         }
         [HttpPatch("{id:int}/DeviceModelParams/{modelParamId:int}/ActiveModelParam")]
         [HasPermission(typeof(AdminPermission))]
-        public async Task<IActionResult> ActiveModelParam([FromRoute] Int32 id, [FromRoute] Int32 modelParamId, [FromServices] DeviceModelRepository deviceModelRepository, 
+        public async Task<IActionResult> ActiveModelParam([FromRoute] Int32 id, [FromRoute] Int32 modelParamId, [FromServices] DeviceModelRepository deviceModelRepository,
         [FromServices] DeviceModelParamRepository deviceModelParamRepository)
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
             var deviceModel = await deviceModelRepository.GetAsync(ww => ww.ID == id);
-            if (deviceModel is null){
+            if (deviceModel is null)
+            {
                 response.AddNotFoundErr("DeviceModel");
             }
 
