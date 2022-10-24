@@ -286,7 +286,6 @@ namespace MiSmart.API.Controllers
             logReport.UpdatedTime = DateTime.UtcNow;
             logReport.AccidentTime = command.AccidentTime;
             logReport.Suggest = command.Suggest;
-            logReport.ImageUrls = new List<String> { };
             logReport.PartnerCompanyName = command.PartnerCompanyName;
             logReport.PilotDescription = command.PilotDescription;
             logReport.ReporterDescription = command.ReporterDescription;
@@ -432,8 +431,7 @@ namespace MiSmart.API.Controllers
             logResult.AnalystName = CurrentUser.Email;
             logResult.Suggest = command.Suggest;
             logResult.Conclusion = command.Conclusion;
-            logResult.ImageUrls = new List<String> { };
-
+    
             await logReportResultRepository.UpdateAsync(logResult);
             return response.ToIActionResult();
         }
