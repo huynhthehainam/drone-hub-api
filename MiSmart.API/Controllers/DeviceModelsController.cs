@@ -134,6 +134,10 @@ namespace MiSmart.API.Controllers
                 Name = command.Name,
                 YMax = command.YMax.GetValueOrDefault(),
                 YMin = command.YMin.GetValueOrDefault(),
+                FlowRateMaxLimit = command.FlowRateMaxLimit.GetValueOrDefault(),
+                FlowRateMiddleLimit = command.FlowRateMiddleLimit.GetValueOrDefault(),
+                FlowRateMinLimit = command.FlowRateMinLimit.GetValueOrDefault(),
+
                 YCentrifugalMax = command.YCentrifugalMax.GetValueOrDefault(),
                 YCentrifugalMin = command.YCentrifugalMin.GetValueOrDefault(),
                 Details = command.Details.Select(ww => new DeviceModelParamDetail()
@@ -144,6 +148,13 @@ namespace MiSmart.API.Controllers
                     XMin = ww.XMin.GetValueOrDefault(),
                 }).ToArray(),
                 CentrifugalDetails = command.CentrifugalDetails.Select(ww => new DeviceModelParamCentrifugalDetail()
+                {
+                    A = ww.A.GetValueOrDefault(),
+                    B = ww.B.GetValueOrDefault(),
+                    XMax = ww.XMax.GetValueOrDefault(),
+                    XMin = ww.XMin.GetValueOrDefault(),
+                }).ToArray(),
+                Centrifugal4Details = command.Centrifugal4Details.Select(ww => new DeviceModelParamCentrifugal4Detail()
                 {
                     A = ww.A.GetValueOrDefault(),
                     B = ww.B.GetValueOrDefault(),

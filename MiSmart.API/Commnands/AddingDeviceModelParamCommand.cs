@@ -28,6 +28,17 @@ namespace MiSmart.API.Commands
         [Required]
         public Double? B { get; set; }
     }
+    public class AddingDeviceModelCentrifugalParam4DetailCommand
+    {
+        [Required]
+        public Double? XMin { get; set; }
+        [Required]
+        public Double? XMax { get; set; }
+        [Required]
+        public Double? A { get; set; }
+        [Required]
+        public Double? B { get; set; }
+    }
     public class AddingDeviceModelParamCommand
     {
         [Required]
@@ -44,9 +55,17 @@ namespace MiSmart.API.Commands
         [Required]
         public Double? FuelLevelNumber { get; set; }
         [Required]
+        public Double? FlowRateMinLimit { get; set; }
+        [Required]
+        public Double? FlowRateMiddleLimit { get; set; }
+        [Required]
+        public Double? FlowRateMaxLimit { get; set; }
+        [Required]
         public List<AddingDeviceModelParamDetailCommand> Details { get; set; }
         [Required]
         public List<AddingDeviceModelCentrifugalParamDetailCommand> CentrifugalDetails { get; set; }
+        [Required]
+        public List<AddingDeviceModelCentrifugalParam4DetailCommand> Centrifugal4Details { get; set; }
 
     }
 

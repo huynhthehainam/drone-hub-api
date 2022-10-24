@@ -27,6 +27,9 @@ namespace MiSmart.DAL.Models
         public Double YCentrifugalMin { get; set; }
         public Double YCentrifugalMax { get; set; }
         public Double FuelLevelNumber { get; set; }
+        public Double FlowRateMinLimit { get; set; }
+        public Double FlowRateMiddleLimit { get; set; }
+        public Double FlowRateMaxLimit { get; set; }
         private DeviceModel deviceModel;
         public DeviceModel DeviceModel
         {
@@ -50,6 +53,12 @@ namespace MiSmart.DAL.Models
         {
             get => lazyLoader.Load(this, ref centrifugalDetails);
             set => centrifugalDetails = value;
+        }
+        private ICollection<DeviceModelParamCentrifugal4Detail> centrifugal4Details;
+        public ICollection<DeviceModelParamCentrifugal4Detail> Centrifugal4Details
+        {
+            get => lazyLoader.Load(this, ref centrifugal4Details);
+            set => centrifugal4Details = value;
         }
     }
 
@@ -82,6 +91,27 @@ namespace MiSmart.DAL.Models
         }
 
         public DeviceModelParamCentrifugalDetail(ILazyLoader lazyLoader) : base(lazyLoader)
+        {
+        }
+        public Double XMin { get; set; }
+        public Double XMax { get; set; }
+        public Double A { get; set; }
+        public Double B { get; set; }
+        private DeviceModelParam deviceModelParam;
+        public DeviceModelParam DeviceModelParam
+        {
+            get => lazyLoader.Load(this, ref deviceModelParam);
+            set => deviceModelParam = value;
+        }
+        public Int32 DeviceModelParamID { get; set; }
+    }
+    public class DeviceModelParamCentrifugal4Detail : EntityBase<Int32>
+    {
+        public DeviceModelParamCentrifugal4Detail()
+        {
+        }
+
+        public DeviceModelParamCentrifugal4Detail(ILazyLoader lazyLoader) : base(lazyLoader)
         {
         }
         public Double XMin { get; set; }
