@@ -236,7 +236,6 @@ namespace MiSmart.API.Controllers
             {
                 response.AddExistedErr("LogReport");
             }
-            String[] email = CurrentUser.Email.Split(' ');
             var report = new LogReport
             {
                 LogFileID = id,
@@ -248,7 +247,7 @@ namespace MiSmart.API.Controllers
                 PilotName = command.PilotName,
                 PartnerCompanyName = command.PartnerCompanyName,
                 UserUUID = CurrentUser.UUID,
-                Username = email[email.Count() - 1]
+                Username = CurrentUser.Email,
             };
 
             await logReportRepository.CreateAsync(report);
@@ -322,7 +321,6 @@ namespace MiSmart.API.Controllers
             var logResult = await logReportResultRepository.GetAsync(ww => ww.LogFileID == logFile.ID);
             if (logResult is not null)
                 response.AddExistedErr("ResultReport");
-            String[] email = CurrentUser.Email.Split(" ");
             var result = new LogReportResult
             {
                 ImageUrls = new List<String> { },
@@ -332,7 +330,7 @@ namespace MiSmart.API.Controllers
                 Suggest = command.Suggest,
                 Conclusion = command.Conclusion,
                 ResponsibleCompany = command.ResponsibleCompany,
-                AnalystName = email[email.Count() - 1]
+                AnalystName = CurrentUser.Email,
             };
             if (command.ResponsibleCompany == ResponsibleCompany.MiSmart)
             {
@@ -346,6 +344,10 @@ namespace MiSmart.API.Controllers
                 {
                     result.ExecutionCompany = executionCompany;
                 }
+            }
+            else
+            {
+                result.ExecutionCompany = null;
             }
             var res = await logReportResultRepository.CreateAsync(result);
 
@@ -419,10 +421,15 @@ namespace MiSmart.API.Controllers
                 if (executionCompany is not null)
                     logResult.ExecutionCompany = executionCompany;
             }
-            String[] email = CurrentUser.Email.Split(" ");
+            else
+            {
+                logResult.ExecutionCompany = null;
+            }
+
+            logResult.ResponsibleCompany = command.ResponsibleCompany;
             logResult.DetailedAnalysis = command.DetailedAnalysis;
             logResult.AnalystUUID = CurrentUser.UUID;
-            logResult.AnalystName = email[email.Count() - 1];
+            logResult.AnalystName = CurrentUser.Email;
             logResult.Suggest = command.Suggest;
             logResult.Conclusion = command.Conclusion;
             logResult.ImageUrls = new List<String> { };
