@@ -483,7 +483,7 @@ namespace MiSmart.API.Controllers
                 String token = TokenHelper.GenerateToken();
                 await logTokenRepository.CreateAsync(new LogToken() { Token = token, UserUUID = logReport.UserUUID, LogFileID = id });
                 await emailService.SendMailAttachmentAsync(new String[] { logReport.Username }, new String[] { }, new String[] { }, @$"Subject: [Kết quả Phân tích Dữ liệu bay] Mã hiệu drone ({logFile.Device.Name})",
-                $"Dear,\n\nPhòng Điều khiển bay trả Kết quả phân tích Dữ liệu bay:\n\nThank you",false, null, null, bytes, "Kết quả");   
+                $"Dear,\n\nPhòng Điều khiển bay trả Kết quả phân tích Dữ liệu bay:\n\nThank you",false, null, null, bytes, "Kết quả.pdf");   
             }
 
             logFile.Status = LogStatus.Approved;
