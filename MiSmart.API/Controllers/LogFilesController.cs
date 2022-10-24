@@ -236,6 +236,7 @@ namespace MiSmart.API.Controllers
             {
                 response.AddExistedErr("LogReport");
             }
+            String[] email = CurrentUser.Email.Split(' ');
             var report = new LogReport
             {
                 LogFileID = id,
@@ -247,12 +248,8 @@ namespace MiSmart.API.Controllers
                 PilotName = command.PilotName,
                 PartnerCompanyName = command.PartnerCompanyName,
                 UserUUID = CurrentUser.UUID,
-                Username = CurrentUser.Email
+                Username = email[email.Count() - 1]
             };
-            if (command.Username?.Length != 0)
-            {
-                report.Username = command.Username;
-            }
 
             await logReportRepository.CreateAsync(report);
 
@@ -283,6 +280,11 @@ namespace MiSmart.API.Controllers
             {
                 response.AddNotFoundErr("LogReport");
             }
+            if (logReport.LogFile.Status != LogStatus.Warning)
+            {
+                response.AddInvalidErr("LogStatus");
+            }
+            String[] email = CurrentUser.Email.Split(' ');
             logReport.UpdatedTime = DateTime.UtcNow;
             logReport.AccidentTime = command.AccidentTime;
             logReport.Suggest = command.Suggest;
@@ -290,6 +292,9 @@ namespace MiSmart.API.Controllers
             logReport.PartnerCompanyName = command.PartnerCompanyName;
             logReport.PilotDescription = command.PilotDescription;
             logReport.ReporterDescription = command.ReporterDescription;
+            logReport.UserUUID = CurrentUser.UUID;
+            logReport.Username = email[email.Count() - 1];
+
             await logReportRepository.UpdateAsync(logReport);
             return response.ToIActionResult();
         }
@@ -319,6 +324,7 @@ namespace MiSmart.API.Controllers
             var logResult = await logReportResultRepository.GetAsync(ww => ww.LogFileID == logFile.ID);
             if (logResult is not null)
                 response.AddExistedErr("ResultReport");
+            String[] email = CurrentUser.Email.Split(" ");
             var result = new LogReportResult
             {
                 ImageUrls = new List<String> { },
@@ -328,7 +334,7 @@ namespace MiSmart.API.Controllers
                 Suggest = command.Suggest,
                 Conclusion = command.Conclusion,
                 ResponsibleCompany = command.ResponsibleCompany,
-                AnalystName = CurrentUser.Email
+                AnalystName = email[email.Count() - 1]
             };
             if (command.ResponsibleCompany == ResponsibleCompany.MiSmart)
             {
@@ -388,6 +394,10 @@ namespace MiSmart.API.Controllers
             {
                 response.AddNotFoundErr("LogResult");
             }
+            if (logResult.LogFile.Status != LogStatus.Completed)
+            {
+                response.AddInvalidErr("LogStatus");
+            }
             foreach (AddingLogResultDetailCommand item in command.ListErrors)
             {
                 var error = await logResultDetailRepository.GetAsync(ww => ww.PartErrorID == item.PartID.GetValueOrDefault() && ww.LogReportResultID == logResult.ID);
@@ -411,9 +421,10 @@ namespace MiSmart.API.Controllers
                 if (executionCompany is not null)
                     logResult.ExecutionCompany = executionCompany;
             }
+            String[] email = CurrentUser.Email.Split(" ");
             logResult.DetailedAnalysis = command.DetailedAnalysis;
             logResult.AnalystUUID = CurrentUser.UUID;
-            logResult.AnalystName = CurrentUser.Email;
+            logResult.AnalystName = email[email.Count() - 1];
             logResult.Suggest = command.Suggest;
             logResult.Conclusion = command.Conclusion;
             logResult.ImageUrls = new List<String> { };
@@ -444,7 +455,7 @@ namespace MiSmart.API.Controllers
             {
                 response.AddNotFoundErr("LogReport");
             }
-            
+            String[] email = CurrentUser.Email.Split(" ");
             logResult.ApproverUUID = CurrentUser.UUID;
             logResult.ApproverName = CurrentUser.Email;
             
@@ -1049,6 +1060,7 @@ namespace MiSmart.API.Controllers
             {
                 response.AddInvalidErr("LogStatus");
             }
+            String[] email = CurrentUser.Email.Split(' ');
             var report = new SecondLogReport
             {
                 LogFileID = id,
@@ -1060,7 +1072,7 @@ namespace MiSmart.API.Controllers
                 UserUUID = CurrentUser.UUID,
                 PilotName = command.PilotName,
                 PartnerCompanyName = command.PartnerCompanyName,
-                Username = command.Username,
+                Username = email[email.Count() - 1],
             };
             var secondReport = await secondLogReportRepository.CreateAsync(report);
 
