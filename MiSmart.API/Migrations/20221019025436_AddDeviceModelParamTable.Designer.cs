@@ -5,6 +5,7 @@ using System.Text.Json;
 using MiSmart.DAL.DatabaseContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -14,9 +15,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MiSmart.API.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20221019025436_AddDeviceModelParamTable")]
+    partial class AddDeviceModelParamTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -275,9 +277,6 @@ namespace MiSmart.API.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("text");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("integer");
-
                     b.HasKey("ID");
 
                     b.ToTable("DeviceModels");
@@ -300,15 +299,6 @@ namespace MiSmart.API.Migrations
                     b.Property<int>("DeviceModelID")
                         .HasColumnType("integer");
 
-                    b.Property<double>("FlowRateMaxLimit")
-                        .HasColumnType("double precision");
-
-                    b.Property<double>("FlowRateMiddleLimit")
-                        .HasColumnType("double precision");
-
-                    b.Property<double>("FlowRateMinLimit")
-                        .HasColumnType("double precision");
-
                     b.Property<double>("FuelLevelNumber")
                         .HasColumnType("double precision");
 
@@ -317,12 +307,6 @@ namespace MiSmart.API.Migrations
 
                     b.Property<string>("Name")
                         .HasColumnType("text");
-
-                    b.Property<double>("YCentrifugalMax")
-                        .HasColumnType("double precision");
-
-                    b.Property<double>("YCentrifugalMin")
-                        .HasColumnType("double precision");
 
                     b.Property<double>("YMax")
                         .HasColumnType("double precision");
@@ -335,66 +319,6 @@ namespace MiSmart.API.Migrations
                     b.HasIndex("DeviceModelID");
 
                     b.ToTable("DeviceModelParams");
-                });
-
-            modelBuilder.Entity("MiSmart.DAL.Models.DeviceModelParamCentrifugal4Detail", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
-
-                    b.Property<double>("A")
-                        .HasColumnType("double precision");
-
-                    b.Property<double>("B")
-                        .HasColumnType("double precision");
-
-                    b.Property<int>("DeviceModelParamID")
-                        .HasColumnType("integer");
-
-                    b.Property<double>("XMax")
-                        .HasColumnType("double precision");
-
-                    b.Property<double>("XMin")
-                        .HasColumnType("double precision");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("DeviceModelParamID");
-
-                    b.ToTable("DeviceModelParamCentrifugal4Details");
-                });
-
-            modelBuilder.Entity("MiSmart.DAL.Models.DeviceModelParamCentrifugalDetail", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
-
-                    b.Property<double>("A")
-                        .HasColumnType("double precision");
-
-                    b.Property<double>("B")
-                        .HasColumnType("double precision");
-
-                    b.Property<int>("DeviceModelParamID")
-                        .HasColumnType("integer");
-
-                    b.Property<double>("XMax")
-                        .HasColumnType("double precision");
-
-                    b.Property<double>("XMin")
-                        .HasColumnType("double precision");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("DeviceModelParamID");
-
-                    b.ToTable("DeviceModelParamCentrifugalDetails");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.DeviceModelParamDetail", b =>
@@ -1430,28 +1354,6 @@ namespace MiSmart.API.Migrations
                     b.Navigation("DeviceModel");
                 });
 
-            modelBuilder.Entity("MiSmart.DAL.Models.DeviceModelParamCentrifugal4Detail", b =>
-                {
-                    b.HasOne("MiSmart.DAL.Models.DeviceModelParam", "DeviceModelParam")
-                        .WithMany("Centrifugal4Details")
-                        .HasForeignKey("DeviceModelParamID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("DeviceModelParam");
-                });
-
-            modelBuilder.Entity("MiSmart.DAL.Models.DeviceModelParamCentrifugalDetail", b =>
-                {
-                    b.HasOne("MiSmart.DAL.Models.DeviceModelParam", "DeviceModelParam")
-                        .WithMany("CentrifugalDetails")
-                        .HasForeignKey("DeviceModelParamID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("DeviceModelParam");
-                });
-
             modelBuilder.Entity("MiSmart.DAL.Models.DeviceModelParamDetail", b =>
                 {
                     b.HasOne("MiSmart.DAL.Models.DeviceModelParam", "DeviceModelParam")
@@ -1804,10 +1706,6 @@ namespace MiSmart.API.Migrations
 
             modelBuilder.Entity("MiSmart.DAL.Models.DeviceModelParam", b =>
                 {
-                    b.Navigation("Centrifugal4Details");
-
-                    b.Navigation("CentrifugalDetails");
-
                     b.Navigation("Details");
                 });
 

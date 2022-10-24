@@ -645,7 +645,10 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
             {
                 countingService.Count4 += 1;
             }
-
+            else if (device.ID == 42)
+            {
+                countingService.Count5 += 1;
+            }
 
             var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
 

@@ -35,13 +35,18 @@ namespace MiSmart.DAL.DatabaseContexts
         public DbSet<StreamingLink> StreamingLinks { get; set; }
         public DbSet<MaintenanceReport> MaintenanceReports { get; set; }
         public DbSet<FlightStatReportRecord> FlightStatReportRecords { get; set; }
-        public DbSet<LogDetail> LogDetails {get; set; }
-        public DbSet<LogReport> LogReports {get; set; }
-        public DbSet<LogReportResult> LogReportResults {get; set; }
-        public DbSet<LogToken> LogTokens {get; set;}
-        public DbSet<Part> Parts {get; set; }
-        public DbSet<LogResultDetail> LogResultDetails {get; set; }
-        public DbSet<SecondLogReport> SecondLogReports {get; set; }
+        public DbSet<LogDetail> LogDetails { get; set; }
+        public DbSet<LogReport> LogReports { get; set; }
+        public DbSet<LogReportResult> LogReportResults { get; set; }
+        public DbSet<LogToken> LogTokens { get; set; }
+        public DbSet<Part> Parts { get; set; }
+        public DbSet<LogResultDetail> LogResultDetails { get; set; }
+        public DbSet<SecondLogReport> SecondLogReports { get; set; }
+
+        public DbSet<DeviceModelParam> DeviceModelParams { get; set; }
+        public DbSet<DeviceModelParamDetail> DeviceModelParamDetails { get; set; }
+        public DbSet<DeviceModelParamCentrifugalDetail> DeviceModelParamCentrifugalDetails { get; set; }
+        public DbSet<DeviceModelParamCentrifugal4Detail> DeviceModelParamCentrifugal4Details { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -173,17 +178,21 @@ namespace MiSmart.DAL.DatabaseContexts
                 ww.HasOne(ww => ww.FlightStat).WithMany(ww => ww.FlightStatReportRecords).HasForeignKey(ww => ww.FlightStatID).OnDelete(DeleteBehavior.Cascade);
             });
 
-            modelBuilder.Entity<LogDetail>(ww => {
+            modelBuilder.Entity<LogDetail>(ww =>
+            {
                 ww.HasOne(ww => ww.LogFile).WithOne(ww => ww.LogDetail).HasForeignKey<LogDetail>(ww => ww.LogFileID).OnDelete(DeleteBehavior.Cascade);
             });
-            modelBuilder.Entity<LogReport>(ww => {
+            modelBuilder.Entity<LogReport>(ww =>
+            {
                 ww.HasOne(ww => ww.LogFile).WithOne(ww => ww.LogReport).HasForeignKey<LogReport>(ww => ww.LogFileID).OnDelete(DeleteBehavior.Cascade);
             });
-            modelBuilder.Entity<LogReportResult>(ww => {
+            modelBuilder.Entity<LogReportResult>(ww =>
+            {
                 ww.HasOne(ww => ww.LogFile).WithOne(ww => ww.LogReportResult).HasForeignKey<LogReportResult>(ww => ww.LogFileID).OnDelete(DeleteBehavior.Cascade);
                 ww.HasOne(ww => ww.ExecutionCompany).WithMany(ww => ww.LogReportResults).HasForeignKey(ww => ww.ExecutionCompanyID).OnDelete(DeleteBehavior.Cascade);
             });
-            modelBuilder.Entity<LogResultDetail>(ww => {
+            modelBuilder.Entity<LogResultDetail>(ww =>
+            {
                 ww.HasOne(ww => ww.PartError).WithMany(ww => ww.LogResultDetails).HasForeignKey(ww => ww.PartErrorID).OnDelete(DeleteBehavior.Cascade);
                 ww.HasOne(ww => ww.LogReportResult).WithMany(ww => ww.LogResultDetails).HasForeignKey(ww => ww.LogReportResultID).OnDelete(DeleteBehavior.Cascade);
             });
@@ -191,8 +200,26 @@ namespace MiSmart.DAL.DatabaseContexts
             {
                 ww.HasOne(ww => ww.LogFile).WithMany(ww => ww.LogTokens).HasForeignKey(ww => ww.LogFileID).OnDelete(DeleteBehavior.Cascade);
             });
-            modelBuilder.Entity<SecondLogReport>(ww => {
+            modelBuilder.Entity<SecondLogReport>(ww =>
+            {
                 ww.HasOne(ww => ww.LogFile).WithOne(ww => ww.SecondLogReport).HasForeignKey<SecondLogReport>(ww => ww.LogFileID).OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<DeviceModelParam>(ww =>
+            {
+                ww.HasOne(ww => ww.DeviceModel).WithMany(ww => ww.ModelParams).HasForeignKey(ww => ww.DeviceModelID).OnDelete(DeleteBehavior.Cascade);
+            });
+            modelBuilder.Entity<DeviceModelParamDetail>(ww =>
+            {
+                ww.HasOne(ww => ww.DeviceModelParam).WithMany(ww => ww.Details).HasForeignKey(ww => ww.DeviceModelParamID).OnDelete(DeleteBehavior.Cascade);
+            });
+            modelBuilder.Entity<DeviceModelParamCentrifugalDetail>(ww =>
+            {
+                ww.HasOne(ww => ww.DeviceModelParam).WithMany(ww => ww.CentrifugalDetails).HasForeignKey(ww => ww.DeviceModelParamID).OnDelete(DeleteBehavior.Cascade);
+            });
+            modelBuilder.Entity<DeviceModelParamCentrifugal4Detail>(ww =>
+            {
+                ww.HasOne(ww => ww.DeviceModelParam).WithMany(ww => ww.Centrifugal4Details).HasForeignKey(ww => ww.DeviceModelParamID).OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

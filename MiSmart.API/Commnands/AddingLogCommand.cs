@@ -14,7 +14,6 @@ namespace MiSmart.API.Commands
         public DateTime AccidentTime { get; set; } = DateTime.UtcNow;
         public String PilotName { get; set; }
         public String PartnerCompanyName { get; set; }
-        public String Username { get; set; }
 
     }
     public class AddingLogResultCommand

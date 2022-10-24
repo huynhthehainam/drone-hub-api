@@ -27,6 +27,7 @@ namespace MiSmart.API.Controllers
                 Count2 = countingService.Count2,
                 Count3 = countingService.Count3,
                 Count4 = countingService.Count4,
+                Count5 = countingService.Count5,
                 Heartbeat = countingService.Heartbeat,
             });
             return Task.FromResult(response.ToIActionResult());

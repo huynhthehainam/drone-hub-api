@@ -14,6 +14,7 @@ using MiSmart.Infrastructure.Permissions;
 using MiSmart.API.Permissions;
 using MiSmart.Infrastructure.Minio;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace MiSmart.API.Controllers
 {
@@ -29,7 +30,7 @@ namespace MiSmart.API.Controllers
         [FromServices] DeviceModelRepository deviceModelRepository)
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
-            var model = await deviceModelRepository.CreateAsync(new DeviceModel() { Name = command.Name });
+            var model = await deviceModelRepository.CreateAsync(new DeviceModel() { Name = command.Name, Type = command.Type });
             response.SetCreatedObject(model);
 
             return response.ToIActionResult();
@@ -39,7 +40,7 @@ namespace MiSmart.API.Controllers
         {
             var response = actionResponseFactory.CreateInstance();
             Expression<Func<DeviceModel, Boolean>> query = ww => true;
-            var listResponse = await deviceModelRepository.GetListResponseViewAsync<SmallDeviceModelVieModel>(pageCommand, query);
+            var listResponse = await deviceModelRepository.GetListResponseViewAsync<SmallDeviceModelViewModel>(pageCommand, query);
 
             listResponse.SetResponse(response);
 
@@ -100,6 +101,119 @@ namespace MiSmart.API.Controllers
 
             await deviceModelRepository.UpdateAsync(deviceModel);
 
+
+            return response.ToIActionResult();
+        }
+
+        [HttpPost("{id:int}/ModelParams")]
+        [HasPermission(typeof(AdminPermission))]
+        public async Task<IActionResult> CreateModelParam([FromRoute] Int32 id, [FromServices] DeviceModelRepository deviceModelRepository, [FromServices] DeviceModelParamRepository deviceModelParamRepository, [FromBody] AddingDeviceModelParamCommand command)
+        {
+            ActionResponse response = actionResponseFactory.CreateInstance();
+
+            var deviceModel = await deviceModelRepository.GetAsync(ww => ww.ID == id);
+            if (deviceModel is null)
+            {
+                response.AddNotFoundErr("DeviceModel");
+            }
+
+            var activeParams = await deviceModelParamRepository.GetListEntitiesAsync(new PageCommand(), ww => ww.IsActive && ww.DeviceModelID == id);
+            foreach (var param in activeParams)
+            {
+                param.IsActive = false;
+                await deviceModelParamRepository.UpdateAsync(param);
+            }
+
+            DeviceModelParam deviceModelParam = await deviceModelParamRepository.CreateAsync(new DeviceModelParam()
+            {
+                CreationTime = DateTime.UtcNow,
+                Description = command.Description,
+                DeviceModel = deviceModel,
+                FuelLevelNumber = command.FuelLevelNumber.GetValueOrDefault(),
+                IsActive = true,
+                Name = command.Name,
+                YMax = command.YMax.GetValueOrDefault(),
+                YMin = command.YMin.GetValueOrDefault(),
+                FlowRateMaxLimit = command.FlowRateMaxLimit.GetValueOrDefault(),
+                FlowRateMiddleLimit = command.FlowRateMiddleLimit.GetValueOrDefault(),
+                FlowRateMinLimit = command.FlowRateMinLimit.GetValueOrDefault(),
+
+                YCentrifugalMax = command.YCentrifugalMax.GetValueOrDefault(),
+                YCentrifugalMin = command.YCentrifugalMin.GetValueOrDefault(),
+                Details = command.Details.Select(ww => new DeviceModelParamDetail()
+                {
+                    A = ww.A.GetValueOrDefault(),
+                    B = ww.B.GetValueOrDefault(),
+                    XMax = ww.XMax.GetValueOrDefault(),
+                    XMin = ww.XMin.GetValueOrDefault(),
+                }).ToArray(),
+                CentrifugalDetails = command.CentrifugalDetails.Select(ww => new DeviceModelParamCentrifugalDetail()
+                {
+                    A = ww.A.GetValueOrDefault(),
+                    B = ww.B.GetValueOrDefault(),
+                    XMax = ww.XMax.GetValueOrDefault(),
+                    XMin = ww.XMin.GetValueOrDefault(),
+                }).ToArray(),
+                Centrifugal4Details = command.Centrifugal4Details.Select(ww => new DeviceModelParamCentrifugal4Detail()
+                {
+                    A = ww.A.GetValueOrDefault(),
+                    B = ww.B.GetValueOrDefault(),
+                    XMax = ww.XMax.GetValueOrDefault(),
+                    XMin = ww.XMin.GetValueOrDefault(),
+                }).ToArray(),
+            });
+
+            response.SetCreatedObject(deviceModelParam);
+
+
+
+            return response.ToIActionResult();
+        }
+        [HttpGet("{id:int}/ModelParams")]
+        [HasPermission(typeof(AdminPermission))]
+        public async Task<IActionResult> GetListModelParams([FromRoute] Int32 id, [FromServices] DeviceModelRepository deviceModelRepository,
+        [FromServices] DeviceModelParamRepository deviceModelParamRepository, [FromQuery] PageCommand pageCommand)
+        {
+            ActionResponse response = actionResponseFactory.CreateInstance();
+
+            var deviceModel = await deviceModelRepository.GetAsync(ww => ww.ID == id);
+            if (deviceModel is null)
+            {
+                response.AddNotFoundErr("DeviceModel");
+            }
+
+            Expression<Func<DeviceModelParam, Boolean>> query = ww => (ww.DeviceModelID == deviceModel.ID);
+            var listResponse = await deviceModelParamRepository.GetListResponseViewAsync<DeviceModelParamViewModel>(pageCommand, query, ww => ww.CreationTime, false);
+            listResponse.SetResponse(response);
+
+            return response.ToIActionResult();
+        }
+        [HttpPatch("{id:int}/DeviceModelParams/{modelParamId:int}/ActiveModelParam")]
+        [HasPermission(typeof(AdminPermission))]
+        public async Task<IActionResult> ActiveModelParam([FromRoute] Int32 id, [FromRoute] Int32 modelParamId, [FromServices] DeviceModelRepository deviceModelRepository,
+        [FromServices] DeviceModelParamRepository deviceModelParamRepository)
+        {
+            ActionResponse response = actionResponseFactory.CreateInstance();
+            var deviceModel = await deviceModelRepository.GetAsync(ww => ww.ID == id);
+            if (deviceModel is null)
+            {
+                response.AddNotFoundErr("DeviceModel");
+            }
+
+            var deviceModelParam = await deviceModelParamRepository.GetAsync(ww => ww.ID == modelParamId);
+            if (deviceModelParam is null)
+            {
+                response.AddNotFoundErr("DeviceModelParam");
+            }
+            var activeParams = await deviceModelParamRepository.GetListEntitiesAsync(new PageCommand(), ww => ww.IsActive && ww.DeviceModelID == id);
+            foreach (var param in activeParams)
+            {
+                param.IsActive = false;
+                await deviceModelParamRepository.UpdateAsync(param);
+            }
+
+            deviceModelParam.IsActive = true;
+            await deviceModelParamRepository.UpdateAsync(deviceModelParam);
 
             return response.ToIActionResult();
         }

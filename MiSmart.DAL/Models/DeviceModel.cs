@@ -9,6 +9,13 @@ using MiSmart.Infrastructure.Data;
 
 namespace MiSmart.DAL.Models
 {
+
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public enum DeviceModelType
+    {
+        Pressure,
+        Centrifugal
+    }
     public class DeviceModel : EntityBase<Int32>
     {
         public DeviceModel() : base()
@@ -27,5 +34,14 @@ namespace MiSmart.DAL.Models
             get => lazyLoader.Load(this, ref devices);
             set => devices = value;
         }
+
+        private ICollection<DeviceModelParam> modelParams;
+        public ICollection<DeviceModelParam> ModelParams
+        {
+            get => lazyLoader.Load(this, ref modelParams);
+            set => modelParams = value;
+        }
+
+        public DeviceModelType Type { get; set; } = DeviceModelType.Pressure;
     }
 }
