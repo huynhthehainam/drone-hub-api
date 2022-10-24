@@ -26,6 +26,8 @@ namespace MiSmart.DAL.Models
         public Double YMax { get; set; }
         public Double YCentrifugalMin { get; set; }
         public Double YCentrifugalMax { get; set; }
+        public Double YCentrifugal4Min { get; set; }
+        public Double YCentrifugal4Max { get; set; }
         public Double FuelLevelNumber { get; set; }
         public Double FlowRateMinLimit { get; set; }
         public Double FlowRateMiddleLimit { get; set; }

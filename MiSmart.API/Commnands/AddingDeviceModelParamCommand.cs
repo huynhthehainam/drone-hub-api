@@ -61,6 +61,10 @@ namespace MiSmart.API.Commands
         [Required]
         public Double? FlowRateMaxLimit { get; set; }
         [Required]
+        public Double? YCentrifugal4Min { get; set; }
+        [Required]
+        public Double? YCentrifugal4Max { get; set; }
+        [Required]
         public List<AddingDeviceModelParamDetailCommand> Details { get; set; }
         [Required]
         public List<AddingDeviceModelCentrifugalParamDetailCommand> CentrifugalDetails { get; set; }
