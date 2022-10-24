@@ -137,7 +137,8 @@ namespace MiSmart.API.Controllers
                 FlowRateMaxLimit = command.FlowRateMaxLimit.GetValueOrDefault(),
                 FlowRateMiddleLimit = command.FlowRateMiddleLimit.GetValueOrDefault(),
                 FlowRateMinLimit = command.FlowRateMinLimit.GetValueOrDefault(),
-
+                YCentrifugal4Min = command.YCentrifugal4Min.GetValueOrDefault(),
+                YCentrifugal4Max = command.YCentrifugal4Max.GetValueOrDefault(),
                 YCentrifugalMax = command.YCentrifugalMax.GetValueOrDefault(),
                 YCentrifugalMin = command.YCentrifugalMin.GetValueOrDefault(),
                 Details = command.Details.Select(ww => new DeviceModelParamDetail()
