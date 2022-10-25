@@ -13,6 +13,7 @@ using System.Linq;
 using System.Text;
 using System.Net.Mail;
 using System.Net;
+using System.Drawing;
 
 namespace MiSmart.API.Services;
 
@@ -123,6 +124,26 @@ public class MyEmailService : EmailService
         await SendMailAsync(targetEmailSettings.DailyReport.ToArray(), new String[] { }, new String[] { }, "Báo cáo cảnh báo vận hành pin sai cách " + localNow.ToString("yyyy-MM-dd"), html, true);
     }
 
+    private String convertImgToBase64(String name)
+    {
+        var path = $"{htmlFolderPath}/Image/{name}";
+        if (File.Exists(path))
+        {
+            using (Image image = Image.FromFile(path))
+            {
+                using (MemoryStream m = new MemoryStream())
+                {
+                    image.Save(m, image.RawFormat);
+                    byte[] imageBytes = m.ToArray();
+
+                    // Convert byte[] to Base64 String
+                    string base64String = Convert.ToBase64String(imageBytes);
+                    return base64String;
+                }
+            }
+        }
+        return null;
+    }
     public StringBuilder GenerateResultLogReport(LogReportResult logResult, LogReport logReport, SecondLogReport secondLogReport)
     {
         TimeZoneInfo seaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
@@ -139,6 +160,14 @@ public class MyEmailService : EmailService
         htmlStringBuilder.Replace("analysis_day", logResult.UpdatedTime.Day.ToString());
         htmlStringBuilder.Replace("analysis_month", logResult.UpdatedTime.Month.ToString());
         htmlStringBuilder.Replace("analysis_year", logResult.UpdatedTime.Year.ToString());
+
+        String sign = convertImgToBase64("signDat.png");
+        htmlStringBuilder.Replace("manager_sign", $"data:image/png;base64, {sign}");
+        sign = convertImgToBase64("signAToan.png");
+        htmlStringBuilder.Replace("warden_sign", $"data:image/png;base64, {sign}");
+        sign = convertImgToBase64("white.png");
+        htmlStringBuilder.Replace("analysis_sign", $"data:image/png;base64, {sign}");
+        
         if (secondLogReport is null)
         {
             htmlStringBuilder.Replace("flight_id", "Chưa định danh");

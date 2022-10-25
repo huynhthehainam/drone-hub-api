@@ -1032,12 +1032,13 @@ namespace MiSmart.API.Controllers
                 actionResponse.AddNotFoundErr("ResultReport");
             
             StringBuilder html = emailService.GenerateResultLogReport(logResult, logReport, secondLogReport);
+            var htmlString = html.ToString();
             
             Byte[] bytes = null;
             System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
             using (MemoryStream ms = new MemoryStream())
             {
-                HtmlConverter.ConvertToPdf(html.ToString(), ms);
+                HtmlConverter.ConvertToPdf(htmlString, ms);
                 bytes = ms.ToArray();
             }
             actionResponse.SetFile(bytes, "application/pdf", "report.pdf");
