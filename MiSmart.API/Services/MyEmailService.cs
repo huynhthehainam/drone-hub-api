@@ -133,6 +133,8 @@ public class MyEmailService : EmailService
         conclusionResult = conclusionResult.Replace("\t", "&#09;");
         String suggestResult = logResult.Suggest.Replace(System.Environment.NewLine, "<br>");
         suggestResult = suggestResult.Replace("\t", "&#09;");
+        String detailAnalysisResult = logResult.DetailedAnalysis.Replace(System.Environment.NewLine, "<br>");
+        detailAnalysisResult = detailAnalysisResult.Replace("\t", "&#09;");
 
         htmlStringBuilder.Replace("analysis_day", logResult.UpdatedTime.Day.ToString());
         htmlStringBuilder.Replace("analysis_month", logResult.UpdatedTime.Month.ToString());
@@ -184,7 +186,7 @@ public class MyEmailService : EmailService
             else if (logReport.LogFile.Device.ExecutionCompany != null)
                 htmlStringBuilder.Replace("responsible_company", logReport.LogFile.Device.ExecutionCompany?.Name);
             htmlStringBuilder.Replace("conclusion", conclusionResult);
-            htmlStringBuilder.Replace("detailed_analysis", logResult.DetailedAnalysis);
+            htmlStringBuilder.Replace("detailed_analysis", detailAnalysisResult);
             htmlStringBuilder.Replace("result_suggestion", suggestResult);
             htmlStringBuilder.Replace("by_analyst", logResult.AnalystName);
             htmlStringBuilder.Replace("by_approver", logResult.ApproverName);
@@ -244,7 +246,7 @@ public class MyEmailService : EmailService
             else if (secondLogReport.LogFile.Device.ExecutionCompany != null)
                 htmlStringBuilder.Replace("responsible_company", secondLogReport.LogFile.Device.ExecutionCompany?.Name);
             htmlStringBuilder.Replace("conclusion", conclusionResult);
-            htmlStringBuilder.Replace("detailed_analysis", logResult.DetailedAnalysis);
+            htmlStringBuilder.Replace("detailed_analysis", detailAnalysisResult);
             htmlStringBuilder.Replace("result_suggestion", suggestResult);
             htmlStringBuilder.Replace("by_analyst", logResult.AnalystName);
             htmlStringBuilder.Replace("by_approver", logResult.ApproverName);
