@@ -38,6 +38,9 @@
 		<!-- <None Include="Seeding/**" CopyToOutputDirectory="PreserveNewest" /> -->
 		<!-- <None Include="wwwroot/images/default/default_avatar.jpg" CopyToOutputDirectory="PreserveNewest" /> -->
 	</ItemGroup>
+	<ItemGroup>
+    	<RuntimeHostConfigurationOption Include="System.Drawing.EnableUnixSupport" Value="true" />
+  	</ItemGroup>
 	<PropertyGroup>
 		<IsTransformWebConfigDisabled>true</IsTransformWebConfigDisabled>
 		<TargetFramework>net6.0</TargetFramework>
