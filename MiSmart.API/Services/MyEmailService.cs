@@ -129,6 +129,11 @@ public class MyEmailService : EmailService
         var html = GetHTML("ResultLogReport");
         StringBuilder htmlStringBuilder = new StringBuilder(html);
 
+        String conclusionResult = logResult.Conclusion.Replace(System.Environment.NewLine, "<br>");
+        conclusionResult = conclusionResult.Replace("\t", "&#09;");
+        String suggestResult = logResult.Suggest.Replace(System.Environment.NewLine, "<br>");
+        suggestResult = suggestResult.Replace("\t", "&#09;");
+
         htmlStringBuilder.Replace("analysis_day", logResult.UpdatedTime.Day.ToString());
         htmlStringBuilder.Replace("analysis_month", logResult.UpdatedTime.Month.ToString());
         htmlStringBuilder.Replace("analysis_year", logResult.UpdatedTime.Year.ToString());
@@ -178,9 +183,9 @@ public class MyEmailService : EmailService
                 htmlStringBuilder.Replace("responsible_company", "Không có công ty");
             else if (logReport.LogFile.Device.ExecutionCompany != null)
                 htmlStringBuilder.Replace("responsible_company", logReport.LogFile.Device.ExecutionCompany?.Name);
-            htmlStringBuilder.Replace("conclusion", logResult.Conclusion);
+            htmlStringBuilder.Replace("conclusion", conclusionResult);
             htmlStringBuilder.Replace("detailed_analysis", logResult.DetailedAnalysis);
-            htmlStringBuilder.Replace("result_suggestion", logResult.Suggest);
+            htmlStringBuilder.Replace("result_suggestion", suggestResult);
             htmlStringBuilder.Replace("by_analyst", logResult.AnalystName);
             htmlStringBuilder.Replace("by_approver", logResult.ApproverName);
             var listImageResult = "";
@@ -238,9 +243,9 @@ public class MyEmailService : EmailService
                 htmlStringBuilder.Replace("responsible_company", "Không có công ty");
             else if (secondLogReport.LogFile.Device.ExecutionCompany != null)
                 htmlStringBuilder.Replace("responsible_company", secondLogReport.LogFile.Device.ExecutionCompany?.Name);
-            htmlStringBuilder.Replace("conclusion", logResult.Conclusion);
+            htmlStringBuilder.Replace("conclusion", conclusionResult);
             htmlStringBuilder.Replace("detailed_analysis", logResult.DetailedAnalysis);
-            htmlStringBuilder.Replace("result_suggestion", logResult.Suggest);
+            htmlStringBuilder.Replace("result_suggestion", suggestResult);
             htmlStringBuilder.Replace("by_analyst", logResult.AnalystName);
             htmlStringBuilder.Replace("by_approver", logResult.ApproverName);
             var listImageResult = "";
