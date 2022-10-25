@@ -1042,6 +1042,7 @@ namespace MiSmart.API.Controllers
                 bytes = ms.ToArray();
             }
             actionResponse.SetFile(bytes, "application/pdf", "report.pdf");
+            // actionResponse.Data = htmlString;
             return actionResponse.ToIActionResult();
         }
         
