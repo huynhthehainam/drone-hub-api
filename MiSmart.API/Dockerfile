@@ -20,5 +20,6 @@ WORKDIR /app
 COPY --from=publish /app/publish .
 COPY --from=publish /src/wait-for-it.sh /app
 RUN chmod +x ./*.sh
+RUN apt-get update && apt-get install -y apt-utils
 RUN apt-get install -y libgdiplus
 ENTRYPOINT ["./wait-for-it.sh", "postgres_image:5432" ,"--","dotnet", "MiSmart.API.dll"]
