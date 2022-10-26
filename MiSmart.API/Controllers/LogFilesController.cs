@@ -1136,68 +1136,87 @@ namespace MiSmart.API.Controllers
             actionResponse.SetUpdatedMessage();
             return actionResponse.ToIActionResult();
         }
-        // [HttpPost("{id:Guid}/UpdateImageUrlsReport")]
-        // public async Task<IActionResult> UpdateImageUrlsReport([FromRoute] Guid id, [FromServices] LogReportRepository logReportRepository,
-        // [FromServices] MyEmailService emailService, [FromBody] UpdateImageUrlsCommand command)
-        // {
-        //     ActionResponse actionResponse = actionResponseFactory.CreateInstance();
-        //     var report = await logReportRepository.GetAsync(ww => ww.LogFileID == id && ww.UserUUID == CurrentUser.UUID);
-        //     if (report is null)
-        //     {
-        //         actionResponse.AddNotFoundErr("LogReport");
-        //     }
-        //     if (report.LogFile.Status != LogStatus.Warning){
-        //         actionResponse.AddInvalidErr("LogStatus");
-        //     }
-        //     report.ImageUrls = command.ImageUrls;
+        [HttpPost("{id:Guid}/UpdateImageUrlsReport")]
+        public async Task<IActionResult> UpdateImageUrlsReport([FromRoute] Guid id, [FromServices] LogReportRepository logReportRepository,
+        [FromServices] MyEmailService emailService, [FromBody] UpdateImageUrlsCommand command, [FromServices] MinioService minioService)
+        {
+            ActionResponse actionResponse = actionResponseFactory.CreateInstance();
+            if (CurrentUser.RoleID != 3 && !CurrentUser.IsAdministrator){
+                actionResponse.AddNotAllowedErr();
+            }
+            var report = await logReportRepository.GetAsync(ww => ww.LogFileID == id);
+            if (report is null)
+            {
+                actionResponse.AddNotFoundErr("LogReport");
+            }
+            if (report.LogFile.Status != LogStatus.Warning){
+                actionResponse.AddInvalidErr("LogStatus");
+            }
+            for (var i = 0; i < report.ImageUrls.Count; i++){
+                String url = report.ImageUrls[i];
+                if (!command.ImageUrls.Contains(url))
+                    await minioService.RemoveFileByUrlAsync(url);
+            }
+            report.ImageUrls = command.ImageUrls;
 
-        //     await logReportRepository.UpdateAsync(report);
+            await logReportRepository.UpdateAsync(report);
 
-        //     actionResponse.SetUpdatedMessage();
-        //     return actionResponse.ToIActionResult();
-        // }
+            actionResponse.SetUpdatedMessage();
+            return actionResponse.ToIActionResult();
+        }
 
-        // [HttpPost("{id:Guid}/UpdateImageUrlsResult")]
-        // public async Task<IActionResult> UpdateImageUrlsResult([FromRoute] Guid id, [FromServices] LogReportResultRepository logReportResultRepository,
-        // [FromServices] MyEmailService emailService, [FromBody] UpdateImageUrlsCommand command)
-        // {
-        //     ActionResponse actionResponse = actionResponseFactory.CreateInstance();
-        //     var result = await logReportResultRepository.GetAsync(ww => ww.LogFileID == id && ww.AnalystUUID == CurrentUser.UUID);
-        //     if (result is null)
-        //     {
-        //         actionResponse.AddNotFoundErr("ResultReport");
-        //     }
-        //     if (result.LogFile.Status != LogStatus.Completed){
-        //         actionResponse.AddInvalidErr("LogStatus");
-        //     }
-        //     result.ImageUrls = command.ImageUrls;
+        [HttpPost("{id:Guid}/UpdateImageUrlsResult")]
+        [HasPermission(typeof(AdminPermission))]
+        public async Task<IActionResult> UpdateImageUrlsResult([FromRoute] Guid id, [FromServices] LogReportResultRepository logReportResultRepository,
+        [FromServices] MyEmailService emailService, [FromBody] UpdateImageUrlsCommand command, [FromServices] MinioService minioService)
+        {
+            ActionResponse actionResponse = actionResponseFactory.CreateInstance();
+            var result = await logReportResultRepository.GetAsync(ww => ww.LogFileID == id);
+            if (result is null)
+            {
+                actionResponse.AddNotFoundErr("ResultReport");
+            }
+            if (result.LogFile.Status != LogStatus.Completed){
+                actionResponse.AddInvalidErr("LogStatus");
+            }
+            for (var i = 0; i < result.ImageUrls.Count; i++){
+                String url = result.ImageUrls[i];
+                if (!command.ImageUrls.Contains(url))
+                    await minioService.RemoveFileByUrlAsync(url);
+            }
+            result.ImageUrls = command.ImageUrls;
 
-        //     await logReportResultRepository.UpdateAsync(result);
+            await logReportResultRepository.UpdateAsync(result);
 
-        //     actionResponse.SetUpdatedMessage();
-        //     return actionResponse.ToIActionResult();
-        // }
+            actionResponse.SetUpdatedMessage();
+            return actionResponse.ToIActionResult();
+        }
 
-        // [HttpPost("UpdateImageUrlsResultFromEmail")]
-        // [AllowAnonymous]
-        // public async Task<IActionResult> UpdateImageUrlsReportFromEmail([FromRoute] Guid id, [FromServices] LogReportResultRepository logReportResultRepository,
-        // [FromServices] MyEmailService emailService, [FromBody] UpdateImageUrlsFromEmailCommand command, [FromServices] LogTokenRepository tokenRepository)
-        // {
-        //     ActionResponse actionResponse = actionResponseFactory.CreateInstance();
-        //     var report = await logReportResultRepository.GetAsync(ww => ww.Token == command.token);
-        //     if (report is null)
-        //     {
-        //         actionResponse.AddNotFoundErr("LogReport");
-        //     }
-        //     if (report.LogFile.Status != LogStatus.Warning){
-        //         actionResponse.AddInvalidErr("LogStatus");
-        //     }
-        //     report.ImageUrls = command.ImageUrls;
+        [HttpPost("UpdateImageUrlsResultFromEmail")]
+        [AllowAnonymous]
+        public async Task<IActionResult> UpdateImageUrlsReportFromEmail([FromRoute] Guid id, [FromServices] LogReportResultRepository logReportResultRepository,
+        [FromServices] MyEmailService emailService, [FromBody] UpdateImageUrlsFromEmailCommand command, [FromServices] LogTokenRepository tokenRepository, [FromServices] MinioService minioService)
+        {
+            ActionResponse actionResponse = actionResponseFactory.CreateInstance();
+            var report = await logReportResultRepository.GetAsync(ww => ww.Token == command.token);
+            if (report is null)
+            {
+                actionResponse.AddNotFoundErr("LogReport");
+            }
+            if (report.LogFile.Status != LogStatus.Warning){
+                actionResponse.AddInvalidErr("LogStatus");
+            }
+            for (var i = 0; i < report.ImageUrls.Count; i++){
+                String url = report.ImageUrls[i];
+                if (!command.ImageUrls.Contains(url))
+                    await minioService.RemoveFileByUrlAsync(url);
+            }
+            report.ImageUrls = command.ImageUrls;
 
-        //     await logReportResultRepository.UpdateAsync(report);
+            await logReportResultRepository.UpdateAsync(report);
 
-        //     actionResponse.SetUpdatedMessage();
-        //     return actionResponse.ToIActionResult();
-        // }
+            actionResponse.SetUpdatedMessage();
+            return actionResponse.ToIActionResult();
+        }
     }
 }
