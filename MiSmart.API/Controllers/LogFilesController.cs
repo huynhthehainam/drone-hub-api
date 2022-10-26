@@ -928,7 +928,7 @@ namespace MiSmart.API.Controllers
 
             for (var i = 0; i < command.Files.Count; i++)
             {
-                var fileLink = await minioService.PutFileAsync(command.Files[i], new String[] { "drone-hub-api", "log-reports", $"{secondReport.ID}" });
+                var fileLink = await minioService.PutFileAsync(command.Files[i], new String[] { "drone-hub-api", "second-log-reports", $"{secondReport.ID}" });
                 secondReport.ImageUrls.Add(fileLink);
             }
 
@@ -1192,18 +1192,18 @@ namespace MiSmart.API.Controllers
             return actionResponse.ToIActionResult();
         }
 
-        [HttpPost("UpdateImageUrlsResultFromEmail")]
+        [HttpPost("UpdateImageUrlsSecondReportFromEmail")]
         [AllowAnonymous]
-        public async Task<IActionResult> UpdateImageUrlsReportFromEmail([FromRoute] Guid id, [FromServices] LogReportResultRepository logReportResultRepository,
+        public async Task<IActionResult> UpdateImageUrlsSecondReportFromEmail([FromRoute] Guid id, [FromServices] SecondLogReportRepository secondLogReportRepository,
         [FromServices] MyEmailService emailService, [FromBody] UpdateImageUrlsFromEmailCommand command, [FromServices] LogTokenRepository tokenRepository, [FromServices] MinioService minioService)
         {
             ActionResponse actionResponse = actionResponseFactory.CreateInstance();
-            var report = await logReportResultRepository.GetAsync(ww => ww.Token == command.token);
+            var report = await secondLogReportRepository.GetAsync(ww => ww.Token == command.token);
             if (report is null)
             {
-                actionResponse.AddNotFoundErr("LogReport");
+                actionResponse.AddNotFoundErr("SecondReport");
             }
-            if (report.LogFile.Status != LogStatus.Warning){
+            if (report.LogFile.Status != LogStatus.SecondWarning){
                 actionResponse.AddInvalidErr("LogStatus");
             }
             for (var i = 0; i < report.ImageUrls.Count; i++){
@@ -1213,7 +1213,7 @@ namespace MiSmart.API.Controllers
             }
             report.ImageUrls = command.ImageUrls;
 
-            await logReportResultRepository.UpdateAsync(report);
+            await secondLogReportRepository.UpdateAsync(report);
 
             actionResponse.SetUpdatedMessage();
             return actionResponse.ToIActionResult();
