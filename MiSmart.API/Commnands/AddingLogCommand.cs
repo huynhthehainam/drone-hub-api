@@ -15,6 +15,16 @@ namespace MiSmart.API.Commands
         public String PilotName { get; set; }
         public String PartnerCompanyName { get; set; }
     }
+    public class AddingSecondLogReportCommand
+    {
+        public String PilotDescription { get; set; }
+        public String ReporterDescription { get; set; }
+        public String Suggest { get; set; }
+        public DateTime AccidentTime { get; set; } = DateTime.UtcNow;
+        public String PilotName { get; set; }
+        public String PartnerCompanyName { get; set; }
+        public List<String> ImageUrls { get; set; } = new List<String>();
+    }
     public class AddingLogResultCommand
     {
         public List<AddingLogResultDetailCommand> ListErrors { get; set; }
@@ -79,6 +89,19 @@ namespace MiSmart.API.Commands
     {
         public String Message { get; set; }
         public String Token { get; set; }
+    }
+    public class AddingSecondLogReportFromEmailCommand
+    {
+        [Required]
+        public String Token { get; set; }
+        public String PilotDescription { get; set; }
+        public String ReporterDescription { get; set; }
+        public String Suggest { get; set; }
+        public DateTime AccidentTime { get; set; }
+        public String PilotName { get; set; }
+        public String PartnerCompanyName { get; set; }
+        public String Username { get; set; }
+        public List<String> ImageUrls { get; set; } = new List<String>();
     }
 
 }

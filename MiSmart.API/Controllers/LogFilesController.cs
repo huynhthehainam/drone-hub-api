@@ -381,9 +381,11 @@ namespace MiSmart.API.Controllers
         [HttpPatch("{id:Guid}/Result")]
         public async Task<IActionResult> UpdateReportResult([FromRoute] Guid id, [FromBody] AddingLogResultCommand command,
         [FromServices] LogReportResultRepository logReportResultRepository, [FromServices] MinioService minioService,
-        [FromServices] LogResultDetailRepository logResultDetailRepository, [FromServices] ExecutionCompanyRepository executionCompanyRepository)
+        [FromServices] LogResultDetailRepository logResultDetailRepository, [FromServices] ExecutionCompanyRepository executionCompanyRepository,
+        [FromServices] MyEmailService emailService, [FromServices] IOptions<TargetEmailSettings> options)
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
+            TargetEmailSettings settings = options.Value;
             if (!CurrentUser.IsAdministrator && CurrentUser.RoleID != 4)
             {
                 response.AddNotAllowedErr();
@@ -431,6 +433,9 @@ namespace MiSmart.API.Controllers
             logResult.AnalystName = CurrentUser.Email;
             logResult.Suggest = command.Suggest;
             logResult.Conclusion = command.Conclusion;
+
+            await emailService.SendMailAsync(settings.ApprovedLogReport.ToArray(), new String[] { }, new String[] { }, @$"[Báo cáo cần xác nhận] Mã hiệu drone ({logResult.LogFile.Device.Name})",
+            $"Dear,\n\nPhòng Đặc Nhiệm trả kết quả báo cáo hiện tường:\n\nMã hiệu Drone: {logResult.LogFile.Device.Name}\n\nThời gian bay: {logResult.LogFile.LoggingTime}\n\nVui lòng vào trang trang Drone Hub để xác nhận báo cáo\n\nThank you");
     
             await logReportResultRepository.UpdateAsync(logResult);
             return response.ToIActionResult();
@@ -860,7 +865,7 @@ namespace MiSmart.API.Controllers
         }
         [HttpPost("CreateSecondReportFromEmail")]
         [AllowAnonymous]
-        public async Task<IActionResult> CreateSecondReportFromEmail([FromBody] AddingLogReportFromEmailCommand command, [FromServices] LogFileRepository logFileRepository,
+        public async Task<IActionResult> CreateSecondReportFromEmail([FromBody] AddingSecondLogReportFromEmailCommand command, [FromServices] LogFileRepository logFileRepository,
         [FromServices] MyEmailService emailService, [FromServices] IOptions<TargetEmailSettings> options,
         [FromServices] LogTokenRepository logTokenRepository, [FromServices] SecondLogReportRepository secondLogReportRepository)
         {
@@ -888,7 +893,7 @@ namespace MiSmart.API.Controllers
             {
                 LogFileID = token.LogFileID,
                 AccidentTime = command.AccidentTime,
-                ImageUrls = new List<String> { },
+                ImageUrls = command.ImageUrls,
                 PilotDescription = command.PilotDescription,
                 ReporterDescription = command.ReporterDescription,
                 Suggest = command.Suggest,
@@ -1047,7 +1052,7 @@ namespace MiSmart.API.Controllers
         }
         
         [HttpPost("{id:Guid}/CreateSecondReport")]
-        public async Task<IActionResult> CreateSecondReport([FromRoute] Guid id, [FromBody] AddingLogReportCommand command, [FromServices] LogFileRepository logFileRepository,
+        public async Task<IActionResult> CreateSecondReport([FromRoute] Guid id, [FromBody] AddingSecondLogReportCommand command, [FromServices] LogFileRepository logFileRepository,
         [FromServices] MyEmailService emailService, [FromServices] IOptions<TargetEmailSettings> options,
         [FromServices] SecondLogReportRepository secondLogReportRepository, [FromServices] LogTokenRepository logTokenRepository)
         {
@@ -1070,14 +1075,14 @@ namespace MiSmart.API.Controllers
             {
                 LogFileID = id,
                 AccidentTime = command.AccidentTime,
-                ImageUrls = new List<String> { },
+                ImageUrls = command.ImageUrls,
                 PilotDescription = command.PilotDescription,
                 ReporterDescription = command.ReporterDescription,
                 Suggest = command.Suggest,
                 UserUUID = CurrentUser.UUID,
                 PilotName = command.PilotName,
                 PartnerCompanyName = command.PartnerCompanyName,
-                Username = CurrentUser.Email
+                Username = CurrentUser.Email,
             };
             var secondReport = await secondLogReportRepository.CreateAsync(report);
 
