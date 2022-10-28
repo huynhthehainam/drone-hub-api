@@ -369,7 +369,7 @@ namespace MiSmart.API.Controllers
             }
 
             await emailService.SendMailAsync(settings.ApprovedLogReport.ToArray(), new String[] { }, new String[] { }, @$"[Báo cáo cần xác nhận] Mã hiệu drone ({logFile.Device.Name})",
-            $"Dear,\n\nPhòng Đặc Nhiệm trả kết quả báo cáo hiện tường:\n\nMã hiệu Drone: {logFile.Device.Name}\n\nThời gian bay: {logFile.LoggingTime}\n\nVui lòng vào trang trang Drone Hub để xác nhận báo cáo\n\nThank you");
+            $"Dear,\n\nPhòng Đặc Nhiệm trả kết quả báo cáo hiện tường:\n\nMã hiệu Drone: {logFile.Device.Name}\n\nThời gian bay: {logFile.LoggingTime.ToString("dd/MM/yyyy HH:mm:ss")}\n\nVui lòng vào trang trang Drone Hub để xác nhận báo cáo\n\nThank you");
 
             logFile.Status = LogStatus.Completed;
             await logFileRepository.UpdateAsync(logFile);
@@ -597,7 +597,7 @@ namespace MiSmart.API.Controllers
             await tokenRepository.DeleteRangeAsync(listLogToken);
 
             await emailService.SendMailAsync(settings.ApprovedLogReport.ToArray(), new String[] { }, new String[] { }, @$"[Báo cáo cần xác nhận] Mã hiệu drone ({logFile.Device.Name})",
-            $"Dear,\n\nPhòng Đặc Nhiệm trả kết quả báo cáo hiện tường:\n\nMã hiệu Drone: {logFile.Device.Name}\n\nThời gian bay: {logFile.LoggingTime}\n\nVui lòng vào trang trang Drone Hub để xác nhận báo cáo\n\nThank you");
+            $"Dear,\n\nPhòng Đặc Nhiệm trả kết quả báo cáo hiện tường:\n\nMã hiệu Drone: {logFile.Device.Name}\n\nThời gian bay: {logFile.LoggingTime.ToString("dd/MM/yyyy HH:mm:ss")}\n\nVui lòng vào trang trang Drone Hub để xác nhận báo cáo\n\nThank you");
 
             logFile.Status = LogStatus.Completed;
             await logFileRepository.UpdateAsync(logFile);
@@ -1131,7 +1131,7 @@ namespace MiSmart.API.Controllers
             }
             
             await emailService.SendMailAsync(new String[]{result.AnalystName}, new String[] { }, new String[] { }, @$"[Báo cáo cần chỉnh sửa] Mã hiệu drone ({result.LogFile.Device.Name})",
-            $"Dear,\n\nPhòng Đặc Nhiệm trả kết quả báo cáo hiện tường:\n\nMã hiệu Drone: {result.LogFile.Device.Name}\n\nThời gian bay: {result.LogFile.LoggingTime}\n\nYêu cầu vào trang Drone Hub chỉnh sửa\n\nGhi chú: {command.Message}\n\nThank you");
+            $"Dear,\n\nPhòng Đặc Nhiệm trả kết quả báo cáo hiện tường:\n\nMã hiệu Drone: {result.LogFile.Device.Name}\n\nThời gian bay: {result.LogFile.LoggingTime.ToString("dd/MM/yyyy HH:mm:ss")}\n\nYêu cầu vào trang Drone Hub chỉnh sửa\n\nGhi chú: {command.Message}\n\nThank you");
 
             actionResponse.SetUpdatedMessage();
             return actionResponse.ToIActionResult();
