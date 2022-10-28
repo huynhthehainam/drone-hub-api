@@ -1136,7 +1136,7 @@ namespace MiSmart.API.Controllers
             }
             
             await emailService.SendMailAsync(new String[]{result.AnalystName}, new String[] { }, new String[] { }, @$"[Báo cáo cần chỉnh sửa] Mã hiệu drone ({result.LogFile.Device.Name})",
-            $"Dear,\n\nPhòng Đặc Nhiệm trả kết quả báo cáo hiện tường:\n\nMã hiệu Drone: {result.LogFile.Device.Name}\n\nThời gian ghi log: {result.LogFile.LoggingTime.ToString("dd/MM/yyyy HH:mm:ss")}\n\nYêu cầu vào trang Drone Hub chỉnh sửa\n\nGhi chú: {command.Message}\n\nThank you");
+            $"Dear,\n\nYêu cầu vào trang Drone Hub chỉnh sửa\n\nMã hiệu Drone: {result.LogFile.Device.Name}\n\nThời gian ghi log: {result.LogFile.LoggingTime.ToString("dd/MM/yyyy HH:mm:ss")}\n\nGhi chú: {command.Message}\n\nThank you");
 
             actionResponse.SetUpdatedMessage();
             return actionResponse.ToIActionResult();
