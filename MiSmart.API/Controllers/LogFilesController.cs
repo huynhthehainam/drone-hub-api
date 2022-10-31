@@ -255,13 +255,14 @@ namespace MiSmart.API.Controllers
             logFile.Status = LogStatus.Warning;
             logFile.DroneStatus = DroneStatus.Fall;
             await logFileRepository.UpdateAsync(logFile);
+            TimeZoneInfo seaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
 
             foreach (UserEmail item in settings.LogReport)
             {
                 String token = TokenHelper.GenerateToken();
                 await logTokenRepository.CreateAsync(new LogToken { Token = token, UserUUID = new Guid(item.UUID), LogFileID = id, Username = item.Email });
                 await emailService.SendMailAsync(new String[] { item.Email }, new String[] { }, new String[] { }, @$"[Chuyến bay cần phân tích] Mã hiệu drone ({logFile.Device.Name})",
-                $"Dear,\n\nPhòng Đặc Nhiệm trả kết quả báo cáo hiện tường:\n\nMã hiệu Drone: {logFile.Device.Name}\n\nThời gian ghi log: {logFile.LoggingTime.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss")}\n\nLink Báo cáo tình trạng chuyến bay: https://dronehub.mismart.ai/log-report-result?token={token} \n\nThank you");
+                $"Dear,\n\nPhòng Đặc Nhiệm trả kết quả báo cáo hiện tường:\n\nMã hiệu Drone: {logFile.Device.Name}\n\nThời gian ghi log: {TimeZoneInfo.ConvertTimeFromUtc(logFile.LoggingTime, seaTimeZone).ToString("dd/MM/yyyy HH:mm:ss")}\n\nLink Báo cáo tình trạng chuyến bay: https://dronehub.mismart.ai/log-report-result?token={token} \n\nThank you");
             }
             response.SetCreatedObject(report);
             return response.ToIActionResult();
@@ -367,9 +368,10 @@ namespace MiSmart.API.Controllers
                 };
                 await logResultDetailRepository.CreateAsync(error);
             }
+            TimeZoneInfo seaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
 
             await emailService.SendMailAsync(settings.ApprovedLogReport.ToArray(), new String[] { }, new String[] { }, @$"[Báo cáo cần xác nhận] Mã hiệu drone ({logFile.Device.Name})",
-            $"Dear,\n\nPhòng Đặc Nhiệm trả kết quả báo cáo hiện tường:\n\nMã hiệu Drone: {logFile.Device.Name}\n\nThời gian ghi log: {logFile.LoggingTime.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss")}\n\nVui lòng vào trang trang Drone Hub để xác nhận báo cáo\n\nThank you");
+            $"Dear,\n\nPhòng Đặc Nhiệm trả kết quả báo cáo hiện tường:\n\nMã hiệu Drone: {logFile.Device.Name}\n\nThời gian ghi log: {TimeZoneInfo.ConvertTimeFromUtc(logFile.LoggingTime, seaTimeZone).ToString("dd/MM/yyyy HH:mm:ss")}\n\nVui lòng vào trang trang Drone Hub để xác nhận báo cáo\n\nThank you");
 
             logFile.Status = LogStatus.Completed;
             await logFileRepository.UpdateAsync(logFile);
@@ -433,9 +435,10 @@ namespace MiSmart.API.Controllers
             logResult.AnalystName = CurrentUser.Email;
             logResult.Suggest = command.Suggest;
             logResult.Conclusion = command.Conclusion;
+            TimeZoneInfo seaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
 
             await emailService.SendMailAsync(settings.ApprovedLogReport.ToArray(), new String[] { }, new String[] { }, @$"[Báo cáo cần xác nhận] Mã hiệu drone ({logResult.LogFile.Device.Name})",
-            $"Dear,\n\nPhòng Đặc Nhiệm trả kết quả báo cáo hiện tường:\n\nMã hiệu Drone: {logResult.LogFile.Device.Name}\n\nThời gian ghi log: {logResult.LogFile.LoggingTime.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss")}\n\nVui lòng vào trang trang Drone Hub để xác nhận báo cáo\n\nThank you");
+            $"Dear,\n\nPhòng Đặc Nhiệm trả kết quả báo cáo hiện tường:\n\nMã hiệu Drone: {logResult.LogFile.Device.Name}\n\nThời gian ghi log: {TimeZoneInfo.ConvertTimeFromUtc(logResult.LogFile.LoggingTime, seaTimeZone).ToString("dd/MM/yyyy HH:mm:ss")}\n\nVui lòng vào trang trang Drone Hub để xác nhận báo cáo\n\nThank you");
     
             await logReportResultRepository.UpdateAsync(logResult);
             return response.ToIActionResult();
@@ -600,8 +603,9 @@ namespace MiSmart.API.Controllers
             var listLogToken = await tokenRepository.GetListEntitiesAsync(new PageCommand(), ww => ww.LogFileID == token.LogFileID);
             await tokenRepository.DeleteRangeAsync(listLogToken);
 
+            TimeZoneInfo seaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
             await emailService.SendMailAsync(settings.ApprovedLogReport.ToArray(), new String[] { }, new String[] { }, @$"[Báo cáo cần xác nhận] Mã hiệu drone ({logFile.Device.Name})",
-            $"Dear,\n\nPhòng Đặc Nhiệm trả kết quả báo cáo hiện tường:\n\nMã hiệu Drone: {logFile.Device.Name}\n\nThời gian ghi log: {logFile.LoggingTime.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss")}\n\nVui lòng vào trang trang Drone Hub để xác nhận báo cáo\n\nThank you");
+            $"Dear,\n\nPhòng Đặc Nhiệm trả kết quả báo cáo hiện tường:\n\nMã hiệu Drone: {logFile.Device.Name}\n\nThời gian ghi log: {TimeZoneInfo.ConvertTimeFromUtc(logFile.LoggingTime, seaTimeZone).ToString("dd/MM/yyyy HH:mm:ss")}\n\nVui lòng vào trang trang Drone Hub để xác nhận báo cáo\n\nThank you");
 
             logFile.Status = LogStatus.Completed;
             await logFileRepository.UpdateAsync(logFile);
@@ -1133,9 +1137,10 @@ namespace MiSmart.API.Controllers
             if (result.LogFile.Status != LogStatus.Completed){
                 actionResponse.AddInvalidErr("LogStatus");
             }
-            
+
+            TimeZoneInfo seaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
             await emailService.SendMailAsync(new String[]{result.AnalystName}, new String[] { }, new String[] { }, @$"[Báo cáo cần chỉnh sửa] Mã hiệu drone ({result.LogFile.Device.Name})",
-            $"Dear,\n\nYêu cầu vào trang Drone Hub chỉnh sửa\n\nMã hiệu Drone: {result.LogFile.Device.Name}\n\nThời gian ghi log: {result.LogFile.LoggingTime.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss")}\n\nGhi chú: {command.Message}\n\nThank you");
+            $"Dear,\n\nYêu cầu vào trang Drone Hub chỉnh sửa\n\nMã hiệu Drone: {result.LogFile.Device.Name}\n\nThời gian ghi log: {TimeZoneInfo.ConvertTimeFromUtc(result.LogFile.LoggingTime, seaTimeZone).ToString("dd/MM/yyyy HH:mm:ss")}\n\nGhi chú: {command.Message}\n\nThank you");
 
             actionResponse.SetUpdatedMessage();
             return actionResponse.ToIActionResult();
