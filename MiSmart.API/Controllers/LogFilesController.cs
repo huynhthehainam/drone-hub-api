@@ -1171,11 +1171,14 @@ namespace MiSmart.API.Controllers
         }
 
         [HttpPost("{id:Guid}/UpdateImageUrlsResult")]
-        [HasPermission(typeof(AdminPermission))]
         public async Task<IActionResult> UpdateImageUrlsResult([FromRoute] Guid id, [FromServices] LogReportResultRepository logReportResultRepository,
         [FromServices] MyEmailService emailService, [FromBody] UpdateImageUrlsCommand command, [FromServices] MinioService minioService)
         {
             ActionResponse actionResponse = actionResponseFactory.CreateInstance();
+            if (CurrentUser.RoleID != 4)
+            {
+                actionResponse.AddNotAllowedErr();
+            }
             var result = await logReportResultRepository.GetAsync(ww => ww.LogFileID == id);
             if (result is null)
             {
