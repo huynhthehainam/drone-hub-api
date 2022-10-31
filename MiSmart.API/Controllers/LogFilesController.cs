@@ -463,7 +463,6 @@ namespace MiSmart.API.Controllers
             {
                 response.AddNotFoundErr("LogReport");
             }
-            String[] email = CurrentUser.Email.Split(" ");
             logResult.ApproverUUID = CurrentUser.UUID;
             logResult.ApproverName = CurrentUser.Email;
             
