@@ -1204,6 +1204,36 @@ namespace MiSmart.API.Controllers
             return actionResponse.ToIActionResult();
         }
 
+        [HttpPost("{id:Guid}/UpdateImageUrlsSecondReport")]
+        public async Task<IActionResult> UpdateImageUrlsSecondReport([FromRoute] Guid id, [FromServices] SecondLogReportRepository secondLogReportRepository,
+        [FromServices] MyEmailService emailService, [FromBody] UpdateImageUrlsCommand command, [FromServices] MinioService minioService)
+        {
+            ActionResponse actionResponse = actionResponseFactory.CreateInstance();
+            if (CurrentUser.RoleID != 3 && !CurrentUser.IsAdministrator)
+            {
+                actionResponse.AddNotAllowedErr();
+            }
+            var report = await secondLogReportRepository.GetAsync(ww => ww.LogFileID == id);
+            if (report is null)
+            {
+                actionResponse.AddNotFoundErr("ResultReport");
+            }
+            if (report.LogFile.Status != LogStatus.Completed){
+                actionResponse.AddInvalidErr("LogStatus");
+            }
+            for (var i = 0; i < report.ImageUrls.Count; i++){
+                String url = report.ImageUrls[i];
+                if (!command.ImageUrls.Contains(url))
+                    await minioService.RemoveFileByUrlAsync(url);
+            }
+            report.ImageUrls = command.ImageUrls;
+
+            await secondLogReportRepository.UpdateAsync(report);
+
+            actionResponse.SetUpdatedMessage();
+            return actionResponse.ToIActionResult();
+        }
+
         [HttpPost("UpdateImageUrlsSecondReportFromEmail")]
         [AllowAnonymous]
         public async Task<IActionResult> UpdateImageUrlsSecondReportFromEmail([FromRoute] Guid id, [FromServices] SecondLogReportRepository secondLogReportRepository,
