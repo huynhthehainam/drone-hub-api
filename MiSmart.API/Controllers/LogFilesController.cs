@@ -1258,34 +1258,5 @@ namespace MiSmart.API.Controllers
             actionResponse.SetUpdatedMessage();
             return actionResponse.ToIActionResult();
         }
-
-        [HttpPost("UpdateImageUrlsSecondReportFromEmail")]
-        [AllowAnonymous]
-        public async Task<IActionResult> UpdateImageUrlsSecondReportFromEmail([FromRoute] Guid id, [FromServices] SecondLogReportRepository secondLogReportRepository,
-        [FromServices] MyEmailService emailService, [FromBody] UpdateImageUrlsFromEmailCommand command, [FromServices] LogTokenRepository tokenRepository, [FromServices] MyMinioService minioService)
-        {
-            ActionResponse actionResponse = actionResponseFactory.CreateInstance();
-            var report = await secondLogReportRepository.GetAsync(ww => ww.Token == command.token);
-            if (report is null)
-            {
-                actionResponse.AddNotFoundErr("SecondReport");
-            }
-            if (report.LogFile.Status != LogStatus.SecondWarning)
-            {
-                actionResponse.AddInvalidErr("LogStatus");
-            }
-            for (var i = 0; i < report.ImageUrls.Count; i++)
-            {
-                String url = report.ImageUrls[i];
-                if (!command.ImageUrls.Contains(url))
-                    await minioService.RemoveFileByUrlAsync(url);
-            }
-            report.ImageUrls = command.ImageUrls;
-
-            await secondLogReportRepository.UpdateAsync(report);
-
-            actionResponse.SetUpdatedMessage();
-            return actionResponse.ToIActionResult();
-        }
     }
 }
