@@ -21,8 +21,8 @@ namespace MiSmart.DAL.Models
         public Double MainPilotCostPerHectare { get; set; }
         public Double SubPilotCostPerHectare { get; set; }
         public Double CostPerHectare { get; set; }
-        private ExecutionCompany executionCompany;
-        public ExecutionCompany ExecutionCompany
+        private ExecutionCompany? executionCompany;
+        public ExecutionCompany? ExecutionCompany
         {
             get => lazyLoader.Load(this, ref executionCompany);
             set => executionCompany = value;

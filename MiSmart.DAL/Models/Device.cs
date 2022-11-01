@@ -31,64 +31,59 @@ namespace MiSmart.DAL.Models
         {
         }
 
-        public String Name { get; set; }
+        public String? Name { get; set; }
         public Guid UUID { get; set; } = Guid.NewGuid();
-        public String Token { get; set; } = TokenHelper.GenerateToken();
+        public String? Token { get; set; } = TokenHelper.GenerateToken();
 
         public DeviceStatus Status { get; set; } = DeviceStatus.Offline;
-        private Team team;
-        [JsonIgnore]
-        public Team Team
+        private Team? team;
+        public Team? Team
         {
             get => lazyLoader.Load(this, ref team);
             set => team = value;
         }
         public Int64? TeamID { get; set; }
 
-        private Customer customer;
-        [JsonIgnore]
-        public Customer Customer
+        private Customer? customer;
+        public Customer? Customer
         {
             get => lazyLoader.Load(this, ref customer);
             set => customer = value;
         }
         public Int32 CustomerID { get; set; }
 
-        private ExecutionCompany executionCompany;
-        public ExecutionCompany ExecutionCompany
+        private ExecutionCompany? executionCompany;
+        public ExecutionCompany? ExecutionCompany
         {
             get => lazyLoader.Load(this, ref executionCompany);
             set => executionCompany = value;
         }
         public Int32? ExecutionCompanyID { get; set; }
-        private ICollection<FlightStat> flightStats;
-        [JsonIgnore]
-        public ICollection<FlightStat> FlightStats
+        private ICollection<FlightStat>? flightStats;
+        public ICollection<FlightStat>? FlightStats
         {
             get => lazyLoader.Load(this, ref flightStats);
             set => flightStats = value;
         }
-        private DeviceModel deviceModel;
-        [JsonIgnore]
-        public DeviceModel DeviceModel
+        private DeviceModel? deviceModel;
+        public DeviceModel? DeviceModel
         {
             get => lazyLoader.Load(this, ref deviceModel);
             set => deviceModel = value;
         }
 
-        private ICollection<Plan> plans;
-        [JsonIgnore]
-        public ICollection<Plan> Plans
+        private ICollection<Plan>? plans;
+        public ICollection<Plan>? Plans
         {
             get => lazyLoader.Load(this, ref plans);
             set => plans = value;
         }
-        public String AccessToken { get; set; }
+        public String? AccessToken { get; set; }
         public DateTime? NextGeneratingAccessTokenTime { get; set; }
         public Int32 DeviceModelID { get; set; }
 
-        private ICollection<TelemetryGroup> telemetryGroups;
-        public ICollection<TelemetryGroup> TelemetryGroups
+        private ICollection<TelemetryGroup>? telemetryGroups;
+        public ICollection<TelemetryGroup>? TelemetryGroups
         {
             get => lazyLoader.Load(this, ref telemetryGroups);
             set => telemetryGroups = value;
@@ -96,21 +91,21 @@ namespace MiSmart.DAL.Models
         public DateTime? LastOnline { get; set; }
 
 
-        private TelemetryGroup lastGroup;
-        public TelemetryGroup LastGroup
+        private TelemetryGroup? lastGroup;
+        public TelemetryGroup? LastGroup
         {
             get => lazyLoader.Load(this, ref lastGroup);
             set => lastGroup = value;
         }
         public Guid? LastGroupID { get; set; }
 
-        private ICollection<LogFile> logFiles;
-        public ICollection<LogFile> LogFiles
+        private ICollection<LogFile>? logFiles;
+        public ICollection<LogFile>? LogFiles
         {
             get => lazyLoader.Load(this, ref logFiles);
             set => logFiles = value;
         }
-        public List<Guid> LastBatterGroupLogs
+        public List<Guid>? LastBatterGroupLogs
         {
             get; set;
         }
@@ -126,15 +121,15 @@ namespace MiSmart.DAL.Models
         }
 
 
-        private ICollection<StreamingLink> streamingLinks;
-        public ICollection<StreamingLink> StreamingLinks
+        private ICollection<StreamingLink>? streamingLinks;
+        public ICollection<StreamingLink>? StreamingLinks
         {
             get => lazyLoader.Load(this, ref streamingLinks);
             set => streamingLinks = value;
         }
 
-        private ICollection<MaintenanceReport> maintenanceReports;
-        public ICollection<MaintenanceReport> MaintenanceReports
+        private ICollection<MaintenanceReport>? maintenanceReports;
+        public ICollection<MaintenanceReport>? MaintenanceReports
         {
             get => lazyLoader.Load(this, ref maintenanceReports);
             set => maintenanceReports = value;

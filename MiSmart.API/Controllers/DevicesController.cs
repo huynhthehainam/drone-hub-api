@@ -47,16 +47,18 @@ namespace MiSmart.API.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> UpdateFromRpaionServer([FromServices] DeviceRepository deviceRepository, [FromForm] AddingLogFileCommand command, [FromServices] LogFileRepository logFileRepository, [FromServices] IOptions<RpanionSettings> options)
         {
-            ActionResponse actionResponse = actionResponseFactory.CreateInstance();
+            ActionResponse response = actionResponseFactory.CreateInstance();
             var settings = options.Value;
             if (command.SecretKey != settings.SecretKey)
             {
-                actionResponse.AddAuthorizationErr();
+                response.AddAuthorizationErr();
+                return response.ToIActionResult();
             }
             var device = await deviceRepository.GetAsync(ww => ww.Token == command.DeviceToken);
             if (device is null)
             {
-                actionResponse.AddNotFoundErr("Device");
+                response.AddNotFoundErr("Device");
+                return response.ToIActionResult();
             }
             foreach (var formFile in command.Files)
             {
@@ -91,7 +93,7 @@ namespace MiSmart.API.Controllers
                 }
 
             }
-            return actionResponse.ToIActionResult();
+            return response.ToIActionResult();
 
         }
 
@@ -102,11 +104,12 @@ namespace MiSmart.API.Controllers
         [FromBody] AddingMaintenanceReportCommand command,
          [FromServices] MaintenanceReportRepository maintenanceReportRepository)
         {
-            ActionResponse actionResponse = actionResponseFactory.CreateInstance();
+            ActionResponse response = actionResponseFactory.CreateInstance();
             var device = await deviceRepository.GetAsync(ww => ww.ID == id);
             if (device is null)
             {
-                actionResponse.AddNotFoundErr("Device");
+                response.AddNotFoundErr("Device");
+                return response.ToIActionResult();
             }
 
             MaintenanceReport maintenanceReport = await maintenanceReportRepository.CreateAsync(new MaintenanceReport
@@ -117,28 +120,30 @@ namespace MiSmart.API.Controllers
                 UserUUID = CurrentUser.UUID,
                 AttachmentLinks = new List<String> { },
             });
-            actionResponse.SetCreatedObject(maintenanceReport);
-            return actionResponse.ToIActionResult();
+            response.SetCreatedObject(maintenanceReport);
+            return response.ToIActionResult();
         }
 
         [HttpGet("{id:int}/MaintenanceReports")]
 
         public async Task<IActionResult> GetMaintenanceReports([FromRoute] Int32 id, [FromQuery] PageCommand pageCommand, [FromServices] DeviceRepository deviceRepository,
          [FromServices] MaintenanceReportRepository maintenanceReportRepository,
-         [FromQuery] String relation = "Maintainer")
+         [FromQuery] String? relation = "Maintainer")
         {
-            ActionResponse actionResponse = actionResponseFactory.CreateInstance();
+            ActionResponse response = actionResponseFactory.CreateInstance();
             var device = await deviceRepository.GetAsync(ww => ww.ID == id);
             if (device is null)
             {
-                actionResponse.AddNotFoundErr("Device");
+                response.AddNotFoundErr("Device");
+                return response.ToIActionResult();
             }
             Expression<Func<MaintenanceReport, Boolean>> query = ww => false;
             if (relation == "Maintainer")
             {
                 if (CurrentUser.RoleID != 3)
                 {
-                    actionResponse.AddNotAllowedErr();
+                    response.AddNotAllowedErr();
+                    return response.ToIActionResult();
                 }
                 query = ww => ww.UserUUID == CurrentUser.UUID && ww.DeviceID == device.ID;
             }
@@ -146,13 +151,14 @@ namespace MiSmart.API.Controllers
             {
                 if (!CurrentUser.IsAdministrator)
                 {
-                    actionResponse.AddNotAllowedErr();
+                    response.AddNotAllowedErr();
+                    return response.ToIActionResult();
                 }
                 query = ww => ww.DeviceID == device.ID;
             }
             var listResponse = await maintenanceReportRepository.GetListResponseViewAsync<MaintenanceReportViewModel>(pageCommand, query, ww => ww.CreatedTime, false);
-            listResponse.SetResponse(actionResponse);
-            return actionResponse.ToIActionResult();
+            listResponse.SetResponse(response);
+            return response.ToIActionResult();
         }
 
         [HttpPost("{id:int}/AssignExecutionCompany")]
@@ -161,22 +167,25 @@ namespace MiSmart.API.Controllers
          [FromServices] TeamUserRepository teamUserRepository, [FromRoute] Int32 id, [FromBody] AssigningDeviceExecutionCompanyCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
-            CustomerUser customerUser = await customerUserRepository.GetByPermissionAsync(CurrentUser.UUID);
+            var customerUser = await customerUserRepository.GetByPermissionAsync(CurrentUser.UUID);
             if (customerUser is null)
             {
                 response.AddNotAllowedErr();
+                return response.ToIActionResult();
             }
 
             var executionCompany = await executionCompanyRepository.GetAsync(ww => ww.ID == command.ExecutionCompanyID.GetValueOrDefault());
             if (executionCompany is null)
             {
                 response.AddInvalidErr("ExecutionCompanyID");
+                return response.ToIActionResult();
             }
             Expression<Func<Device, Boolean>> query = ww => (ww.ID == id) && (ww.CustomerID == customerUser.CustomerID);
             var device = await deviceRepository.GetAsync(query);
             if (device is null)
             {
                 response.AddNotFoundErr("Device");
+                return response.ToIActionResult();
             }
             if (executionCompany.ID != device.ExecutionCompanyID)
             {
@@ -195,15 +204,17 @@ namespace MiSmart.API.Controllers
         [FromServices] TeamRepository teamRepository, [FromBody] AssigningDeviceTeamCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
-            ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.UUID, ExecutionCompanyUserType.Owner);
+            var executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.UUID, ExecutionCompanyUserType.Owner);
             if (executionCompanyUser is null)
             {
                 response.AddNotAllowedErr();
+                return response.ToIActionResult();
             }
             var device = await deviceRepository.GetAsync(ww => ww.ID == id && ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID);
             if (device is null)
             {
                 response.AddNotFoundErr("Device");
+                return response.ToIActionResult();
             }
             if (command.TeamID.HasValue)
             {
@@ -211,6 +222,7 @@ namespace MiSmart.API.Controllers
                 if (team is null)
                 {
                     response.AddInvalidErr("TeamID");
+                    return response.ToIActionResult();
                 }
                 device.Team = team;
             }
@@ -226,22 +238,23 @@ namespace MiSmart.API.Controllers
         [FromServices] DeviceRepository deviceRepository,
         [FromServices] BatteryGroupLogRepository batteryGroupLogRepository,
     [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository,
-         [FromServices] TeamUserRepository teamUserRepository, [FromQuery] PageCommand pageCommand, [FromQuery] String search,
-         [FromQuery] String relation = "Owner")
+         [FromServices] TeamUserRepository teamUserRepository, [FromQuery] PageCommand pageCommand, [FromQuery] String? search,
+         [FromQuery] String? relation = "Owner")
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
             Expression<Func<Device, Boolean>> query = ww => false;
             if (relation == "Owner")
             {
-                CustomerUser customerUser = await customerUserRepository.GetByPermissionAsync(CurrentUser.UUID);
+                var customerUser = await customerUserRepository.GetByPermissionAsync(CurrentUser.UUID);
 
                 if (customerUser is null)
                 {
                     response.AddNotAllowedErr();
+                    return response.ToIActionResult();
                 }
 
                 query = ww => (ww.CustomerID == customerUser.CustomerID)
-                && (!String.IsNullOrWhiteSpace(search) ? ww.Name.ToLower().Contains(search.ToLower()) : true);
+                && (!String.IsNullOrWhiteSpace(search) ? (ww.Name ?? "").ToLower().Contains(search.ToLower()) : true);
 
             }
             else if (relation == "Administrator")
@@ -250,7 +263,7 @@ namespace MiSmart.API.Controllers
                 {
                     response.AddNotAllowedErr();
                 }
-                query = ww => true && (!String.IsNullOrWhiteSpace(search) ? ww.Name.ToLower().Contains(search.ToLower()) : true);
+                query = ww => true && (!String.IsNullOrWhiteSpace(search) ? (ww.Name ?? "").ToLower().Contains(search.ToLower()) : true);
             }
             else if (relation == "Maintainer")
             {
@@ -258,7 +271,7 @@ namespace MiSmart.API.Controllers
                 {
                     response.AddNotAllowedErr();
                 }
-                query = ww => true && (!String.IsNullOrWhiteSpace(search) ? ww.Name.ToLower().Contains(search.ToLower()) : true);
+                query = ww => true && (!String.IsNullOrWhiteSpace(search) ? (ww.Name ?? "").ToLower().Contains(search.ToLower()) : true);
             }
             else if (relation == "LogAnalyst")
             {
@@ -266,22 +279,23 @@ namespace MiSmart.API.Controllers
                 {
                     response.AddNotAllowedErr();
                 }
-                query = ww => true && (!String.IsNullOrWhiteSpace(search) ? ww.Name.ToLower().Contains(search.ToLower()) : true);
+                query = ww => true && (!String.IsNullOrWhiteSpace(search) ? (ww.Name ?? "").ToLower().Contains(search.ToLower()) : true);
             }
             else
             {
-                ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.UUID);
+                var executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.UUID);
                 if (executionCompanyUser is null)
                 {
                     response.AddNotAllowedErr();
+                    return response.ToIActionResult();
                 }
                 List<Int64> teamIDs = teamUserRepository.GetListEntitiesAsync(new PageCommand(), ww => ww.ExecutionCompanyUserID == executionCompanyUser.ID).Result.Select(ww => ww.TeamID).ToList();
                 query = ww => (ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID)
                 && (executionCompanyUser.Type == ExecutionCompanyUserType.Member ? (teamIDs.Contains(ww.TeamID.GetValueOrDefault())) : true)
-                 && (!String.IsNullOrWhiteSpace(search) ? ww.Name.ToLower().Contains(search.ToLower()) : true);
+                 && (!String.IsNullOrWhiteSpace(search) ? (ww.Name ?? "").ToLower().Contains(search.ToLower()) : true);
             }
             var listResponse = await deviceRepository.GetListResponseViewAsync<SmallDeviceViewModel>(pageCommand, query, ww => ww.Status);
-            foreach (var item in listResponse.Data)
+            foreach (var item in listResponse.Data ?? new List<SmallDeviceViewModel>())
             {
                 if (item.LastBatteryGroupIDs is not null)
                     if (item.LastBatteryGroupIDs.Count > 0)
@@ -302,17 +316,18 @@ namespace MiSmart.API.Controllers
         }
         [HttpGet("{id:int}/GetToken")]
         public async Task<IActionResult> GetToken([FromServices] CustomerUserRepository customerUserRepository, [FromServices] TeamUserRepository teamUserRepository, [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository,
-         [FromServices] DeviceRepository deviceRepository, [FromRoute] Int32 id, [FromQuery] String relation = "Owner")
+         [FromServices] DeviceRepository deviceRepository, [FromRoute] Int32 id, [FromQuery] String? relation = "Owner")
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
             Expression<Func<Device, Boolean>> query = ww => false;
             if (relation == "Owner")
             {
 
-                CustomerUser customerUser = await customerUserRepository.GetByPermissionAsync(CurrentUser.UUID);
+                var customerUser = await customerUserRepository.GetByPermissionAsync(CurrentUser.UUID);
                 if (customerUser is null)
                 {
                     response.AddNotAllowedErr();
+                    return response.ToIActionResult();
                 }
 
 
@@ -337,10 +352,11 @@ namespace MiSmart.API.Controllers
             }
             else
             {
-                ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.UUID);
+                var executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.UUID);
                 if (executionCompanyUser is null)
                 {
                     response.AddNotAllowedErr();
+                    return response.ToIActionResult();
                 }
                 query = ww => (ww.ID == id) && (ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID);
             }
@@ -348,6 +364,7 @@ namespace MiSmart.API.Controllers
             if (device is null)
             {
                 response.AddNotFoundErr("Device");
+                return response.ToIActionResult();
             }
 
             response.SetData(ViewModelHelpers.ConvertToViewModel<Device, SuperSmallDeviceViewModel>(device));
@@ -362,11 +379,13 @@ namespace MiSmart.API.Controllers
             if (!CurrentUser.IsAdministrator && CurrentUser.RoleID != 3)
             {
                 response.AddNotAllowedErr();
+                return response.ToIActionResult();
             }
             var device = await deviceRepository.GetAsync(ww => ww.ID == id);
             if (device is null)
             {
                 response.AddNotFoundErr("Device");
+                return response.ToIActionResult();
             }
 
 
@@ -378,6 +397,7 @@ namespace MiSmart.API.Controllers
                 if (deviceModel is null)
                 {
                     response.AddInvalidErr("DeviceModelID");
+                    return response.ToIActionResult();
                 }
                 device.DeviceModel = deviceModel;
             }
@@ -388,6 +408,7 @@ namespace MiSmart.API.Controllers
                 if (executionCompany is null)
                 {
                     response.AddInvalidErr("ExecutionCompanyID");
+                    return response.ToIActionResult();
                 }
                 device.ExecutionCompany = executionCompany;
             }
@@ -437,168 +458,173 @@ namespace MiSmart.API.Controllers
             }
             foreach (var item in command.Data)
             {
-                var deviceJWT = jwtService.GetUser(item.DeviceAccessToken);
-                if (deviceJWT.Type == "Device")
+                var deviceJWT = jwtService.GetUser(item.DeviceAccessToken ?? "");
+                if (deviceJWT != null)
                 {
-
-                    var device = await deviceRepository.GetAsync(ww => ww.ID == deviceJWT.ID);
-                    if (device is not null)
+                    if (deviceJWT.Type == "Device")
                     {
-                        device.LastOnline = DateTime.UtcNow;
-                        await deviceRepository.UpdateAsync(device);
-                        if (!Constants.AllowedVersions.Contains(item.GCSVersion))
-                        {
-                            continue;
-                        }
-                        if (item.FlywayPoints.Count < 2)
-                        {
-                            if (item.TaskArea.GetValueOrDefault() < 0)
-                            {
-                                await emailService.SendMailAsync(new String[] { "huynhthehainam@gmail.com" }, new String[] { }, new String[] { }, "Report flight stat", @$"
-                                task area: {item.TaskArea},
-                                sprayedIndexes: {item.SprayedIndexes.Count()}
-                                flywayPoints: {item.FlywayPoints.Count()}
-                                device: {device.Name}
-                                flightDuration: {item.FlightDuration.GetValueOrDefault()}
-                                flightTime: {item.FlightTime}
-                                offline
-                            ");
-                            }
-                            continue;
-                        }
-                        var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
-                        if (item.SprayedIndexes.Count > 0 && item.TaskArea.GetValueOrDefault() <= 0)
-                        {
-                            if (item.TaskArea.GetValueOrDefault() < 0)
-                            {
-                                await emailService.SendMailAsync(new String[] { "huynhthehainam@gmail.com" }, new String[] { }, new String[] { }, "Report flight stat", @$"
-                                task area: {item.TaskArea},
-                                sprayedIndexes: {item.SprayedIndexes.Count()}
-                                flywayPoints: {item.FlywayPoints.Count()}
-                                device: {device.Name}
-                                flightDuration: {item.FlightDuration.GetValueOrDefault()}
-                                flightTime: {item.FlightTime}
-                                offline
-                            ");
-                            }
-                            var taskArea = 0.0;
-                            for (var i = 0; i < item.FlywayPoints.Count - 1; i++)
-                            {
-                                if (item.SprayedIndexes.Contains(i))
-                                {
-                                    var firstLng = item.FlywayPoints[i].Longitude.GetValueOrDefault();
-                                    var firstLat = item.FlywayPoints[i].Latitude.GetValueOrDefault();
-                                    var secondLng = item.FlywayPoints[i + 1].Longitude.GetValueOrDefault();
-                                    var secondLat = item.FlywayPoints[i + 1].Latitude.GetValueOrDefault();
-                                    var point1 = geometryFactory.CreatePoint(new Coordinate(firstLng, firstLat));
-                                    var point2 = geometryFactory.CreatePoint(new Coordinate(secondLng, secondLat));
-                                    var distance = 0.0;
 
-                                    using (var databaseCommand = databaseContext.Database.GetDbConnection().CreateCommand())
+                        var device = await deviceRepository.GetAsync(ww => ww.ID == deviceJWT.ID);
+                        if (device is not null)
+                        {
+                            device.LastOnline = DateTime.UtcNow;
+                            await deviceRepository.UpdateAsync(device);
+                            if (!Constants.AllowedVersions.Contains(item.GCSVersion ?? ""))
+                            {
+                                continue;
+                            }
+                            if (item.FlywayPoints.Count < 2)
+                            {
+                                if (item.TaskArea.GetValueOrDefault() < 0)
+                                {
+                                    await emailService.SendMailAsync(new String[] { "huynhthehainam@gmail.com" }, new String[] { }, new String[] { }, "Report flight stat", @$"
+                                task area: {item.TaskArea},
+                                sprayedIndexes: {item.SprayedIndexes.Count()}
+                                flywayPoints: {item.FlywayPoints.Count()}
+                                device: {device.Name}
+                                flightDuration: {item.FlightDuration.GetValueOrDefault()}
+                                flightTime: {item.FlightTime}
+                                offline
+                            ");
+                                }
+                                continue;
+                            }
+                            var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
+                            if (item.SprayedIndexes.Count > 0 && item.TaskArea.GetValueOrDefault() <= 0)
+                            {
+                                if (item.TaskArea.GetValueOrDefault() < 0)
+                                {
+                                    await emailService.SendMailAsync(new String[] { "huynhthehainam@gmail.com" }, new String[] { }, new String[] { }, "Report flight stat", @$"
+                                task area: {item.TaskArea},
+                                sprayedIndexes: {item.SprayedIndexes.Count()}
+                                flywayPoints: {item.FlywayPoints.Count()}
+                                device: {device.Name}
+                                flightDuration: {item.FlightDuration.GetValueOrDefault()}
+                                flightTime: {item.FlightTime}
+                                offline
+                            ");
+                                }
+                                var taskArea = 0.0;
+                                for (var i = 0; i < item.FlywayPoints.Count - 1; i++)
+                                {
+                                    if (item.SprayedIndexes.Contains(i))
                                     {
-                                        databaseCommand.CommandText = @$"select ST_Distance(st_transform( st_geomfromtext ('point({firstLng} {firstLat})', 4326), 3857 ),
+                                        var firstLng = item.FlywayPoints[i].Longitude.GetValueOrDefault();
+                                        var firstLat = item.FlywayPoints[i].Latitude.GetValueOrDefault();
+                                        var secondLng = item.FlywayPoints[i + 1].Longitude.GetValueOrDefault();
+                                        var secondLat = item.FlywayPoints[i + 1].Latitude.GetValueOrDefault();
+                                        var point1 = geometryFactory.CreatePoint(new Coordinate(firstLng, firstLat));
+                                        var point2 = geometryFactory.CreatePoint(new Coordinate(secondLng, secondLat));
+                                        var distance = 0.0;
+
+                                        using (var databaseCommand = databaseContext.Database.GetDbConnection().CreateCommand())
+                                        {
+                                            databaseCommand.CommandText = @$"select ST_Distance(st_transform( st_geomfromtext ('point({firstLng} {firstLat})', 4326), 3857 ),
 st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * cosd({firstLat})
 ";
-                                        databaseCommand.CommandType = CommandType.Text;
-                                        databaseContext.Database.OpenConnection();
-                                        using (var result = databaseCommand.ExecuteReader())
-                                        {
-                                            while (result.Read())
+                                            databaseCommand.CommandType = CommandType.Text;
+                                            databaseContext.Database.OpenConnection();
+                                            using (var result = databaseCommand.ExecuteReader())
                                             {
-                                                var parsed = Double.TryParse(result[0].ToString(), out distance);
-                                                break;
+                                                while (result.Read())
+                                                {
+                                                    var parsed = Double.TryParse(result[0].ToString(), out distance);
+                                                    break;
+                                                }
                                             }
                                         }
+                                        taskArea += distance * 6; // Mr Dat confirmed
                                     }
-                                    taskArea += distance * 6; // Mr Dat confirmed
+                                }
+                                item.TaskArea = taskArea;
+                            }
+
+
+
+                            var stat = new FlightStat
+                            {
+                                FlightDuration = item.FlightDuration.GetValueOrDefault(),
+                                FieldName = item.FieldName,
+                                FlightUID = item.FlightUID,
+                                Flights = item.Flights.GetValueOrDefault(),
+                                FlightTime = item.FlightTime ?? DateTime.UtcNow,
+                                FlywayPoints = geometryFactory.CreateLineString(item.FlywayPoints.Select(ww => new Coordinate(ww.Longitude.GetValueOrDefault(), ww.Latitude.GetValueOrDefault())).ToArray()),
+                                SprayedIndexes = item.SprayedIndexes,
+                                PilotName = item.PilotName,
+                                CreatedTime = DateTime.UtcNow,
+                                CustomerID = device.CustomerID,
+                                Device = device,
+                                DeviceName = device.Name,
+                                TaskLocation = item.TaskLocation,
+                                TeamID = device.TeamID,
+                                TaskArea = item.TaskArea.GetValueOrDefault(),
+                                ExecutionCompanyID = device.ExecutionCompanyID,
+                                GCSVersion = item.GCSVersion,
+                                AdditionalInformation = item.AdditionalInformation,
+                                BatteryPercentRemaining = item.BatteryPercentRemaining,
+                                IsOnline = false,
+                            };
+                            if (!String.IsNullOrEmpty(item.BatterySerialNumber))
+                            {
+                                var battery = await batteryRepository.GetOrCreateBySerialNumberAsync(item.BatterySerialNumber);
+                                stat.Battery = battery;
+                                stat.CycleCount = item.BatteryCycleCount.GetValueOrDefault();
+                            }
+                            try
+                            {
+                                stat.TaskLocation = await BingLocationHelper.UpdateFlightStatLocation(stat, httpClientFactory);
+                                stat.IsBingLocation = true;
+                            }
+                            catch (Exception)
+                            {
+
+                            }
+
+                            if (device.ExecutionCompanyID.HasValue)
+                            {
+                                var latestSetting = executionCompanySettingRepository.GetLatestSetting(device.ExecutionCompanyID.GetValueOrDefault());
+                                if (latestSetting is not null)
+                                {
+                                    stat.Cost = stat.TaskArea / 10000 * latestSetting.CostPerHectare;
                                 }
                             }
-                            item.TaskArea = taskArea;
-                        }
 
 
-
-                        var stat = new FlightStat
-                        {
-                            FlightDuration = item.FlightDuration.GetValueOrDefault(),
-                            FieldName = item.FieldName,
-                            FlightUID = item.FlightUID,
-                            Flights = item.Flights.GetValueOrDefault(),
-                            FlightTime = item.FlightTime ?? DateTime.UtcNow,
-                            FlywayPoints = geometryFactory.CreateLineString(item.FlywayPoints.Select(ww => new Coordinate(ww.Longitude.GetValueOrDefault(), ww.Latitude.GetValueOrDefault())).ToArray()),
-                            SprayedIndexes = item.SprayedIndexes,
-                            PilotName = item.PilotName,
-                            CreatedTime = DateTime.UtcNow,
-                            CustomerID = device.CustomerID,
-                            Device = device,
-                            DeviceName = device.Name,
-                            TaskLocation = item.TaskLocation,
-                            TeamID = device.TeamID,
-                            TaskArea = item.TaskArea.GetValueOrDefault(),
-                            ExecutionCompanyID = device.ExecutionCompanyID,
-                            GCSVersion = item.GCSVersion,
-                            AdditionalInformation = item.AdditionalInformation,
-                            BatteryPercentRemaining = item.BatteryPercentRemaining,
-                            IsOnline = false,
-                        };
-                        if (!String.IsNullOrEmpty(item.BatterySerialNumber))
-                        {
-                            var battery = await batteryRepository.GetOrCreateBySerialNumberAsync(item.BatterySerialNumber);
-                            stat.Battery = battery;
-                            stat.CycleCount = item.BatteryCycleCount.GetValueOrDefault();
-                        }
-                        try
-                        {
-                            stat.TaskLocation = await BingLocationHelper.UpdateFlightStatLocation(stat, httpClientFactory);
-                            stat.IsBingLocation = true;
-                        }
-                        catch (Exception)
-                        {
-
-                        }
-
-                        if (device.ExecutionCompanyID.HasValue)
-                        {
-                            var latestSetting = executionCompanySettingRepository.GetLatestSetting(device.ExecutionCompanyID.GetValueOrDefault());
-                            if (latestSetting is not null)
+                            stat = await flightStatRepository.CreateAsync(stat);
+                            if (device.Team is not null)
                             {
-                                stat.Cost = stat.TaskArea / 10000 * latestSetting.CostPerHectare;
-                            }
-                        }
-
-
-                        stat = await flightStatRepository.CreateAsync(stat);
-                        if (device.Team is not null)
-                        {
-                            var team = device.Team;
-                            List<TeamUser> teamUsers = team.TeamUsers.ToList();
-
-                            var executionCompanyUserFlightStats = await executionCompanyUserFlightStatRepository.GetListEntitiesAsync(new PageCommand(), ww => ww.FlightStatID == stat.ID);
-                            await executionCompanyUserFlightStatRepository.DeleteRangeAsync(executionCompanyUserFlightStats);
-
-                            foreach (var teamUser in teamUsers)
-                            {
-                                ExecutionCompanyUserFlightStat executionCompanyUserFlightStat = await
-                                executionCompanyUserFlightStatRepository.CreateAsync(new ExecutionCompanyUserFlightStat
+                                var team = device.Team;
+                                List<TeamUser>? teamUsers = team?.TeamUsers?.ToList();
+                                if (teamUsers != null)
                                 {
-                                    ExecutionCompanyUserID = teamUser.ExecutionCompanyUserID,
-                                    FlightStatID = stat.ID,
-                                    Type = teamUser.Type,
-                                });
-                            }
-                        }
-                        await deviceRepository.UpdateAsync(device);
-                        if (stat.BatteryPercentRemaining.HasValue)
-                        {
-                            if (stat.BatteryPercentRemaining.GetValueOrDefault() < 30)
-                            {
-                                await emailService.SendLowBatteryReportAsync(stat, false);
-                            }
-                        }
-                        flightStats.Add(stat);
-                    }
-                }
+                                    var executionCompanyUserFlightStats = await executionCompanyUserFlightStatRepository.GetListEntitiesAsync(new PageCommand(), ww => ww.FlightStatID == stat.ID);
+                                    await executionCompanyUserFlightStatRepository.DeleteRangeAsync(executionCompanyUserFlightStats);
 
+                                    foreach (var teamUser in teamUsers)
+                                    {
+                                        ExecutionCompanyUserFlightStat executionCompanyUserFlightStat = await
+                                        executionCompanyUserFlightStatRepository.CreateAsync(new ExecutionCompanyUserFlightStat
+                                        {
+                                            ExecutionCompanyUserID = teamUser.ExecutionCompanyUserID,
+                                            FlightStatID = stat.ID,
+                                            Type = teamUser.Type,
+                                        });
+                                    }
+                                }
+                            }
+                            await deviceRepository.UpdateAsync(device);
+                            if (stat.BatteryPercentRemaining.HasValue)
+                            {
+                                if (stat.BatteryPercentRemaining.GetValueOrDefault() < 30)
+                                {
+                                    await emailService.SendLowBatteryReportAsync(stat, false);
+                                }
+                            }
+                            flightStats.Add(stat);
+                        }
+                    }
+
+                }
             }
             response.SetData(flightStats.Select(fs => new { ID = fs.ID }));
             return response.ToIActionResult();
@@ -626,11 +652,13 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
             if (device is null)
             {
                 response.AddNotFoundErr("Device");
+                return response.ToIActionResult();
             }
-            if (command.Data.Count == 0)
+            if (command.Data == null || command.Data.Count == 0)
             {
                 countingService.Count += 1;
                 response.AddInvalidErr("Data");
+                return response.ToIActionResult();
             }
 
             if (device.ID == 8)
@@ -765,10 +793,11 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
             if (device is null)
             {
                 response.AddNotFoundErr("Device");
+                return response.ToIActionResult();
             }
             device.LastOnline = DateTime.UtcNow;
             await deviceRepository.UpdateAsync(device);
-            if (!Constants.AllowedVersions.Contains(command.GCSVersion))
+            if (!Constants.AllowedVersions.Contains(command.GCSVersion ?? ""))
             {
                 response.SetMessage("Invalid");
                 return response.ToIActionResult();
@@ -900,20 +929,22 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
             if (device.Team is not null)
             {
                 var team = device.Team;
-                List<TeamUser> teamUsers = team.TeamUsers.ToList();
-
-                var executionCompanyUserFlightStats = await executionCompanyUserFlightStatRepository.GetListEntitiesAsync(new PageCommand(), ww => ww.FlightStatID == stat.ID);
-                await executionCompanyUserFlightStatRepository.DeleteRangeAsync(executionCompanyUserFlightStats);
-
-                foreach (var teamUser in teamUsers)
+                List<TeamUser>? teamUsers = team?.TeamUsers?.ToList();
+                if (teamUsers != null)
                 {
-                    ExecutionCompanyUserFlightStat executionCompanyUserFlightStat = new ExecutionCompanyUserFlightStat
+                    var executionCompanyUserFlightStats = await executionCompanyUserFlightStatRepository.GetListEntitiesAsync(new PageCommand(), ww => ww.FlightStatID == stat.ID);
+                    await executionCompanyUserFlightStatRepository.DeleteRangeAsync(executionCompanyUserFlightStats);
+
+                    foreach (var teamUser in teamUsers)
                     {
-                        ExecutionCompanyUserID = teamUser.ExecutionCompanyUserID,
-                        FlightStatID = stat.ID,
-                        Type = teamUser.Type,
-                    };
-                    await executionCompanyUserFlightStatRepository.CreateAsync(executionCompanyUserFlightStat);
+                        ExecutionCompanyUserFlightStat executionCompanyUserFlightStat = new ExecutionCompanyUserFlightStat
+                        {
+                            ExecutionCompanyUserID = teamUser.ExecutionCompanyUserID,
+                            FlightStatID = stat.ID,
+                            Type = teamUser.Type,
+                        };
+                        await executionCompanyUserFlightStatRepository.CreateAsync(executionCompanyUserFlightStat);
+                    }
                 }
             }
             await deviceRepository.UpdateAsync(device);
@@ -932,12 +963,13 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
 
         public async Task<IActionResult> CreateStreamingLink([FromServices] DeviceRepository deviceRepository, [FromBody] AddingStreamingLinkCommand command)
         {
-            var actionResponse = actionResponseFactory.CreateInstance();
+            var response = actionResponseFactory.CreateInstance();
             var device = await deviceRepository.GetAsync(ww => ww.ID == CurrentDevice.ID);
 
             if (device is null)
             {
-                actionResponse.AddNotFoundErr("Device");
+                response.AddNotFoundErr("Device");
+                return response.ToIActionResult();
             }
 
             StreamingLink streamingLink = new StreamingLink()
@@ -947,36 +979,39 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
 
 
 
-            device.StreamingLinks.Add(streamingLink);
+            device.StreamingLinks?.Add(streamingLink);
 
 
             await deviceRepository.UpdateAsync(device);
 
-            actionResponse.SetCreatedObject(streamingLink);
+            response.SetCreatedObject(streamingLink);
             var result = await FirebaseMessaging.DefaultInstance.SendAsync(new Message() { Topic = "dronehub_message", Data = new Dictionary<String, String>() { { "update", "streaming_links" }, } });
-            return actionResponse.ToIActionResult();
+            return response.ToIActionResult();
         }
 
         [HttpPost("me/RemoveAllStreamingLinks")]
         public async Task<IActionResult> RemoveAllStreamingLinks([FromServices] DeviceRepository deviceRepository, [FromServices] StreamingLinkRepository streamingLinkRepository)
         {
-            var actionResponse = actionResponseFactory.CreateInstance();
+            var response = actionResponseFactory.CreateInstance();
 
             var device = await deviceRepository.GetAsync(ww => ww.ID == CurrentDevice.ID);
 
             if (device is null)
             {
-                actionResponse.AddNotFoundErr("Device");
+                response.AddNotFoundErr("Device");
+                return response.ToIActionResult();
             }
 
 
 
+            if (device.StreamingLinks != null)
+            {
+                await streamingLinkRepository.DeleteRangeAsync(device.StreamingLinks.ToList());
+                response.SetUpdatedMessage();
 
-            await streamingLinkRepository.DeleteRangeAsync(device.StreamingLinks.ToList());
-            actionResponse.SetUpdatedMessage();
-
-            var result = await FirebaseMessaging.DefaultInstance.SendAsync(new Message() { Topic = "dronehub_message", Data = new Dictionary<String, String>() { { "update", "streaming_links" }, } });
-            return actionResponse.ToIActionResult();
+                var result = await FirebaseMessaging.DefaultInstance.SendAsync(new Message() { Topic = "dronehub_message", Data = new Dictionary<String, String>() { { "update", "streaming_links" }, } });
+            }
+            return response.ToIActionResult();
         }
 
         [HttpPost("me/Plans")]
@@ -988,16 +1023,17 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
             if (device is null)
             {
                 response.AddNotFoundErr("Device");
+                return response.ToIActionResult();
             }
             var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
-            var plan = await planRepository.GetAsync(ww => ww.FileName == command.File.FileName && ww.Device == device);
+            var plan = await planRepository.GetAsync(ww => ww.FileName == (command.File == null ? "" : command.File.FileName) && ww.Device == device);
             if (plan is null)
             {
-                plan = new Plan { FileName = command.File.FileName, Device = device };
+                plan = new Plan { FileName = (command.File == null ? "" : command.File.FileName), Device = device };
             }
 
             plan.Location = geometryFactory.CreatePoint(new Coordinate(command.Longitude.GetValueOrDefault(), command.Latitude.GetValueOrDefault()));
-            plan.FileName = command.File.FileName;
+            plan.FileName = (command.File == null ? "" : command.File.FileName);
             plan.Area = command.Area.GetValueOrDefault();
             plan.FileBytes = command.GetFileBytes();
 
@@ -1016,7 +1052,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
         [HttpGet("RetrievePlans")]
         public async Task<IActionResult> GetPlans([FromServices] PlanRepository planRepository,
         [FromServices] DatabaseContext databaseContext, [FromServices] DeviceRepository deviceRepository,
-        [FromQuery] PageCommand pageCommand, [FromQuery] String search, [FromQuery] Double? latitude, [FromQuery] Double? longitude, [FromQuery] Double? range = 5000)
+        [FromQuery] PageCommand pageCommand, [FromQuery] String? search, [FromQuery] Double? latitude, [FromQuery] Double? longitude, [FromQuery] Double? range = 5000)
         {
             var response = actionResponseFactory.CreateInstance();
             var device = await deviceRepository.GetAsync(ww => ww.ID == CurrentDevice.ID);
@@ -1024,9 +1060,10 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
             if (device is null)
             {
                 response.AddNotFoundErr("Device");
+                return response.ToIActionResult();
             }
 
-            Point centerLocation = null;
+            Point? centerLocation = null;
             var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
 
             if (latitude.HasValue && longitude.HasValue && range.HasValue)
@@ -1035,14 +1072,15 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
             }
             Expression<Func<Plan, Boolean>> query = ww => (ww.Device == null || ww.Device.ExecutionCompanyID == device.ExecutionCompanyID)
             && (String.IsNullOrWhiteSpace(search) ?
-            ((centerLocation != null) ? (ww.Location.Distance(centerLocation) < range.GetValueOrDefault()) : true)
-            : ww.FileName.ToLower().Contains(search.ToLower()));
-            var listResponse = await planRepository.GetListResponseViewAsync<SmallPlanViewModel>(pageCommand, query, ww => centerLocation != null ? ww.Location.Distance(centerLocation) : ww.CreatedTime, true);
+            ((centerLocation != null) ? ((ww.Location != null ? ww.Location.Distance(centerLocation) < range.GetValueOrDefault() : false)) : true)
+            : (ww.FileName ?? "").ToLower().Contains(search.ToLower()));
+            var listResponse = await planRepository.GetListResponseViewAsync<SmallPlanViewModel>(pageCommand, query, ww => (centerLocation != null && ww.Location != null) ? ww.Location.Distance(centerLocation) : ww.CreatedTime, true);
             if (centerLocation is not null)
             {
-                foreach (var item in listResponse.Data)
+                foreach (var item in listResponse.Data ?? new List<SmallPlanViewModel>())
                 {
-                    item.Distance = DistanceHelper.CalculateDistance(databaseContext, item.Point, centerLocation);
+                    if (item.Point != null)
+                        item.Distance = DistanceHelper.CalculateDistance(databaseContext, item.Point, centerLocation);
                 }
             }
             listResponse.SetResponse(response);
@@ -1060,6 +1098,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
             if (device is null)
             {
                 response.AddNotFoundErr("Device");
+                return response.ToIActionResult();
             }
             Expression<Func<Plan, Boolean>> query = ww => (ww.Device == null || ww.Device.ExecutionCompanyID == device.ExecutionCompanyID)
                        && (ww.ID == command.PlanID);
@@ -1067,9 +1106,10 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
             if (plan is null)
             {
                 response.AddNotFoundErr("Plan");
+                return response.ToIActionResult();
             }
 
-            response.SetFile(plan.FileBytes, "application/octet-stream", plan.FileName);
+            response.SetFile(plan.FileBytes ?? new Byte[0], "application/octet-stream", plan.FileName ?? "example.plan");
 
 
 

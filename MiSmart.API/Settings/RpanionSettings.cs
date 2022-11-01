@@ -2,7 +2,7 @@ using System;
 namespace MiSmart.API.Settings;
 public class RpanionSettings
 {
-    public String SecretKey
+    public String? SecretKey
     {
         get; set;
     }

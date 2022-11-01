@@ -29,6 +29,7 @@ namespace MiSmart.API.Controllers
             if (executionCompanyUser is null)
             {
                 response.AddNotAllowedErr();
+                return response.ToIActionResult();
             }
             var setting = await executionCompanySettingRepository.CreateAsync(new ExecutionCompanySetting
             {
@@ -51,12 +52,14 @@ namespace MiSmart.API.Controllers
             if (executionCompanyUser is null)
             {
                 response.AddNotAllowedErr();
+                return response.ToIActionResult();
             }
 
             var latestSetting = executionCompanySettingRepository.GetLatestSetting(executionCompanyUser.ExecutionCompanyID);
             if (latestSetting is null)
             {
                 response.AddNotFoundErr("LatestSetting");
+                return response.ToIActionResult();
             }
             var vm = ViewModelHelpers.ConvertToViewModel<ExecutionCompanySetting, ExecutionCompanySettingViewModel>(latestSetting);
 

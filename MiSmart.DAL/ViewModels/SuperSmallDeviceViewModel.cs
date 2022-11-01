@@ -8,7 +8,7 @@ namespace MiSmart.DAL.ViewModels
     public class SuperSmallDeviceViewModel : IViewModel<Device>
     {
         public Int32 ID { get; set; }
-        public String Token { get; set; }
+        public String? Token { get; set; }
 
 
         public void LoadFrom(Device entity)
@@ -21,7 +21,7 @@ namespace MiSmart.DAL.ViewModels
     public class OnlyNameDeviceViewModel : IViewModel<Device>
     {
         public Int32 ID { get; set; }
-        public String Name { get; set; }
+        public String? Name { get; set; }
 
         public void LoadFrom(Device entity)
         {

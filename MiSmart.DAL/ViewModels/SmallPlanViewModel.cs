@@ -9,21 +9,21 @@ namespace MiSmart.DAL.ViewModels
     public class SmallPlanViewModel : IViewModel<Plan>
     {
         public Int64 ID { get; set; }
-        public String Name { get; set; }
-        public String FileName { get; set; }
+        public String? Name { get; set; }
+        public String? FileName { get; set; }
         public Double Longitude { get; set; }
         public Double Latitude { get; set; }
         [JsonIgnore]
-        public Point Point { get; set; }
-        public CoordinateViewModel Location { get; set; }
+        public Point? Point { get; set; }
+        public CoordinateViewModel? Location { get; set; }
         public Double? Distance { get; set; }
         public DateTime CreatedTime { get; set; }
         public Double Area { get; set; }
-        public String DistanceString
+        public String? DistanceString
         {
             get
             {
-                String result = null;
+                String? result = null;
                 if (Distance.HasValue)
                 {
                     if (Distance > 1000)
@@ -50,12 +50,12 @@ namespace MiSmart.DAL.ViewModels
             ID = entity.ID;
             Name = entity.Name;
             FileName = entity.FileName;
-            Longitude = entity.Location.X;
-            Latitude = entity.Location.Y;
+            Longitude = entity.Location is null ? 0 : entity.Location.X;
+            Latitude = entity.Location is null ? 0 : entity.Location.Y;
             Point = entity.Location;
             CreatedTime = entity.CreatedTime;
             Area = entity.Area;
-            Location = new CoordinateViewModel(entity.Location.Coordinate);
+            Location = entity.Location is null ? null : new CoordinateViewModel(entity.Location.Coordinate);
         }
     }
 }

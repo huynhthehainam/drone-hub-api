@@ -23,25 +23,23 @@ namespace MiSmart.DAL.Models
         }
 
         public Guid UserUUID { get; set; }
-        private ExecutionCompany executionCompany;
-        [JsonIgnore]
-        public ExecutionCompany ExecutionCompany
+        private ExecutionCompany? executionCompany;
+        public ExecutionCompany? ExecutionCompany
         {
             get => lazyLoader.Load(this, ref executionCompany);
             set => executionCompany = value;
         }
         public Int32 ExecutionCompanyID { get; set; }
         public ExecutionCompanyUserType Type { get; set; } = ExecutionCompanyUserType.Member;
-        private ICollection<TeamUser> teamUsers;
-        [JsonIgnore]
-        public ICollection<TeamUser> TeamUsers
+        private ICollection<TeamUser>? teamUsers;
+        public ICollection<TeamUser>? TeamUsers
         {
             get => lazyLoader.Load(this, ref teamUsers);
             set => teamUsers = value;
         }
 
-        private ICollection<ExecutionCompanyUserFlightStat> executionCompanyUserFlightStats;
-        public ICollection<ExecutionCompanyUserFlightStat> ExecutionCompanyUserFlightStats
+        private ICollection<ExecutionCompanyUserFlightStat>? executionCompanyUserFlightStats;
+        public ICollection<ExecutionCompanyUserFlightStat>? ExecutionCompanyUserFlightStats
         {
             get => lazyLoader.Load(this, ref executionCompanyUserFlightStats);
             set => executionCompanyUserFlightStats = value;

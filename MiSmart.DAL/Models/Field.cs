@@ -29,35 +29,34 @@ namespace MiSmart.DAL.Models
     {
         public Field() : base() { }
         public Field(ILazyLoader lazyLoader) : base(lazyLoader) { }
-        public String Name { get; set; }
+        public String? Name { get; set; }
         public DateTime CreatedTime { get; set; } = DateTime.UtcNow;
-        public String FieldName { get; set; }
-        public String FieldLocation { get; set; }
-        public String PilotName { get; set; }
+        public String? FieldName { get; set; }
+        public String? FieldLocation { get; set; }
+        public String? PilotName { get; set; }
         public Double MappingArea { get; set; }
         public Double MappingTime { get; set; }
         public DateTime? UpdatedTime { get; set; } = null;
-        private Customer customer;
-        [JsonIgnore]
-        public Customer Customer
+        private Customer? customer;
+        public Customer? Customer
         {
             get => lazyLoader.Load(this, ref customer);
             set => customer = value;
         }
         public Int32 CustomerID { get; set; }
 
-        private ExecutionCompany executionCompany;
-        public ExecutionCompany ExecutionCompany
+        private ExecutionCompany? executionCompany;
+        public ExecutionCompany? ExecutionCompany
         {
             get => lazyLoader.Load(this, ref executionCompany);
             set => executionCompany = value;
         }
         public Int32 ExecutionCompanyID { get; set; }
-        public Polygon Border { get; set; }
-        public LineString Flyway { get; set; }
-        public MultiPoint GPSPoints { get; set; }
-        public Point LocationPoint { get; set; }
-        public MultiPoint CalibrationPoints { get; set; }
+        public Polygon? Border { get; set; }
+        public LineString? Flyway { get; set; }
+        public MultiPoint? GPSPoints { get; set; }
+        public Point? LocationPoint { get; set; }
+        public MultiPoint? CalibrationPoints { get; set; }
 
         public Double WorkSpeed { get; set; }
         public Double WorkArea { get; set; }

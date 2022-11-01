@@ -8,6 +8,6 @@ namespace MiSmart.API.Commands
     public class GeneratingDeviceAccessTokenCommand
     {
         [Required]
-        public String DeviceToken { get; set; }
+        public String? DeviceToken { get; set; }
     }
 }

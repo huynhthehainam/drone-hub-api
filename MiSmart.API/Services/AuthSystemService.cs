@@ -14,11 +14,11 @@ namespace MiSmart.API.Services
         {
             public Boolean Exists { get; set; }
         }
-        public CheckUserIDExistsData Data { get; set; }
+        public CheckUserIDExistsData? Data { get; set; }
     }
     public class AuthSystemSettings
     {
-        public String Url { get; set; }
+        public String? Url { get; set; }
     }
     public class AuthSystemService
     {
@@ -37,8 +37,8 @@ namespace MiSmart.API.Services
             if (response.IsSuccessStatusCode)
             {
                 String responseString = response.Content.ReadAsStringAsync().Result;
-                CheckUserIDExistsResponse checkUserIDExistsResponse = JsonSerializer.Deserialize<CheckUserIDExistsResponse>(responseString, JsonSerializerDefaultOptions.CamelOptions);
-                return checkUserIDExistsResponse.Data.Exists;
+                CheckUserIDExistsResponse? checkUserIDExistsResponse = JsonSerializer.Deserialize<CheckUserIDExistsResponse>(responseString, JsonSerializerDefaultOptions.CamelOptions);
+                return checkUserIDExistsResponse?.Data?.Exists ?? false;
             }
             return false;
         }

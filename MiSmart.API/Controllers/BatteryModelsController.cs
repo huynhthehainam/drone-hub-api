@@ -54,6 +54,7 @@ namespace MiSmart.API.Controllers
             if (batteryModel is null)
             {
                 response.AddNotFoundErr("BatteryModel");
+                return response.ToIActionResult();
             }
 
 
@@ -70,16 +71,20 @@ namespace MiSmart.API.Controllers
             if (batteryModel is null)
             {
                 response.AddNotFoundErr("BatteryModel");
+                return response.ToIActionResult();
             }
 
             if (batteryModel.FileUrl is not null)
             {
                 await minioService.RemoveFileByUrlAsync(batteryModel.FileUrl);
             }
+            if (command.File != null)
+            {
+                batteryModel.FileUrl = await minioService.PutFileAsync(command.File, new String[] { "drone-hub-api", "battery-model" });
+                await batteryModelRepository.UpdateAsync(batteryModel);
+                response.SetUpdatedMessage();
+            }
 
-            batteryModel.FileUrl = await minioService.PutFileAsync(command.File, new String[] { "drone-hub-api", "battery-model" });
-            await batteryModelRepository.UpdateAsync(batteryModel);
-            response.SetUpdatedMessage();
 
             return response.ToIActionResult();
         }
@@ -92,6 +97,7 @@ namespace MiSmart.API.Controllers
             if (batteryModel is null)
             {
                 response.AddNotFoundErr("BatteryModel");
+                return response.ToIActionResult();
             }
 
             batteryModel.Name = String.IsNullOrWhiteSpace(command.Name) ? batteryModel.Name : command.Name;

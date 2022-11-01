@@ -13,7 +13,7 @@ namespace MiSmart.DAL.Repositories
         {
         }
 
-        public async Task<Battery> GetOrCreateBySerialNumberAsync(String serialNumber)
+        public async Task<Battery?> GetOrCreateBySerialNumberAsync(String serialNumber)
         {
             var batteryModel = context.Set<BatteryModel>().FirstOrDefault();
             if (batteryModel is null)

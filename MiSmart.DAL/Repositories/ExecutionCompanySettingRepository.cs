@@ -11,7 +11,7 @@ namespace MiSmart.DAL.Repositories
         {
         }
 
-        public ExecutionCompanySetting GetLatestSetting(Int32 executionCompanyID)
+        public ExecutionCompanySetting? GetLatestSetting(Int32 executionCompanyID)
         {
             return context.Set<ExecutionCompanySetting>().Where(ww => ww.ExecutionCompanyID == executionCompanyID).OrderByDescending(ww => ww.CreatedTime).FirstOrDefault();
         }

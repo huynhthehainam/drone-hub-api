@@ -14,15 +14,15 @@ namespace MiSmart.DAL.Models
         {
         }
 
-        private Device device;
-        public Device Device
+        private Device? device;
+        public Device? Device
         {
             get => lazyLoader.Load(this, ref device);
             set => device = value;
         }
 
         public Int32 DeviceID { get; set; }
-        public String Link { get; set; }
+        public String? Link { get; set; }
         public DateTime CreatedTime { get; set; } = DateTime.UtcNow;
     }
 }

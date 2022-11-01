@@ -2,7 +2,6 @@
 using MiSmart.API.Protos;
 using static MiSmart.API.Protos.AuthProtoService;
 using System;
-using System.Threading.Tasks;
 
 namespace MiSmart.API.GrpcServices
 {
@@ -17,11 +16,9 @@ namespace MiSmart.API.GrpcServices
         {
             GetUserInfoProtoRequest request = new GetUserInfoProtoRequest { Id = id };
             var resp = authProtoServiceClient.GetUserInfo(request);
-            if (resp.Id != 0)
-            {
-                return resp;
-            }
-            return null;
+
+            return resp;
+
         }
         public UserExistingInformationProtoModel GetUserExistingInformation(Int64 id)
         {

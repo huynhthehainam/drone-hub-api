@@ -10,7 +10,7 @@ namespace MiSmart.API.Commands
 
     public class UpdateImageUrlsFromEmailCommand
     {
-        public String token {get; set;}        
+        public String? token {get; set;}        
         public List<String> ImageUrls {get; set; } = new List<String>();
     }
 

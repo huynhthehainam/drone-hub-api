@@ -11,6 +11,7 @@ using MiSmart.Infrastructure.Permissions;
 using MiSmart.API.Permissions;
 using MiSmart.Infrastructure.Minio;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace MiSmart.API.Controllers
 {
@@ -30,14 +31,19 @@ namespace MiSmart.API.Controllers
             if (report is null)
             {
                 actionResponse.AddNotFoundErr("Report");
+                return actionResponse.ToIActionResult();
             }
+            if (command.Files != null)
+            {
+                if (report.AttachmentLinks is null) report.AttachmentLinks = new List<String>();
+                for (var i = 0; i < command.Files.Count; i++)
+                {
+                    var fileLink = await minioService.PutFileAsync(command.Files[i], new String[] { "drone-hub-api", "maintenance-report", $"{report.UUID}" });
+                    report.AttachmentLinks.Add(fileLink);
+                }
 
-            for(var i = 0; i < command.Files.Count; i++){
-                var fileLink = await minioService.PutFileAsync(command.Files[i], new String[] { "drone-hub-api", "maintenance-report", $"{report.UUID}" });
-                report.AttachmentLinks.Add(fileLink);
+                await maintenanceReportRepository.UpdateAsync(report);
             }
-
-            await maintenanceReportRepository.UpdateAsync(report);
 
             actionResponse.SetUpdatedMessage();
             return actionResponse.ToIActionResult();

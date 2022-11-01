@@ -15,14 +15,21 @@ namespace MiSmart.API.Helpers
     {
         public static async Task UpdateLocation(ListFlightStatsResponse<SmallFlightStatViewModel> listResponse, Int32 index, IHttpClientFactory httpClientFactory)
         {
-            if (listResponse.Data[index].IsBingLocation)
+            if (listResponse.Data?[index].IsBingLocation ?? false)
             {
                 return;
             }
             Console.WriteLine("Get data");
             var client = httpClientFactory.CreateClient();
-
+            if (listResponse.Data is null)
+            {
+                return;
+            }
             var firstPoint = listResponse.Data[index].FirstPoint;
+            if (firstPoint is null)
+            {
+                return;
+            }
             HttpResponseMessage resp = await client.GetAsync($"http://dev.virtualearth.net/REST/v1/Locations/{firstPoint.Latitude},{firstPoint.Longitude}?key=AiZ-Nz14Iup8BQtxfTK5PM1Fv2QRHYKL_SEiZYHC7HyfBuhVI19zKy2-RsT5NzFQ");
 
             var content = await resp.Content.ReadAsStringAsync();
@@ -54,19 +61,19 @@ namespace MiSmart.API.Helpers
                                 success = address.TryGetProperty("adminDistrict2", out adminDistrict2);
                                 if (success)
                                 {
-                                    locations.Add(adminDistrict2.GetString());
+                                    locations.Add(adminDistrict2.GetString() ?? "");
                                 }
                                 JsonElement adminDistrict;
                                 success = address.TryGetProperty("adminDistrict", out adminDistrict);
                                 if (success)
                                 {
-                                    locations.Add(adminDistrict.GetString());
+                                    locations.Add(adminDistrict.GetString() ?? "");
                                 }
                                 JsonElement countryRegion;
                                 success = address.TryGetProperty("countryRegion", out countryRegion);
                                 if (success)
                                 {
-                                    locations.Add(countryRegion.GetString());
+                                    locations.Add(countryRegion.GetString() ?? "");
                                 }
                                 listResponse.Data[index].TaskLocation = String.Join(", ", locations);
                             }
@@ -80,8 +87,12 @@ namespace MiSmart.API.Helpers
         {
 
             var client = httpClientFactory.CreateClient();
-
-            var firstPoint = new CoordinateViewModel(flightStat.FlywayPoints.Coordinates.FirstOrDefault());
+            var firstPointCoord = flightStat.FlywayPoints?.Coordinate;
+            if (firstPointCoord is null)
+            {
+                return "";
+            }
+            var firstPoint = new CoordinateViewModel(firstPointCoord);
             HttpResponseMessage resp = await client.GetAsync($"http://dev.virtualearth.net/REST/v1/Locations/{firstPoint.Latitude},{firstPoint.Longitude}?key=AiZ-Nz14Iup8BQtxfTK5PM1Fv2QRHYKL_SEiZYHC7HyfBuhVI19zKy2-RsT5NzFQ");
 
             var content = await resp.Content.ReadAsStringAsync();
@@ -113,19 +124,19 @@ namespace MiSmart.API.Helpers
                                 success = address.TryGetProperty("adminDistrict2", out adminDistrict2);
                                 if (success)
                                 {
-                                    locations.Add(adminDistrict2.GetString());
+                                    locations.Add(adminDistrict2.GetString() ?? "");
                                 }
                                 JsonElement adminDistrict;
                                 success = address.TryGetProperty("adminDistrict", out adminDistrict);
                                 if (success)
                                 {
-                                    locations.Add(adminDistrict.GetString());
+                                    locations.Add(adminDistrict.GetString() ?? "");
                                 }
                                 JsonElement countryRegion;
                                 success = address.TryGetProperty("countryRegion", out countryRegion);
                                 if (success)
                                 {
-                                    locations.Add(countryRegion.GetString());
+                                    locations.Add(countryRegion.GetString() ?? "");
                                 }
                                 return String.Join(", ", locations);
 
@@ -134,7 +145,7 @@ namespace MiSmart.API.Helpers
                     }
                 }
             }
-            return flightStat.TaskLocation;
+            return flightStat.TaskLocation ?? "";
 
         }
         public static async Task<String> UpdateLogLocation(LogDetail log, IHttpClientFactory httpClientFactory)
@@ -173,19 +184,19 @@ namespace MiSmart.API.Helpers
                                 success = address.TryGetProperty("adminDistrict2", out adminDistrict2);
                                 if (success)
                                 {
-                                    locations.Add(adminDistrict2.GetString());
+                                    locations.Add(adminDistrict2.GetString() ?? "");
                                 }
                                 JsonElement adminDistrict;
                                 success = address.TryGetProperty("adminDistrict", out adminDistrict);
                                 if (success)
                                 {
-                                    locations.Add(adminDistrict.GetString());
+                                    locations.Add(adminDistrict.GetString() ?? "");
                                 }
                                 JsonElement countryRegion;
                                 success = address.TryGetProperty("countryRegion", out countryRegion);
                                 if (success)
                                 {
-                                    locations.Add(countryRegion.GetString());
+                                    locations.Add(countryRegion.GetString() ?? "");
                                 }
                                 return String.Join(", ", locations);
 

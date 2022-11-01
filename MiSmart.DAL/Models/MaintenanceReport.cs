@@ -17,12 +17,11 @@ namespace MiSmart.DAL.Models
         public MaintenanceReport()
         {
         }
-        public String Reason { get; set; }
-        public List<String> AttachmentLinks { get; set; }
+        public String? Reason { get; set; }
+        public List<String>? AttachmentLinks { get; set; }
 
-        private Device device;
-
-        public Device Device
+        private Device? device;
+        public Device ?Device
         {
             get => lazyLoader.Load(this, ref device);
             set => device = value;

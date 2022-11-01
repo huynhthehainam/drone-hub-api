@@ -10,8 +10,8 @@ namespace MiSmart.DAL.ViewModels
         public Int32 ID { get; set; }
         public Boolean IsActive { get; set; }
         public DateTime CreationTime { get; set; }
-        public String Description { get; set; }
-        public String Name { get; set; }
+        public String? Description { get; set; }
+        public String? Name { get; set; }
         public Double YMin { get; set; }
         public Double YMax { get; set; }
         public Double YCentrifugalMin { get; set; }
@@ -22,9 +22,9 @@ namespace MiSmart.DAL.ViewModels
         public Double FlowRateMinLimit { get; set; }
         public Double FlowRateMiddleLimit { get; set; }
         public Double FlowRateMaxLimit { get; set; }
-        public DeviceModelParamDetailViewModel[] Details { get; set; }
-        public DeviceModelParamCentrifugalDetailViewModel[] CentrifugalDetails { get; set; }
-        public DeviceModelParamCentrifugal4DetailViewModel[] Centrifugal4Details { get; set; }
+        public DeviceModelParamDetailViewModel[]? Details { get; set; }
+        public DeviceModelParamCentrifugalDetailViewModel[]? CentrifugalDetails { get; set; }
+        public DeviceModelParamCentrifugal4DetailViewModel[]? Centrifugal4Details { get; set; }
 
         public void LoadFrom(DeviceModelParam entity)
         {
@@ -44,9 +44,9 @@ namespace MiSmart.DAL.ViewModels
             FlowRateMinLimit = entity.FlowRateMinLimit;
             FlowRateMiddleLimit = entity.FlowRateMiddleLimit;
             FlowRateMaxLimit = entity.FlowRateMaxLimit;
-            Details = entity.Details.OrderBy(ww => ww.XMin).Select(ww => ViewModelHelpers.ConvertToViewModel<DeviceModelParamDetail, DeviceModelParamDetailViewModel>(ww)).ToArray();
-            CentrifugalDetails = entity.CentrifugalDetails.OrderBy(ww => ww.XMin).Select(ww => ViewModelHelpers.ConvertToViewModel<DeviceModelParamCentrifugalDetail, DeviceModelParamCentrifugalDetailViewModel>(ww)).ToArray();
-            Centrifugal4Details = entity.Centrifugal4Details.OrderBy(ww => ww.XMin).Select(ww => ViewModelHelpers.ConvertToViewModel<DeviceModelParamCentrifugal4Detail, DeviceModelParamCentrifugal4DetailViewModel>(ww)).ToArray();
+            Details = entity.Details is null ? null : entity.Details.OrderBy(ww => ww.XMin).Select(ww => ViewModelHelpers.ConvertToViewModel<DeviceModelParamDetail, DeviceModelParamDetailViewModel>(ww)).ToArray();
+            CentrifugalDetails = entity.CentrifugalDetails is null ? null : entity.CentrifugalDetails.OrderBy(ww => ww.XMin).Select(ww => ViewModelHelpers.ConvertToViewModel<DeviceModelParamCentrifugalDetail, DeviceModelParamCentrifugalDetailViewModel>(ww)).ToArray();
+            Centrifugal4Details = entity.Centrifugal4Details is null ? null : entity.Centrifugal4Details.OrderBy(ww => ww.XMin).Select(ww => ViewModelHelpers.ConvertToViewModel<DeviceModelParamCentrifugal4Detail, DeviceModelParamCentrifugal4DetailViewModel>(ww)).ToArray();
         }
     }
 

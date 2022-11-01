@@ -20,34 +20,34 @@ namespace MiSmart.API.Commands
     {
         public DateTime? FlightTime { get; set; }
         [Required(AllowEmptyStrings = false)]
-        public String TaskLocation { get; set; }
+        public String? TaskLocation { get; set; }
         [Required]
         public Int32? Flights { get; set; }
         [Required]
-        public String FieldName { get; set; }
+        public String? FieldName { get; set; }
         [Required]
         public Double? TaskArea { get; set; }
         [Required]
         public Double? FlightDuration { get; set; }
         [Required(AllowEmptyStrings = false)]
-        public String PilotName { get; set; }
+        public String? PilotName { get; set; }
         public List<LocationPoint> FlywayPoints { get; set; } = new List<LocationPoint>();
         public List<Int32> SprayedIndexes { get; set; } = new List<Int32>();
-        public String TeamName { get; set; }
+        public String? TeamName { get; set; }
         public Guid FlightUID { get; set; } = Guid.NewGuid();
-        public String GCSVersion { get; set; }
-        public JsonDocument AdditionalInformation { get; set; }
+        public String? GCSVersion { get; set; }
+        public JsonDocument? AdditionalInformation { get; set; }
         public Double? BatteryPercentRemaining { get; set; }
-        public String BatterySerialNumber { get; set; }
+        public String? BatterySerialNumber { get; set; }
         public Int32? BatteryCycleCount { get; set; }
     }
     public class AddingOfflineFlightStatCommand : AddingFlightStatCommand
     {
-        public String DeviceAccessToken { get; set; }
+        public String? DeviceAccessToken { get; set; }
     }
 
     public class AddingBulkOfflineFlightStatsCommand
     {
-        public List<AddingOfflineFlightStatCommand> Data { get; set; }
+        public List<AddingOfflineFlightStatCommand> Data { get; set; } = new List<AddingOfflineFlightStatCommand>();
     }
 }

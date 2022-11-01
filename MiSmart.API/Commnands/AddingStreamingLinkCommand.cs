@@ -6,6 +6,6 @@ namespace MiSmart.API.Commands
     public class AddingStreamingLinkCommand
     {
         [Required]
-        public String Link { get; set; }
+        public String? Link { get; set; }
     }
 }

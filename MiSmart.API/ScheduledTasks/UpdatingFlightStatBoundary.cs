@@ -43,14 +43,17 @@ namespace MiSmart.API.ScheduledTasks
                     var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
                     foreach (var flightStat in flightStats)
                     {
-                        var sprayedIndexes = flightStat.SprayedIndexes;
+                        var sprayedIndexes = flightStat.SprayedIndexes ?? new List<Int32>();
                         sprayedIndexes.Sort();
                         var minIndex = sprayedIndexes.FirstOrDefault();
                         var maxIndex = sprayedIndexes.LastOrDefault();
                         List<Coordinate> coordinates = new List<Coordinate>();
                         for (var i = minIndex; i <= maxIndex; i += 1)
                         {
-                            coordinates.Add(flightStat.FlywayPoints.Coordinates[i]);
+                            if (flightStat.FlywayPoints != null)
+                            {
+                                coordinates.Add(flightStat.FlywayPoints.Coordinates[i]);
+                            }
                         }
                         var vertices = new List<MyVertex>();
                         foreach (var coordinate in coordinates)

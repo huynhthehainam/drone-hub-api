@@ -17,8 +17,8 @@ namespace MiSmart.DAL.Models
         {
         }
 
-        private ICollection<BatteryLog> logs;
-        public ICollection<BatteryLog> Logs
+        private ICollection<BatteryLog>? logs;
+        public ICollection<BatteryLog>? Logs
         {
             get => lazyLoader.Load(this, ref logs);
             set => logs = value;
@@ -26,8 +26,8 @@ namespace MiSmart.DAL.Models
 
 
 
-        private Battery battery;
-        public Battery Battery
+        private Battery? battery;
+        public Battery? Battery
         {
             get => lazyLoader.Load(this, ref battery);
             set => battery = value;
@@ -36,8 +36,8 @@ namespace MiSmart.DAL.Models
         public DateTime CreatedTime { get; set; } = DateTime.UtcNow;
 
 
-        private ICollection<Battery> lastBatteries;
-        public ICollection<Battery> LastBatteries
+        private ICollection<Battery>? lastBatteries;
+        public ICollection<Battery>? LastBatteries
         {
             get => lazyLoader.Load(this, ref lastBatteries);
             set => lastBatteries = value;

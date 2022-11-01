@@ -19,15 +19,15 @@ namespace MiSmart.DAL.Models
         }
 
         public DateTime CreatedTime { get; set; } = DateTime.UtcNow;
-        public Point LocationPoint { get; set; }
+        public Point? LocationPoint { get; set; }
         public Double Direction { get; set; }
-        public JsonDocument AdditionalInformation
+        public JsonDocument? AdditionalInformation
         {
             get; set;
         }
 
-        private TelemetryGroup group;
-        public TelemetryGroup Group
+        private TelemetryGroup? group;
+        public TelemetryGroup? Group
         {
             get => lazyLoader.Load(this, ref group);
             set => group = value;

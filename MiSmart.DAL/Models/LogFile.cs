@@ -31,46 +31,46 @@ namespace MiSmart.DAL.Models
         public LogFile(ILazyLoader lazyLoader) : base(lazyLoader)
         {
         }
-        private Device device;
-        public Device Device
+        private Device? device;
+        public Device? Device
         {
             get => lazyLoader.Load(this, ref device);
             set => device = value;
         }
         public Int32 DeviceID { get; set; }
-        public Byte[] FileBytes { get; set; }
-        public String FileName { get; set; }
+        public Byte[]? FileBytes { get; set; }
+        public String? FileName { get; set; }
         public DateTime CreationTime { get; set; } = DateTime.UtcNow;
         public DateTime LoggingTime { get; set; } = DateTime.UtcNow;
         public DroneStatus DroneStatus { get; set; }
         public LogStatus Status { get; set; }
-        private LogDetail logDetail;
-        public LogDetail LogDetail
+        private LogDetail? logDetail;
+        public LogDetail? LogDetail
         {
             get => lazyLoader.Load(this, ref logDetail);
             set => logDetail = value;
         }
-        private LogReport logReport;
-        public LogReport LogReport
+        private LogReport? logReport;
+        public LogReport? LogReport
         {
             get => lazyLoader.Load(this, ref logReport);
             set => logReport = value;
         }
-        private LogReportResult logReportResult;
-        public LogReportResult LogReportResult
+        private LogReportResult? logReportResult;
+        public LogReportResult? LogReportResult
         {
             get => lazyLoader.Load(this, ref logReportResult);
             set => logReportResult = value;
         }
-        private ICollection<LogToken> logTokens;
-        public ICollection<LogToken> LogTokens
+        private ICollection<LogToken>? logTokens;
+        public ICollection<LogToken>? LogTokens
         {
             get => lazyLoader.Load(this, ref logTokens);
             set => logTokens = value;
         }
-        public Boolean isAnalyzed { get; set; } = false;
-        private SecondLogReport secondLogReport;
-        public SecondLogReport SecondLogReport
+        public Boolean IsAnalyzed { get; set; } = false;
+        private SecondLogReport? secondLogReport;
+        public SecondLogReport? SecondLogReport
         {
             get => lazyLoader.Load(this, ref secondLogReport);
             set => secondLogReport = value;

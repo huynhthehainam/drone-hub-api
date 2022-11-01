@@ -11,15 +11,15 @@ namespace MiSmart.API.Commands
     public class AddingLogFileCommand
     {
 
-        public List<IFormFile> Files { get; set; }
-        public String DeviceToken { get; set; }
-        public String SecretKey { get;  set; }
+        public List<IFormFile> Files { get; set; } = new List<IFormFile>();
+        public String? DeviceToken { get; set; }
+        public String? SecretKey { get; set; }
     }
     public class AddingPlanCommand
     {
         [AllowedExtensions(new String[] { ".plan" })]
         [Required]
-        public IFormFile File { get; set; }
+        public IFormFile? File { get; set; }
         [Required]
         public Double? Latitude { get; set; }
         [Required]
@@ -29,17 +29,18 @@ namespace MiSmart.API.Commands
         public Byte[] GetFileBytes()
         {
             Byte[] bytes = new Byte[] { };
-            using (var ms = new MemoryStream())
-            {
-                this.File.CopyTo(ms);
-                bytes = ms.ToArray();
-            }
+            if (this.File != null)
+                using (var ms = new MemoryStream())
+                {
+                    this.File.CopyTo(ms);
+                    bytes = ms.ToArray();
+                }
             return bytes;
         }
     }
     public class RetrievingPlansCommand
     {
-        public String Search { get; set; }
+        public String? Search { get; set; }
         [Required]
         public Double? Latitude { get; set; }
         [Required]

@@ -9,10 +9,11 @@ namespace MiSmart.DAL.Models
     {
         public Part() : base() { }
         public Part(ILazyLoader lazyLoader) : base(lazyLoader) { }
-        public String Group {get; set; }
-        public String Name {get; set; }
-        private ICollection<LogResultDetail> logResultDetails;
-        public ICollection<LogResultDetail> LogResultDetails{
+        public String? Group { get; set; }
+        public String? Name { get; set; }
+        private ICollection<LogResultDetail>? logResultDetails;
+        public ICollection<LogResultDetail>? LogResultDetails
+        {
             get => lazyLoader.Load(this, ref logResultDetails);
             set => logResultDetails = value;
         }

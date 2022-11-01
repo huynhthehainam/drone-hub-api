@@ -22,7 +22,7 @@ namespace MiSmart.API.Controllers
         public async Task<IActionResult> GetListLinks([FromQuery] PageCommand pageCommand,
         [FromServices] CustomerUserRepository customerUserRepository,
         [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository,
-         [FromServices] StreamingLinkRepository streamingLinkRepository, [FromQuery] String relation = "Owner")
+         [FromServices] StreamingLinkRepository streamingLinkRepository, [FromQuery] String? relation = "Owner")
         {
             ActionResponse actionResponse = actionResponseFactory.CreateInstance();
 
@@ -30,12 +30,13 @@ namespace MiSmart.API.Controllers
             if (relation == "Owner")
             {
 
-                CustomerUser customerUser = await customerUserRepository.GetByPermissionAsync(CurrentUser.UUID);
+                var customerUser = await customerUserRepository.GetByPermissionAsync(CurrentUser.UUID);
                 if (customerUser is null)
                 {
                     actionResponse.AddNotAllowedErr();
+                    return actionResponse.ToIActionResult();
                 }
-                query = ww => (ww.Device.CustomerID == customerUser.CustomerID);
+                query = ww => (ww.Device != null ? ww.Device.CustomerID == customerUser.CustomerID : false);
             }
             else if (relation == "Administrator")
             {
@@ -43,13 +44,14 @@ namespace MiSmart.API.Controllers
             }
             else
             {
-                ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.UUID);
+                var executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.UUID);
                 if (executionCompanyUser is null)
                 {
                     actionResponse.AddNotAllowedErr();
+                    return actionResponse.ToIActionResult();
                 }
 
-                query = ww => ww.Device.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID;
+                query = ww => ww.Device != null ? ww.Device.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID : false;
             }
             var listResponse = await streamingLinkRepository.GetListResponseViewAsync<StreamingLinkViewMode>(pageCommand, query, ww => ww.CreatedTime, false);
 

@@ -10,17 +10,17 @@ namespace MiSmart.API.Commands
     public class AddingBatteryLogCommand
     {
         [Required]
-        public String ActualID { get; set; }
+        public String? ActualID { get; set; }
         public Double PercentRemaining { get; set; }
         public Double Temperature { get; set; }
-        public String TemperatureUnit { get; set; }
+        public String? TemperatureUnit { get; set; }
         public Double CellMinimumVoltage { get; set; }
-        public String CellMinimumVoltageUnit { get; set; }
+        public String? CellMinimumVoltageUnit { get; set; }
         public Double CellMaximumVoltage { get; set; }
-        public String CellMaximumVoltageUnit { get; set; }
+        public String? CellMaximumVoltageUnit { get; set; }
         public Int32 CycleCount { get; set; }
         public Double Current { get; set; }
-        public String CurrentUnit { get; set; }
+        public String? CurrentUnit { get; set; }
     }
 
     public class AddingTelemetryRecordCommand
@@ -33,12 +33,12 @@ namespace MiSmart.API.Commands
         [Required]
         [Range(0, 360)]
         public Double? Direction { get; set; }
-        public JsonDocument AdditionalInformation { get; set; }
+        public JsonDocument? AdditionalInformation { get; set; }
     }
     public class AddingBulkTelemetryRecordCommand
     {
         [Required]
-        public List<AddingTelemetryRecordCommand> Data { get; set; }
+        public List<AddingTelemetryRecordCommand>? Data { get; set; }
         public List<AddingBatteryLogCommand> BatteryLogs { get; set; } = new List<AddingBatteryLogCommand>();
 
     }

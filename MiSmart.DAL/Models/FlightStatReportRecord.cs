@@ -16,11 +16,11 @@ public class FlightStatReportRecord : EntityBase<Guid>
     {
     }
 
-    public String Reason { get; set; }
-    public List<String> Images { get; set; }
+    public String? Reason { get; set; }
+    public List<String>? Images { get; set; }
 
-    private FlightStat flightStat;
-    public FlightStat FlightStat
+    private FlightStat? flightStat;
+    public FlightStat? FlightStat
     {
         get => lazyLoader.Load(this, ref flightStat);
         set => flightStat = value;
