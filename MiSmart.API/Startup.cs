@@ -145,6 +145,7 @@ namespace MiSmart.API
             services.AddSingleton<HashService, HashService>();
             services.AddScoped<JWTService, JWTService>();
             services.AddScoped<MyEmailService, MyEmailService>();
+            services.AddScoped<MyMinioService, MyMinioService>();
 
             services.AddSingleton<AuthSystemService, AuthSystemService>();
 
