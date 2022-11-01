@@ -10,12 +10,12 @@ namespace MiSmart.API.Commands
     public class AddingMaintenanceReportCommand
     {
         [Required]
-        public String Reason { get; set; }
+        public String? Reason { get; set; }
         public DateTime? ActualReportCreatedTime { get; set; }
     }
     public class AddingMaintenanceReportAttachmentCommand
     {
         [Required]
-        public List<IFormFile> Files { get; set; }
+        public List<IFormFile>? Files { get; set; }
     }
 }

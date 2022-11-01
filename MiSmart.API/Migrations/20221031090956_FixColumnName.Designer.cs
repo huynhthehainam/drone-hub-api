@@ -5,6 +5,7 @@ using System.Text.Json;
 using MiSmart.DAL.DatabaseContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -14,9 +15,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MiSmart.API.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20221031090956_FixColumnName")]
+    partial class FixColumnName
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -62,7 +64,7 @@ namespace MiSmart.API.Migrations
 
                     b.HasIndex("LastGroupID");
 
-                    b.ToTable("Batteries", (string)null);
+                    b.ToTable("Batteries");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.BatteryGroupLog", b =>
@@ -81,7 +83,7 @@ namespace MiSmart.API.Migrations
 
                     b.HasIndex("BatteryID");
 
-                    b.ToTable("BatteryGroupLogs", (string)null);
+                    b.ToTable("BatteryGroupLogs");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.BatteryLog", b =>
@@ -130,7 +132,7 @@ namespace MiSmart.API.Migrations
 
                     b.HasIndex("GroupLogID");
 
-                    b.ToTable("BatteryLogs", (string)null);
+                    b.ToTable("BatteryLogs");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.BatteryModel", b =>
@@ -152,7 +154,7 @@ namespace MiSmart.API.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("BatteryModels", (string)null);
+                    b.ToTable("BatteryModels");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.Customer", b =>
@@ -171,7 +173,7 @@ namespace MiSmart.API.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("Customers", (string)null);
+                    b.ToTable("Customers");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.CustomerUser", b =>
@@ -195,7 +197,7 @@ namespace MiSmart.API.Migrations
                     b.HasIndex("UserUUID")
                         .IsUnique();
 
-                    b.ToTable("CustomerUsers", (string)null);
+                    b.ToTable("CustomerUsers");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.Device", b =>
@@ -258,7 +260,7 @@ namespace MiSmart.API.Migrations
 
                     b.HasIndex("TeamID");
 
-                    b.ToTable("Devices", (string)null);
+                    b.ToTable("Devices");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.DeviceModel", b =>
@@ -280,7 +282,7 @@ namespace MiSmart.API.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("DeviceModels", (string)null);
+                    b.ToTable("DeviceModels");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.DeviceModelParam", b =>
@@ -340,7 +342,7 @@ namespace MiSmart.API.Migrations
 
                     b.HasIndex("DeviceModelID");
 
-                    b.ToTable("DeviceModelParams", (string)null);
+                    b.ToTable("DeviceModelParams");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.DeviceModelParamCentrifugal4Detail", b =>
@@ -370,7 +372,7 @@ namespace MiSmart.API.Migrations
 
                     b.HasIndex("DeviceModelParamID");
 
-                    b.ToTable("DeviceModelParamCentrifugal4Details", (string)null);
+                    b.ToTable("DeviceModelParamCentrifugal4Details");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.DeviceModelParamCentrifugalDetail", b =>
@@ -400,7 +402,7 @@ namespace MiSmart.API.Migrations
 
                     b.HasIndex("DeviceModelParamID");
 
-                    b.ToTable("DeviceModelParamCentrifugalDetails", (string)null);
+                    b.ToTable("DeviceModelParamCentrifugalDetails");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.DeviceModelParamDetail", b =>
@@ -430,7 +432,7 @@ namespace MiSmart.API.Migrations
 
                     b.HasIndex("DeviceModelParamID");
 
-                    b.ToTable("DeviceModelParamDetails", (string)null);
+                    b.ToTable("DeviceModelParamDetails");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.ExecutionCompany", b =>
@@ -452,7 +454,7 @@ namespace MiSmart.API.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("ExecutionCompanies", (string)null);
+                    b.ToTable("ExecutionCompanies");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.ExecutionCompanySetting", b =>
@@ -482,7 +484,7 @@ namespace MiSmart.API.Migrations
 
                     b.HasIndex("ExecutionCompanyID");
 
-                    b.ToTable("ExecutionCompanySettings", (string)null);
+                    b.ToTable("ExecutionCompanySettings");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.ExecutionCompanyUser", b =>
@@ -509,7 +511,7 @@ namespace MiSmart.API.Migrations
                     b.HasIndex("UserUUID")
                         .IsUnique();
 
-                    b.ToTable("ExecutionCompanyUsers", (string)null);
+                    b.ToTable("ExecutionCompanyUsers");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.ExecutionCompanyUserFlightStat", b =>
@@ -533,7 +535,7 @@ namespace MiSmart.API.Migrations
 
                     b.HasIndex("FlightStatID");
 
-                    b.ToTable("ExecutionCompanyUserFlightStats", (string)null);
+                    b.ToTable("ExecutionCompanyUserFlightStats");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.Field", b =>
@@ -616,7 +618,7 @@ namespace MiSmart.API.Migrations
 
                     b.HasIndex("ExecutionCompanyID");
 
-                    b.ToTable("Fields", (string)null);
+                    b.ToTable("Fields");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.FlightStat", b =>
@@ -751,7 +753,7 @@ namespace MiSmart.API.Migrations
 
                     b.HasIndex("TeamID");
 
-                    b.ToTable("FlightStats", (string)null);
+                    b.ToTable("FlightStats");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.FlightStatReportRecord", b =>
@@ -773,7 +775,7 @@ namespace MiSmart.API.Migrations
 
                     b.HasIndex("FlightStatID");
 
-                    b.ToTable("FlightStatReportRecords", (string)null);
+                    b.ToTable("FlightStatReportRecords");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.LogDetail", b =>
@@ -846,7 +848,7 @@ namespace MiSmart.API.Migrations
                     b.HasIndex("LogFileID")
                         .IsUnique();
 
-                    b.ToTable("LogDetails", (string)null);
+                    b.ToTable("LogDetails");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.LogFile", b =>
@@ -883,7 +885,7 @@ namespace MiSmart.API.Migrations
 
                     b.HasIndex("DeviceID");
 
-                    b.ToTable("LogFiles", (string)null);
+                    b.ToTable("LogFiles");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.LogReport", b =>
@@ -932,7 +934,7 @@ namespace MiSmart.API.Migrations
                     b.HasIndex("LogFileID")
                         .IsUnique();
 
-                    b.ToTable("LogReports", (string)null);
+                    b.ToTable("LogReports");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.LogReportResult", b =>
@@ -989,7 +991,7 @@ namespace MiSmart.API.Migrations
                     b.HasIndex("LogFileID")
                         .IsUnique();
 
-                    b.ToTable("LogReportResults", (string)null);
+                    b.ToTable("LogReportResults");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.LogResultDetail", b =>
@@ -1021,7 +1023,7 @@ namespace MiSmart.API.Migrations
 
                     b.HasIndex("PartErrorID");
 
-                    b.ToTable("LogResultDetails", (string)null);
+                    b.ToTable("LogResultDetails");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.LogToken", b =>
@@ -1051,7 +1053,7 @@ namespace MiSmart.API.Migrations
 
                     b.HasIndex("LogFileID");
 
-                    b.ToTable("LogTokens", (string)null);
+                    b.ToTable("LogTokens");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.MaintenanceReport", b =>
@@ -1087,7 +1089,7 @@ namespace MiSmart.API.Migrations
 
                     b.HasIndex("DeviceID");
 
-                    b.ToTable("MaintenanceReports", (string)null);
+                    b.ToTable("MaintenanceReports");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.Part", b =>
@@ -1106,7 +1108,7 @@ namespace MiSmart.API.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("Parts", (string)null);
+                    b.ToTable("Parts");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.Plan", b =>
@@ -1141,7 +1143,7 @@ namespace MiSmart.API.Migrations
 
                     b.HasIndex("DeviceID");
 
-                    b.ToTable("Plans", (string)null);
+                    b.ToTable("Plans");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.SecondLogReport", b =>
@@ -1193,7 +1195,7 @@ namespace MiSmart.API.Migrations
                     b.HasIndex("LogFileID")
                         .IsUnique();
 
-                    b.ToTable("SecondLogReports", (string)null);
+                    b.ToTable("SecondLogReports");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.StreamingLink", b =>
@@ -1217,7 +1219,7 @@ namespace MiSmart.API.Migrations
 
                     b.HasIndex("DeviceID");
 
-                    b.ToTable("StreamingLinks", (string)null);
+                    b.ToTable("StreamingLinks");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.Team", b =>
@@ -1250,7 +1252,7 @@ namespace MiSmart.API.Migrations
 
                     b.HasIndex("ExecutionCompanyID");
 
-                    b.ToTable("Teams", (string)null);
+                    b.ToTable("Teams");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.TeamUser", b =>
@@ -1277,7 +1279,7 @@ namespace MiSmart.API.Migrations
                     b.HasIndex("TeamID", "ExecutionCompanyUserID")
                         .IsUnique();
 
-                    b.ToTable("TeamUsers", (string)null);
+                    b.ToTable("TeamUsers");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.TelemetryGroup", b =>
@@ -1296,7 +1298,7 @@ namespace MiSmart.API.Migrations
 
                     b.HasIndex("DeviceID");
 
-                    b.ToTable("TelemetryGroups", (string)null);
+                    b.ToTable("TelemetryGroups");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.TelemetryRecord", b =>
@@ -1324,7 +1326,7 @@ namespace MiSmart.API.Migrations
 
                     b.HasIndex("GroupID");
 
-                    b.ToTable("TelemetryRecords", (string)null);
+                    b.ToTable("TelemetryRecords");
                 });
 
             modelBuilder.Entity("MiSmart.DAL.Models.Battery", b =>

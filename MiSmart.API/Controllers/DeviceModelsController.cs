@@ -56,6 +56,7 @@ namespace MiSmart.API.Controllers
             if (deviceModel is null)
             {
                 response.AddNotFoundErr("DeviceModel");
+                return response.ToIActionResult();
             }
 
 
@@ -73,16 +74,19 @@ namespace MiSmart.API.Controllers
             if (deviceModel is null)
             {
                 response.AddNotFoundErr("DeviceModel");
+                return response.ToIActionResult();
             }
-
-            if (deviceModel.FileUrl is not null)
+            if (command.File != null)
             {
-                await minioService.RemoveFileByUrlAsync(deviceModel.FileUrl);
-            }
+                if (deviceModel.FileUrl is not null)
+                {
+                    await minioService.RemoveFileByUrlAsync(deviceModel.FileUrl);
+                }
 
-            deviceModel.FileUrl = await minioService.PutFileAsync(command.File, new String[] { "drone-hub-api", "device-model" });
-            await deviceModelRepository.UpdateAsync(deviceModel);
-            response.SetUpdatedMessage();
+                deviceModel.FileUrl = await minioService.PutFileAsync(command.File, new String[] { "drone-hub-api", "device-model" });
+                await deviceModelRepository.UpdateAsync(deviceModel);
+                response.SetUpdatedMessage();
+            }
 
             return response.ToIActionResult();
         }
@@ -95,6 +99,7 @@ namespace MiSmart.API.Controllers
             if (deviceModel is null)
             {
                 response.AddNotFoundErr("DeviceModel");
+                return response.ToIActionResult();
             }
 
             deviceModel.Name = String.IsNullOrWhiteSpace(command.Name) ? deviceModel.Name : command.Name;
@@ -115,6 +120,7 @@ namespace MiSmart.API.Controllers
             if (deviceModel is null)
             {
                 response.AddNotFoundErr("DeviceModel");
+                return response.ToIActionResult();
             }
 
             var activeParams = await deviceModelParamRepository.GetListEntitiesAsync(new PageCommand(), ww => ww.IsActive && ww.DeviceModelID == id);
@@ -181,6 +187,7 @@ namespace MiSmart.API.Controllers
             if (deviceModel is null)
             {
                 response.AddNotFoundErr("DeviceModel");
+                return response.ToIActionResult();
             }
 
             Expression<Func<DeviceModelParam, Boolean>> query = ww => (ww.DeviceModelID == deviceModel.ID);
@@ -199,12 +206,14 @@ namespace MiSmart.API.Controllers
             if (deviceModel is null)
             {
                 response.AddNotFoundErr("DeviceModel");
+                return response.ToIActionResult();
             }
 
             var deviceModelParam = await deviceModelParamRepository.GetAsync(ww => ww.ID == modelParamId);
             if (deviceModelParam is null)
             {
                 response.AddNotFoundErr("DeviceModelParam");
+                return response.ToIActionResult();
             }
             var activeParams = await deviceModelParamRepository.GetListEntitiesAsync(new PageCommand(), ww => ww.IsActive && ww.DeviceModelID == id);
             foreach (var param in activeParams)

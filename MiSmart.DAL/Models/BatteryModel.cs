@@ -15,13 +15,13 @@ namespace MiSmart.DAL.Models
         {
         }
 
-        public String Name { get; set; }
-        public String ManufacturerName { get; set; }
-        public String FileUrl { get; set; }
+        public String? Name { get; set; }
+        public String? ManufacturerName { get; set; }
+        public String? FileUrl { get; set; }
 
 
-        private ICollection<Battery> batteries;
-        public ICollection<Battery> Batteries
+        private ICollection<Battery>? batteries;
+        public ICollection<Battery>? Batteries
         {
             get => lazyLoader.Load(this, ref batteries);
             set => batteries = value;

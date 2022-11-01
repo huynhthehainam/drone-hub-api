@@ -32,6 +32,7 @@ namespace MiSmart.API.Controllers
             if (!CurrentUser.IsAdministrator && CurrentUser.RoleID != 3)
             {
                 response.AddNotAllowedErr();
+                return response.ToIActionResult();
             }
 
             var customer = await customerRepository.CreateAsync(new Customer { Name = command.Name, Address = command.Address });
@@ -42,10 +43,10 @@ namespace MiSmart.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetList([FromQuery] PageCommand pageCommand,
         [FromServices] CustomerRepository customerRepository,
-        [FromQuery] String search)
+        [FromQuery] String? search)
         {
             var response = actionResponseFactory.CreateInstance();
-            Expression<Func<Customer, Boolean>> query = ww => (!String.IsNullOrWhiteSpace(search) ? (ww.Name.ToLower().Contains(search.ToLower()) || ww.Address.ToLower().Contains(search.ToLower())) : true);
+            Expression<Func<Customer, Boolean>> query = ww => (!String.IsNullOrWhiteSpace(search) ? ((ww.Name ?? "").ToLower().Contains(search.ToLower()) || (ww.Address ?? "").ToLower().Contains(search.ToLower())) : true);
 
             var listResponse = await customerRepository.GetListResponseViewAsync<SmallCustomerViewModel>(pageCommand, query);
             listResponse.SetResponse(response);
@@ -78,7 +79,7 @@ namespace MiSmart.API.Controllers
             {
                 response.AddExistedErr("User");
             }
-            CustomerUser customerUser = await customerUserRepository.CreateAsync(new CustomerUser { CustomerID = id, UserUUID = command.UserUUID.Value });
+            CustomerUser customerUser = await customerUserRepository.CreateAsync(new CustomerUser { CustomerID = id, UserUUID = command.UserUUID.GetValueOrDefault() });
             response.SetCreatedObject(customerUser);
 
             return response.ToIActionResult();
@@ -94,6 +95,7 @@ namespace MiSmart.API.Controllers
             if (customer is null)
             {
                 response.AddNotFoundErr("Customer");
+                return response.ToIActionResult();
             }
             customer.Name = String.IsNullOrEmpty(command.Name) ? customer.Name : command.Name;
             customer.Address = String.IsNullOrEmpty(command.Address) ? customer.Address : command.Address;
@@ -125,6 +127,7 @@ namespace MiSmart.API.Controllers
             if (customer is null)
             {
                 response.AddNotFoundErr("Customer");
+                return response.ToIActionResult();
             }
 
             Expression<Func<CustomerUser, Boolean>> query = ww => ww.CustomerID == id;
@@ -143,6 +146,7 @@ namespace MiSmart.API.Controllers
             if (customer is null)
             {
                 response.AddNotFoundErr("Customer");
+                return response.ToIActionResult();
             }
 
             var listResponse = await deviceRepository.GetListResponseViewAsync<LargeDeviceViewModel>(pageCommand, ww => ww.CustomerID == customer.ID);
@@ -161,6 +165,7 @@ namespace MiSmart.API.Controllers
             if (customer is null)
             {
                 response.AddNotFoundErr("Customer");
+                return response.ToIActionResult();
             }
             await customerRepository.DeleteAsync(customer);
             return response.ToIActionResult();
@@ -175,6 +180,7 @@ namespace MiSmart.API.Controllers
             if (customerUser is null)
             {
                 response.AddInvalidErr("UserUUID");
+                return response.ToIActionResult();
             }
 
             await customerUserRepository.DeleteAsync(customerUser);
@@ -198,18 +204,20 @@ namespace MiSmart.API.Controllers
             if (customer is null)
             {
                 response.AddNotFoundErr("Customer");
+                return response.ToIActionResult();
             }
             var deviceModel = await deviceModelRepository.GetAsync(ww => ww.ID == command.DeviceModelID);
             if (deviceModel is null)
             {
                 response.AddInvalidErr("DeviceModelID");
+                return response.ToIActionResult();
             }
             var device = new Device
             {
                 DeviceModel = deviceModel,
                 Name = command.Name,
             };
-            customer.Devices.Add(device);
+            customer.Devices?.Add(device);
             await customerRepository.UpdateAsync(customer);
             response.SetCreatedObject(device);
             return response.ToIActionResult();
@@ -224,6 +232,7 @@ namespace MiSmart.API.Controllers
             if (device is null)
             {
                 response.AddInvalidErr("DeviceID");
+                return response.ToIActionResult();
             }
 
             await deviceRepository.DeleteAsync(device);

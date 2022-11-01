@@ -13,15 +13,16 @@ namespace MiSmart.DAL.Models
         public LogToken(ILazyLoader lazyLoader) : base(lazyLoader)
         {
         }
-        public Guid LogFileID {get; set; }
-        private LogFile logFile;
-        public LogFile LogFile{
+        public Guid LogFileID { get; set; }
+        private LogFile? logFile;
+        public LogFile? LogFile
+        {
             get => lazyLoader.Load(this, ref logFile);
             set => logFile = value;
         }
-        public Guid UserUUID {get; set; }
-        public String Token {get; set; }
-        public DateTime CreateTime {get; set; } = DateTime.UtcNow;
-        public String Username {get; set;}
+        public Guid UserUUID { get; set; }
+        public String? Token { get; set; }
+        public DateTime CreateTime { get; set; } = DateTime.UtcNow;
+        public String? Username { get; set; }
     }
 }

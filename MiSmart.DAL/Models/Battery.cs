@@ -15,19 +15,19 @@ namespace MiSmart.DAL.Models
         {
         }
 
-        public String ActualID { get; set; }
-        public String Name { get; set; }
+        public String? ActualID { get; set; }
+        public String? Name { get; set; }
 
-        private BatteryModel batteryModel;
-        public BatteryModel BatteryModel
+        private BatteryModel? batteryModel;
+        public BatteryModel? BatteryModel
         {
             get => lazyLoader.Load(this, ref batteryModel);
             set => batteryModel = value;
         }
         public Int32 BatteryModelID { get; set; }
 
-        private ICollection<BatteryGroupLog> groupLogs;
-        public ICollection<BatteryGroupLog> GroupLogs
+        private ICollection<BatteryGroupLog>? groupLogs;
+        public ICollection<BatteryGroupLog>? GroupLogs
         {
             get => lazyLoader.Load(this, ref groupLogs);
             set => groupLogs = value;
@@ -35,8 +35,8 @@ namespace MiSmart.DAL.Models
 
 
 
-        private BatteryGroupLog lastGroup;
-        public BatteryGroupLog LastGroup
+        private BatteryGroupLog? lastGroup;
+        public BatteryGroupLog? LastGroup
         {
             get => lazyLoader.Load(this, ref lastGroup);
             set => lastGroup = value;
@@ -44,8 +44,8 @@ namespace MiSmart.DAL.Models
         public Guid? LastGroupID { get; set; }
 
 
-        private ExecutionCompany executionCompany;
-        public ExecutionCompany ExecutionCompany
+        private ExecutionCompany? executionCompany;
+        public ExecutionCompany? ExecutionCompany
         {
             get => lazyLoader.Load(this, ref executionCompany);
             set => executionCompany = value;
@@ -53,8 +53,8 @@ namespace MiSmart.DAL.Models
         public Int32? ExecutionCompanyID { get; set; }
         public DateTime CreatedTime { get; set; } = DateTime.UtcNow;
 
-        private ICollection<FlightStat> flightStats;
-        public ICollection<FlightStat> FlightStats
+        private ICollection<FlightStat>? flightStats;
+        public ICollection<FlightStat>? FlightStats
         {
             get => lazyLoader.Load(this, ref flightStats);
             set => flightStats = value;

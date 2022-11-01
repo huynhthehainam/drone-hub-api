@@ -12,41 +12,41 @@ namespace MiSmart.DAL.DatabaseContexts
             AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
         }
 
-        public DbSet<Customer> Customers { get; set; }
-        public DbSet<Team> Teams { get; set; }
-        public DbSet<TelemetryRecord> TelemetryRecords { get; set; }
-        public DbSet<TeamUser> TeamUsers { get; set; }
-        public DbSet<Device> Devices { get; set; }
-        public DbSet<Field> Fields { get; set; }
-        public DbSet<FlightStat> FlightStats { get; set; }
-        public DbSet<DeviceModel> DeviceModels { get; set; }
-        public DbSet<CustomerUser> CustomerUsers { get; set; }
-        public DbSet<Plan> Plans { get; set; }
-        public DbSet<TelemetryGroup> TelemetryGroups { get; set; }
-        public DbSet<LogFile> LogFiles { get; set; }
-        public DbSet<ExecutionCompany> ExecutionCompanies { get; set; }
-        public DbSet<ExecutionCompanyUser> ExecutionCompanyUsers { get; set; }
-        public DbSet<Battery> Batteries { get; set; }
-        public DbSet<BatteryGroupLog> BatteryGroupLogs { get; set; }
-        public DbSet<BatteryLog> BatteryLogs { get; set; }
-        public DbSet<BatteryModel> BatteryModels { get; set; }
-        public DbSet<ExecutionCompanyUserFlightStat> ExecutionCompanyUserFlightStats { get; set; }
-        public DbSet<ExecutionCompanySetting> ExecutionCompanySettings { get; set; }
-        public DbSet<StreamingLink> StreamingLinks { get; set; }
-        public DbSet<MaintenanceReport> MaintenanceReports { get; set; }
-        public DbSet<FlightStatReportRecord> FlightStatReportRecords { get; set; }
-        public DbSet<LogDetail> LogDetails { get; set; }
-        public DbSet<LogReport> LogReports { get; set; }
-        public DbSet<LogReportResult> LogReportResults { get; set; }
-        public DbSet<LogToken> LogTokens { get; set; }
-        public DbSet<Part> Parts { get; set; }
-        public DbSet<LogResultDetail> LogResultDetails { get; set; }
-        public DbSet<SecondLogReport> SecondLogReports { get; set; }
+        public DbSet<Customer> Customers => Set<Customer>();
+        public DbSet<Team> Teams => Set<Team>();
+        public DbSet<TelemetryRecord> TelemetryRecords => Set<TelemetryRecord>();
+        public DbSet<TeamUser> TeamUsers => Set<TeamUser>();
+        public DbSet<Device> Devices => Set<Device>();
+        public DbSet<Field> Fields => Set<Field>();
+        public DbSet<FlightStat> FlightStats => Set<FlightStat>();
+        public DbSet<DeviceModel> DeviceModels => Set<DeviceModel>();
+        public DbSet<CustomerUser> CustomerUsers => Set<CustomerUser>();
+        public DbSet<Plan> Plans => Set<Plan>();
+        public DbSet<TelemetryGroup> TelemetryGroups => Set<TelemetryGroup>();
+        public DbSet<LogFile> LogFiles => Set<LogFile>();
+        public DbSet<ExecutionCompany> ExecutionCompanies => Set<ExecutionCompany>();
+        public DbSet<ExecutionCompanyUser> ExecutionCompanyUsers => Set<ExecutionCompanyUser>();
+        public DbSet<Battery> Batteries => Set<Battery>();
+        public DbSet<BatteryGroupLog> BatteryGroupLogs => Set<BatteryGroupLog>();
+        public DbSet<BatteryLog> BatteryLogs => Set<BatteryLog>();
+        public DbSet<BatteryModel> BatteryModels => Set<BatteryModel>();
+        public DbSet<ExecutionCompanyUserFlightStat> ExecutionCompanyUserFlightStats => Set<ExecutionCompanyUserFlightStat>();
+        public DbSet<ExecutionCompanySetting> ExecutionCompanySettings => Set<ExecutionCompanySetting>();
+        public DbSet<StreamingLink> StreamingLinks => Set<StreamingLink>();
+        public DbSet<MaintenanceReport> MaintenanceReports => Set<MaintenanceReport>();
+        public DbSet<FlightStatReportRecord> FlightStatReportRecords => Set<FlightStatReportRecord>();
+        public DbSet<LogDetail> LogDetails => Set<LogDetail>();
+        public DbSet<LogReport> LogReports => Set<LogReport>();
+        public DbSet<LogReportResult> LogReportResults => Set<LogReportResult>();
+        public DbSet<LogToken> LogTokens => Set<LogToken>();
+        public DbSet<Part> Parts => Set<Part>();
+        public DbSet<LogResultDetail> LogResultDetails => Set<LogResultDetail>();
+        public DbSet<SecondLogReport> SecondLogReports => Set<SecondLogReport>();
 
-        public DbSet<DeviceModelParam> DeviceModelParams { get; set; }
-        public DbSet<DeviceModelParamDetail> DeviceModelParamDetails { get; set; }
-        public DbSet<DeviceModelParamCentrifugalDetail> DeviceModelParamCentrifugalDetails { get; set; }
-        public DbSet<DeviceModelParamCentrifugal4Detail> DeviceModelParamCentrifugal4Details { get; set; }
+        public DbSet<DeviceModelParam> DeviceModelParams => Set<DeviceModelParam>();
+        public DbSet<DeviceModelParamDetail> DeviceModelParamDetails => Set<DeviceModelParamDetail>();
+        public DbSet<DeviceModelParamCentrifugalDetail> DeviceModelParamCentrifugalDetails => Set<DeviceModelParamCentrifugalDetail>();
+        public DbSet<DeviceModelParamCentrifugal4Detail> DeviceModelParamCentrifugal4Details => Set<DeviceModelParamCentrifugal4Detail>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

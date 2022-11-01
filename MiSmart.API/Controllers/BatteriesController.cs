@@ -30,28 +30,32 @@ namespace MiSmart.API.Controllers
             if (!CurrentUser.IsAdministrator && CurrentUser.RoleID != 3)
             {
                 response.AddNotAllowedErr();
+                return response.ToIActionResult();
             }
             var battery = await batteryRepository.GetAsync(ww => ww.ID == id);
             if (battery is null)
             {
                 response.AddNotFoundErr("Battery");
+                return response.ToIActionResult();
             }
 
             if (command.BatteryModelID.HasValue)
             {
-                BatteryModel batteryModel = await batteryModelRepository.GetAsync(ww => ww.ID == command.BatteryModelID.GetValueOrDefault());
+                var batteryModel = await batteryModelRepository.GetAsync(ww => ww.ID == command.BatteryModelID.GetValueOrDefault());
                 if (batteryModel is null)
                 {
                     response.AddInvalidErr("BatteryModelID");
+                    return response.ToIActionResult();
                 }
                 battery.BatteryModel = batteryModel;
             }
             if (command.ExecutionCompanyID.HasValue)
             {
-                ExecutionCompany executionCompany = await executionCompanyRepository.GetAsync(ww => ww.ID == command.ExecutionCompanyID.GetValueOrDefault());
+                var executionCompany = await executionCompanyRepository.GetAsync(ww => ww.ID == command.ExecutionCompanyID.GetValueOrDefault());
                 if (executionCompany is null)
                 {
                     response.AddInvalidErr("ExecutionCompanyID");
+                    return response.ToIActionResult();
                 }
                 battery.ExecutionCompany = executionCompany;
             }
@@ -76,16 +80,18 @@ namespace MiSmart.API.Controllers
             var response = actionResponseFactory.CreateInstance();
             if (command.ExecutionCompanyID.HasValue)
             {
-                ExecutionCompany executionCompany = await executionCompanyRepository.GetAsync(c => c.ID == command.ExecutionCompanyID.GetValueOrDefault());
+                var executionCompany = await executionCompanyRepository.GetAsync(c => c.ID == command.ExecutionCompanyID.GetValueOrDefault());
                 if (executionCompany is null)
                 {
                     response.AddInvalidErr("ExecutionCompanyID");
+                    return response.ToIActionResult();
                 }
             }
-            BatteryModel batteryModel = await batteryModelRepository.GetAsync(ww => ww.ID == command.BatteryModelID.GetValueOrDefault());
+            var batteryModel = await batteryModelRepository.GetAsync(ww => ww.ID == command.BatteryModelID.GetValueOrDefault());
             if (batteryModel is null)
             {
                 response.AddInvalidErr("BatteryModelID");
+                return response.ToIActionResult();
             }
             Battery battery = new Battery { ActualID = command.ActualID, ExecutionCompanyID = command.ExecutionCompanyID, BatteryModel = batteryModel, Name = command.Name };
 
@@ -95,7 +101,7 @@ namespace MiSmart.API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetList([FromQuery] PageCommand pageCommand, [FromServices] BatteryRepository batteryRepository, [FromQuery] String search, [FromQuery] String relation = "Administrator")
+        public async Task<IActionResult> GetList([FromQuery] PageCommand pageCommand, [FromServices] BatteryRepository batteryRepository, [FromQuery] String? search, [FromQuery] String? relation = "Administrator")
         {
             var response = actionResponseFactory.CreateInstance();
             Expression<Func<Battery, Boolean>> query = b => false;
@@ -104,16 +110,18 @@ namespace MiSmart.API.Controllers
                 if (!CurrentUser.IsAdministrator)
                 {
                     response.AddNotAllowedErr();
+                    return response.ToIActionResult();
                 }
-                query = b => String.IsNullOrEmpty(search) ? true : (b.Name.ToLower().Contains(search.ToLower()) || b.ActualID.ToLower().Contains(search.ToLower()));
+                query = b => String.IsNullOrEmpty(search) ? true : ((b.Name ?? "").ToLower().Contains(search.ToLower()) || (b.ActualID ?? "").ToLower().Contains(search.ToLower()));
             }
             else if (relation == "Maintainer")
             {
                 if (CurrentUser.RoleID != 3)
                 {
                     response.AddNotAllowedErr();
+                    return response.ToIActionResult();
                 }
-                query = b => String.IsNullOrEmpty(search) ? true : (b.Name.ToLower().Contains(search.ToLower()) || b.ActualID.ToLower().Contains(search.ToLower()));
+                query = b => String.IsNullOrEmpty(search) ? true : ((b.Name ?? "").ToLower().Contains(search.ToLower()) || (b.ActualID ?? "").ToLower().Contains(search.ToLower()));
             }
 
             var listResponse = await batteryRepository.GetListResponseViewAsync<BatteryViewModel>(pageCommand, query, ww => ww.CreatedTime, false);

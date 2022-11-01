@@ -22,7 +22,7 @@ namespace MiSmart.API.ScheduledTasks
             {
                 using (DatabaseContext databaseContext = scope.ServiceProvider.GetRequiredService<DatabaseContext>())
                 {
-                    var flightStats = databaseContext.FlightStats.Where(ww => ww.Cost == 0 && ww.ExecutionCompanyID != null && ww.ExecutionCompany.Settings.Any() && ww.TaskArea > 0).ToList();
+                    var flightStats = databaseContext.FlightStats.Where(ww => ww.Cost == 0 && ww.ExecutionCompanyID != null && ((ww.ExecutionCompany != null && ww.ExecutionCompany.Settings != null) ? ww.ExecutionCompany.Settings.Any() : false) && ww.TaskArea > 0).ToList();
                     foreach (var flightStat in flightStats)
                     {
                         if (flightStat.ExecutionCompanyID.HasValue)

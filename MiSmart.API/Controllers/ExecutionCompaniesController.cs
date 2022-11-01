@@ -39,10 +39,10 @@ namespace MiSmart.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetList([FromQuery] PageCommand pageCommand,
         [FromServices] ExecutionCompanyRepository executionCompanyRepository,
-        [FromQuery] String search)
+        [FromQuery] String? search)
         {
             var response = actionResponseFactory.CreateInstance();
-            Expression<Func<ExecutionCompany, Boolean>> query = ww => (!String.IsNullOrWhiteSpace(search) ? (ww.Name.ToLower().Contains(search.ToLower()) || ww.Address.ToLower().Contains(search.ToLower())) : true);
+            Expression<Func<ExecutionCompany, Boolean>> query = ww => (!String.IsNullOrWhiteSpace(search) ? ((ww.Name ?? "").ToLower().Contains(search.ToLower()) || (ww.Address ?? "").ToLower().Contains(search.ToLower())) : true);
             var listResponse = await executionCompanyRepository.GetListResponseViewAsync<ExecutionCompanyViewModel>(pageCommand, query);
             listResponse.SetResponse(response);
             return response.ToIActionResult();
@@ -58,6 +58,7 @@ namespace MiSmart.API.Controllers
             if (company is null)
             {
                 response.AddNotFoundErr("ExecutionCompany");
+                return response.ToIActionResult();
             }
 
             company.Name = String.IsNullOrWhiteSpace(command.Name) ? company.Name : command.Name;
@@ -78,19 +79,23 @@ namespace MiSmart.API.Controllers
             if (!userExists)
             {
                 response.AddInvalidErr("UserUUID");
+                return response.ToIActionResult();
             }
 
             var executionCompany = await executionCompanyRepository.GetAsync(ww => ww.ID == id);
             if (executionCompany is null)
             {
+
                 response.AddNotFoundErr("ExecutionCompany");
+                return response.ToIActionResult();
             }
             var existedExecutionCompanyUser = await executionCompanyUserRepository.GetAsync(ww => ww.UserUUID == command.UserUUID.GetValueOrDefault());
             if (existedExecutionCompanyUser is not null)
             {
                 response.AddExistedErr("User");
+                return response.ToIActionResult();
             }
-            ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.CreateAsync(new ExecutionCompanyUser { ExecutionCompanyID = id, UserUUID = command.UserUUID.Value, Type = command.Type });
+            ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.CreateAsync(new ExecutionCompanyUser { ExecutionCompanyID = id, UserUUID = command.UserUUID.GetValueOrDefault(), Type = command.Type });
             response.SetCreatedObject(executionCompanyUser);
 
             return response.ToIActionResult();
@@ -116,6 +121,7 @@ namespace MiSmart.API.Controllers
             if (executionCompany is null)
             {
                 response.AddNotFoundErr("ExecutionCompany");
+                return response.ToIActionResult();
             }
 
             Expression<Func<ExecutionCompanyUser, Boolean>> query = ww => ww.ExecutionCompanyID == id;
@@ -134,6 +140,7 @@ namespace MiSmart.API.Controllers
             if (executionCompany is null)
             {
                 response.AddNotFoundErr("ExecutionCompany");
+                return response.ToIActionResult();
             }
 
             var listResponse = await deviceRepository.GetListResponseViewAsync<LargeDeviceViewModel>(pageCommand, ww => ww.ExecutionCompanyID == executionCompany.ID);
@@ -152,6 +159,7 @@ namespace MiSmart.API.Controllers
             if (executionCompany is null)
             {
                 response.AddNotFoundErr("ExecutionCompany");
+                return response.ToIActionResult();
             }
 
             var listResponse = await batteryRepository.GetListResponseViewAsync<BatteryViewModel>(pageCommand, ww => ww.ExecutionCompanyID == executionCompany.ID);
@@ -170,6 +178,7 @@ namespace MiSmart.API.Controllers
             if (executionCompany is null)
             {
                 response.AddNotFoundErr("ExecutionCompany");
+                return response.ToIActionResult();
             }
             await executionCompanyRepository.DeleteAsync(executionCompany);
             return response.ToIActionResult();
@@ -184,6 +193,7 @@ namespace MiSmart.API.Controllers
             if (executionCompanyUser is null)
             {
                 response.AddInvalidErr("UserUUID");
+                return response.ToIActionResult();
             }
 
             await executionCompanyUserRepository.DeleteAsync(executionCompanyUser);

@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using MiSmart.Infrastructure.Data;
 namespace MiSmart.DAL.Models
@@ -18,47 +17,43 @@ namespace MiSmart.DAL.Models
 
         }
 
-        public String Name { get; set; }
-        public String Address { get; set; }
+        public String? Name { get; set; }
+        public String? Address { get; set; }
 
 
 
 
 
-        private ICollection<Field> fields;
-        [JsonIgnore]
-        public ICollection<Field> Fields
+        private ICollection<Field>? fields;
+        public ICollection<Field>? Fields
         {
             get => lazyLoader.Load(this, ref fields);
             set => fields = value;
         }
 
 
-        private ICollection<Device> devices;
-        [JsonIgnore]
-        public ICollection<Device> Devices
+        private ICollection<Device>? devices;
+        public ICollection<Device>? Devices
         {
             get => lazyLoader.Load(this, ref devices);
             set => devices = value;
         }
 
-        private ICollection<FlightStat> flightStats;
-        [JsonIgnore]
-        public ICollection<FlightStat> FlightStats
+        private ICollection<FlightStat>? flightStats;
+        public ICollection<FlightStat>? FlightStats
         {
             get => lazyLoader.Load(this, ref flightStats);
             set => flightStats = value;
         }
 
-        private ICollection<CustomerUser> customerUsers;
-        [JsonIgnore]
-        public ICollection<CustomerUser> CustomerUsers
+        private ICollection<CustomerUser>? customerUsers;
+        public ICollection<CustomerUser>? CustomerUsers
         {
             get => lazyLoader.Load(this, ref customerUsers);
             set => customerUsers = value;
         }
 
-       
+
 
     }
 

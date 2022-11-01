@@ -13,17 +13,17 @@ namespace MiSmart.API.Models
             {
                 public class GettingAllMedicineFromDroneHubModelData
                 {
-                    public String ID { get; set; }
-                    public String Name { get; set; }
-                    public String Code { get; set; }
-                    public String Thumbnail { get; set; }
+                    public String? ID { get; set; }
+                    public String? Name { get; set; }
+                    public String? Code { get; set; }
+                    public String? Thumbnail { get; set; }
 
                 }
-                public List<GettingAllMedicineFromDroneHubModelData> Data { get; set; }
+                public List<GettingAllMedicineFromDroneHubModelData>? Data { get; set; }
             }
-            public GettingAllMedicineFromDroneHubModel GetAllMedicineFromDroneHub { get; set; }
+            public GettingAllMedicineFromDroneHubModel? GetAllMedicineFromDroneHub { get; set; }
         }
-        public GettingAllMedicinesResponseData Data { get; set; }
+        public GettingAllMedicinesResponseData? Data { get; set; }
     }
 
     public class GettingAllFarmersResponse
@@ -34,16 +34,16 @@ namespace MiSmart.API.Models
             {
                 public class GettingAllFarmersResponseDataModelData
                 {
-                    public String ID { get; set; }
-                    public String UID { get; set; }
-                    public String Name { get; set; }
-                    public String Phone { get; set; }
-                    public String Email { get; set; }
+                    public String? ID { get; set; }
+                    public String? UID { get; set; }
+                    public String? Name { get; set; }
+                    public String? Phone { get; set; }
+                    public String? Email { get; set; }
                 }
-                public List<GettingAllFarmersResponseDataModelData> Data { get; set; }
+                public List<GettingAllFarmersResponseDataModelData>? Data { get; set; }
             }
-            public GettingAllFarmersResponseDataModel GetAllFarmerFromDroneHub { get; set; }
+            public GettingAllFarmersResponseDataModel? GetAllFarmerFromDroneHub { get; set; }
         }
-        public GettingAllFarmersResponseData Data { get; set; }
+        public GettingAllFarmersResponseData? Data { get; set; }
     }
 }

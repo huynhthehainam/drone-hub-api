@@ -18,18 +18,15 @@ namespace MiSmart.DAL.Models
         public TeamUser(ILazyLoader lazyLoader) : base(lazyLoader) { }
 
 
-        private Team team;
-
-        [JsonIgnore]
-        public Team Team
+        private Team? team;
+        public Team? Team
         {
             get => lazyLoader.Load(this, ref team);
             set => team = value;
         }
         public Int64 TeamID { get; set; }
-        private ExecutionCompanyUser executionCompanyUser;
-        [JsonIgnore]
-        public ExecutionCompanyUser ExecutionCompanyUser
+        private ExecutionCompanyUser? executionCompanyUser;
+        public ExecutionCompanyUser? ExecutionCompanyUser
         {
             get => lazyLoader.Load(this, ref executionCompanyUser);
             set => executionCompanyUser = value;

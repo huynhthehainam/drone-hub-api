@@ -33,7 +33,7 @@ namespace MiSmart.DAL.Responses
                     }
                 case ResponseType.File:
                     {
-                        var result = new FileContentResult(bytes, contentType);
+                        var result = new FileContentResult(bytes ?? new Byte[0], contentType ?? "application/text");
                         result.FileDownloadName = fileName;
                         return result;
                     }

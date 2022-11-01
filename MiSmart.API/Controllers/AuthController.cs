@@ -27,16 +27,17 @@ namespace MiSmart.API.Controllers
             if (device is null)
             {
                 response.AddNotFoundErr("Device");
+                return response.ToIActionResult();
             }
             if (device.AccessToken is null || device.NextGeneratingAccessTokenTime.GetValueOrDefault() < DateTime.UtcNow.AddDays(2))
             {
-                device.AccessToken = device.GenerateDeviceAccessToken(options.Value.AuthSecret);
+                device.AccessToken = device.GenerateDeviceAccessToken(options.Value.AuthSecret ?? "");
                 device.NextGeneratingAccessTokenTime = DateTime.UtcNow.AddMonths(1);
                 await deviceRepository.UpdateAsync(device);
             }
 
 
-            response.SetData(new { AccessToken = device.AccessToken, DeviceModel = ViewModelHelpers.ConvertToViewModel<DeviceModel, GCSDeviceModelViewModel>(device.DeviceModel) });
+            response.SetData(new { AccessToken = device.AccessToken, DeviceModel = device.DeviceModel is null ? null : ViewModelHelpers.ConvertToViewModel<DeviceModel, GCSDeviceModelViewModel>(device.DeviceModel) });
 
             return response.ToIActionResult();
         }

@@ -19,9 +19,9 @@ namespace MiSmart.DAL.Models
         {
         }
         public Boolean IsActive { get; set; }
-        public String Name { get; set; }
+        public String? Name { get; set; }
         public DateTime CreationTime { get; set; } = DateTime.UtcNow;
-        public String Description { get; set; }
+        public String? Description { get; set; }
         public Double YMin { get; set; }
         public Double YMax { get; set; }
         public Double YCentrifugalMin { get; set; }
@@ -32,8 +32,8 @@ namespace MiSmart.DAL.Models
         public Double FlowRateMinLimit { get; set; }
         public Double FlowRateMiddleLimit { get; set; }
         public Double FlowRateMaxLimit { get; set; }
-        private DeviceModel deviceModel;
-        public DeviceModel DeviceModel
+        private DeviceModel? deviceModel;
+        public DeviceModel? DeviceModel
         {
             get => lazyLoader.Load(this, ref deviceModel);
             set => deviceModel = value;
@@ -43,21 +43,21 @@ namespace MiSmart.DAL.Models
 
 
 
-        private ICollection<DeviceModelParamDetail> details;
-        public ICollection<DeviceModelParamDetail> Details
+        private ICollection<DeviceModelParamDetail>? details;
+        public ICollection<DeviceModelParamDetail>? Details
         {
             get => lazyLoader.Load(this, ref details);
             set => details = value;
         }
 
-        private ICollection<DeviceModelParamCentrifugalDetail> centrifugalDetails;
-        public ICollection<DeviceModelParamCentrifugalDetail> CentrifugalDetails
+        private ICollection<DeviceModelParamCentrifugalDetail>? centrifugalDetails;
+        public ICollection<DeviceModelParamCentrifugalDetail>? CentrifugalDetails
         {
             get => lazyLoader.Load(this, ref centrifugalDetails);
             set => centrifugalDetails = value;
         }
-        private ICollection<DeviceModelParamCentrifugal4Detail> centrifugal4Details;
-        public ICollection<DeviceModelParamCentrifugal4Detail> Centrifugal4Details
+        private ICollection<DeviceModelParamCentrifugal4Detail>? centrifugal4Details;
+        public ICollection<DeviceModelParamCentrifugal4Detail>? Centrifugal4Details
         {
             get => lazyLoader.Load(this, ref centrifugal4Details);
             set => centrifugal4Details = value;
@@ -77,8 +77,8 @@ namespace MiSmart.DAL.Models
         public Double XMax { get; set; }
         public Double A { get; set; }
         public Double B { get; set; }
-        private DeviceModelParam deviceModelParam;
-        public DeviceModelParam DeviceModelParam
+        private DeviceModelParam? deviceModelParam;
+        public DeviceModelParam? DeviceModelParam
         {
             get => lazyLoader.Load(this, ref deviceModelParam);
             set => deviceModelParam = value;
@@ -99,8 +99,8 @@ namespace MiSmart.DAL.Models
         public Double XMax { get; set; }
         public Double A { get; set; }
         public Double B { get; set; }
-        private DeviceModelParam deviceModelParam;
-        public DeviceModelParam DeviceModelParam
+        private DeviceModelParam? deviceModelParam;
+        public DeviceModelParam? DeviceModelParam
         {
             get => lazyLoader.Load(this, ref deviceModelParam);
             set => deviceModelParam = value;
@@ -120,8 +120,8 @@ namespace MiSmart.DAL.Models
         public Double XMax { get; set; }
         public Double A { get; set; }
         public Double B { get; set; }
-        private DeviceModelParam deviceModelParam;
-        public DeviceModelParam DeviceModelParam
+        private DeviceModelParam? deviceModelParam;
+        public DeviceModelParam? DeviceModelParam
         {
             get => lazyLoader.Load(this, ref deviceModelParam);
             set => deviceModelParam = value;

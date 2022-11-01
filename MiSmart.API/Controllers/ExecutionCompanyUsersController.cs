@@ -20,16 +20,18 @@ namespace MiSmart.API.Controllers
         public async Task<IActionResult> UnassignUser([FromRoute] Int32 id, [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, [FromBody] RemovingExecutionCompanyUserCommand command)
         {
             var response = actionResponseFactory.CreateInstance();
-            ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.UUID, ExecutionCompanyUserType.Owner);
+            var executionCompanyUser = await executionCompanyUserRepository.GetByPermissionAsync(CurrentUser.UUID, ExecutionCompanyUserType.Owner);
             if (executionCompanyUser is null)
             {
                 response.AddNotAllowedErr();
+                 return response.ToIActionResult();
             }
 
             var targetExecutionCompanyUser = await executionCompanyUserRepository.GetAsync(ww => ww.ExecutionCompanyID == executionCompanyUser.ExecutionCompanyID && ww.UserUUID == command.UserUUID.GetValueOrDefault());
             if (targetExecutionCompanyUser is null)
             {
                 response.AddInvalidErr("UserUUID");
+                 return response.ToIActionResult();
             }
             await executionCompanyUserRepository.DeleteAsync(targetExecutionCompanyUser);
 

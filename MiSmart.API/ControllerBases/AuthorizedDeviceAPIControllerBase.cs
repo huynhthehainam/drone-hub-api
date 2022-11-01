@@ -5,6 +5,7 @@ using MiSmart.Infrastructure.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using MiSmart.Infrastructure.Responses;
 using MiSmart.Infrastructure.Controllers;
+using System;
 
 namespace MiSmart.API.ControllerBases
 {
@@ -19,16 +20,17 @@ namespace MiSmart.API.ControllerBases
             get
             {
                 var userClaims = HttpContext.User;
-                if (userClaims.Claims.FirstOrDefault(ww => ww.Type == Keys.IdentityClaim) != null)
+                var claim = userClaims.Claims.FirstOrDefault(ww => ww.Type == Keys.IdentityClaim);
+                if (claim != null)
                 {
-                    var claimsString = userClaims.Claims.FirstOrDefault(ww => ww.Type == Keys.IdentityClaim).Value;
+                    var claimsString = claim.Value;
                     var vm = JsonSerializer.Deserialize<UserCacheViewModel>(claimsString);
-                    if (vm.Type == "Device")
+                    if (vm is not null && vm.Type == "Device")
                         return vm;
                 }
                 ActionResponse actionResponse = actionResponseFactory.CreateInstance();
                 actionResponse.AddAuthorizationErr();
-                return null;
+                throw new Exception("Cannot found current device");
             }
         }
     }

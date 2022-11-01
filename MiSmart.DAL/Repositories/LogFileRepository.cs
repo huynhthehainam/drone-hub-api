@@ -17,7 +17,7 @@ namespace MiSmart.DAL.Repositories
         public LogFileRepository(DatabaseContext context) : base(context)
         {
         }
-        public override async Task<ListResponse<TView>> GetListResponseViewAsync<TView>(PageCommand pageCommand, Expression<Func<LogFile, Boolean>> expression, Func<LogFile, Object> order = null, Boolean ascending = true)
+        public override async Task<ListResponse<TView>> GetListResponseViewAsync<TView>(PageCommand pageCommand, Expression<Func<LogFile, Boolean>> expression, Func<LogFile, Object>? order = null, Boolean ascending = true)
         {
             var count = await context.Set<LogFile>().CountAsync(expression);
             List<TView> data;
@@ -36,7 +36,7 @@ namespace MiSmart.DAL.Repositories
                 LogDetail = ww.LogDetail,
                 LogReport = ww.LogReport,
                 LogReportResult = ww.LogReportResult,
-                isAnalyzed = ww.isAnalyzed,
+                IsAnalyzed = ww.IsAnalyzed,
             });
             if (pageIndex.HasValue && pageSize.HasValue)
             {

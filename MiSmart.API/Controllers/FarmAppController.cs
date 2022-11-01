@@ -94,10 +94,11 @@ namespace MiSmart.API.Controllers
 
                 var body = await response.Content.ReadAsStringAsync();
 
-                GettingAllMedicinesResponse gettingAllMedicinesResponse = JsonSerializer.Deserialize<GettingAllMedicinesResponse>(body, JsonSerializerDefaultOptions.CamelOptions);
-                if (gettingAllMedicinesResponse.Data.GetAllMedicineFromDroneHub == null)
+                var gettingAllMedicinesResponse = JsonSerializer.Deserialize<GettingAllMedicinesResponse>(body, JsonSerializerDefaultOptions.CamelOptions);
+                if (gettingAllMedicinesResponse == null || gettingAllMedicinesResponse.Data == null || gettingAllMedicinesResponse.Data.GetAllMedicineFromDroneHub == null || gettingAllMedicinesResponse.Data.GetAllMedicineFromDroneHub.Data == null)
                 {
                     actionResponse.AddNotFoundErr("AllMedicines");
+                    return actionResponse.ToIActionResult();
                 }
 
                 actionResponse.SetData(gettingAllMedicinesResponse.Data.GetAllMedicineFromDroneHub.Data);

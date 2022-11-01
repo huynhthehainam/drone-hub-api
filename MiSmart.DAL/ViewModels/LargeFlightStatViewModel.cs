@@ -16,11 +16,11 @@ namespace MiSmart.DAL.ViewModels
         public Int32 DeviceID { get; set; }
         public Int32 Flights { get; set; }
         public DateTime FlightTime { get; set; }
-        public String FieldName { get; set; }
-        public List<CoordinateViewModel> FlywayPoints { get; set; }
-        public List<Int32> SprayedIndexes { get; set; }
-        public String TaskLocation { get; set; }
-        public String TeamName { get; set; }
+        public String? FieldName { get; set; }
+        public List<CoordinateViewModel>? FlywayPoints { get; set; }
+        public List<Int32>? SprayedIndexes { get; set; }
+        public String? TaskLocation { get; set; }
+        public String? TeamName { get; set; }
         public Double TaskArea { get; set; }
         public void LoadFrom(FlightStat entity)
         {
@@ -32,10 +32,10 @@ namespace MiSmart.DAL.ViewModels
             Flights = entity.Flights;
             FlightTime = entity.FlightTime;
             FieldName = entity.FieldName;
-            FlywayPoints = entity.FlywayPoints.Coordinates.Select(ww => new CoordinateViewModel(ww)).ToList();
+            FlywayPoints = entity.FlywayPoints?.Coordinates.Select(ww => new CoordinateViewModel(ww)).ToList();
             SprayedIndexes = entity.SprayedIndexes;
             TaskLocation = entity.TaskLocation;
-            TeamName = entity.Device.Team?.Name;
+            TeamName = entity.Device?.Team?.Name;
             TaskArea = entity.TaskArea;
         }
     }

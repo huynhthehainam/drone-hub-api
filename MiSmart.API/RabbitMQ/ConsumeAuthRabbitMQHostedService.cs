@@ -19,8 +19,8 @@ namespace MiSmart.API.RabbitMQ
 {
     public class ConsumeAuthRabbitMQHostedService : BackgroundService
     {
-        private IConnection connection;
-        private IModel channel;
+        private IConnection? connection;
+        private IModel? channel;
         private readonly IServiceProvider serviceProvider;
         private readonly RabbitOptions rabbitOptions;
         private readonly MinioService minioService;
@@ -78,31 +78,32 @@ namespace MiSmart.API.RabbitMQ
         {
             try
             {
-                ExchangeRequest<Object> contentModel = JsonSerializer.Deserialize<ExchangeRequest<Object>>(content, JsonSerializerDefaultOptions.CamelOptions);
-                if (contentModel.Type == "RemoveUser")
+                ExchangeRequest<Object>? contentModel = JsonSerializer.Deserialize<ExchangeRequest<Object>>(content, JsonSerializerDefaultOptions.CamelOptions);
+                if (contentModel != null && contentModel.Type == "RemoveUser")
                 {
-                    RemovingUserModel model = JsonSerializer.Deserialize<RemovingUserModel>(JsonSerializer.Serialize(contentModel.Data, JsonSerializerDefaultOptions.CamelOptions), JsonSerializerDefaultOptions.CamelOptions);
-                    using (var context = serviceProvider.CreateScope().ServiceProvider.GetRequiredService<DatabaseContext>())
-                    {
-                        var customerUsers = context.CustomerUsers.Where(ww => ww.UserUUID == model.UUID).ToList();
-                        context.CustomerUsers.RemoveRange(customerUsers);
-                        context.SaveChanges();
-
-                        var executionCompanyUsers = context.ExecutionCompanyUsers.Where(ww => ww.UserUUID == model.UUID).ToList();
-                        context.ExecutionCompanyUsers.RemoveRange(executionCompanyUsers);
-                        context.SaveChanges();
-
-                        var reports = context.MaintenanceReports.Where(ww => ww.UserUUID == model.UUID).ToList();
-                        foreach (var report in reports)
+                    RemovingUserModel? model = JsonSerializer.Deserialize<RemovingUserModel>(JsonSerializer.Serialize(contentModel.Data, JsonSerializerDefaultOptions.CamelOptions), JsonSerializerDefaultOptions.CamelOptions);
+                    if (model != null)
+                        using (var context = serviceProvider.CreateScope().ServiceProvider.GetRequiredService<DatabaseContext>())
                         {
-                            foreach (var url in report.AttachmentLinks ?? new List<String> { })
+                            var customerUsers = context.CustomerUsers.Where(ww => ww.UserUUID == model.UUID).ToList();
+                            context.CustomerUsers.RemoveRange(customerUsers);
+                            context.SaveChanges();
+
+                            var executionCompanyUsers = context.ExecutionCompanyUsers.Where(ww => ww.UserUUID == model.UUID).ToList();
+                            context.ExecutionCompanyUsers.RemoveRange(executionCompanyUsers);
+                            context.SaveChanges();
+
+                            var reports = context.MaintenanceReports.Where(ww => ww.UserUUID == model.UUID).ToList();
+                            foreach (var report in reports)
                             {
-                                await minioService.RemoveFileByUrlAsync(url);
+                                foreach (var url in report.AttachmentLinks ?? new List<String> { })
+                                {
+                                    await minioService.RemoveFileByUrlAsync(url);
+                                }
                             }
+                            context.MaintenanceReports.RemoveRange(reports);
+                            context.SaveChanges();
                         }
-                        context.MaintenanceReports.RemoveRange(reports);
-                        context.SaveChanges();
-                    }
                 }
             }
             catch (Exception)
@@ -119,8 +120,8 @@ namespace MiSmart.API.RabbitMQ
 
         public override void Dispose()
         {
-            channel.Close();
-            connection.Close();
+            channel?.Close();
+            connection?.Close();
             base.Dispose();
         }
     }

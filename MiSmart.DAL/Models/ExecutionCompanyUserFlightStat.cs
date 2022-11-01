@@ -16,16 +16,16 @@ namespace MiSmart.DAL.Models
         public ExecutionCompanyUserFlightStat(ILazyLoader lazyLoader) : base(lazyLoader)
         {
         }
-        private ExecutionCompanyUser executionCompanyUser;
-        public ExecutionCompanyUser ExecutionCompanyUser
+        private ExecutionCompanyUser? executionCompanyUser;
+        public ExecutionCompanyUser? ExecutionCompanyUser
         {
             get => lazyLoader.Load(this, ref executionCompanyUser);
             set => executionCompanyUser = value;
         }
         public Int64 ExecutionCompanyUserID { get; set; }
 
-        private FlightStat flightStat;
-        public FlightStat FlightStat
+        private FlightStat? flightStat;
+        public FlightStat? FlightStat
         {
             get => lazyLoader.Load(this, ref flightStat);
             set => flightStat = value;

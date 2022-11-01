@@ -9,13 +9,13 @@ namespace MiSmart.DAL.ViewModels
     public class LargeFieldViewModel : IViewModel<Field>
     {
         public Int64 ID { get; set; }
-        public List<Object> CalibrationPoints { get; set; }
+        public List<Object>? CalibrationPoints { get; set; }
         public DateTime CreatedTime { get; set; }
         public Int32 CustomerID { get; set; }
-        public List<CoordinateViewModel> Border { get; set; }
+        public List<CoordinateViewModel>? Border { get; set; }
         public Double EdgeOffset { get; set; }
-        public String FieldLocation { get; set; }
-        public String FieldName { get; set; }
+        public String? FieldLocation { get; set; }
+        public String? FieldName { get; set; }
         // public List<LocationPoint> FlywayPoints { get; set; }
         // public List<GPSPoint> GPSPoints { get; set; }
         public Double InnerArea { get; set; }
@@ -23,8 +23,8 @@ namespace MiSmart.DAL.ViewModels
         // public LocationPoint LocationPoint { get; set; }
         public Double MappingArea { get; set; }
         public Double MappingTime { get; set; }
-        public String Name { get; set; }
-        public String PilotName { get; set; }
+        public String? Name { get; set; }
+        public String? PilotName { get; set; }
         public Double SprayDir { get; set; }
         public Double SprayWidth { get; set; }
         public DateTime? UpdatedTime { get; set; }
@@ -34,7 +34,7 @@ namespace MiSmart.DAL.ViewModels
         public void LoadFrom(Field entity)
         {
             ID = entity.ID;
-            Border = entity.Border.Coordinates.Select(ww => new CoordinateViewModel(ww)).ToList();
+            Border = entity.Border is null ? null : entity.Border.Coordinates.Select(ww => new CoordinateViewModel(ww)).ToList();
             CreatedTime = entity.CreatedTime;
             CustomerID = entity.CustomerID;
             // EdgedLocationPoints = entity.EdgedLocationPoints;

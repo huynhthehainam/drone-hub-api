@@ -18,7 +18,7 @@ namespace MiSmart.DAL.Repositories
         public FlightStatRepository(DatabaseContext context) : base(context)
         {
         }
-        public async Task<ListFlightStatsResponse<TView>> GetListFlightStatsViewAsync<TView>(PageCommand pageCommand, Expression<Func<FlightStat, Boolean>> expression, Func<FlightStat, Object> order = null, Boolean ascending = true) where TView : class, IViewModel<FlightStat>, new()
+        public async Task<ListFlightStatsResponse<TView>> GetListFlightStatsViewAsync<TView>(PageCommand pageCommand, Expression<Func<FlightStat, Boolean>> expression, Func<FlightStat, Object>? order = null, Boolean ascending = true) where TView : class, IViewModel<FlightStat>, new()
         {
 
             var count = await context.Set<FlightStat>().CountAsync(expression);

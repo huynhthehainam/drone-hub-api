@@ -40,23 +40,23 @@ namespace MiSmart.API.ScheduledTasks
             [JsonPropertyName("fuel_avg_per")]
             public Double FuelAvgPercent { get; set; }
             [JsonPropertyName("max_accel")]
-            public XYZ MaxAccel { get; set; }
+            public XYZ? MaxAccel { get; set; }
             [JsonPropertyName("max_angle")]
-            public EdgeData MaxAngle { get; set; }
+            public EdgeData? MaxAngle { get; set; }
             [JsonPropertyName("max_battery_deviation")]
             public Double MaxBatteryDeviation { get; set; }
             [JsonPropertyName("max_cordinate")]
-            public Location MaxCoordinate { get; set; }
+            public Location? MaxCoordinate { get; set; }
             [JsonPropertyName("max_height")]
             public Double MaxHeight { get; set; }
             [JsonPropertyName("max_speed")]
             public Double MaxSpeed { get; set; }
             [JsonPropertyName("max_vibe")]
-            public XYZ MaxVibe { get; set; }
+            public XYZ? MaxVibe { get; set; }
             [JsonPropertyName("pin_min_per")]
             public Double BatteryMinPercent { get; set; }
         }
-        public DroneLogAPIData Result { get; set; }
+        public DroneLogAPIData? Result { get; set; }
     }
     public class UpdatingLogDetail : CronJobService
     {
@@ -73,40 +73,40 @@ namespace MiSmart.API.ScheduledTasks
                 using (DatabaseContext databaseContext = scope.ServiceProvider.GetRequiredService<DatabaseContext>())
                 {
                     var client = clientFactory.CreateClient();
-                    var logs = databaseContext.LogFiles.Where(ww => ww.FileBytes.Length > 500000 && ww.FileBytes.Length < 50000000 && !ww.isAnalyzed).OrderByDescending(ww => ww.LoggingTime).Take(2).ToList();
+                    var logs = databaseContext.LogFiles.Where(ww => (ww.FileBytes != null ? ww.FileBytes.Length > 500000 : false) && (ww.FileBytes != null ? ww.FileBytes.Length < 50000000 : false) && !ww.IsAnalyzed).OrderByDescending(ww => ww.LoggingTime).Take(2).ToList();
                     foreach (var log in logs)
                     {
                         var detail = databaseContext.LogDetails.Where(ww => ww.LogFileID == log.ID);
                         var formData = new MultipartFormDataContent();
-                        formData.Add(new StreamContent(new MemoryStream(log.FileBytes)), "file", log.FileName);
+                        formData.Add(new StreamContent(new MemoryStream(log.FileBytes ?? new Byte[0])), "file", log.FileName ?? "ex.bin");
                         try
                         {
                             var response = client.PostAsync("http://node1.dronelog.mismart.ai/analysis", formData).GetAwaiter().GetResult();
                             if (response.IsSuccessStatusCode)
                             {
                                 string responseString = response.Content.ReadAsStringAsync().Result;
-                                DroneLogAPIResponse droneLogAPIResponse = JsonSerializer.Deserialize<DroneLogAPIResponse>(responseString, JsonSerializerDefaultOptions.CamelOptions);
-                                if (droneLogAPIResponse.Result is not null)
+                                DroneLogAPIResponse? droneLogAPIResponse = JsonSerializer.Deserialize<DroneLogAPIResponse>(responseString, JsonSerializerDefaultOptions.CamelOptions);
+                                if (droneLogAPIResponse != null && droneLogAPIResponse.Result is not null)
                                 {
                                     var model = new LogDetail()
                                     {
-                                        AccelX = droneLogAPIResponse.Result.MaxAccel.X,
-                                        AccelY = droneLogAPIResponse.Result.MaxAccel.Y,
-                                        AccelZ = droneLogAPIResponse.Result.MaxAccel.Z,
-                                        PercentFuel = droneLogAPIResponse.Result.FuelAvgPercent,
-                                        BatteryCellDeviation = droneLogAPIResponse.Result.MaxBatteryDeviation,
-                                        VibeX = droneLogAPIResponse.Result.MaxVibe.X,
-                                        VibeY = droneLogAPIResponse.Result.MaxVibe.Y,
-                                        VibeZ = droneLogAPIResponse.Result.MaxVibe.Z,
-                                        FlySpeed = droneLogAPIResponse.Result.MaxSpeed,
-                                        Height = droneLogAPIResponse.Result.MaxHeight,
-                                        Roll = droneLogAPIResponse.Result.MaxAngle.Roll,
-                                        Pitch = droneLogAPIResponse.Result.MaxAngle.Pitch,
-                                        FlightDuration = droneLogAPIResponse.Result.FlightTime,
-                                        PercentBattery = droneLogAPIResponse.Result.BatteryMinPercent,
+                                        AccelX = droneLogAPIResponse?.Result?.MaxAccel?.X ?? 0,
+                                        AccelY = droneLogAPIResponse?.Result?.MaxAccel?.Y ?? 0,
+                                        AccelZ = droneLogAPIResponse?.Result?.MaxAccel?.Z ?? 0,
+                                        PercentFuel = droneLogAPIResponse?.Result?.FuelAvgPercent ?? 0,
+                                        BatteryCellDeviation = droneLogAPIResponse?.Result?.MaxBatteryDeviation ?? 0,
+                                        VibeX = droneLogAPIResponse?.Result?.MaxVibe?.X ?? 0,
+                                        VibeY = droneLogAPIResponse?.Result?.MaxVibe?.Y ?? 0,
+                                        VibeZ = droneLogAPIResponse?.Result?.MaxVibe?.Z ?? 0,
+                                        FlySpeed = droneLogAPIResponse?.Result?.MaxSpeed ?? 0,
+                                        Height = droneLogAPIResponse?.Result?.MaxHeight ?? 0,
+                                        Roll = droneLogAPIResponse?.Result?.MaxAngle?.Roll ?? 0,
+                                        Pitch = droneLogAPIResponse?.Result?.MaxAngle?.Pitch ?? 0,
+                                        FlightDuration = droneLogAPIResponse?.Result?.FlightTime ?? 0,
+                                        PercentBattery = droneLogAPIResponse?.Result?.BatteryMinPercent ?? 0,
                                         LogFileID = log.ID,
-                                        Latitude = droneLogAPIResponse.Result.MaxCoordinate.Lat,
-                                        Longitude = droneLogAPIResponse.Result.MaxCoordinate.Lng,
+                                        Latitude = droneLogAPIResponse?.Result?.MaxCoordinate?.Lat ?? 0,
+                                        Longitude = droneLogAPIResponse?.Result?.MaxCoordinate?.Lng ?? 0,
                                         IsBingLocation = false,
                                     };
                                     databaseContext.LogDetails.Add(model);
@@ -117,7 +117,7 @@ namespace MiSmart.API.ScheduledTasks
                         {
 
                         }
-                        log.isAnalyzed = true;
+                        log.IsAnalyzed = true;
                         databaseContext.Update(log);
                         databaseContext.SaveChanges();
                     }

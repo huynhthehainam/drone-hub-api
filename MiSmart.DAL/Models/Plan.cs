@@ -15,11 +15,11 @@ namespace MiSmart.DAL.Models
         public Plan(ILazyLoader lazyLoader) : base(lazyLoader)
         {
         }
-        public String Name
+        public String? Name
         {
             get
             {
-                var words = this.FileName.Split(".", StringSplitOptions.RemoveEmptyEntries);
+                var words = (this.FileName ?? "").Split(".", StringSplitOptions.RemoveEmptyEntries);
                 if (words.Length > 0)
                 {
                     return words[0];
@@ -27,11 +27,11 @@ namespace MiSmart.DAL.Models
                 return null;
             }
         }
-        public Point Location { get; set; }
-        public Byte[] FileBytes { get; set; }
-        public String FileName { get; set; }
-        private Device device;
-        public Device Device
+        public Point? Location { get; set; }
+        public Byte[]? FileBytes { get; set; }
+        public String? FileName { get; set; }
+        private Device? device;
+        public Device? Device
         {
             get => lazyLoader.Load(this, ref device);
             set => device = value;

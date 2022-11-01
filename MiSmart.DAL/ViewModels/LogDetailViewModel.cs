@@ -6,23 +6,23 @@ namespace MiSmart.DAL.ViewModels
 {
     public class LogDetailViewModel : IViewModel<LogDetail>
     {
-        public Guid LogFileID {get; set;}
+        public Guid LogFileID { get; set; }
         public Double FlightDuration { get; set; }
         public Double PercentBattery { get; set; }
-        public Double PercentFuel {get; set;}
-        public Double BatteryCellDeviation {get; set;}
-        public Double FlySpeed {get;set;}
-        public Double Height {get; set; }
-        public Double VibeX {get; set; }
-        public Double VibeY {get; set; }
-        public Double VibeZ {get; set; }
-        public Double Roll {get; set; }
-        public Double Pitch{get; set; }
-        public Double AccelX {get; set; }
-        public Double AccelY {get; set; }
-        public Double AccelZ {get; set; }
-        public String Location {get; set; }
-        public String PartnerCompanyName { get; set; }
+        public Double PercentFuel { get; set; }
+        public Double BatteryCellDeviation { get; set; }
+        public Double FlySpeed { get; set; }
+        public Double Height { get; set; }
+        public Double VibeX { get; set; }
+        public Double VibeY { get; set; }
+        public Double VibeZ { get; set; }
+        public Double Roll { get; set; }
+        public Double Pitch { get; set; }
+        public Double AccelX { get; set; }
+        public Double AccelY { get; set; }
+        public Double AccelZ { get; set; }
+        public String? Location { get; set; }
+        public String? PartnerCompanyName { get; set; }
         public void LoadFrom(LogDetail entity)
         {
             LogFileID = entity.LogFileID;
@@ -41,34 +41,34 @@ namespace MiSmart.DAL.ViewModels
             AccelY = entity.AccelY;
             AccelZ = entity.AccelZ;
             Location = entity.Location;
-            PartnerCompanyName = entity.LogFile.Device.ExecutionCompany?.Name;
+            PartnerCompanyName = entity.LogFile?.Device?.ExecutionCompany?.Name;
         }
     }
-     public class LargeLogDetailViewModel : IViewModel<LogDetail>
+    public class LargeLogDetailViewModel : IViewModel<LogDetail>
     {
-        public Guid LogFileID {get; set;}
+        public Guid LogFileID { get; set; }
         public Double FlightDuration { get; set; }
         public Double PercentBattery { get; set; }
-        public Double PercentFuel {get; set;}
-        public Double BatteryCellDeviation {get; set;}
-        public Double FlySpeed {get;set;}
-        public Double Height {get; set; }
-        public Double VibeX {get; set; }
-        public Double VibeY {get; set; }
-        public Double VibeZ {get; set; }
-        public Double Roll {get; set; }
-        public Double Pitch{get; set; }
-        public Double AccelX {get; set; }
-        public Double AccelY {get; set; }
-        public Double AccelZ {get; set; }
-        public String Location {get; set; }
-        public String DeviceName {get; set; }
-        public DateTime LoggingTime {get; set; }
-        public DroneStatus DroneStatus {get; set;}
-        public LogStatus LogStatus {get; set; }
-        public Boolean isAnalyzed {get; set; }
-        public String PartnerCompanyName { get; set; }
-       public void LoadFrom(LogDetail entity)
+        public Double PercentFuel { get; set; }
+        public Double BatteryCellDeviation { get; set; }
+        public Double FlySpeed { get; set; }
+        public Double Height { get; set; }
+        public Double VibeX { get; set; }
+        public Double VibeY { get; set; }
+        public Double VibeZ { get; set; }
+        public Double Roll { get; set; }
+        public Double Pitch { get; set; }
+        public Double AccelX { get; set; }
+        public Double AccelY { get; set; }
+        public Double AccelZ { get; set; }
+        public String? Location { get; set; }
+        public String? DeviceName { get; set; }
+        public DateTime? LoggingTime { get; set; }
+        public DroneStatus? DroneStatus { get; set; }
+        public LogStatus? LogStatus { get; set; }
+        public Boolean IsAnalyzed { get; set; }
+        public String? PartnerCompanyName { get; set; }
+        public void LoadFrom(LogDetail entity)
         {
             LogFileID = entity.LogFileID;
             FlightDuration = entity.FlightDuration;
@@ -86,12 +86,12 @@ namespace MiSmart.DAL.ViewModels
             AccelY = entity.AccelY;
             AccelZ = entity.AccelZ;
             Location = entity.Location;
-            DeviceName = entity.LogFile.Device.Name;
-            LoggingTime = entity.LogFile.LoggingTime;
-            DroneStatus = entity.LogFile.DroneStatus;
-            LogStatus = entity.LogFile.Status;
-            isAnalyzed = entity.LogFile.isAnalyzed;
-            PartnerCompanyName = entity.LogFile.Device.ExecutionCompany?.Name;
+            DeviceName = entity.LogFile?.Device?.Name;
+            LoggingTime = entity.LogFile?.LoggingTime;
+            DroneStatus = entity.LogFile?.DroneStatus;
+            LogStatus = entity.LogFile?.Status;
+            IsAnalyzed = entity.LogFile?.IsAnalyzed ?? false;
+            PartnerCompanyName = entity.LogFile?.Device?.ExecutionCompany?.Name;
         }
     }
 }

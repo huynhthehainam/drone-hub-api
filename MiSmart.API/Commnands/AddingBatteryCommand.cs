@@ -9,21 +9,21 @@ namespace MiSmart.API.Commands
         [Required]
         public Int32? BatteryModelID { get; set; }
         [Required]
-        public String ActualID { get; set; }
+        public String? ActualID { get; set; }
         public Int32? ExecutionCompanyID { get; set; }
-        public String Name { get; set; }
+        public String? Name { get; set; }
     }
     public class PatchingBatteryCommand
     {
-        public String Name { get; set; }
+        public String? Name { get; set; }
         public Int32? BatteryModelID { get; set; }
         public Int32? ExecutionCompanyID { get; set; }
     }
     public class AddingBatteryModelCommand
     {
         [Required]
-        public String Name { get; set; }
+        public String? Name { get; set; }
         [Required]
-        public String ManufacturerName { get; set; }
+        public String? ManufacturerName { get; set; }
     }
 }

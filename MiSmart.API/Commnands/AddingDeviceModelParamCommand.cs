@@ -42,8 +42,8 @@ namespace MiSmart.API.Commands
     public class AddingDeviceModelParamCommand
     {
         [Required]
-        public String Name { get; set; }
-        public String Description { get; set; }
+        public String? Name { get; set; }
+        public String? Description { get; set; }
         [Required]
         public Double? YMin { get; set; }
         [Required]
@@ -65,11 +65,11 @@ namespace MiSmart.API.Commands
         [Required]
         public Double? YCentrifugal4Max { get; set; }
         [Required]
-        public List<AddingDeviceModelParamDetailCommand> Details { get; set; }
+        public List<AddingDeviceModelParamDetailCommand> Details { get; set; } = new List<AddingDeviceModelParamDetailCommand>();
         [Required]
-        public List<AddingDeviceModelCentrifugalParamDetailCommand> CentrifugalDetails { get; set; }
+        public List<AddingDeviceModelCentrifugalParamDetailCommand> CentrifugalDetails { get; set; } = new List<AddingDeviceModelCentrifugalParamDetailCommand>();
         [Required]
-        public List<AddingDeviceModelCentrifugalParam4DetailCommand> Centrifugal4Details { get; set; }
+        public List<AddingDeviceModelCentrifugalParam4DetailCommand> Centrifugal4Details { get; set; } = new List<AddingDeviceModelCentrifugalParam4DetailCommand>();
 
     }
 

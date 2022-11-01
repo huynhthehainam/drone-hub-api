@@ -16,7 +16,7 @@ namespace MiSmart.API.Services
 {
     public class MqttService : IMqttService
     {
-        public IMqttServer Server;
+        public IMqttServer? Server;
         private readonly IServiceProvider serviceProvider;
         public MqttService(IServiceProvider serviceProvider)
         {

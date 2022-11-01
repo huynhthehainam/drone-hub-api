@@ -25,18 +25,19 @@ namespace MiSmart.API.Controllers
         {
             var response = actionResponseFactory.CreateInstance();
             var customerUser = await customerUserRepository.GetAsync(ww => ww.UserUUID == CurrentUser.UUID);
-            ExecutionCompanyUser executionCompanyUser = await executionCompanyUserRepository.GetAsync(ww => ww.UserUUID == CurrentUser.UUID);
+            ExecutionCompanyUser? executionCompanyUser = await executionCompanyUserRepository.GetAsync(ww => ww.UserUUID == CurrentUser.UUID);
             if (customerUser is null && executionCompanyUser is null)
             {
                 response.AddNotFoundErr("User");
+                return response.ToIActionResult();
             }
             response.SetData(new
             {
-                CustomerUser = customerUser is not null ? new
+                CustomerUser = (customerUser is not null && customerUser.Customer is not null) ? new
                 {
                     Customer = ViewModelHelpers.ConvertToViewModel<Customer, SmallCustomerViewModel>(customerUser.Customer)
                 } : null,
-                ExecutionCompanyUser = executionCompanyUser is not null ? new
+                ExecutionCompanyUser = (executionCompanyUser is not null && executionCompanyUser.ExecutionCompany is not null) ? new
                 {
                     ExecutionCompany = ViewModelHelpers.ConvertToViewModel<ExecutionCompany, ExecutionCompanyViewModel>(executionCompanyUser.ExecutionCompany),
                     Type = executionCompanyUser.Type,

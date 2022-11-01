@@ -8,7 +8,7 @@ namespace MiSmart.API.Commands
     public class AddingDeviceModelCommand
     {
         [Required]
-        public String Name { get; set; }
+        public String? Name { get; set; }
         [Required]
         public DeviceModelType Type {get;set; }
     }

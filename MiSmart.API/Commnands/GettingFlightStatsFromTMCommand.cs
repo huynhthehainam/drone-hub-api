@@ -8,6 +8,6 @@ namespace MiSmart.API.Commands
     public class GettingFlightStatsFromTMCommand
     {
         [Required]
-        public String TMUserUID { get; set; }
+        public String? TMUserUID { get; set; }
     }
 }
