@@ -271,12 +271,13 @@ namespace MiSmart.API.Controllers
             logFile.DroneStatus = DroneStatus.Fall;
             await logFileRepository.UpdateAsync(logFile);
 
+            TimeZoneInfo seaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
             foreach (UserEmail item in settings.LogReport ?? new List<UserEmail>())
             {
                 String token = TokenHelper.GenerateToken();
                 await logTokenRepository.CreateAsync(new LogToken { Token = token, UserUUID = item.UUID != null ? new Guid(item.UUID) : Guid.Empty, LogFileID = id, Username = item.Email });
                 await emailService.SendMailAsync(new String[] { item.Email ?? "" }, new String[] { }, new String[] { }, @$"[Chuyến bay cần phân tích] Mã hiệu drone ({logFile.Device?.Name ?? ""})",
-                $"Dear,\n\nPhòng Đặc Nhiệm trả kết quả báo cáo hiện tường:\n\nMã hiệu Drone: {logFile.Device?.Name ?? ""}\n\nThời gian ghi log: {logFile.LoggingTime.ToString("dd/MM/yyyy HH:mm:ss")}\n\nLink Báo cáo tình trạng chuyến bay: https://dronehub.mismart.ai/log-report-result?token={token} \n\nThank you");
+                $"Dear,\n\nPhòng Đặc Nhiệm trả kết quả báo cáo hiện tường:\n\nMã hiệu Drone: {logFile.Device?.Name ?? ""}\n\nThời gian ghi log: {TimeZoneInfo.ConvertTimeFromUtc(logFile.LoggingTime, seaTimeZone).ToString("dd/MM/yyyy HH:mm:ss")}\n\nLink Báo cáo tình trạng chuyến bay: https://dronehub.mismart.ai/log-report-result?token={token} \n\nThank you");
             }
             response.SetCreatedObject(report);
             return response.ToIActionResult();
@@ -391,9 +392,11 @@ namespace MiSmart.API.Controllers
                 };
                 await logResultDetailRepository.CreateAsync(error);
             }
+
+            TimeZoneInfo seaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
             if (logFile.Device is not null)
                 await emailService.SendMailAsync(settings.ApprovedLogReport?.ToArray() ?? new String[0], new String[] { }, new String[] { }, @$"[Báo cáo cần xác nhận] Mã hiệu drone ({logFile.Device.Name})",
-                $"Dear,\n\nPhòng Đặc Nhiệm trả kết quả báo cáo hiện tường:\n\nMã hiệu Drone: {logFile.Device.Name}\n\nThời gian ghi log: {logFile.LoggingTime.ToString("dd/MM/yyyy HH:mm:ss")}\n\nVui lòng vào trang trang Drone Hub để xác nhận báo cáo\n\nThank you");
+                $"Dear,\n\nPhòng Đặc Nhiệm trả kết quả báo cáo hiện tường:\n\nMã hiệu Drone: {logFile.Device.Name}\n\nThời gian ghi log: {TimeZoneInfo.ConvertTimeFromUtc(logFile.LoggingTime, seaTimeZone).ToString("dd/MM/yyyy HH:mm:ss")}\n\nVui lòng vào trang trang Drone Hub để xác nhận báo cáo\n\nThank you");
 
             logFile.Status = LogStatus.Completed;
             await logFileRepository.UpdateAsync(logFile);
@@ -464,10 +467,11 @@ namespace MiSmart.API.Controllers
             logResult.Suggest = command.Suggest;
             logResult.Conclusion = command.Conclusion;
 
+            TimeZoneInfo seaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
             if (logResult.LogFile is not null && logResult.LogFile.Device is not null)
             {
                 await emailService.SendMailAsync(settings.ApprovedLogReport?.ToArray() ?? new String[0], new String[] { }, new String[] { }, @$"[Báo cáo cần xác nhận] Mã hiệu drone ({logResult.LogFile.Device.Name})",
-                $"Dear,\n\nPhòng Đặc Nhiệm trả kết quả báo cáo hiện tường:\n\nMã hiệu Drone: {logResult.LogFile.Device.Name}\n\nThời gian ghi log: {logResult.LogFile.LoggingTime.ToString("dd/MM/yyyy HH:mm:ss")}\n\nVui lòng vào trang trang Drone Hub để xác nhận báo cáo\n\nThank you");
+                $"Dear,\n\nPhòng Đặc Nhiệm trả kết quả báo cáo hiện tường:\n\nMã hiệu Drone: {logResult.LogFile.Device.Name}\n\nThời gian ghi log:  {TimeZoneInfo.ConvertTimeFromUtc(logResult.LogFile.LoggingTime, seaTimeZone).ToString("dd/MM/yyyy HH:mm:ss")}\n\nVui lòng vào trang trang Drone Hub để xác nhận báo cáo\n\nThank you");
             }
 
             await logReportResultRepository.UpdateAsync(logResult);
@@ -499,7 +503,6 @@ namespace MiSmart.API.Controllers
                 response.AddNotFoundErr("LogReport");
                 return response.ToIActionResult();
             }
-            // String[] email = CurrentUser.Email.Split(" ");
             logResult.ApproverUUID = CurrentUser.UUID;
             logResult.ApproverName = CurrentUser.Email;
 
@@ -648,8 +651,9 @@ namespace MiSmart.API.Controllers
             var listLogToken = await tokenRepository.GetListEntitiesAsync(new PageCommand(), ww => ww.LogFileID == token.LogFileID);
             await tokenRepository.DeleteRangeAsync(listLogToken);
 
+            TimeZoneInfo seaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
             await emailService.SendMailAsync(settings.ApprovedLogReport?.ToArray() ?? new String[0], new String[] { }, new String[] { }, @$"[Báo cáo cần xác nhận] Mã hiệu drone ({logFile.Device?.Name ?? ""})",
-            $"Dear,\n\nPhòng Đặc Nhiệm trả kết quả báo cáo hiện tường:\n\nMã hiệu Drone: {logFile.Device?.Name ?? ""}\n\nThời gian ghi log: {logFile.LoggingTime.ToString("dd/MM/yyyy HH:mm:ss")}\n\nVui lòng vào trang trang Drone Hub để xác nhận báo cáo\n\nThank you");
+            $"Dear,\n\nPhòng Đặc Nhiệm trả kết quả báo cáo hiện tường:\n\nMã hiệu Drone: {logFile.Device?.Name ?? ""}\n\nThời gian ghi log: {TimeZoneInfo.ConvertTimeFromUtc(logFile.LoggingTime, seaTimeZone).ToString("dd/MM/yyyy HH:mm:ss")}\n\nVui lòng vào trang trang Drone Hub để xác nhận báo cáo\n\nThank you");
 
             logFile.Status = LogStatus.Completed;
             await logFileRepository.UpdateAsync(logFile);
@@ -1254,9 +1258,10 @@ namespace MiSmart.API.Controllers
                 actionResponse.AddInvalidErr("LogStatus");
                 return actionResponse.ToIActionResult();
             }
-            if (result.AnalystName != null)
+            TimeZoneInfo seaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+            if (result.AnalystName != null && result.LogFile?.LoggingTime != null)
                 await emailService.SendMailAsync(new String[] { result.AnalystName }, new String[] { }, new String[] { }, @$"[Báo cáo cần chỉnh sửa] Mã hiệu drone ({result.LogFile?.Device?.Name ?? ""})",
-                $"Dear,\n\nYêu cầu vào trang Drone Hub chỉnh sửa\n\nMã hiệu Drone: {result.LogFile?.Device?.Name ?? ""}\n\nThời gian ghi log: {result.LogFile?.LoggingTime.ToString("dd/MM/yyyy HH:mm:ss")}\n\nGhi chú: {command.Message}\n\nThank you");
+                $"Dear,\n\nYêu cầu vào trang Drone Hub chỉnh sửa\n\nMã hiệu Drone: {result.LogFile?.Device?.Name ?? ""}\n\nThời gian ghi log: {TimeZoneInfo.ConvertTimeFromUtc(result.LogFile?.LoggingTime ?? DateTime.UtcNow, seaTimeZone).ToString("dd/MM/yyyy HH:mm:ss")}\n\nGhi chú: {command.Message}\n\nThank you");
 
             actionResponse.SetUpdatedMessage();
             return actionResponse.ToIActionResult();
@@ -1300,11 +1305,15 @@ namespace MiSmart.API.Controllers
         }
 
         [HttpPost("{id:Guid}/UpdateImageUrlsResult")]
-        [HasPermission(typeof(AdminPermission))]
+    
         public async Task<IActionResult> UpdateImageUrlsResult([FromRoute] Guid id, [FromServices] LogReportResultRepository logReportResultRepository,
         [FromServices] MyEmailService emailService, [FromBody] UpdateImageUrlsCommand command, [FromServices] MinioService minioService)
         {
             ActionResponse actionResponse = actionResponseFactory.CreateInstance();
+            if (CurrentUser.RoleID != 4)
+            {
+                actionResponse.AddNotAllowedErr();
+            }
             var result = await logReportResultRepository.GetAsync(ww => ww.LogFileID == id);
             if (result is null)
             {
