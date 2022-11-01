@@ -1216,9 +1216,9 @@ namespace MiSmart.API.Controllers
             var report = await secondLogReportRepository.GetAsync(ww => ww.LogFileID == id);
             if (report is null)
             {
-                actionResponse.AddNotFoundErr("ResultReport");
+                actionResponse.AddNotFoundErr("SecondReport");
             }
-            if (report.LogFile.Status != LogStatus.Completed){
+            if (report.LogFile.Status != LogStatus.SecondWarning){
                 actionResponse.AddInvalidErr("LogStatus");
             }
             for (var i = 0; i < report.ImageUrls.Count; i++){
