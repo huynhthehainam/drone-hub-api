@@ -217,7 +217,7 @@ public class MyEmailService : EmailService
             htmlStringBuilder.Replace("list_image_report", listImageReport);
 
             if (logResult.ResponsibleCompany == ResponsibleCompany.MiSmart)
-                htmlStringBuilder.Replace("responsible_company", "Công ty khai thác MiSmart");
+                htmlStringBuilder.Replace("responsible_company", "MiSmart");
             else if (logResult.ResponsibleCompany == ResponsibleCompany.NoCompany)
                 htmlStringBuilder.Replace("responsible_company", "Không có công ty");
             else if (logReport.LogFile != null && logReport.LogFile.Device != null && logReport.LogFile.Device.ExecutionCompany != null)
@@ -250,7 +250,7 @@ public class MyEmailService : EmailService
             htmlStringBuilder.Replace("list_image_report", listImageReport);
 
             if (logResult.ResponsibleCompany == ResponsibleCompany.MiSmart)
-                htmlStringBuilder.Replace("responsible_company", "Công ty khai thác MiSmart");
+                htmlStringBuilder.Replace("responsible_company", "MiSmart");
             else if (logResult.ResponsibleCompany == ResponsibleCompany.NoCompany)
                 htmlStringBuilder.Replace("responsible_company", "Không có công ty");
             else if (secondLogReport.LogFile != null && secondLogReport.LogFile.Device != null && secondLogReport.LogFile.Device.ExecutionCompany != null)
