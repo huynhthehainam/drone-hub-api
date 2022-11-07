@@ -678,6 +678,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
                 countingService.Count5 += 1;
             }
 
+
             var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
 
             TimeSpan span = new TimeSpan(0, 0, 0, 0, 5000);
@@ -769,7 +770,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
             }
 
             device.LastBatterGroupLogs = lastGroupIDs;
-
+            device.LastOnline = DateTime.UtcNow;
 
             await deviceRepository.UpdateAsync(device);
 
