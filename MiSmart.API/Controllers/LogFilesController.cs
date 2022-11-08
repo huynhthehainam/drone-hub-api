@@ -69,7 +69,6 @@ namespace MiSmart.API.Controllers
                 query = ww => (deviceID.HasValue ? (ww.DeviceID == deviceID.Value) : true)
                                 && (ww.FileBytes != null ? ww.FileBytes.Length > 500000 : false)
                                 && (isUnstable == true ? (ww.DroneStatus != DroneStatus.Stable) : true)
-                                && (ww.Status == LogStatus.Completed || ww.Status == LogStatus.Approved)
                                     && (PartErrorID.HasValue ? ((ww.LogReportResult != null && ww.LogReportResult.LogResultDetails != null) ? ww.LogReportResult.LogResultDetails.Any(ww => ww.PartErrorID == PartErrorID.Value && ww.Status == StatusError.Bad) : false) : true)
                                     && (from.HasValue ? (ww.LoggingTime >= from.Value) : true)
                                     && (to.HasValue ? (ww.LoggingTime <= to.Value) : true);
