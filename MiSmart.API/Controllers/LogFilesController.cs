@@ -98,7 +98,7 @@ namespace MiSmart.API.Controllers
         public async Task<IActionResult> GetFile([FromRoute] Guid id, [FromServices] LogFileRepository logFileRepository, [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository)
         {
             ActionResponse actionResponse = actionResponseFactory.CreateInstance();
-            if (CurrentUser.RoleID != 3 && CurrentUser.RoleID != 4)
+            if (CurrentUser.RoleID != 3 && CurrentUser.RoleID != 4 && CurrentUser.RoleID != 1 && !CurrentUser.IsAdministrator)
             {
                 actionResponse.AddNotAllowedErr();
                 return actionResponse.ToIActionResult();
