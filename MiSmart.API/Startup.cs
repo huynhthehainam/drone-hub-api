@@ -337,13 +337,14 @@ namespace MiSmart.API
             var env = scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
 
             TargetEmailSettings targetEmailSettings = scope.ServiceProvider.GetRequiredService<IOptions<TargetEmailSettings>>().Value;
-            foreach (var email in targetEmailSettings.LogReport)
+            foreach (var email in targetEmailSettings.LogReport ?? new List<UserEmail>())
             {
                 Console.WriteLine(email.Email);
             }
+        
             if (!env.IsDevelopment())
             {
-                Console.WriteLine("Not dev env");
+                Console.WriteLine($"Not dev env {env.EnvironmentName}");
                 return;
             }
 
