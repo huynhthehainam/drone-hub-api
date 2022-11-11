@@ -81,6 +81,7 @@ public sealed class BatteryModelsControllerTest : AuthorizedControllerTest<MiSma
 
         UpdatedResponseTest? updatedResponseTest = await resp.Content.ReadFromJsonAsync<UpdatedResponseTest>(JsonSerializerDefaultOptions.CamelOptions);
 
+        Assert.Equal(HttpStatusCode.OK, resp.StatusCode);
         Assert.NotNull(updatedResponseTest);
         Assert.NotNull(updatedResponseTest?.Message);
     }

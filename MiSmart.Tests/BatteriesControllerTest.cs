@@ -27,6 +27,7 @@ public sealed class BatteriesControllerTest : AuthorizedControllerTest<Startup>
         }, options: JsonSerializerDefaultOptions.CamelOptions));
 
         UpdatedResponseTest? updatedResponse = await resp.Content.ReadFromJsonAsync<UpdatedResponseTest>(JsonSerializerDefaultOptions.CamelOptions);
+        Assert.Equal(HttpStatusCode.OK, resp.StatusCode);
         Assert.NotNull(updatedResponse);
         Assert.NotNull(updatedResponse?.Message);
     }

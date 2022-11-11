@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using MiSmart.API;
 using MiSmart.Infrastructure.Constants;
+using MiSmart.DAL.ViewModels;
 
 namespace MiSmart.Tests;
 
@@ -10,6 +11,7 @@ public sealed class DeviceModelsControllerTest : AuthorizedControllerTest<MiSmar
     public DeviceModelsControllerTest(CustomWebApplicationFactory<Startup> factory) : base(factory)
     {
     }
+    private readonly Int32 testingDeviceModelID = 1;
     [Fact]
     public async Task CreateDeviceModelWithRoleAdminAndReturnCreatedObject()
     {
@@ -31,5 +33,49 @@ public sealed class DeviceModelsControllerTest : AuthorizedControllerTest<MiSmar
         var resp = await client.PostAsJsonAsync("/devicemodels", new { Name = "asfsafas", Type = "Pressure" }, JsonSerializerDefaultOptions.CamelOptions);
 
         Assert.Equal(resp.StatusCode, HttpStatusCode.Forbidden);
+    }
+    [Fact]
+    public async Task GetListDeviceModelAndReturnListDeviceModel()
+    {
+        var client = CreateAuthorizedClient();
+
+        var resp = await client.GetAsync("/devicemodels?pageIndex=0&pageSize=5");
+
+        ListResponseTest<SmallDeviceModelViewModel>? listResponse = await resp.Content.ReadFromJsonAsync<ListResponseTest<SmallDeviceModelViewModel>>(JsonSerializerDefaultOptions.CamelOptions);
+
+        Assert.Equal(HttpStatusCode.OK, resp.StatusCode);
+        Assert.NotNull(listResponse);
+        Assert.NotNull(listResponse?.Data);
+        Assert.NotEmpty(listResponse?.Data);
+    }
+    [Fact]
+    public async Task PatchDeviceModelWithRoleAdminAndReturnUpdatedMessage()
+    {
+        var client = CreateAuthorizedClient();
+
+        var resp = await client.PatchAsync($"/devicemodels/{testingDeviceModelID}", JsonContent.Create(new
+        {
+            Name = "update test"
+        }, options: JsonSerializerDefaultOptions.CamelOptions));
+
+        var data = await resp.Content.ReadAsStringAsync();
+        UpdatedResponseTest? updatedResponse = await resp.Content.ReadFromJsonAsync<UpdatedResponseTest>(JsonSerializerDefaultOptions.CamelOptions);
+
+        Assert.Equal(HttpStatusCode.OK, resp.StatusCode);
+        Assert.NotNull(updatedResponse);
+        Assert.NotNull(updatedResponse?.Message);
+    }
+    [Fact]
+    public async Task PatchDeviceModelWithRoleStaffAndReturnForbiddenMessage()
+    {
+
+        var client = CreateAuthorizedClient(GenerateStaffUser());
+
+        var resp = await client.PatchAsync($"/devicemodels/{testingDeviceModelID}", JsonContent.Create(new
+        {
+            Name = "update test"
+        }, options: JsonSerializerDefaultOptions.CamelOptions));
+
+        Assert.Equal(HttpStatusCode.Forbidden, resp.StatusCode);
     }
 }

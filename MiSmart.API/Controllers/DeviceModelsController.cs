@@ -106,6 +106,7 @@ namespace MiSmart.API.Controllers
 
             await deviceModelRepository.UpdateAsync(deviceModel);
 
+            response.SetUpdatedMessage();
 
             return response.ToIActionResult();
         }
