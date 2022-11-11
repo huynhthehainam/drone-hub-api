@@ -32,7 +32,7 @@ public class HomePageTest : IClassFixture<CustomWebApplicationFactory<MiSmart.AP
 
 
         // Assert
-        Assert.Empty(allowedVersions);
+        Assert.NotEmpty(allowedVersions);
         // Assert.Equal(HttpStatusCode.OK, homePage.StatusCode);
 
     }
