@@ -2,6 +2,7 @@ using MiSmart.Infrastructure.Responses;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using MiSmart.API.Services;
+using Microsoft.AspNetCore.Hosting;
 
 namespace MiSmart.API.Controllers
 {
@@ -13,13 +14,14 @@ namespace MiSmart.API.Controllers
             this.actionResponseFactory = actionResponseFactory;
         }
         [HttpGet]
-        public Task<IActionResult> Index([FromServices] CountingService countingService)
+        public Task<IActionResult> Index([FromServices] CountingService countingService, [FromServices] IWebHostEnvironment webHostEnvironment)
         {
             var response = actionResponseFactory.CreateInstance();
             response.SetData(new
             {
                 Version = "1.0.4",
                 CreatedBy = "MiSmart",
+                Env = webHostEnvironment.EnvironmentName,
                 Service = "App Sync",
                 Description = "MiSmart is the best drone company in VN",
                 AllowedVersions = Constants.AllowedVersions,

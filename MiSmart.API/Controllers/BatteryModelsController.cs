@@ -29,6 +29,7 @@ namespace MiSmart.API.Controllers
         [FromServices] BatteryModelRepository batteryModelRepository)
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
+            Console.WriteLine("go to permission");
             var model = await batteryModelRepository.CreateAsync(new BatteryModel() { Name = command.Name, ManufacturerName = command.ManufacturerName });
             response.SetCreatedObject(model);
             return response.ToIActionResult();
@@ -105,7 +106,7 @@ namespace MiSmart.API.Controllers
 
             await batteryModelRepository.UpdateAsync(batteryModel);
 
-
+            response.SetUpdatedMessage();
             return response.ToIActionResult();
         }
     }
