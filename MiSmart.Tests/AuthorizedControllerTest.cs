@@ -4,6 +4,7 @@ using MiSmart.Infrastructure.Services;
 
 namespace MiSmart.Tests;
 
+
 public abstract class AuthorizedControllerTest<TProgram> : IClassFixture<CustomWebApplicationFactory<TProgram>> where TProgram : class
 {
     protected readonly CustomWebApplicationFactory<TProgram> factory;

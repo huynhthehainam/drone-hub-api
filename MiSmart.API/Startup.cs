@@ -69,9 +69,12 @@ namespace MiSmart.API
                 Description = "Drone hub management"
             });
             services.AddHttpClient();
+            try
+            {
+                FirebaseApp.Create();
 
-            FirebaseApp.Create();
-
+            }
+            catch (Exception) { }
 
 
             #region  ConfiguringMqtt
@@ -341,7 +344,7 @@ namespace MiSmart.API
             {
                 Console.WriteLine(email.Email);
             }
-        
+
             if (!env.IsDevelopment())
             {
                 Console.WriteLine($"Not dev env {env.EnvironmentName}");

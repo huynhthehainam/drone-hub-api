@@ -1,7 +1,7 @@
 using System.Text.Json;
 
 namespace MiSmart.Tests;
-
+[CollectionDefinition("Non-Parallel Collection", DisableParallelization = true)]
 public class HomePageTest : IClassFixture<CustomWebApplicationFactory<MiSmart.API.Startup>>
 {
     private readonly CustomWebApplicationFactory<MiSmart.API.Startup> factory;
@@ -32,7 +32,7 @@ public class HomePageTest : IClassFixture<CustomWebApplicationFactory<MiSmart.AP
 
 
         // Assert
-        Assert.NotEmpty(allowedVersions);
+        Assert.Empty(allowedVersions);
         // Assert.Equal(HttpStatusCode.OK, homePage.StatusCode);
 
     }

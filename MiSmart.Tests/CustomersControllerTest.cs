@@ -23,6 +23,7 @@ public class CreateResponseTest<T> where T : struct
 {
     public CreateResponseTestData<T>? Data { get; set; }
 }
+[CollectionDefinition("Non-Parallel Collection", DisableParallelization = true)]
 public sealed class CustomersControllerTest : AuthorizedControllerTest<MiSmart.API.Startup>
 {
 
@@ -111,7 +112,7 @@ public sealed class CustomersControllerTest : AuthorizedControllerTest<MiSmart.A
         Assert.NotNull(updatedResponse?.Message);
     }
     [Fact]
-    public async Task DeleteCustomerWithRoleStaffReturnFailedStatus()
+    public async Task DeleteCustomerWithRoleStaffAndReturnFailedStatus()
     {
         var client = CreateAuthorizedClient(
                  new Infrastructure.ViewModels.UserCacheViewModel
