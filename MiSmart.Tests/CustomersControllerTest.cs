@@ -23,7 +23,6 @@ public class CreateResponseTest<T> where T : struct
 {
     public CreateResponseTestData<T>? Data { get; set; }
 }
-[CollectionDefinition("Non-Parallel Collection", DisableParallelization = true)]
 public sealed class CustomersControllerTest : AuthorizedControllerTest<MiSmart.API.Startup>
 {
 
@@ -31,6 +30,7 @@ public sealed class CustomersControllerTest : AuthorizedControllerTest<MiSmart.A
     {
 
     }
+    private readonly Int32 testingCustomerID = 1;
 
     public static String[] Names = new String[] {
   "Tom", "Rich", "Barry",
@@ -53,7 +53,7 @@ public sealed class CustomersControllerTest : AuthorizedControllerTest<MiSmart.A
         var resp = await client.GetAsync("/customers?pageIndex=0&pageSize=5");
 
         // Assert
-        resp.EnsureSuccessStatusCode();
+        Assert.Equal(HttpStatusCode.OK, resp.StatusCode);
         var contentStr = await resp.Content.ReadAsStringAsync();
         ListResponseTest<SmallCustomerViewModel>? listResponse = JsonSerializer.Deserialize<ListResponseTest<SmallCustomerViewModel>>(contentStr, JsonSerializerDefaultOptions.CamelOptions);
         Assert.NotNull(listResponse);
@@ -74,11 +74,11 @@ public sealed class CustomersControllerTest : AuthorizedControllerTest<MiSmart.A
         }, options: JsonSerializerDefaultOptions.CamelOptions));
 
         // Assert
-        resp.EnsureSuccessStatusCode();
+        Assert.Equal(HttpStatusCode.Created, resp.StatusCode);
         CreateResponseTest<Int32>? createResponse = await resp.Content.ReadFromJsonAsync<CreateResponseTest<Int32>>(JsonSerializerDefaultOptions.CamelOptions);
 
         Assert.NotNull(createResponse);
-        Assert.NotEqual(0, createResponse?.Data?.ID);
+        Assert.True(createResponse?.Data?.ID > 0);
     }
 
     [Fact]
@@ -89,9 +89,9 @@ public sealed class CustomersControllerTest : AuthorizedControllerTest<MiSmart.A
 
         // Act
 
-        var customerID = 1;
 
-        var resp = await client.PostAsJsonAsync($"/customers/{customerID}/assignuser", new { UserUUID = Guid.NewGuid() }, JsonSerializerDefaultOptions.CamelOptions);
+
+        var resp = await client.PostAsJsonAsync($"/customers/{testingCustomerID}/assignuser", new { UserUUID = Guid.NewGuid() }, JsonSerializerDefaultOptions.CamelOptions);
 
         CreateResponseTest<Int64>? createResponse = await resp.Content.ReadFromJsonAsync<CreateResponseTest<Int64>>(JsonSerializerDefaultOptions.CamelOptions);
 
@@ -104,9 +104,9 @@ public sealed class CustomersControllerTest : AuthorizedControllerTest<MiSmart.A
     public async Task UpdateCustomerAndReturnUpdatedMessage()
     {
         var client = CreateAuthorizedClient();
-        var customerID = 1;
+
         int randIndex1 = rand.Next(0, Names.Length - 1);
-        var resp = await client.PatchAsync($"customers/{customerID}", JsonContent.Create(new { Name = $"updated_${Names[randIndex1]}" }, options: JsonSerializerDefaultOptions.CamelOptions));
+        var resp = await client.PatchAsync($"customers/{testingCustomerID}", JsonContent.Create(new { Name = $"updated_${Names[randIndex1]}" }, options: JsonSerializerDefaultOptions.CamelOptions));
         UpdatedResponseTest? updatedResponse = await resp.Content.ReadFromJsonAsync<UpdatedResponseTest>(JsonSerializerDefaultOptions.CamelOptions);
         Assert.NotNull(updatedResponse);
         Assert.NotNull(updatedResponse?.Message);
@@ -124,10 +124,45 @@ public sealed class CustomersControllerTest : AuthorizedControllerTest<MiSmart.A
                      Email = "test@mismart.ai",
                      Username = "test@mismart.ai",
                  });
-        var customerID = 1;
-        var resp = await client.DeleteAsync($"customers/{customerID}");
+
+        var resp = await client.DeleteAsync($"customers/{testingCustomerID}");
 
         Assert.Equal(HttpStatusCode.Forbidden, resp.StatusCode);
     }
+    [Fact]
+    public async Task AddDeviceToCustomerAndReturnCreatedObject()
+    {
+        var client = CreateAuthorizedClient();
 
+        Int32 deviceModelID = 1;
+        String name = "Device test";
+
+        var resp = await client.PostAsJsonAsync($"/customers/{testingCustomerID}/devices", new
+        {
+            Name = name,
+            DeviceModelID = deviceModelID
+        }, JsonSerializerDefaultOptions.CamelOptions);
+        var data = await resp.Content.ReadAsStringAsync();
+
+        CreateResponseTest<Int32>? createResponse = await resp.Content.ReadFromJsonAsync<CreateResponseTest<Int32>>(JsonSerializerDefaultOptions.CamelOptions);
+        Assert.Equal(HttpStatusCode.Created, resp.StatusCode);
+        Assert.NotNull(createResponse);
+        Assert.NotNull(createResponse?.Data);
+        Assert.True(createResponse?.Data?.ID > 0);
+    }
+    [Fact]
+    public async Task GetListDeviceAndReturnListDevice()
+    {
+        var client = CreateAuthorizedClient();
+
+        var resp = await client.GetAsync($"/customers/{testingCustomerID}/devices");
+
+        ListResponseTest<SmallDeviceViewModel>? listResponse = await resp.Content.ReadFromJsonAsync<ListResponseTest<SmallDeviceViewModel>>(JsonSerializerDefaultOptions.CamelOptions);
+
+        Assert.Equal(HttpStatusCode.OK, resp.StatusCode);
+        Assert.NotNull(listResponse);
+        Assert.NotNull(listResponse?.Data);
+        Assert.NotEmpty(listResponse?.Data);
+
+    }
 }

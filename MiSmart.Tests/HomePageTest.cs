@@ -1,7 +1,7 @@
+using System.Net;
 using System.Text.Json;
 
 namespace MiSmart.Tests;
-[CollectionDefinition("Non-Parallel Collection", DisableParallelization = true)]
 public class HomePageTest : IClassFixture<CustomWebApplicationFactory<MiSmart.API.Startup>>
 {
     private readonly CustomWebApplicationFactory<MiSmart.API.Startup> factory;
@@ -17,23 +17,24 @@ public class HomePageTest : IClassFixture<CustomWebApplicationFactory<MiSmart.AP
         var client = factory.CreateClient();
 
         // Act
-        var homePageResponse = await client.GetAsync("/");
+        var resp = await client.GetAsync("/");
 
 
 
-        homePageResponse.EnsureSuccessStatusCode();
-        var contentStr = await homePageResponse.Content.ReadAsStringAsync();
+
+        var contentStr = await resp.Content.ReadAsStringAsync();
         Console.WriteLine($"contentStr {contentStr}");
         JsonDocument jsonDocument = JsonDocument.Parse(contentStr);
         var root = jsonDocument.RootElement;
 
         var data = root.GetProperty("data");
         var allowedVersions = data.GetProperty("allowedVersions").EnumerateArray();
+        var env = data.GetProperty("env").GetString();
 
 
         // Assert
+        Assert.Equal(HttpStatusCode.OK, resp.StatusCode);
         Assert.NotEmpty(allowedVersions);
-        // Assert.Equal(HttpStatusCode.OK, homePage.StatusCode);
-
+        Assert.Equal("Testing", env);
     }
 }
