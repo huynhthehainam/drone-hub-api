@@ -2,6 +2,7 @@ using System.Net;
 using System.Text.Json;
 
 namespace MiSmart.Tests;
+[Collection("Sequential")]
 public class HomePageTest : IClassFixture<CustomWebApplicationFactory<MiSmart.API.Startup>>
 {
     private readonly CustomWebApplicationFactory<MiSmart.API.Startup> factory;

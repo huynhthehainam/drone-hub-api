@@ -8,7 +8,7 @@ using System.Net;
 
 namespace MiSmart.Tests;
 
-
+[Collection("Sequential")]
 public sealed class BatteryModelsControllerTest : AuthorizedControllerTest<MiSmart.API.Startup>
 {
     public BatteryModelsControllerTest(CustomWebApplicationFactory<Startup> factory) : base(factory)

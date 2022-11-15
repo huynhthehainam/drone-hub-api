@@ -8,7 +8,7 @@ using MiSmart.DAL.ViewModels;
 
 namespace MiSmart.Tests;
 
-
+[Collection("Sequential")]
 public sealed class BatteriesControllerTest : AuthorizedControllerTest<Startup>
 {
     public BatteriesControllerTest(CustomWebApplicationFactory<Startup> factory) : base(factory)

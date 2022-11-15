@@ -5,7 +5,7 @@ using MiSmart.Infrastructure.Constants;
 using MiSmart.DAL.ViewModels;
 
 namespace MiSmart.Tests;
-
+[Collection("Sequential")]
 public sealed class DeviceModelsControllerTest : AuthorizedControllerTest<MiSmart.API.Startup>
 {
     public DeviceModelsControllerTest(CustomWebApplicationFactory<Startup> factory) : base(factory)

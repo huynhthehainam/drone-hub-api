@@ -23,6 +23,7 @@ public class CreateResponseTest<T> where T : struct
 {
     public CreateResponseTestData<T>? Data { get; set; }
 }
+[Collection("Sequential")]
 public sealed class CustomersControllerTest : AuthorizedControllerTest<MiSmart.API.Startup>
 {
 
