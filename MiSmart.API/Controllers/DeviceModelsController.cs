@@ -15,6 +15,7 @@ using MiSmart.API.Permissions;
 using MiSmart.Infrastructure.Minio;
 using System.Threading.Tasks;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace MiSmart.API.Controllers
 {
@@ -30,7 +31,7 @@ namespace MiSmart.API.Controllers
         [FromServices] DeviceModelRepository deviceModelRepository)
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
-            var model = await deviceModelRepository.CreateAsync(new DeviceModel() { Name = command.Name, Type = command.Type });
+            var model = await deviceModelRepository.CreateAsync(new DeviceModel() { Name = command.Name, Type = command.Type, SprayingModes = command.SprayingModes ?? new List<String>() });
             response.SetCreatedObject(model);
 
             return response.ToIActionResult();
@@ -103,6 +104,7 @@ namespace MiSmart.API.Controllers
             }
 
             deviceModel.Name = String.IsNullOrWhiteSpace(command.Name) ? deviceModel.Name : command.Name;
+            deviceModel.SprayingModes = command.SprayingModes != null ? command.SprayingModes : deviceModel.SprayingModes;
 
             await deviceModelRepository.UpdateAsync(deviceModel);
 
