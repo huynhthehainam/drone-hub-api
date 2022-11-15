@@ -12,12 +12,16 @@ public sealed class DeviceModelsControllerTest : AuthorizedControllerTest<MiSmar
     {
     }
     private readonly Int32 testingDeviceModelID = 1;
+    public Object GenerateCreatingCommand()
+    {
+        return new { Name = "asfsafas", Type = "Pressure", SprayingModes = new List<String>() { "1 pump" } };
+    }
     [Fact]
     public async Task CreateDeviceModelWithRoleAdminAndReturnCreatedObject()
     {
         var client = CreateAuthorizedClient();
 
-        var resp = await client.PostAsJsonAsync("/devicemodels", new { Name = "asfsafas", Type = "Pressure" }, JsonSerializerDefaultOptions.CamelOptions);
+        var resp = await client.PostAsJsonAsync("/devicemodels", GenerateCreatingCommand(), JsonSerializerDefaultOptions.CamelOptions);
         CreateResponseTest<Int32>? createResponse = await resp.Content.ReadFromJsonAsync<CreateResponseTest<Int32>>(JsonSerializerDefaultOptions.CamelOptions);
 
         Assert.Equal(HttpStatusCode.Created, resp.StatusCode);
@@ -30,7 +34,7 @@ public sealed class DeviceModelsControllerTest : AuthorizedControllerTest<MiSmar
     public async Task CreateDeviceModelWithRoleStaffAndReturnForbiddenMessage()
     {
         var client = CreateAuthorizedClient(GenerateStaffUser());
-        var resp = await client.PostAsJsonAsync("/devicemodels", new { Name = "asfsafas", Type = "Pressure" }, JsonSerializerDefaultOptions.CamelOptions);
+        var resp = await client.PostAsJsonAsync("/devicemodels", GenerateCreatingCommand(), JsonSerializerDefaultOptions.CamelOptions);
 
         Assert.Equal(resp.StatusCode, HttpStatusCode.Forbidden);
     }

@@ -33,6 +33,7 @@ namespace MiSmart.DAL.Models
             get => lazyLoader.Load(this, ref devices);
             set => devices = value;
         }
+        public List<String> SprayingModes { get; set; } = new List<String>();
 
         private ICollection<DeviceModelParam>? modelParams;
         public ICollection<DeviceModelParam>? ModelParams

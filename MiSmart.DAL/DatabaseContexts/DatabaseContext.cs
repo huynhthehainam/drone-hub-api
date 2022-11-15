@@ -204,6 +204,10 @@ namespace MiSmart.DAL.DatabaseContexts
             {
                 ww.HasOne(ww => ww.LogFile).WithOne(ww => ww.SecondLogReport).HasForeignKey<SecondLogReport>(ww => ww.LogFileID).OnDelete(DeleteBehavior.Cascade);
             });
+            modelBuilder.Entity<DeviceModel>(ww =>
+            {
+              
+            });
 
             modelBuilder.Entity<DeviceModelParam>(ww =>
             {

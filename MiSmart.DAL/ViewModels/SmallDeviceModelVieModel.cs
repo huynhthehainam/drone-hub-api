@@ -24,6 +24,7 @@ namespace MiSmart.DAL.ViewModels
         public String? FileUrl { get; set; }
         public DeviceModelType Type { get; set; }
         public List<CustomerDeviceSpecificQuantity>? SpecificQuantities { get; set; }
+        public List<String>? SprayingModes { get; set; }
         public void LoadFrom(DeviceModel entity)
         {
             ID = entity.ID;
@@ -32,6 +33,7 @@ namespace MiSmart.DAL.ViewModels
             Entity = entity;
             FileUrl = entity.FileUrl;
             Type = entity.Type;
+            SprayingModes = entity.SprayingModes;
             var group = entity.Devices?.GroupBy(ww => ww.Customer).ToList();
             SpecificQuantities = group?.Select(ww => new CustomerDeviceSpecificQuantity
             {
@@ -50,12 +52,13 @@ namespace MiSmart.DAL.ViewModels
         public String? Name { get; set; }
         public DeviceModelType Type { get; set; }
         public DeviceModelParamViewModel? DeviceModelParam { get; set; }
-
+        public List<String>? SprayingModes { get; set; }
         public void LoadFrom(DeviceModel entity)
         {
             ID = entity.ID;
             Name = entity.Name;
             Type = entity.Type;
+            SprayingModes = entity.SprayingModes;
             var activeParam = entity.ModelParams?.FirstOrDefault(ww => ww.IsActive);
             if (activeParam != null)
             {
