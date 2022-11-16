@@ -15,4 +15,9 @@ namespace MiSmart.API.Commands
         [Required]
         public Double? CostPerHectare { get; set; }
     }
+    public class GetExecutionCompanySettingFromTMCommand
+    {
+        [Required]
+        public String? EncryptedUUID { get; set; }
+    }
 }

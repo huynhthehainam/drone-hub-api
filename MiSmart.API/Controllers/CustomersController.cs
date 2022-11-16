@@ -15,6 +15,10 @@ using MiSmart.Infrastructure.Permissions;
 using MiSmart.API.Permissions;
 using MiSmart.API.Services;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using MiSmart.API.GrpcServices;
+using Microsoft.Extensions.Options;
+using MiSmart.API.Settings;
 
 namespace MiSmart.API.Controllers
 {
@@ -238,6 +242,75 @@ namespace MiSmart.API.Controllers
             await deviceRepository.DeleteAsync(device);
 
             response.SetNoContent();
+            return response.ToIActionResult();
+        }
+
+        [HttpGet("GetCustomerFromTM")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetListFromTM([FromQuery] PageCommand pageCommand,
+        [FromServices] CustomerRepository customerRepository, [FromQuery] String? search, [FromQuery] String? secretKey,
+        [FromServices] AuthGrpcClientService authGrpcClientService, [FromServices] IOptions<FarmAppSettings> options)
+        {
+            ActionResponse response = actionResponseFactory.CreateInstance();
+            Expression<Func<Customer, Boolean>> query = ww => (!String.IsNullOrWhiteSpace(search) ? ((ww.Name ?? "").ToLower().Contains(search.ToLower()) || (ww.Address ?? "").ToLower().Contains(search.ToLower())) : true);
+            var settings = options.Value;
+            if (secretKey != settings.SecretKey)
+            {
+                response.AddAuthorizationErr();
+                return response.ToIActionResult();
+            }
+            var listResponse = await customerRepository.GetListResponseViewAsync<SmallCustomerViewModel>(pageCommand, query);
+            listResponse.SetResponse(response);
+
+            return response.ToIActionResult();
+        }
+
+        [HttpPost("{id:int}/AssignUserFromTM")]
+        [AllowAnonymous]
+        public async Task<IActionResult> AssginCustomerUserFromTM([FromServices] CustomerRepository customerRepository, [FromBody] AssigningCustomerUserFromTMCommand command,
+        [FromServices] IOptions<FarmAppSettings> options, [FromServices] CustomerUserRepository customerUserRepository,
+        [FromServices] AuthGrpcClientService authGrpcClientService, [FromRoute] Int32 id)
+        {
+            var response = actionResponseFactory.CreateInstance();
+            var settings = options.Value;
+            if (command.SecretKey != settings.SecretKey)
+            {
+                response.AddAuthorizationErr();
+                return response.ToIActionResult();
+            }
+            var resp = authGrpcClientService.GetUserExistingInformation(command.EncryptedUUID ?? "");
+            if (resp.IsExist)
+            {
+                try
+                {
+                    var uuid = Guid.Parse(resp.DecryptedUUID);
+                    var existedCustomerUser = await customerUserRepository.GetAsync(ww => ww.UserUUID == uuid);
+                    if (existedCustomerUser is not null)
+                    {
+                        response.AddExistedErr("User");
+                        return response.ToIActionResult();
+                    }
+                    var customer = await customerRepository.GetAsync(ww => ww.ID == id);
+                    if (customer is null)
+                    {
+                        response.AddNotFoundErr("Customer");
+                        return response.ToIActionResult();
+                    }
+                    CustomerUser customerUser = await customerUserRepository.CreateAsync(new CustomerUser { CustomerID = customer.ID, UserUUID = uuid });
+                    response.SetCreatedObject(customerUser);
+                }
+                catch (Exception)
+                {
+                    response.AddInvalidErr("EncryptedUUID");
+                    return response.ToIActionResult();
+                }
+            }
+            else
+            {
+                response.AddInvalidErr("EncryptedUUID");
+                return response.ToIActionResult();
+            }
+
             return response.ToIActionResult();
         }
     }

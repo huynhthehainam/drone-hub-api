@@ -20,9 +20,9 @@ namespace MiSmart.API.GrpcServices
             return resp;
 
         }
-        public UserExistingInformationProtoModel GetUserExistingInformation(Int64 id)
+        public UserExistingInformationProtoModel GetUserExistingInformation(String encryptedUUID)
         {
-            GetUserExistingInformationRequest request = new GetUserExistingInformationRequest { Id = id };
+            GetUserExistingInformationRequest request = new GetUserExistingInformationRequest { EncryptedUUID = encryptedUUID };
             var resp = authProtoServiceClient.GetUserExistingInformation(request);
 
             return resp;

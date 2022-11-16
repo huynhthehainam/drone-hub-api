@@ -12,4 +12,9 @@ namespace MiSmart.API.Commands
         [Required]
         public Int32? DeviceModelID { get; set; }
     }
+    public class GetDeviceFromTMCommand
+    {
+        [Required]
+        public String? EncryptedUUID { get; set; }
+    }
 }
