@@ -46,7 +46,7 @@ namespace MiSmart.API.Controllers
         [FromQuery] String? search)
         {
             var response = actionResponseFactory.CreateInstance();
-            Expression<Func<Customer, Boolean>> query = ww => (!String.IsNullOrWhiteSpace(search) ? ((ww.Name ?? "").ToLower().Contains(search.ToLower()) || (ww.Address ?? "").ToLower().Contains(search.ToLower())) : true);
+            Expression<Func<Customer, Boolean>> query = ww => (!String.IsNullOrWhiteSpace(search) ? (ww.Name ?? "").ToLower().Contains(search.ToLower()) : true);
 
             var listResponse = await customerRepository.GetListResponseViewAsync<SmallCustomerViewModel>(pageCommand, query);
             listResponse.SetResponse(response);
