@@ -19,5 +19,19 @@ namespace MiSmart.API.Commands
         public Guid? UserUUID { get; set; }
         public ExecutionCompanyUserType Type { get; set; } = ExecutionCompanyUserType.Member;
     }
+    public class AssigningExecutionCompanyUserFromTMCommand
+    {
+        [Required]
+        public String? SecretKey { get; set; }
+        public String? EncryptedUUID { get; set; }
+        public ExecutionCompanyUserType Type { get; set; } = ExecutionCompanyUserType.Member;
+    }
+    public class AssigningCustomerUserFromTMCommand
+    {
+        [Required]
+        public String? SecretKey { get; set; }
+        [Required]
+        public String? EncryptedUUID { get; set; }
+    }
 
 }

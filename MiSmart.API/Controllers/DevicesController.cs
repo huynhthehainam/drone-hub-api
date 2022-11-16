@@ -33,6 +33,7 @@ using System.Net.Http;
 using MiSmart.API.Settings;
 using System.IO;
 using System.Text.RegularExpressions;
+using MiSmart.API.GrpcServices;
 
 namespace MiSmart.API.Controllers
 {
@@ -627,6 +628,74 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
                 }
             }
             response.SetData(flightStats.Select(fs => new { ID = fs.ID }));
+            return response.ToIActionResult();
+        }
+        [HttpPost("DevicesFromTM")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetDevicesFromTM([FromServices] DeviceRepository deviceRepository, [FromServices] AuthGrpcClientService authGrpcClientService,
+        [FromBody] GetDeviceFromTMCommand command, [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, 
+        [FromServices] CustomerUserRepository customerUserRepository,
+        [FromQuery] String? relation = "Pilot")
+        {
+            ActionResponse response = actionResponseFactory.CreateInstance();
+            var resp = authGrpcClientService.GetUserExistingInformation(command.EncryptedUUID ?? "");
+            if (resp.IsExist)
+            {
+                try
+                {
+                    var uuid = Guid.Parse(resp.DecryptedUUID);
+                    Expression<Func<Device, bool>> query = ww => false;
+                    if (relation == "Pilot"){
+                        ExecutionCompanyUser? executionCompanyUser = await executionCompanyUserRepository.GetAsync(ww => ww.UserUUID == uuid);
+                        if (executionCompanyUser == null)
+                        {
+                            response.AddInvalidErr("EncryptedUUID");
+                            return response.ToIActionResult();
+                        }
+                        query = ww => true;
+                    }else if (relation == "Owner"){
+                       CustomerUser? customerUser = await customerUserRepository.GetAsync(ww => ww.UserUUID == uuid); 
+                        if (customerUser == null)
+                        {
+                            response.AddInvalidErr("EncryptedUUID");
+                            return response.ToIActionResult();
+                        }
+                        query = ww => ww.CustomerID == customerUser.CustomerID;
+                    }
+                    var listDevice = await deviceRepository.GetListResponseViewAsync<SmallDeviceViewModel>(new PageCommand(), query);
+                    listDevice.SetResponse(response);
+
+                }
+                catch (Exception)
+                {
+                    response.AddInvalidErr("EncryptedUUID");
+                    return response.ToIActionResult();
+                }
+            }
+            else
+            {
+                response.AddInvalidErr("EncryptedUUID");
+                return response.ToIActionResult();
+            }
+            return response.ToIActionResult();
+        }
+        [HttpGet("GetDevicesFromTM")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetListDeviceFromTM([FromQuery] PageCommand pageCommand,
+        [FromServices] DeviceRepository deviceRepository, [FromQuery] String? search, [FromQuery] String? secretKey,
+        [FromServices] IOptions<FarmAppSettings> options)
+        {
+            ActionResponse response = actionResponseFactory.CreateInstance();
+            Expression<Func<Device, Boolean>> query = ww => (!String.IsNullOrWhiteSpace(search) ? (ww.Name ?? "").ToLower().Contains(search.ToLower()) : true);
+            var settings = options.Value;
+            if (secretKey != settings.SecretKey)
+            {
+                response.AddAuthorizationErr();
+                return response.ToIActionResult();
+            }
+            var listResponse = await deviceRepository.GetListResponseViewAsync<SmallDeviceViewModel>(pageCommand, query);
+            listResponse.SetResponse(response);
+
             return response.ToIActionResult();
         }
     }

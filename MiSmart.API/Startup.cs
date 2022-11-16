@@ -32,6 +32,9 @@ using MiSmart.API.ScheduledTasks;
 using FirebaseAdmin;
 using MiSmart.API.RabbitMQ;
 using Microsoft.Extensions.Options;
+using MiSmart.API.Protos;
+using System.Net.Http;
+using MiSmart.API.GrpcServices;
 
 namespace MiSmart.API
 {
@@ -114,13 +117,13 @@ namespace MiSmart.API
 
 
             #region ConfiguringGrpc
-            // services.AddGrpc();
-            // services.AddGrpcClient<AuthProtoService.AuthProtoServiceClient>(o => o.Address = new Uri(Configuration["GrpcConfigs:AuthUrl"])).ConfigurePrimaryHttpMessageHandler(() =>
-            // {
-            //     return new HttpClientHandler { ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true, };
-            // });
+            services.AddGrpc();
+            services.AddGrpcClient<AuthProtoService.AuthProtoServiceClient>(o => o.Address = new Uri(Configuration["GrpcConfigs:AuthUrl"])).ConfigurePrimaryHttpMessageHandler(() =>
+            {
+                return new HttpClientHandler { ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true, };
+            });
 
-            // services.AddSingleton<AuthGrpcClientService, AuthGrpcClientService>();
+            services.AddSingleton<AuthGrpcClientService, AuthGrpcClientService>();
 
 
             #endregion

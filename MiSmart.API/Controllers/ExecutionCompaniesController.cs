@@ -15,6 +15,10 @@ using MiSmart.API.Permissions;
 using System.Linq;
 using MiSmart.API.Services;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Options;
+using MiSmart.API.Settings;
+using MiSmart.API.GrpcServices;
 
 namespace MiSmart.API.Controllers
 {
@@ -200,6 +204,73 @@ namespace MiSmart.API.Controllers
 
             response.SetUpdatedMessage();
 
+            return response.ToIActionResult();
+        }
+        [HttpGet("GetExecutionCompanyFromTM")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetListFromTM([FromQuery] PageCommand pageCommand,
+        [FromServices] ExecutionCompanyRepository executionCompanyRepository,
+        [FromQuery] String? search, [FromQuery] String? secretKey, [FromServices] AuthGrpcClientService authGrpcClientService,
+        [FromServices] IOptions<FarmAppSettings> options)
+        {
+            var response = actionResponseFactory.CreateInstance();
+            var settings = options.Value;
+            if (secretKey != settings.SecretKey)
+            {
+                response.AddAuthorizationErr();
+                return response.ToIActionResult();
+            }
+            Expression<Func<ExecutionCompany, Boolean>> query = ww => (!String.IsNullOrWhiteSpace(search) ? ((ww.Name ?? "").ToLower().Contains(search.ToLower()) || (ww.Address ?? "").ToLower().Contains(search.ToLower())) : true);
+            var listResponse = await executionCompanyRepository.GetListResponseViewAsync<ExecutionCompanyViewModel>(pageCommand, query);
+            listResponse.SetResponse(response);
+
+            return response.ToIActionResult();
+        }
+        [HttpPost("{id:int}/AssignUserFromTM")]
+        [AllowAnonymous]
+        public async Task<IActionResult> AssignExecutionCompanyUserFromTM([FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository,
+        [FromServices] ExecutionCompanyRepository executionCompanyRepository, [FromServices] AuthGrpcClientService authGrpcClientService, [FromBody] AssigningExecutionCompanyUserFromTMCommand command,
+        [FromRoute] Int32 id, [FromServices] IOptions<FarmAppSettings> options)
+        {
+            var response = actionResponseFactory.CreateInstance();
+            var resp = authGrpcClientService.GetUserExistingInformation(command.EncryptedUUID ?? "");
+            var settings = options.Value;
+            if (command.SecretKey != settings.SecretKey)
+            {
+                response.AddAuthorizationErr();
+                return response.ToIActionResult();
+            }
+            if (resp.IsExist)
+            {
+                try
+                {
+                    var uuid = Guid.Parse(resp.DecryptedUUID);
+                    ExecutionCompanyUser? executionCompanyUser = await executionCompanyUserRepository.GetAsync(ww => ww.UserUUID == uuid);
+                    if (executionCompanyUser != null)
+                    {
+                        response.AddExistedErr("User");
+                        return response.ToIActionResult();
+                    }
+                    ExecutionCompany? company = await executionCompanyRepository.GetAsync(ww => ww.ID == id);
+                    if (company == null)
+                    {
+                        response.AddNotFoundErr("ExecutionCompany");
+                        return response.ToIActionResult();
+                    }
+                    var user = await executionCompanyUserRepository.CreateAsync(new ExecutionCompanyUser { ExecutionCompany = company, UserUUID = uuid, Type = command.Type });
+                    response.SetCreatedObject(user);
+                }
+                catch (Exception)
+                {
+                    response.AddInvalidErr("EncryptedUUID");
+                    return response.ToIActionResult();
+                }
+            }
+            else
+            {
+                response.AddInvalidErr("EncryptedUUID");
+                return response.ToIActionResult();
+            }
             return response.ToIActionResult();
         }
 
