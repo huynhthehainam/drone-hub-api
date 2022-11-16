@@ -105,6 +105,7 @@ namespace MiSmart.API.Controllers
 
             deviceModel.Name = String.IsNullOrWhiteSpace(command.Name) ? deviceModel.Name : command.Name;
             deviceModel.SprayingModes = command.SprayingModes != null ? command.SprayingModes : deviceModel.SprayingModes;
+            deviceModel.Type = command.Type != null ? command.Type.GetValueOrDefault() : deviceModel.Type;
 
             await deviceModelRepository.UpdateAsync(deviceModel);
 
