@@ -169,7 +169,7 @@ namespace MiSmart.API.Controllers
         {
             var response = actionResponseFactory.CreateInstance();
             var customerUser = await customerUserRepository.GetByPermissionAsync(CurrentUser.UUID);
-            if (customerUser is null)
+            if (customerUser is null && !CurrentUser.IsAdministrator)
             {
                 response.AddNotAllowedErr();
                 return response.ToIActionResult();
@@ -181,7 +181,7 @@ namespace MiSmart.API.Controllers
                 response.AddInvalidErr("ExecutionCompanyID");
                 return response.ToIActionResult();
             }
-            Expression<Func<Device, Boolean>> query = ww => (ww.ID == id) && (ww.CustomerID == customerUser.CustomerID);
+            Expression<Func<Device, Boolean>> query = ww => (ww.ID == id);
             var device = await deviceRepository.GetAsync(query);
             if (device is null)
             {
@@ -198,7 +198,7 @@ namespace MiSmart.API.Controllers
 
             return response.ToIActionResult();
         }
-
+        
         [HttpPost("{id:int}/AssignTeam")]
         public async Task<IActionResult> AssignTeam([FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, [FromRoute] Int32 id,
         [FromServices] DeviceRepository deviceRepository,
