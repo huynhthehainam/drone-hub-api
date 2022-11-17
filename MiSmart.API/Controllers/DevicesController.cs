@@ -198,7 +198,7 @@ namespace MiSmart.API.Controllers
 
             return response.ToIActionResult();
         }
-        
+
         [HttpPost("{id:int}/AssignTeam")]
         public async Task<IActionResult> AssignTeam([FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, [FromRoute] Int32 id,
         [FromServices] DeviceRepository deviceRepository,
@@ -374,7 +374,7 @@ namespace MiSmart.API.Controllers
         }
         [HttpPatch("{id:int}")]
         public async Task<IActionResult> PatchDevice([FromServices] DeviceRepository deviceRepository, [FromServices] DeviceModelRepository deviceModelRepository, [FromRoute] Int32 id, [FromBody] PatchingDeviceCommand command,
-        [FromServices] ExecutionCompanyRepository executionCompanyRepository)
+        [FromServices] ExecutionCompanyRepository executionCompanyRepository, [FromServices] CustomerRepository customerRepository)
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
             if (!CurrentUser.IsAdministrator && CurrentUser.RoleID != 3)
@@ -412,6 +412,16 @@ namespace MiSmart.API.Controllers
                     return response.ToIActionResult();
                 }
                 device.ExecutionCompany = executionCompany;
+            }
+            if (command.CustomerID.HasValue)
+            {
+                var customer = await customerRepository.GetAsync(ww => ww.ID == command.CustomerID.GetValueOrDefault());
+                if (customer is null)
+                {
+                    response.AddInvalidErr("CustomerID");
+                    return response.ToIActionResult();
+                }
+                device.Customer = customer;
             }
 
 
@@ -633,7 +643,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
         [HttpPost("DevicesFromTM")]
         [AllowAnonymous]
         public async Task<IActionResult> GetDevicesFromTM([FromServices] DeviceRepository deviceRepository, [FromServices] AuthGrpcClientService authGrpcClientService,
-        [FromBody] GetDeviceFromTMCommand command, [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository, 
+        [FromBody] GetDeviceFromTMCommand command, [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository,
         [FromServices] CustomerUserRepository customerUserRepository,
         [FromQuery] String? relation = "Pilot")
         {
@@ -645,7 +655,8 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
                 {
                     var uuid = Guid.Parse(resp.DecryptedUUID);
                     Expression<Func<Device, bool>> query = ww => false;
-                    if (relation == "Pilot"){
+                    if (relation == "Pilot")
+                    {
                         ExecutionCompanyUser? executionCompanyUser = await executionCompanyUserRepository.GetAsync(ww => ww.UserUUID == uuid);
                         if (executionCompanyUser == null)
                         {
@@ -653,8 +664,10 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
                             return response.ToIActionResult();
                         }
                         query = ww => true;
-                    }else if (relation == "Owner"){
-                       CustomerUser? customerUser = await customerUserRepository.GetAsync(ww => ww.UserUUID == uuid); 
+                    }
+                    else if (relation == "Owner")
+                    {
+                        CustomerUser? customerUser = await customerUserRepository.GetAsync(ww => ww.UserUUID == uuid);
                         if (customerUser == null)
                         {
                             response.AddInvalidErr("EncryptedUUID");
