@@ -15,8 +15,6 @@ using MiSmart.Infrastructure.ViewModels;
 using MiSmart.API.ControllerBases;
 using NetTopologySuite;
 using NetTopologySuite.Geometries;
-using MiSmart.Infrastructure.Permissions;
-using MiSmart.API.Permissions;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Authorization;
 using MiSmart.Infrastructure.Services;
@@ -31,8 +29,6 @@ using MiSmart.Infrastructure.Settings;
 using MiSmart.API.Services;
 using System.Net.Http;
 using MiSmart.API.Settings;
-using System.IO;
-using System.Text.RegularExpressions;
 using MiSmart.API.GrpcServices;
 
 namespace MiSmart.API.Controllers
@@ -44,123 +40,8 @@ namespace MiSmart.API.Controllers
         {
 
         }
-        [HttpPost("UpdateFromRpanionServer")]
-        [AllowAnonymous]
-        public async Task<IActionResult> UpdateFromRpaionServer([FromServices] DeviceRepository deviceRepository, [FromForm] AddingLogFileCommand command, [FromServices] LogFileRepository logFileRepository, [FromServices] IOptions<RpanionSettings> options)
-        {
-            ActionResponse response = actionResponseFactory.CreateInstance();
-            var settings = options.Value;
-            if (command.SecretKey != settings.SecretKey)
-            {
-                response.AddAuthorizationErr();
-                return response.ToIActionResult();
-            }
-            var device = await deviceRepository.GetAsync(ww => ww.Token == command.DeviceToken);
-            if (device is null)
-            {
-                response.AddNotFoundErr("Device");
-                return response.ToIActionResult();
-            }
-            foreach (var formFile in command.Files)
-            {
-                var fileName = formFile.FileName;
-                var existedLogFile = await logFileRepository.GetAsync(ww => ww.DeviceID == device.ID && ww.FileName == fileName);
-                if (existedLogFile is not null)
-                {
-                    continue;
-                }
-                Byte[] bytes = new Byte[] { };
-                using (var ms = new MemoryStream())
-                {
-                    formFile.CopyTo(ms);
-                    bytes = ms.ToArray();
-                };
-                var fileNameRegex = new Regex("^(?<order>[0-9]+[0-9]+)-(?<year>[0-9]+[0-9]+)-(?<month>[0-9]+[0-9]+)-(?<day>[0-9]+[0-9]+)_(?<hour>[0-9]+[0-9]+)-(?<minute>[0-9]+[0-9]+)-(?<second>[0-9]+[0-9]+).bin$");
-                var m = fileNameRegex.Match(fileName);
-                if (m is not null && bytes.Length > 0)
-                {
-                    var groups = m.Groups;
-                    var order = Convert.ToInt32(groups["order"].Value);
-                    var year = Convert.ToInt32(groups["year"].Value);
-                    var month = Convert.ToInt32(groups["month"].Value);
-                    var day = Convert.ToInt32(groups["day"].Value);
-                    var hour = Convert.ToInt32(groups["hour"].Value);
-                    var minute = Convert.ToInt32(groups["minute"].Value);
-                    var second = Convert.ToInt32(groups["second"].Value);
-                    TimeZoneInfo seaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
-                    var loggingTime = new DateTime(year, month, day, hour, minute, second);
-                    var utcLoggingTime = TimeZoneInfo.ConvertTimeToUtc(loggingTime, seaTimeZone);
-                    LogFile logFile = await logFileRepository.CreateAsync(new LogFile { Device = device, FileBytes = bytes, FileName = fileName, LoggingTime = utcLoggingTime });
-                }
-
-            }
-            return response.ToIActionResult();
-
-        }
 
 
-        [HttpPost("{id:int}/MakeMaintenanceReport")]
-        [HasPermission(typeof(MaintainerPermission))]
-        public async Task<IActionResult> MakeMaintenanceReport([FromRoute] Int32 id, [FromServices] DeviceRepository deviceRepository,
-        [FromBody] AddingMaintenanceReportCommand command,
-         [FromServices] MaintenanceReportRepository maintenanceReportRepository)
-        {
-            ActionResponse response = actionResponseFactory.CreateInstance();
-            var device = await deviceRepository.GetAsync(ww => ww.ID == id);
-            if (device is null)
-            {
-                response.AddNotFoundErr("Device");
-                return response.ToIActionResult();
-            }
-
-            MaintenanceReport maintenanceReport = await maintenanceReportRepository.CreateAsync(new MaintenanceReport
-            {
-                Reason = command.Reason,
-                ActualReportCreatedTime = command.ActualReportCreatedTime.HasValue ? command.ActualReportCreatedTime.GetValueOrDefault() : DateTime.UtcNow,
-                Device = device,
-                UserUUID = CurrentUser.UUID,
-                AttachmentLinks = new List<String> { },
-            });
-            response.SetCreatedObject(maintenanceReport);
-            return response.ToIActionResult();
-        }
-
-        [HttpGet("{id:int}/MaintenanceReports")]
-
-        public async Task<IActionResult> GetMaintenanceReports([FromRoute] Int32 id, [FromQuery] PageCommand pageCommand, [FromServices] DeviceRepository deviceRepository,
-         [FromServices] MaintenanceReportRepository maintenanceReportRepository,
-         [FromQuery] String? relation = "Maintainer")
-        {
-            ActionResponse response = actionResponseFactory.CreateInstance();
-            var device = await deviceRepository.GetAsync(ww => ww.ID == id);
-            if (device is null)
-            {
-                response.AddNotFoundErr("Device");
-                return response.ToIActionResult();
-            }
-            Expression<Func<MaintenanceReport, Boolean>> query = ww => false;
-            if (relation == "Maintainer")
-            {
-                if (CurrentUser.RoleID != 3)
-                {
-                    response.AddNotAllowedErr();
-                    return response.ToIActionResult();
-                }
-                query = ww => ww.UserUUID == CurrentUser.UUID && ww.DeviceID == device.ID;
-            }
-            else if (relation == "Administrator")
-            {
-                if (!CurrentUser.IsAdministrator)
-                {
-                    response.AddNotAllowedErr();
-                    return response.ToIActionResult();
-                }
-                query = ww => ww.DeviceID == device.ID;
-            }
-            var listResponse = await maintenanceReportRepository.GetListResponseViewAsync<MaintenanceReportViewModel>(pageCommand, query, ww => ww.CreatedTime, false);
-            listResponse.SetResponse(response);
-            return response.ToIActionResult();
-        }
 
         [HttpPost("{id:int}/AssignExecutionCompany")]
         public async Task<IActionResult> AssignExecutionCompany([FromServices] CustomerUserRepository customerUserRepository, [FromServices] ExecutionCompanyRepository executionCompanyRepository,

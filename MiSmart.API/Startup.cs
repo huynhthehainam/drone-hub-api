@@ -186,7 +186,6 @@ namespace MiSmart.API
             services.AddScoped<ExecutionCompanyUserFlightStatRepository, ExecutionCompanyUserFlightStatRepository>();
             services.AddScoped<ExecutionCompanySettingRepository, ExecutionCompanySettingRepository>();
             services.AddScoped<StreamingLinkRepository, StreamingLinkRepository>();
-            services.AddScoped<MaintenanceReportRepository, MaintenanceReportRepository>();
             services.AddScoped<FlightStatReportRecordRepository, FlightStatReportRecordRepository>();
             services.AddScoped<LogFileRepository, LogFileRepository>();
             services.AddScoped<LogReportRepository, LogReportRepository>();
