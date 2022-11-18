@@ -128,12 +128,7 @@ namespace MiSmart.DAL.Models
             set => streamingLinks = value;
         }
 
-        private ICollection<MaintenanceReport>? maintenanceReports;
-        public ICollection<MaintenanceReport>? MaintenanceReports
-        {
-            get => lazyLoader.Load(this, ref maintenanceReports);
-            set => maintenanceReports = value;
-        }
+    
     }
 
 }

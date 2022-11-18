@@ -33,7 +33,6 @@ namespace MiSmart.DAL.DatabaseContexts
         public DbSet<ExecutionCompanyUserFlightStat> ExecutionCompanyUserFlightStats => Set<ExecutionCompanyUserFlightStat>();
         public DbSet<ExecutionCompanySetting> ExecutionCompanySettings => Set<ExecutionCompanySetting>();
         public DbSet<StreamingLink> StreamingLinks => Set<StreamingLink>();
-        public DbSet<MaintenanceReport> MaintenanceReports => Set<MaintenanceReport>();
         public DbSet<FlightStatReportRecord> FlightStatReportRecords => Set<FlightStatReportRecord>();
         public DbSet<LogDetail> LogDetails => Set<LogDetail>();
         public DbSet<LogReport> LogReports => Set<LogReport>();
@@ -168,10 +167,7 @@ namespace MiSmart.DAL.DatabaseContexts
                 ww.HasOne(ww => ww.ExecutionCompany).WithMany(ww => ww.Settings).HasForeignKey(ww => ww.ExecutionCompanyID).OnDelete(DeleteBehavior.Cascade);
             });
 
-            modelBuilder.Entity<MaintenanceReport>(ww =>
-            {
-                ww.HasOne(ww => ww.Device).WithMany(ww => ww.MaintenanceReports).HasForeignKey(ww => ww.DeviceID).OnDelete(DeleteBehavior.Cascade);
-            });
+            
 
             modelBuilder.Entity<FlightStatReportRecord>(ww =>
             {

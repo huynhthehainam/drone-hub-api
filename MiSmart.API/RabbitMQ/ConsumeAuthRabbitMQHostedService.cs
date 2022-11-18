@@ -93,15 +93,16 @@ namespace MiSmart.API.RabbitMQ
                             context.ExecutionCompanyUsers.RemoveRange(executionCompanyUsers);
                             context.SaveChanges();
 
-                            var reports = context.MaintenanceReports.Where(ww => ww.UserUUID == model.UUID).ToList();
-                            foreach (var report in reports)
-                            {
-                                foreach (var url in report.AttachmentLinks ?? new List<String> { })
-                                {
-                                    await minioService.RemoveFileByUrlAsync(url);
-                                }
-                            }
-                            context.MaintenanceReports.RemoveRange(reports);
+                            var secondLogReports = context.SecondLogReports.Where(ww => ww.UserUUID == model.UUID).ToList();
+                            context.SecondLogReports.RemoveRange(secondLogReports);
+                            context.SaveChanges();
+
+                            var logReports = context.LogReports.Where(ww => ww.UserUUID == model.UUID).ToList();
+                            context.LogReports.RemoveRange(logReports);
+                            context.SaveChanges();
+
+                            var logTokens = context.LogTokens.Where(ww => ww.UserUUID == model.UUID).ToList();
+                            context.LogTokens.RemoveRange(logTokens);
                             context.SaveChanges();
                         }
                 }

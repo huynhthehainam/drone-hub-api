@@ -14,8 +14,11 @@ using System.Text;
 using System.Net.Mail;
 using System.Net;
 using System.Drawing;
+using Microsoft.AspNetCore.Hosting;
+using MiSmart.Infrastructure.Extensions;
 
 namespace MiSmart.API.Services;
+
 
 public class MyEmailService : EmailService
 {
@@ -23,14 +26,17 @@ public class MyEmailService : EmailService
     private const String htmlFolderPath = "./HTMLTemplates";
     private readonly TargetEmailSettings targetEmailSettings;
     private readonly FrontEndSettings frontEndSettings;
-    private SmtpSettings smtpSettings;
-    private EmailSettings emailSettings;
-    public MyEmailService(IOptions<SmtpSettings> options, IOptions<EmailSettings> options1, IOptions<TargetEmailSettings> options2, IOptions<FrontEndSettings> options3) : base(options, options1)
+    private readonly SmtpSettings smtpSettings;
+    private readonly EmailSettings emailSettings;
+    private readonly IWebHostEnvironment env;
+
+    public MyEmailService(IOptions<SmtpSettings> options, IOptions<EmailSettings> options1, IOptions<TargetEmailSettings> options2, IOptions<FrontEndSettings> options3, IWebHostEnvironment env) : base(options, options1)
     {
         this.emailSettings = options1.Value;
         this.smtpSettings = options.Value;
         this.targetEmailSettings = options2.Value;
         this.frontEndSettings = options3.Value;
+        this.env = env;
     }
 
     public String? GetHTML(String name)
@@ -67,6 +73,8 @@ public class MyEmailService : EmailService
     }
     public async Task SendLowBatteryReportAsync(FlightStat stat, Boolean isOnline)
     {
+        if (env.IsTesting())
+            return;
         var online = isOnline ? "online" : "offline";
         TimeZoneInfo seaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
         var localFlightTime = TimeZoneInfo.ConvertTimeFromUtc(stat.FlightTime, seaTimeZone);
@@ -134,6 +142,8 @@ public class MyEmailService : EmailService
 
     public async Task SendLowBatteryDailyReportAsync(List<FlightStat> flightStats, DateTime localNow)
     {
+        if (env.IsTesting())
+            return;
         var html = generateLowBatteryDailyReport(flightStats, localNow);
 
         await SendMailAsync(targetEmailSettings.DailyReport?.ToArray() ?? new String[0], new String[] { }, new String[] { }, "Báo cáo cảnh báo vận hành pin sai cách " + localNow.ToString("yyyy-MM-dd"), html ?? "", true);
@@ -307,46 +317,47 @@ public class MyEmailService : EmailService
         htmlStringBuilder.Replace("list_image_result", listImageResult);
         return htmlStringBuilder;
     }
-    public Task SendMailAttachmentAsync(String[] receivedUsers, String[] cCedUsers, String[] bCCedUsers, String subject, String body, String? senderName, String? from, Byte[] file, String? fileName, Boolean isBodyHtml = false)
+    public async Task SendMailAttachmentAsync(String[] receivedUsers, String[] cCedUsers, String[] bCCedUsers, String subject, String body, String? senderName, String? from, Byte[] file, String? fileName, Boolean isBodyHtml = false)
     {
-        return Task.Run(() =>
+        if (env.IsTesting())
+            return;
+
+        senderName = senderName ?? emailSettings.SenderName;
+        from = from ?? emailSettings.FromEmail;
+        subject = subject ?? "";
+        body = body ?? "";
+        MailMessage mailMessage = new MailMessage();
+        if (from != null)
         {
-            senderName = senderName ?? emailSettings.SenderName;
-            from = from ?? emailSettings.FromEmail;
-            subject = subject ?? "";
-            body = body ?? "";
-            MailMessage mailMessage = new MailMessage();
-            if (from != null)
-            {
-                if (String.IsNullOrWhiteSpace(senderName))
-                    mailMessage.From = new MailAddress(from);
-                else
-                    mailMessage.From = new MailAddress(from, senderName);
-            }
-            foreach (var receivedUser in receivedUsers)
-            {
-                mailMessage.To.Add(receivedUser);
-            }
-            foreach (var cCedUser in cCedUsers)
-            {
-                mailMessage.CC.Add(cCedUser);
-            }
-            foreach (var bCCedUser in bCCedUsers)
-            {
-                mailMessage.CC.Add(bCCedUser);
-            }
-            mailMessage.Subject = subject;
-            mailMessage.Body = body;
-            mailMessage.IsBodyHtml = isBodyHtml;
-            if (file is not null)
-                mailMessage.Attachments.Add(new Attachment(new MemoryStream(file), fileName, "application/pdf"));
-            using (var client = new SmtpClient(smtpSettings.Server))
-            {
-                client.Port = smtpSettings.Port;
-                client.Credentials = new NetworkCredential(smtpSettings.UserName, smtpSettings.Password);
-                client.EnableSsl = smtpSettings.EnableSsl;
-                client.Send(mailMessage);
-            }
-        });
+            if (String.IsNullOrWhiteSpace(senderName))
+                mailMessage.From = new MailAddress(from);
+            else
+                mailMessage.From = new MailAddress(from, senderName);
+        }
+        foreach (var receivedUser in receivedUsers)
+        {
+            mailMessage.To.Add(receivedUser);
+        }
+        foreach (var cCedUser in cCedUsers)
+        {
+            mailMessage.CC.Add(cCedUser);
+        }
+        foreach (var bCCedUser in bCCedUsers)
+        {
+            mailMessage.CC.Add(bCCedUser);
+        }
+        mailMessage.Subject = subject;
+        mailMessage.Body = body;
+        mailMessage.IsBodyHtml = isBodyHtml;
+        if (file is not null)
+            mailMessage.Attachments.Add(new Attachment(new MemoryStream(file), fileName, "application/pdf"));
+        using (var client = new SmtpClient(smtpSettings.Server))
+        {
+            client.Port = smtpSettings.Port;
+            client.Credentials = new NetworkCredential(smtpSettings.UserName, smtpSettings.Password);
+            client.EnableSsl = smtpSettings.EnableSsl;
+            await client.SendMailAsync(mailMessage);
+        }
+
     }
 }
