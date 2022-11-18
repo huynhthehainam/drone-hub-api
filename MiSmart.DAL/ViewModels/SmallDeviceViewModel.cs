@@ -132,4 +132,37 @@ namespace MiSmart.DAL.ViewModels
             ExecutionCompanyId = entity.ExecutionCompanyID;
         }
     }
+    public class SmallDeviceFromTMViewModel : IViewModel<Device>
+    {
+        public Int32 ID { get; set; }
+        public Int64? TeamID { get; set; }
+        public Int32 CustomerID { get; set; }
+        public String? Name { get; set; }
+        public DeviceStatus Status { get; set; }
+        public Guid UUID { get; set; }
+        public String? TeamName { get; set; }
+        public String? ExecutionCompanyName { get; set; }
+        public String? DeviceModelName { get; set; }
+        public String? CustomerName { get; set; }
+        public Int32 DeviceModelID { get; set; }
+        public Int32? ExecutionCompanyId { get; set; }
+        public List<CustomerUserViewModel>? CustomerUsers {get; set;}
+
+        public void LoadFrom(Device entity)
+        {
+            ID = entity.ID;
+            TeamID = entity.TeamID;
+            DeviceModelName = entity.DeviceModel?.Name;
+            CustomerID = entity.CustomerID;
+            Name = entity.Name;
+            Status = entity.Status;
+            UUID = entity.UUID;
+            TeamName = entity.Team?.Name;
+            ExecutionCompanyName = entity.ExecutionCompany?.Name;
+            CustomerName = entity.Customer?.Name;
+            DeviceModelID = entity.DeviceModelID;
+            ExecutionCompanyId = entity.ExecutionCompanyID;
+            CustomerUsers = entity.Customer?.CustomerUsers?.Select(ww => ViewModelHelpers.ConvertToViewModel<CustomerUser, CustomerUserViewModel>(ww)).ToList();
+        }
+    }
 }

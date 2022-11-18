@@ -696,17 +696,18 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
         [AllowAnonymous]
         public async Task<IActionResult> GetListDeviceFromTM([FromQuery] PageCommand pageCommand,
         [FromServices] DeviceRepository deviceRepository, [FromQuery] String? search, [FromQuery] String? secretKey,
-        [FromServices] IOptions<FarmAppSettings> options)
+        [FromServices] IOptions<FarmAppSettings> options, [FromQuery] Guid? deviceUUID)
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
-            Expression<Func<Device, Boolean>> query = ww => (!String.IsNullOrWhiteSpace(search) ? (ww.Name ?? "").ToLower().Contains(search.ToLower()) : true);
+            Expression<Func<Device, Boolean>> query = ww => (!String.IsNullOrWhiteSpace(search) ? (ww.Name ?? "").ToLower().Contains(search.ToLower()) : true)
+                                            && (deviceUUID.HasValue ? ww.UUID == deviceUUID.GetValueOrDefault() : true);
             var settings = options.Value;
             if (secretKey != settings.SecretKey)
             {
                 response.AddAuthorizationErr();
                 return response.ToIActionResult();
             }
-            var listResponse = await deviceRepository.GetListResponseViewAsync<SmallDeviceViewModel>(pageCommand, query);
+            var listResponse = await deviceRepository.GetListResponseViewAsync<SmallDeviceFromTMViewModel>(pageCommand, query);
             listResponse.SetResponse(response);
 
             return response.ToIActionResult();
