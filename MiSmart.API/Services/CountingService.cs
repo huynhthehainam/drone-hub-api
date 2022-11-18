@@ -11,4 +11,5 @@ public class CountingService
     public Int32 Count3 { get; set; }
     public Int32 Count4 { get; set; }
     public Int32 Count5 { get; set; }
+    public Int32 Count6 { get; set; }
 }
