@@ -308,6 +308,7 @@ namespace MiSmart.API.Controllers
             logReport.ReporterDescription = command.ReporterDescription;
             logReport.UserUUID = CurrentUser.UUID;
             logReport.Username = CurrentUser.Email;
+            logReport.PilotName = command.PilotName;
             await logReportRepository.UpdateAsync(logReport);
             return response.ToIActionResult();
         }
