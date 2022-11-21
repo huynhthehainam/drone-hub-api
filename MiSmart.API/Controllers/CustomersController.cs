@@ -13,7 +13,6 @@ using System.Linq.Expressions;
 using MiSmart.DAL.ViewModels;
 using MiSmart.Infrastructure.Permissions;
 using MiSmart.API.Permissions;
-using MiSmart.API.Services;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using MiSmart.API.GrpcServices;
@@ -63,12 +62,12 @@ namespace MiSmart.API.Controllers
         [HasPermission(typeof(AdminPermission))]
         public async Task<IActionResult> AssignCustomerUser([FromServices] CustomerUserRepository customerUserRepository,
         [FromServices] CustomerRepository customerRepository,
-        [FromServices] AuthSystemService authSystemService,
+        [FromServices] AuthGrpcClientService authGrpcClientService,
          [FromBody] AssigningCustomerUserCommand command, [FromRoute] Int32 id)
         {
             var response = actionResponseFactory.CreateInstance();
-            var userExists = authSystemService.CheckUserUUIDExists(command.UserUUID.GetValueOrDefault());
-            if (!userExists)
+            var userInfo = authGrpcClientService.GetUserInfo(command.UserUUID.GetValueOrDefault());
+            if (userInfo == null)
             {
                 response.AddInvalidErr("UserUUID");
             }

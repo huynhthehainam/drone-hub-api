@@ -33,6 +33,7 @@ public abstract class AuthorizedControllerTest<TProgram> : IClassFixture<CustomW
                 RoleID = 1,
                 Email = "test@mismart.ai",
                 Username = "test@mismart.ai",
+                UUID = Guid.Parse("c659bfae-428a-475c-9a25-77feb5536ed8")
             };
         }
 

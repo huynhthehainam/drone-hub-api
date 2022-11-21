@@ -1,22 +1,29 @@
 
 using MiSmart.API.Protos;
 using static MiSmart.API.Protos.AuthProtoService;
+using MiSmart.API.Settings;
 using System;
+using Microsoft.Extensions.Options;
 
 namespace MiSmart.API.GrpcServices
 {
     public class AuthGrpcClientService
     {
         private readonly AuthProtoServiceClient authProtoServiceClient;
-        public AuthGrpcClientService(AuthProtoServiceClient authProtoServiceClient)
+        private readonly InternalServiceSettings internalServiceSettings;
+        public AuthGrpcClientService(AuthProtoServiceClient authProtoServiceClient, IOptions<InternalServiceSettings> options)
         {
             this.authProtoServiceClient = authProtoServiceClient;
+            this.internalServiceSettings = options.Value;
         }
-        public UserProtoModel GetUserInfo(Int64 id)
+        public UserProtoModel? GetUserInfo(Guid uuid)
         {
-            GetUserInfoProtoRequest request = new GetUserInfoProtoRequest { Id = id };
+            GetUserInfoProtoRequest request = new GetUserInfoProtoRequest { SecretKey = internalServiceSettings.SecretKey, Uuid = uuid.ToString() };
             var resp = authProtoServiceClient.GetUserInfo(request);
-
+            if (resp.Id == 0)
+            {
+                return null;
+            }
             return resp;
 
         }
