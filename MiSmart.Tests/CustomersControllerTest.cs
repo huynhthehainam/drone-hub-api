@@ -75,9 +75,10 @@ public sealed class CustomersControllerTest : AuthorizedControllerTest<MiSmart.A
         }, options: JsonSerializerDefaultOptions.CamelOptions));
 
         // Assert
-        Assert.Equal(HttpStatusCode.Created, resp.StatusCode);
+
         CreateResponseTest<Int32>? createResponse = await resp.Content.ReadFromJsonAsync<CreateResponseTest<Int32>>(JsonSerializerDefaultOptions.CamelOptions);
 
+        Assert.Equal(HttpStatusCode.Created, resp.StatusCode);
         Assert.NotNull(createResponse);
         Assert.True(createResponse?.Data?.ID > 0);
     }
@@ -97,6 +98,7 @@ public sealed class CustomersControllerTest : AuthorizedControllerTest<MiSmart.A
         CreateResponseTest<Int64>? createResponse = await resp.Content.ReadFromJsonAsync<CreateResponseTest<Int64>>(JsonSerializerDefaultOptions.CamelOptions);
 
         // Assert
+        Assert.Equal(HttpStatusCode.Created, resp.StatusCode);
         Assert.NotNull(createResponse);
         Assert.NotEqual(0, createResponse?.Data?.ID);
     }

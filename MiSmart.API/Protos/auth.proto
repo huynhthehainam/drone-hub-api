@@ -8,21 +8,10 @@ service AuthProtoService{
     rpc GetUserInfo (GetUserInfoProtoRequest) returns (UserProtoModel);
     rpc GetProfileInfo (GetProfileProtoRequest) returns (UserProtoModel);
     rpc GetUserExistingInformation (GetUserExistingInformationRequest) returns (UserExistingInformationProtoModel);
-    rpc CreateUserByPhone(CreateUserByPhoneRequest) returns (CreateUserResponseModel);
 }
 
 message GetUserExistingInformationRequest {
     string encryptedUUID =1;
-}
-message CreateUserByPhoneRequest {
-    string phoneNumber =1;
-    string name =2;
-    int32 roleID =3;
-}
-
-message CreateUserResponseModel {
-    int64 id=1;
-    string uuid=2;
 }
 
 message UserExistingInformationProtoModel {
@@ -33,12 +22,15 @@ message UserExistingInformationProtoModel {
 
 
 message GetUserInfoProtoRequest {
-    int64 id =1;
+    string uuid =1;
+    string secretKey = 2;
 }
 
 message UserProtoModel {
     int64 id =1;
     string email = 2;
+    int32 roleID =3;
+    string uuid =4;
 }
 
 message GetProfileProtoRequest{

@@ -137,10 +137,10 @@ namespace MiSmart.API
             services.Configure<KeySettings>(Configuration.GetSection("KeySettings"));
             services.Configure<ExpiredTimeSettings>(Configuration.GetSection("ExpiredTimeSettings"));
             services.Configure<ConversionSettings>(Configuration.GetSection("ConversionSettings"));
-            services.Configure<AuthSystemSettings>(Configuration.GetSection("AuthSystemSettings"));
             services.Configure<FrontEndSettings>(Configuration.GetSection("FrontEndSettings"));
             services.Configure<FarmAppSettings>(Configuration.GetSection("FarmAppSettings"));
             services.Configure<RpanionSettings>(Configuration.GetSection("RpanionSettings"));
+            services.Configure<InternalServiceSettings>(Configuration.GetSection("InternalServiceSettings"));
             services.Configure<TargetEmailSettings>(Configuration.GetSection("TargetEmailSettings"));
 
             #endregion
@@ -153,7 +153,6 @@ namespace MiSmart.API
             services.AddScoped<MyEmailService, MyEmailService>();
             services.AddScoped<MyMinioService, MyMinioService>();
 
-            services.AddSingleton<AuthSystemService, AuthSystemService>();
 
             services.AddSingleton<CountingService, CountingService>();
 

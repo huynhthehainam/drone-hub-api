@@ -13,12 +13,13 @@ using MiSmart.DAL.ViewModels;
 using MiSmart.Infrastructure.Permissions;
 using MiSmart.API.Permissions;
 using System.Linq;
-using MiSmart.API.Services;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
 using MiSmart.API.Settings;
 using MiSmart.API.GrpcServices;
+using Microsoft.AspNetCore.Hosting;
+using MiSmart.Infrastructure.Extensions;
 
 namespace MiSmart.API.Controllers
 {
@@ -75,17 +76,21 @@ namespace MiSmart.API.Controllers
         [HttpPost("{id:int}/AssignUser")]
         [HasPermission(typeof(AdminPermission))]
         public async Task<IActionResult> AssignExecutionCompanyUser([FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository,
-     [FromServices] ExecutionCompanyRepository executionCompanyRepository, [FromServices] AuthSystemService authSystemService,
+     [FromServices] ExecutionCompanyRepository executionCompanyRepository, [FromServices] AuthGrpcClientService authGrpcClientService,
+     [FromServices] IWebHostEnvironment env,
       [FromBody] AssigningExecutionCompanyUserCommand command, [FromRoute] Int32 id)
         {
             var response = actionResponseFactory.CreateInstance();
-            var userExists = authSystemService.CheckUserUUIDExists(command.UserUUID.GetValueOrDefault());
-            if (!userExists)
+            if (!env.IsTesting())
             {
-                response.AddInvalidErr("UserUUID");
-                return response.ToIActionResult();
-            }
+                var userInfo = authGrpcClientService.GetUserInfo(command.UserUUID.GetValueOrDefault());
+                if (userInfo == null)
+                {
+                    response.AddInvalidErr("UserUUID");
+                    return response.ToIActionResult();
+                }
 
+            }
             var executionCompany = await executionCompanyRepository.GetAsync(ww => ww.ID == id);
             if (executionCompany is null)
             {
