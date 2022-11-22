@@ -1,4 +1,5 @@
 using System;
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using MiSmart.Infrastructure.Data;
 
@@ -34,5 +35,6 @@ namespace MiSmart.DAL.Models
         public Double AccelX { get; set; }
         public Double AccelY { get; set; }
         public Double AccelZ { get; set; }
+        public JsonDocument? Error { get; set; }
     }
 }
