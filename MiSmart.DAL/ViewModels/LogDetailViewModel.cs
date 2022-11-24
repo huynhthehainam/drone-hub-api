@@ -1,4 +1,5 @@
 using System;
+using System.Text.Json;
 using MiSmart.DAL.Models;
 using MiSmart.Infrastructure.ViewModels;
 
@@ -23,6 +24,7 @@ namespace MiSmart.DAL.ViewModels
         public Double AccelZ { get; set; }
         public String? Location { get; set; }
         public String? PartnerCompanyName { get; set; }
+        public JsonDocument? Error {get; set;}
         public void LoadFrom(LogDetail entity)
         {
             LogFileID = entity.LogFileID;
@@ -42,6 +44,7 @@ namespace MiSmart.DAL.ViewModels
             AccelZ = entity.AccelZ;
             Location = entity.Location;
             PartnerCompanyName = entity.LogFile?.Device?.ExecutionCompany?.Name;
+            Error = entity.Error;
         }
     }
     public class LargeLogDetailViewModel : IViewModel<LogDetail>
@@ -68,6 +71,7 @@ namespace MiSmart.DAL.ViewModels
         public LogStatus? LogStatus { get; set; }
         public Boolean IsAnalyzed { get; set; }
         public String? PartnerCompanyName { get; set; }
+        public JsonDocument? Error {get; set;}
         public void LoadFrom(LogDetail entity)
         {
             LogFileID = entity.LogFileID;
@@ -92,6 +96,7 @@ namespace MiSmart.DAL.ViewModels
             LogStatus = entity.LogFile?.Status;
             IsAnalyzed = entity.LogFile?.IsAnalyzed ?? false;
             PartnerCompanyName = entity.LogFile?.Device?.ExecutionCompany?.Name;
+            Error = entity.Error;
         }
     }
 }
