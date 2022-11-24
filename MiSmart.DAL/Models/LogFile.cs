@@ -75,5 +75,10 @@ namespace MiSmart.DAL.Models
             get => lazyLoader.Load(this, ref secondLogReport);
             set => secondLogReport = value;
         }
+
+
+        public Double? DroneLogAnalyzingTaskID { get; set; }
+        public DateTime? AnalyzingTime { get; set; }
+
     }
 }

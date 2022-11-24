@@ -268,6 +268,11 @@ namespace MiSmart.API
                 o.CronExpression = "*/20 * * * * *";
                 o.TimeZoneInfo = TimeZoneInfo.Utc;
             });
+            services.AddCronJob<GetResultLogDetail>(o =>
+            {
+                o.CronExpression = "*/10 * * * * *";
+                o.TimeZoneInfo = TimeZoneInfo.Utc;
+            });
             services.AddCronJob<UpdatingLogBingLocation>(o =>
             {
                 o.CronExpression = "*/20 * * * * *";

@@ -169,10 +169,6 @@ namespace MiSmart.API.Controllers
                 actionResponse.AddNotFoundErr("LogFile");
                 return actionResponse.ToIActionResult();
             }
-            if (!logFile.IsAnalyzed)
-            {
-                actionResponse.AddNotFoundErr("LogDetail");
-            }
             var logDetail = await logDetailRepository.GetAsync(ww => ww.LogFileID == id);
             if (logDetail is null)
             {
@@ -1319,7 +1315,7 @@ namespace MiSmart.API.Controllers
         }
 
         [HttpPost("{id:Guid}/UpdateImageUrlsResult")]
-    
+
         public async Task<IActionResult> UpdateImageUrlsResult([FromRoute] Guid id, [FromServices] LogReportResultRepository logReportResultRepository,
         [FromServices] MyEmailService emailService, [FromBody] UpdateImageUrlsCommand command, [FromServices] MyMinioService minioService)
         {
