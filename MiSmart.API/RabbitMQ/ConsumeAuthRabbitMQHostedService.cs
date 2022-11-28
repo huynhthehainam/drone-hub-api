@@ -13,7 +13,6 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Linq;
 using MiSmart.Infrastructure.Constants;
 using MiSmart.Infrastructure.Minio;
-using System.Collections.Generic;
 
 namespace MiSmart.API.RabbitMQ
 {
@@ -74,7 +73,7 @@ namespace MiSmart.API.RabbitMQ
             return Task.CompletedTask;
         }
 
-        private async void HandleMessage(String content)
+        private void HandleMessage(String content)
         {
             try
             {
