@@ -18,9 +18,9 @@ namespace MiSmart.API.ScheduledTasks
         public Double Longitude { get; set; }
         public Double Latitude { get; set; }
 
-        public double X => Longitude;
+        public Double X => Longitude;
 
-        public double Y => Latitude;
+        public Double Y => Latitude;
 
 
     }
