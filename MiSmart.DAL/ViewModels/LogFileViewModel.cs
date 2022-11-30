@@ -20,6 +20,7 @@ namespace MiSmart.DAL.ViewModels
         public JsonDocument? Detail { get; set; }
         public Boolean isAnalyzed { get; set; }
         public String? Location { get; set; }
+        public Int32 FlightID {get; set;}
         public void LoadFrom(LogFile entity)
         {
             ID = entity.ID;
@@ -51,6 +52,7 @@ namespace MiSmart.DAL.ViewModels
                 }
 
             }
+            FlightID = entity.FlightID;
         }
     }
 }
