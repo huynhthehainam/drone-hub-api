@@ -151,7 +151,7 @@ namespace MiSmart.API.ScheduledTasks
                         if (response.IsSuccessStatusCode)
                         {
                             String responseString = response.Content.ReadAsStringAsync().Result;
-                            Console.WriteLine($"get log result detail: {responseString}");
+                            Console.WriteLine($"get log result detail: {log.ID} {responseString}");
                             DroneLogAPIResponse? droneLogAPIResponse = JsonSerializer.Deserialize<DroneLogAPIResponse>(responseString, JsonSerializerDefaultOptions.CamelOptions);
                             if (droneLogAPIResponse != null && droneLogAPIResponse.Message == null)
                             {
