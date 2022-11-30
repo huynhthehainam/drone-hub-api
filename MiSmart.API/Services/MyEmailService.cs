@@ -110,7 +110,7 @@ public class MyEmailService : EmailService
     {
         var tableData = "";
         TimeZoneInfo seaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
-        for (int i = 0; i < listStat.Count; i++)
+        for (Int32 i = 0; i < listStat.Count; i++)
         {
             var flightStat = listStat[i];
             var row = GetHTML("LowBatteryRow");
@@ -162,7 +162,7 @@ public class MyEmailService : EmailService
                     byte[] imageBytes = m.ToArray();
 
                     // Convert byte[] to Base64 String
-                    string base64String = Convert.ToBase64String(imageBytes);
+                    String base64String = Convert.ToBase64String(imageBytes);
                     return base64String;
                 }
             }
@@ -271,7 +271,7 @@ public class MyEmailService : EmailService
         {
             var listError = logResult.LogResultDetails.ToArray();
             var tableData = "";
-            for (int i = 0; i < listError.Count(); i++)
+            for (Int32 i = 0; i < listError.Count(); i++)
             {
                 var error = listError[i];
                 if (error.PartError != null)

@@ -79,6 +79,7 @@ namespace MiSmart.DAL.Models
 
         public Double? DroneLogAnalyzingTaskID { get; set; }
         public DateTime? AnalyzingTime { get; set; }
+        public Int32 FlightID { get; set; }
 
     }
 }

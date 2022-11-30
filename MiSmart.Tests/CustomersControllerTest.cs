@@ -66,8 +66,8 @@ public sealed class CustomersControllerTest : AuthorizedControllerTest<MiSmart.A
         var client = CreateAuthorizedClient();
 
         // Act
-        int randIndex1 = rand.Next(0, Names.Length - 1);
-        int randIndex2 = rand.Next(0, Names.Length - 1);
+        Int32 randIndex1 = rand.Next(0, Names.Length - 1);
+        Int32 randIndex2 = rand.Next(0, Names.Length - 1);
         var resp = await client.PostAsync("/customers", JsonContent.Create(new
         {
             Name = $"{Names[randIndex1]} {Names[randIndex2]}",
@@ -108,7 +108,7 @@ public sealed class CustomersControllerTest : AuthorizedControllerTest<MiSmart.A
     {
         var client = CreateAuthorizedClient();
 
-        int randIndex1 = rand.Next(0, Names.Length - 1);
+        Int32 randIndex1 = rand.Next(0, Names.Length - 1);
         var resp = await client.PatchAsync($"customers/{testingCustomerID}", JsonContent.Create(new { Name = $"updated_${Names[randIndex1]}" }, options: JsonSerializerDefaultOptions.CamelOptions));
         UpdatedResponseTest? updatedResponse = await resp.Content.ReadFromJsonAsync<UpdatedResponseTest>(JsonSerializerDefaultOptions.CamelOptions);
         Assert.Equal(HttpStatusCode.OK, resp.StatusCode);

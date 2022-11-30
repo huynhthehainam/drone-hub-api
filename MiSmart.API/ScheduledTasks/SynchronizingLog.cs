@@ -31,6 +31,7 @@ namespace MiSmart.API.ScheduledTasks
                 using (DatabaseContext databaseContext = scope.ServiceProvider.GetRequiredService<DatabaseContext>())
                 {
                     PrivateKeyFile keyFile = new PrivateKeyFile("svgh-mismart.pem");
+                    Console.WriteLine($"Start download file {DateTime.UtcNow.ToString()}");
                     using (SftpClient client = new SftpClient("ec2-13-212-215-73.ap-southeast-1.compute.amazonaws.com", "ubuntu", new[] { keyFile }))
                     {
                         client.Connect();
@@ -53,6 +54,7 @@ namespace MiSmart.API.ScheduledTasks
                                             var existedDBLogFile = databaseContext.LogFiles.Where(ww => ww.FileName == logFile.Name && ww.DeviceID == device.ID).FirstOrDefault();
                                             if (existedDBLogFile is null)
                                             {
+                                                var order = Convert.ToInt32(m.Groups["order"].ToString());
                                                 var year = Convert.ToInt32(m.Groups["year"].ToString());
                                                 var month = Convert.ToInt32(m.Groups["month"].ToString());
                                                 var day = Convert.ToInt32(m.Groups["day"].ToString());
@@ -69,7 +71,7 @@ namespace MiSmart.API.ScheduledTasks
                                                     client.DownloadFile(logPath, ms);
                                                     Console.WriteLine($"Download file: {logPath}");
                                                     var byteArr = ms.ToArray();
-                                                    var dbLogFile = new LogFile() { DeviceID = device.ID, FileBytes = byteArr, LoggingTime = utcTime, FileName = logFile.Name};
+                                                    var dbLogFile = new LogFile() { DeviceID = device.ID, FileBytes = byteArr, LoggingTime = utcTime, FileName = logFile.Name, FlightID = order };
                                                     databaseContext.LogFiles.Add(dbLogFile);
                                                     databaseContext.SaveChanges();
                                                 }
