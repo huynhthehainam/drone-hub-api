@@ -1254,7 +1254,7 @@ namespace MiSmart.API.Controllers
         [HttpPost("{id:Guid}/AnalystError")]
         [HasPermission(typeof(AdminPermission))]
         public async Task<IActionResult> AnalystError([FromRoute] Guid id, [FromServices] LogReportResultRepository logReportResultRepository,
-        [FromServices] MyEmailService emailService, [FromBody] AddingLogErrorCommand command)
+        [FromServices] MyEmailService emailService, [FromBody] AddingLogErrorCommand command, [FromServices] LogFileRepository logFileRepository)
         {
             ActionResponse actionResponse = actionResponseFactory.CreateInstance();
             var result = await logReportResultRepository.GetAsync(ww => ww.LogFileID == id);
@@ -1268,6 +1268,15 @@ namespace MiSmart.API.Controllers
                 actionResponse.AddInvalidErr("LogStatus");
                 return actionResponse.ToIActionResult();
             }
+
+            var logFile = await logFileRepository.GetAsync(ww => ww.ID == result.LogFileID);
+            if (logFile is null)
+            {
+                actionResponse.AddNotFoundErr("LogFile");
+                return actionResponse.ToIActionResult();
+            }
+            logFile.Status = LogStatus.SecondWarning;
+            await logFileRepository.UpdateAsync(logFile);
             TimeZoneInfo seaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
             if (result.AnalystName != null && result.LogFile?.LoggingTime != null)
                 await emailService.SendMailAsync(new String[] { result.AnalystName }, new String[] { }, new String[] { }, @$"[Báo cáo cần chỉnh sửa] Mã hiệu drone ({result.LogFile?.Device?.Name ?? ""})",
