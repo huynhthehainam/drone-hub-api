@@ -367,35 +367,13 @@ namespace MiSmart.API.Controllers
                             }
                             if (item.FlywayPoints.Count < 2)
                             {
-                                if (item.TaskArea.GetValueOrDefault() < 0)
-                                {
-                                    await emailService.SendMailAsync(new String[] { "huynhthehainam@gmail.com" }, new String[] { }, new String[] { }, "Report flight stat", @$"
-                                task area: {item.TaskArea},
-                                sprayedIndexes: {item.SprayedIndexes.Count()}
-                                flywayPoints: {item.FlywayPoints.Count()}
-                                device: {device.Name}
-                                flightDuration: {item.FlightDuration.GetValueOrDefault()}
-                                flightTime: {item.FlightTime}
-                                offline
-                            ");
-                                }
+
                                 continue;
                             }
                             var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
                             if (item.SprayedIndexes.Count > 0 && item.TaskArea.GetValueOrDefault() <= 0)
                             {
-                                if (item.TaskArea.GetValueOrDefault() < 0)
-                                {
-                                    await emailService.SendMailAsync(new String[] { "huynhthehainam@gmail.com" }, new String[] { }, new String[] { }, "Report flight stat", @$"
-                                task area: {item.TaskArea},
-                                sprayedIndexes: {item.SprayedIndexes.Count()}
-                                flywayPoints: {item.FlywayPoints.Count()}
-                                device: {device.Name}
-                                flightDuration: {item.FlightDuration.GetValueOrDefault()}
-                                flightTime: {item.FlightTime}
-                                offline
-                            ");
-                                }
+
                                 var taskArea = 0.0;
                                 for (var i = 0; i < item.FlywayPoints.Count - 1; i++)
                                 {
@@ -774,33 +752,14 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
             if (command.FlywayPoints.Count < 2)
             {
                 response.SetMessage("Invalid");
-                await emailService.SendMailAsync(new String[] { "huynhthehainam@gmail.com" }, new String[] { }, new String[] { }, "Report flight stat", @$"
-                                task area: {command.TaskArea},
-                                sprayedIndexes: {command.SprayedIndexes.Count()}
-                                device: {device.Name}
-                                flightDuration: {command.FlightDuration.GetValueOrDefault()}
-                                flywayPoints: {command.FlywayPoints.Count()}
-                                flightTime: {command.FlightTime}
-                                online
-                            ");
+
                 return response.ToIActionResult();
             }
 
             var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
             if (command.SprayedIndexes.Count > 0 && command.TaskArea.GetValueOrDefault() <= 0)
             {
-                if (command.TaskArea.GetValueOrDefault() < 0)
-                {
-                    await emailService.SendMailAsync(new String[] { "huynhthehainam@gmail.com" }, new String[] { }, new String[] { }, "Report flight stat", @$"
-                                task area: {command.TaskArea},
-                                sprayedIndexes: {command.SprayedIndexes.Count()}
-                                device: {device.Name}
-                                flightDuration: {command.FlightDuration.GetValueOrDefault()}
-                                flywayPoints: {command.FlywayPoints.Count()}
-                                flightTime: {command.FlightTime}
-                                online
-                            ");
-                }
+
                 var taskArea = 0.0;
                 for (var i = 0; i < command.FlywayPoints.Count - 1; i++)
                 {
@@ -837,12 +796,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
             }
             else if (command.TaskArea.GetValueOrDefault() < 0)
             {
-                await emailService.SendMailAsync(new String[] { "huynhthehainam@gmail.com" }, new String[] { }, new String[] { }, "Report flight stat", @$"
-                                task area: {command.TaskArea},
-                                sprayedIndexes: {command.SprayedIndexes.ToString()}
-                                device: {device.Name}
-                                flightDuration: {command.FlightDuration.GetValueOrDefault()}
-                            ");
+
             }
 
 
