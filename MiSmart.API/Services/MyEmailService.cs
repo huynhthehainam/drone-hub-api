@@ -207,7 +207,7 @@ public class MyEmailService : EmailService
             htmlStringBuilder.Replace("reporter_name", logReport.Username);
             htmlStringBuilder.Replace("drone_id", logReport.LogFile?.Device?.Name ?? "Không có thông tin");
             htmlStringBuilder.Replace("flight_location", logReport.LogFile?.LogDetail?.Location ?? "Không có thông tin");
-            htmlStringBuilder.Replace("accident_time", TimeZoneInfo.ConvertTimeFromUtc(logReport.AccidentTime, seaTimeZone).ToString("dd/MM/yyyy HH:mm:ss AA"));
+            htmlStringBuilder.Replace("accident_time", TimeZoneInfo.ConvertTimeFromUtc(logReport.AccidentTime, seaTimeZone).ToString("dd/MM/yyyy HH:mm:ss a"));
             htmlStringBuilder.Replace("pilot_name", logReport.PilotName);
             htmlStringBuilder.Replace("partner_company", logReport.LogFile?.Device?.ExecutionCompany?.Name ?? "Không có thông tin");
             htmlStringBuilder.Replace("pilot_description", logReport.PilotDescription);
