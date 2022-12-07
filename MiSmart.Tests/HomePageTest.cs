@@ -29,13 +29,13 @@ public class HomePageTest : IClassFixture<CustomWebApplicationFactory<MiSmart.AP
         var root = jsonDocument.RootElement;
 
         var data = root.GetProperty("data");
-        var allowedVersions = data.GetProperty("allowedVersions").EnumerateArray();
+     
         var env = data.GetProperty("env").GetString();
 
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, resp.StatusCode);
-        Assert.NotEmpty(allowedVersions);
+       
         Assert.Equal("Testing", env);
     }
 }

@@ -361,10 +361,7 @@ namespace MiSmart.API.Controllers
                         {
                             device.LastOnline = DateTime.UtcNow;
                             await deviceRepository.UpdateAsync(device);
-                            if (!Constants.AllowedVersions.Contains(item.GCSVersion ?? ""))
-                            {
-                                continue;
-                            }
+                          
                             if (item.FlywayPoints.Count < 2)
                             {
 
@@ -745,11 +742,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
             }
             device.LastOnline = DateTime.UtcNow;
             await deviceRepository.UpdateAsync(device);
-            if (!Constants.AllowedVersions.Contains(command.GCSVersion ?? ""))
-            {
-                response.SetMessage("Invalid");
-                return response.ToIActionResult();
-            }
+           
             if (command.FlywayPoints.Count < 2)
             {
                 response.SetMessage("Invalid");
