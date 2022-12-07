@@ -248,17 +248,19 @@ namespace MiSmart.API.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> GetListFromTM([FromQuery] PageCommand pageCommand,
         [FromServices] CustomerRepository customerRepository, [FromQuery] String? search, [FromQuery] String? secretKey,
-        [FromServices] AuthGrpcClientService authGrpcClientService, [FromServices] IOptions<FarmAppSettings> options)
+        [FromServices] AuthGrpcClientService authGrpcClientService, [FromServices] IOptions<FarmAppSettings> options,
+        [FromQuery] Int32? customerID)
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
-            Expression<Func<Customer, Boolean>> query = ww => (!String.IsNullOrWhiteSpace(search) ? ((ww.Name ?? "").ToLower().Contains(search.ToLower()) || (ww.Address ?? "").ToLower().Contains(search.ToLower())) : true);
+            Expression<Func<Customer, Boolean>> query = ww => (!String.IsNullOrWhiteSpace(search) ? ((ww.Name ?? "").ToLower().Contains(search.ToLower()) || (ww.Address ?? "").ToLower().Contains(search.ToLower())) : true)
+                                                && (customerID.HasValue ? ww.ID == customerID : true);
             var settings = options.Value;
             if (secretKey != settings.SecretKey)
             {
                 response.AddAuthorizationErr();
                 return response.ToIActionResult();
             }
-            var listResponse = await customerRepository.GetListResponseViewAsync<SmallCustomerViewModel>(pageCommand, query);
+            var listResponse = await customerRepository.GetListResponseViewAsync<LargeCustomerViewModel>(pageCommand, query);
             listResponse.SetResponse(response);
 
             return response.ToIActionResult();
