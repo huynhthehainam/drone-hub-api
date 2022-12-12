@@ -1281,7 +1281,7 @@ namespace MiSmart.API.Controllers
                 actionResponse.AddNotFoundErr("LogFile");
                 return actionResponse.ToIActionResult();
             }
-            logFile.Status = LogStatus.SecondWarning;
+            logFile.Status = LogStatus.Completed;
             await logFileRepository.UpdateAsync(logFile);
             TimeZoneInfo seaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
             if (result.AnalystName != null && result.LogFile?.LoggingTime != null)
