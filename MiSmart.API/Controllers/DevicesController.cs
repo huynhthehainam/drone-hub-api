@@ -361,10 +361,7 @@ namespace MiSmart.API.Controllers
                         {
                             device.LastOnline = DateTime.UtcNow;
                             await deviceRepository.UpdateAsync(device);
-                            if (!Constants.AllowedVersions.Contains(item.GCSVersion ?? ""))
-                            {
-                                continue;
-                            }
+                          
                             if (item.FlywayPoints.Count < 2)
                             {
 
@@ -603,26 +600,27 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
                 return response.ToIActionResult();
             }
 
-            if (device.ID == 8)
+            if (device.Token == "nm2V9PJV2N98eVfmMLc6FjuPnLO5Tzup")
             {
                 countingService.Count2 += 1;
             }
-            else if (device.ID == 28)
+            else if (device.Token == "hOtsjwDbWgPKoZaeoEPkB0R84SbEY11L")
             {
                 countingService.Count3 += 1;
             }
-            else if (device.ID == 29)
+            else if (device.Token == "br76dNUtk4jLb0YLNFVj7l77rM9NK1W8")
             {
                 countingService.Count4 += 1;
             }
-            else if (device.ID == 42)
+            else if (device.Token == "oFLDJj5Rkc9kaP5c6lbAbWSOAKuhQzw5")
             {
                 countingService.Count5 += 1;
             }
-            else if (device.ID == 43)
+            else if (device.Token == "br76dNUtk4jLb0YLNFVj7lO0rM9NK1W5")
             {
                 countingService.Count6 += 1;
             }
+
 
 
             var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
@@ -744,11 +742,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
             }
             device.LastOnline = DateTime.UtcNow;
             await deviceRepository.UpdateAsync(device);
-            if (!Constants.AllowedVersions.Contains(command.GCSVersion ?? ""))
-            {
-                response.SetMessage("Invalid");
-                return response.ToIActionResult();
-            }
+           
             if (command.FlywayPoints.Count < 2)
             {
                 response.SetMessage("Invalid");

@@ -24,7 +24,6 @@ namespace MiSmart.API.Controllers
                 Env = webHostEnvironment.EnvironmentName,
                 Service = "App Sync",
                 Description = "MiSmart is the best drone company in VN",
-                AllowedVersions = Constants.AllowedVersions,
                 Count = countingService.Count,
                 Count2 = countingService.Count2,
                 Count3 = countingService.Count3,
