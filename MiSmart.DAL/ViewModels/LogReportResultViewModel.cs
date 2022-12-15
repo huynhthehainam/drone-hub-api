@@ -1,16 +1,23 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using MiSmart.DAL.Models;
 using MiSmart.Infrastructure.ViewModels;
 
 namespace MiSmart.DAL.ViewModels
 {
-    public class LogResultDetailViewModel
+    public class LogResultDetailViewModel : IViewModel<LogResultDetail>
     {
         public Int64 PartErrorID { get; set; }
         public String? Detail { get; set; }
         public StatusError Status { get; set; }
         public String? Resolve { get; set; }
+        public void LoadFrom(LogResultDetail entity){
+            PartErrorID = entity.PartErrorID;
+            Detail = entity.Detail;
+            Status = entity.Status;
+            Resolve = entity.Resolve;
+        }
     }
     public class LogReportResultViewModel : IViewModel<LogReportResult>
     {
@@ -33,19 +40,7 @@ namespace MiSmart.DAL.ViewModels
             DetailAnalysis = entity.DetailedAnalysis;
             AnalystUUID = entity.AnalystUUID;
             ApproverUUID = entity.ApproverUUID;
-            ListErrors = new List<LogResultDetailViewModel>();
-            if (entity.LogResultDetails != null)
-                foreach (var error in entity.LogResultDetails)
-                {
-                    LogResultDetailViewModel detail = new LogResultDetailViewModel
-                    {
-                        Detail = error.Detail,
-                        PartErrorID = error.PartErrorID,
-                        Status = error.Status,
-                        Resolve = error.Resolve,
-                    };
-                    ListErrors.Add(detail);
-                }
+            ListErrors = entity.LogResultDetails?.Select(ww => ViewModelHelpers.ConvertToViewModel<LogResultDetail, LogResultDetailViewModel>(ww)).OrderBy(ww => ww.PartErrorID).ToList();
             ResponsibleCompany = entity.ResponsibleCompany;
             Token = entity.Token;
         }

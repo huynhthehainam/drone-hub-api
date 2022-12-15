@@ -269,7 +269,7 @@ public class MyEmailService : EmailService
         }
         if (logResult.LogResultDetails != null)
         {
-            var listError = logResult.LogResultDetails.ToArray();
+            var listError = logResult.LogResultDetails.OrderBy(ww => ww.PartErrorID).ToArray();
             var tableData = "";
             for (Int32 i = 0; i < listError.Count(); i++)
             {

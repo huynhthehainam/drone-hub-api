@@ -52,11 +52,5 @@ namespace MiSmart.DAL.Models
             get => lazyLoader.Load(this, ref customerUsers);
             set => customerUsers = value;
         }
-
-
-
     }
-
-
-
 }
