@@ -40,6 +40,7 @@ namespace MiSmart.API.Controllers
         [FromQuery] Int32? PartErrorID,
         [FromQuery] DateTime? from,
         [FromQuery] DateTime? to,
+        [FromQuery] String? flightID,
         [FromQuery] Boolean isUnstable = false,
         [FromQuery] String? relation = "Maintainer")
         {
@@ -58,7 +59,8 @@ namespace MiSmart.API.Controllers
                             && (isUnstable == true ? (ww.DroneStatus != DroneStatus.Stable) : true)
                                 && (PartErrorID.HasValue ? ((ww.LogReportResult != null && ww.LogReportResult.LogResultDetails != null) ? ww.LogReportResult.LogResultDetails.Any(ww => ww.PartErrorID == PartErrorID.Value && ww.Status == StatusError.Bad) : false) : true)
                                 && (from.HasValue ? (ww.LoggingTime >= from.Value) : true)
-                                && (to.HasValue ? (ww.LoggingTime <= to.Value) : true);
+                                && (to.HasValue ? (ww.LoggingTime <= to.Value) : true)
+                                && (!String.IsNullOrWhiteSpace(flightID) ? (ww.FlightID.ToString().Contains(flightID)) : true);
             }
             else if (relation == "Administrator")
             {
@@ -71,7 +73,8 @@ namespace MiSmart.API.Controllers
                                 && (isUnstable == true ? (ww.DroneStatus != DroneStatus.Stable) : true)
                                     && (PartErrorID.HasValue ? ((ww.LogReportResult != null && ww.LogReportResult.LogResultDetails != null) ? ww.LogReportResult.LogResultDetails.Any(ww => ww.PartErrorID == PartErrorID.Value && ww.Status == StatusError.Bad) : false) : true)
                                     && (from.HasValue ? (ww.LoggingTime >= from.Value) : true)
-                                    && (to.HasValue ? (ww.LoggingTime <= to.Value) : true);
+                                    && (to.HasValue ? (ww.LoggingTime <= to.Value) : true)
+                                    && (!String.IsNullOrWhiteSpace(flightID) ? (ww.FlightID.ToString().Contains(flightID)) : true);
             }
             else if (relation == "LogAnalyst")
             {
@@ -85,7 +88,8 @@ namespace MiSmart.API.Controllers
                                 && (ww.Status == LogStatus.Warning || ww.Status == LogStatus.SecondWarning || ww.Status == LogStatus.Completed || ww.Status == LogStatus.Approved)
                                     && (PartErrorID.HasValue ? ((ww.LogReportResult != null && ww.LogReportResult.LogResultDetails != null) ? ww.LogReportResult.LogResultDetails.Any(ww => ww.PartErrorID == PartErrorID.Value && ww.Status == StatusError.Bad) : false) : true)
                                     && (from.HasValue ? (ww.LoggingTime >= from.Value) : true)
-                                    && (to.HasValue ? (ww.LoggingTime <= to.Value) : true);
+                                    && (to.HasValue ? (ww.LoggingTime <= to.Value) : true)
+                                    && (!String.IsNullOrWhiteSpace(flightID) ? (ww.FlightID.ToString().Contains(flightID)) : true);
             }
 
             var listResponse = await logFileRepository.GetListResponseViewAsync<LogFileViewModel>(pageCommand, query, ww => ww.LoggingTime, false);
