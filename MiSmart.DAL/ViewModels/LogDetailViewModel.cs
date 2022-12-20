@@ -72,6 +72,7 @@ namespace MiSmart.DAL.ViewModels
         public Boolean IsAnalyzed { get; set; }
         public String? PartnerCompanyName { get; set; }
         public JsonDocument? Error {get; set;}
+        public Int32 FlightID {get; set;}
         public void LoadFrom(LogDetail entity)
         {
             LogFileID = entity.LogFileID;
@@ -97,6 +98,7 @@ namespace MiSmart.DAL.ViewModels
             IsAnalyzed = entity.LogFile?.IsAnalyzed ?? false;
             PartnerCompanyName = entity.LogFile?.Device?.ExecutionCompany?.Name;
             Error = entity.Error;
+            FlightID = entity.LogFile?.FlightID ?? -1;
         }
     }
 }
