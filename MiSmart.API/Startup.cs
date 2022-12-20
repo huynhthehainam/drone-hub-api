@@ -233,18 +233,18 @@ namespace MiSmart.API
 
             services.AddCronJob<RemovingOldRecordsTask>(o =>
             {
-                o.CronExpression = "* */30 * * * *";
+                o.CronExpression = "0 */30 * * * *";
                 o.TimeZoneInfo = TimeZoneInfo.Utc;
             });
 
             services.AddCronJob<UpdatingTaskBingLocation>(o =>
             {
-                o.CronExpression = "*/10 * * * * *";
+                o.CronExpression = "10 * * * * *";
                 o.TimeZoneInfo = TimeZoneInfo.Utc;
             });
             services.AddCronJob<UpdatingFlightStatBoundary>(o =>
             {
-                o.CronExpression = "*/30 * * * * *";
+                o.CronExpression = "30 * * * * *";
                 o.TimeZoneInfo = TimeZoneInfo.Utc;
             });
 
@@ -255,7 +255,7 @@ namespace MiSmart.API
             });
             services.AddCronJob<SynchronizingLog>(o =>
             {
-                o.CronExpression = "*/20 * * * * *";
+                o.CronExpression = "20 * * * * *";
                 o.TimeZoneInfo = TimeZoneInfo.Utc;
             });
             services.AddCronJob<RemovingTimeOutToken>(o =>
@@ -265,17 +265,17 @@ namespace MiSmart.API
             });
             services.AddCronJob<UpdatingLogDetail>(o =>
             {
-                o.CronExpression = "*/20 * * * * *";
+                o.CronExpression = "25 * * * * *";
                 o.TimeZoneInfo = TimeZoneInfo.Utc;
             });
             services.AddCronJob<GetResultLogDetail>(o =>
             {
-                o.CronExpression = "*/10 * * * * *";
+                o.CronExpression = "15 * * * * *";
                 o.TimeZoneInfo = TimeZoneInfo.Utc;
             });
             services.AddCronJob<UpdatingLogBingLocation>(o =>
             {
-                o.CronExpression = "*/20 * * * * *";
+                o.CronExpression = "35 * * * * *";
                 o.TimeZoneInfo = TimeZoneInfo.Utc;
             });
 
