@@ -31,6 +31,7 @@ namespace MiSmart.DAL.ViewModels
         public String? DetailAnalysis { get; set; }
         public ResponsibleCompany ResponsibleCompany { get; set; }
         public String? Token { get; set; }
+        public DateTime UpdatedTime { get; set; }
         public void LoadFrom(LogReportResult entity)
         {
             LogFileID = entity.LogFileID;
@@ -43,6 +44,7 @@ namespace MiSmart.DAL.ViewModels
             ListErrors = entity.LogResultDetails?.Select(ww => ViewModelHelpers.ConvertToViewModel<LogResultDetail, LogResultDetailViewModel>(ww)).OrderBy(ww => ww.PartErrorID).ToList();
             ResponsibleCompany = entity.ResponsibleCompany;
             Token = entity.Token;
+            UpdatedTime = entity.UpdatedTime;
         }
     }
 }
