@@ -465,6 +465,7 @@ namespace MiSmart.API.Controllers
             logResult.AnalystName = CurrentUser.Email;
             logResult.Suggest = command.Suggest;
             logResult.Conclusion = command.Conclusion;
+            logResult.UpdatedTime = DateTime.UtcNow;
 
             TimeZoneInfo seaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
             if (logResult.LogFile is not null && logResult.LogFile.Device is not null)
@@ -704,6 +705,7 @@ namespace MiSmart.API.Controllers
             if ((DateTime.UtcNow - resToken.CreateTime).TotalHours > Constants.LogReportTokenDurationHours)
             {
                 response.AddExpiredErr("Token");
+                return response.ToIActionResult();
             }
             var logDetail = await logDetailRepository.GetAsync(ww => ww.LogFileID == resToken.LogFileID);
             if (logDetail is null)
@@ -714,6 +716,33 @@ namespace MiSmart.API.Controllers
             response.SetData(ViewModelHelpers.ConvertToViewModel<LogDetail, LargeLogDetailViewModel>(logDetail));
             return response.ToIActionResult();
         }
+
+        [HttpGet("LogFileInformationForEmail")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetLogFileInformationForEmail([FromServices] LogFileRepository logFileRepository, [FromServices] LogTokenRepository logTokenRepository, [FromQuery] String? token)
+        {
+            ActionResponse response = actionResponseFactory.CreateInstance();
+            var resToken = await logTokenRepository.GetAsync(ww => String.Equals(ww.Token, token));
+            if (resToken is null)
+            {
+                response.AddNotFoundErr("Token");
+                return response.ToIActionResult();
+            }
+            if ((DateTime.UtcNow - resToken.CreateTime).TotalHours > Constants.LogReportTokenDurationHours)
+            {
+                response.AddExpiredErr("Token");
+                return response.ToIActionResult();
+            }
+            var logFile = await logFileRepository.GetAsync(ww => ww.ID == resToken.LogFileID);
+            if (logFile is null)
+            {
+                response.AddNotFoundErr("LogDetail");
+                return response.ToIActionResult();
+            }
+            response.SetData(ViewModelHelpers.ConvertToViewModel<LogFile, LogFileViewModel>(logFile));
+            return response.ToIActionResult();
+        }
+
         [HttpPost("{id:Guid}/SendEmailErrors")]
         public async Task<IActionResult> SendEmailErrors([FromRoute] Guid id, [FromBody] AddingLogErrorCommand command, [FromServices] LogFileRepository logFileRepository,
         [FromServices] MyEmailService emailService, [FromServices] IOptions<TargetEmailSettings> options,
