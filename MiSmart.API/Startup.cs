@@ -231,11 +231,11 @@ namespace MiSmart.API
 
             #region AddingCronJobs
 
-            services.AddCronJob<RemovingOldRecordsTask>(o =>
-            {
-                o.CronExpression = "* */30 * * * *";
-                o.TimeZoneInfo = TimeZoneInfo.Utc;
-            });
+            // services.AddCronJob<RemovingOldRecordsTask>(o =>
+            // {
+            //     o.CronExpression = "* */30 * * * *";
+            //     o.TimeZoneInfo = TimeZoneInfo.Utc;
+            // });
 
             services.AddCronJob<UpdatingTaskBingLocation>(o =>
             {
