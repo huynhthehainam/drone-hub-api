@@ -465,6 +465,7 @@ namespace MiSmart.API.Controllers
             logResult.AnalystName = CurrentUser.Email;
             logResult.Suggest = command.Suggest;
             logResult.Conclusion = command.Conclusion;
+            logResult.UpdatedTime = DateTime.UtcNow;
 
             TimeZoneInfo seaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
             if (logResult.LogFile is not null && logResult.LogFile.Device is not null)
@@ -741,7 +742,7 @@ namespace MiSmart.API.Controllers
             response.SetData(ViewModelHelpers.ConvertToViewModel<LogFile, LogFileViewModel>(logFile));
             return response.ToIActionResult();
         }
-        
+
         [HttpPost("{id:Guid}/SendEmailErrors")]
         public async Task<IActionResult> SendEmailErrors([FromRoute] Guid id, [FromBody] AddingLogErrorCommand command, [FromServices] LogFileRepository logFileRepository,
         [FromServices] MyEmailService emailService, [FromServices] IOptions<TargetEmailSettings> options,
