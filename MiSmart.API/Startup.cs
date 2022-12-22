@@ -237,17 +237,16 @@ namespace MiSmart.API
             //     o.TimeZoneInfo = TimeZoneInfo.Utc;
             // });
 
-            services.AddCronJob<UpdatingTaskBingLocation>(o =>
-            {
-                o.CronExpression = "10 * * * * *";
-                o.TimeZoneInfo = TimeZoneInfo.Utc;
-            });
+            // services.AddCronJob<UpdatingTaskBingLocation>(o =>
+            // {
+            //     o.CronExpression = "10 * * * * *";
+            //     o.TimeZoneInfo = TimeZoneInfo.Utc;
+            // });
             services.AddCronJob<UpdatingFlightStatBoundary>(o =>
             {
                 o.CronExpression = "30 * * * * *";
                 o.TimeZoneInfo = TimeZoneInfo.Utc;
             });
-
             services.AddCronJob<SendingDailyLowBatteryReport>(o =>
             {
                 o.CronExpression = "0 0 15 * * *";
@@ -268,16 +267,16 @@ namespace MiSmart.API
                 o.CronExpression = "25 * * * * *";
                 o.TimeZoneInfo = TimeZoneInfo.Utc;
             });
-            services.AddCronJob<GetResultLogDetail>(o =>
-            {
-                o.CronExpression = "15 * * * * *";
-                o.TimeZoneInfo = TimeZoneInfo.Utc;
-            });
-            services.AddCronJob<UpdatingLogBingLocation>(o =>
-            {
-                o.CronExpression = "35 * * * * *";
-                o.TimeZoneInfo = TimeZoneInfo.Utc;
-            });
+            // services.AddCronJob<GetResultLogDetail>(o =>
+            // {
+            //     o.CronExpression = "15 * * * * *";
+            //     o.TimeZoneInfo = TimeZoneInfo.Utc;
+            // });
+            // services.AddCronJob<UpdatingLogBingLocation>(o =>
+            // {
+            //     o.CronExpression = "35 * * * * *";
+            //     o.TimeZoneInfo = TimeZoneInfo.Utc;
+            // });
 
 
 
