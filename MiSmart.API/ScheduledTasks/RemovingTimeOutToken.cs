@@ -14,7 +14,7 @@ namespace MiSmart.API.ScheduledTasks
     public class RemovingTimeOutToken : CronJobService
     {
         private IServiceProvider serviceProvider;
-        public RemovingTimeOutToken(IScheduleConfig<RemovingOldRecordsTask> options, IServiceProvider serviceProvider) : base(options)
+        public RemovingTimeOutToken(IScheduleConfig<RemovingTimeOutToken> options, IServiceProvider serviceProvider) : base(options)
         {
             this.serviceProvider = serviceProvider;
         }
