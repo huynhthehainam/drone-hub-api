@@ -158,5 +158,6 @@ namespace MiSmart.DAL.Models
         }
         public Int32? BatteryID { get; set; }
         public Int32 CycleCount { get; set; }
+        public Int32 HubFlightID { get; set; }
     }
 }
