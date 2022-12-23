@@ -29,7 +29,7 @@ public sealed class AuthControllerTest : IClassFixture<CustomWebApplicationFacto
 
         var resp = await client.PostAsJsonAsync("/auth/generatedevicetoken", new
         {
-            DeviceToken = "S3XEsPNgYetJQJLebPheN2HSC2WTsuxE"
+            DeviceToken = "jRG3E2j4w6bV5vQoQekiwz5NzV3XnPHU"
         });
 
         GenerateDeviceTokenResponse? deviceTokenResponse = await resp.Content.ReadFromJsonAsync<GenerateDeviceTokenResponse>(JsonSerializerDefaultOptions.CamelOptions);

@@ -231,17 +231,17 @@ namespace MiSmart.API
 
             #region AddingCronJobs
 
-            // services.AddCronJob<RemovingOldRecordsTask>(o =>
-            // {
-            //     o.CronExpression = "* */30 * * * *";
-            //     o.TimeZoneInfo = TimeZoneInfo.Utc;
-            // });
+            services.AddCronJob<RemovingOldRecordsTask>(o =>
+            {
+                o.CronExpression = "* */30 * * * *";
+                o.TimeZoneInfo = TimeZoneInfo.Utc;
+            });
 
-            // services.AddCronJob<UpdatingTaskBingLocation>(o =>
-            // {
-            //     o.CronExpression = "10 * * * * *";
-            //     o.TimeZoneInfo = TimeZoneInfo.Utc;
-            // });
+            services.AddCronJob<UpdatingTaskBingLocation>(o =>
+            {
+                o.CronExpression = "10 * * * * *";
+                o.TimeZoneInfo = TimeZoneInfo.Utc;
+            });
             services.AddCronJob<UpdatingFlightStatBoundary>(o =>
             {
                 o.CronExpression = "30 * * * * *";
@@ -272,19 +272,19 @@ namespace MiSmart.API
                 o.CronExpression = "15 * * * * *";
                 o.TimeZoneInfo = TimeZoneInfo.Utc;
             });
-            // services.AddCronJob<UpdatingLogBingLocation>(o =>
-            // {
-            //     o.CronExpression = "35 * * * * *";
-            //     o.TimeZoneInfo = TimeZoneInfo.Utc;
-            // });
+            services.AddCronJob<UpdatingLogBingLocation>(o =>
+            {
+                o.CronExpression = "35 * * * * *";
+                o.TimeZoneInfo = TimeZoneInfo.Utc;
+            });
 
 
 
-            //     services.AddCronJob<UpdatingCostFlightStatsTask>(o =>
-            //    {
-            //        o.CronExpression = "*/50 * * * * *";
-            //        o.TimeZoneInfo = TimeZoneInfo.Utc;
-            //    });
+            services.AddCronJob<UpdatingCostFlightStatsTask>(o =>
+           {
+               o.CronExpression = "*/50 * * * * *";
+               o.TimeZoneInfo = TimeZoneInfo.Utc;
+           });
             #endregion
         }
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
