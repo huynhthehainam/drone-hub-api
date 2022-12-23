@@ -40,6 +40,7 @@ namespace MiSmart.API.Commands
         public Double? BatteryPercentRemaining { get; set; }
         public String? BatterySerialNumber { get; set; }
         public Int32? BatteryCycleCount { get; set; }
+        public Int32? HubFlightID { get; set; }
     }
     public class AddingOfflineFlightStatCommand : AddingFlightStatCommand
     {

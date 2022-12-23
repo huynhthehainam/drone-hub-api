@@ -430,6 +430,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
                                 AdditionalInformation = item.AdditionalInformation,
                                 BatteryPercentRemaining = item.BatteryPercentRemaining,
                                 IsOnline = false,
+                                HubFlightID = item.HubFlightID.GetValueOrDefault(),
                             };
                             if (!String.IsNullOrEmpty(item.BatterySerialNumber))
                             {
@@ -817,6 +818,7 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
                 AdditionalInformation = command.AdditionalInformation,
                 BatteryPercentRemaining = command.BatteryPercentRemaining,
                 IsOnline = true,
+                HubFlightID = command.HubFlightID.GetValueOrDefault(),
             };
             if (!String.IsNullOrEmpty(command.BatterySerialNumber))
             {
