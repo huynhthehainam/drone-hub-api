@@ -654,67 +654,67 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
             if (device.Status != DeviceStatus.Active)
                 device.Status = DeviceStatus.Active;
 
-            await deviceRepository.UpdateAsync(device);
+            // await deviceRepository.UpdateAsync(device);
 
-            var batteryLogGroups = command.BatteryLogs.GroupBy(bl => bl.ActualID);
-            List<Guid> lastGroupIDs = new List<Guid>();
-            foreach (var batteryGroup in batteryLogGroups)
-            {
-                var key = batteryGroup.Key;
-                if (key != "TestBattery")
-                {
-                    var battery = await batteryRepository.GetAsync(b => b.ActualID == key);
-                    if (battery is null)
-                    {
-                        var batteryModel = await batteryModelRepository.GetAsync(ww => true);
-                        if (batteryModel is not null)
-                        {
-                            battery = new Battery { ActualID = key, BatteryModelID = batteryModel.ID };
-                            battery = await batteryRepository.CreateAsync(battery);
-                            await emailService.SendMailAsync(new String[] { "huynhthehainam@gmail.com" }, new String[] { }, new String[] { }, "New battery", $"Battery name {battery.ActualID} is just registered.");
-                        }
-                    }
-                    if (battery is not null)
-                    {
+            // var batteryLogGroups = command.BatteryLogs.GroupBy(bl => bl.ActualID);
+            // List<Guid> lastGroupIDs = new List<Guid>();
+            // foreach (var batteryGroup in batteryLogGroups)
+            // {
+            //     var key = batteryGroup.Key;
+            //     if (key != "TestBattery")
+            //     {
+            //         var battery = await batteryRepository.GetAsync(b => b.ActualID == key);
+            //         if (battery is null)
+            //         {
+            //             var batteryModel = await batteryModelRepository.GetAsync(ww => true);
+            //             if (batteryModel is not null)
+            //             {
+            //                 battery = new Battery { ActualID = key, BatteryModelID = batteryModel.ID };
+            //                 battery = await batteryRepository.CreateAsync(battery);
+            //                 await emailService.SendMailAsync(new String[] { "huynhthehainam@gmail.com" }, new String[] { }, new String[] { }, "New battery", $"Battery name {battery.ActualID} is just registered.");
+            //             }
+            //         }
+            //         if (battery is not null)
+            //         {
 
-                        TimeSpan span1 = new TimeSpan(0, 0, 0, 0, 5000);
-                        TimeSpan eachSpan1 = span1 / batteryGroup.Count();
-                        var startedTime1 = DateTime.UtcNow - span1;
-                        var actualGroup = batteryGroup.ToList();
-                        var logs = new List<BatteryLog>();
-                        for (var i = 0; i < actualGroup.Count(); i++)
-                        {
-                            logs.Add(new BatteryLog
-                            {
-                                CellMaximumVoltage = actualGroup[i].CellMaximumVoltage,
-                                CellMaximumVoltageUnit = actualGroup[i].CellMaximumVoltageUnit,
-                                CellMinimumVoltage = actualGroup[i].CellMinimumVoltage,
-                                CellMinimumVoltageUnit = actualGroup[i].CellMinimumVoltageUnit,
-                                CreatedTime = startedTime1.Add(eachSpan1 * i),
-                                Current = actualGroup[i].Current,
-                                CurrentUnit = actualGroup[i].CurrentUnit,
-                                CycleCount = actualGroup[i].CycleCount,
-                                PercentRemaining = actualGroup[i].PercentRemaining,
-                                Temperature = actualGroup[i].Temperature,
-                                TemperatureUnit = actualGroup[i].TemperatureUnit,
-                            });
-                        }
-                        var groupLog = new BatteryGroupLog
-                        {
-                            Battery = battery,
-                            CreatedTime = DateTime.UtcNow,
-                            Logs = logs,
-                        };
-                        await batteryGroupLogRepository.CreateAsync(groupLog);
-                        battery.LastGroup = groupLog;
-                        await batteryRepository.UpdateAsync(battery);
-                        lastGroupIDs.Add(groupLog.ID);
-                    }
-                }
+            //             TimeSpan span1 = new TimeSpan(0, 0, 0, 0, 5000);
+            //             TimeSpan eachSpan1 = span1 / batteryGroup.Count();
+            //             var startedTime1 = DateTime.UtcNow - span1;
+            //             var actualGroup = batteryGroup.ToList();
+            //             var logs = new List<BatteryLog>();
+            //             for (var i = 0; i < actualGroup.Count(); i++)
+            //             {
+            //                 logs.Add(new BatteryLog
+            //                 {
+            //                     CellMaximumVoltage = actualGroup[i].CellMaximumVoltage,
+            //                     CellMaximumVoltageUnit = actualGroup[i].CellMaximumVoltageUnit,
+            //                     CellMinimumVoltage = actualGroup[i].CellMinimumVoltage,
+            //                     CellMinimumVoltageUnit = actualGroup[i].CellMinimumVoltageUnit,
+            //                     CreatedTime = startedTime1.Add(eachSpan1 * i),
+            //                     Current = actualGroup[i].Current,
+            //                     CurrentUnit = actualGroup[i].CurrentUnit,
+            //                     CycleCount = actualGroup[i].CycleCount,
+            //                     PercentRemaining = actualGroup[i].PercentRemaining,
+            //                     Temperature = actualGroup[i].Temperature,
+            //                     TemperatureUnit = actualGroup[i].TemperatureUnit,
+            //                 });
+            //             }
+            //             var groupLog = new BatteryGroupLog
+            //             {
+            //                 Battery = battery,
+            //                 CreatedTime = DateTime.UtcNow,
+            //                 Logs = logs,
+            //             };
+            //             await batteryGroupLogRepository.CreateAsync(groupLog);
+            //             battery.LastGroup = groupLog;
+            //             await batteryRepository.UpdateAsync(battery);
+            //             lastGroupIDs.Add(groupLog.ID);
+            //         }
+            //     }
 
-            }
+            // }
 
-            device.LastBatterGroupLogs = lastGroupIDs;
+            // device.LastBatterGroupLogs = lastGroupIDs;
             device.LastOnline = DateTime.UtcNow;
 
             await deviceRepository.UpdateAsync(device);
