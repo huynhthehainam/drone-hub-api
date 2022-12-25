@@ -51,7 +51,9 @@ namespace MiSmart.API.ScheduledTasks
                                         var m = binFileRegex.Match(logFile.Name);
                                         if (m.Success)
                                         {
-                                            var existedDBLogFile = databaseContext.LogFiles.Where(ww => ww.FileName == logFile.Name && ww.DeviceID == device.ID).FirstOrDefault();
+                                            var existedDBLogFile = databaseContext.LogFiles.Where(ww => ww.FileName == logFile.Name && ww.DeviceID == device.ID).Select(ww => new LogFile {
+                                                ID = ww.ID,
+                                            }).FirstOrDefault();
                                             if (existedDBLogFile is null)
                                             {
                                                 var order = Convert.ToInt32(m.Groups["order"].ToString());
@@ -78,29 +80,6 @@ namespace MiSmart.API.ScheduledTasks
                                                 catch (Exception)
                                                 {
                                                     Console.WriteLine("Cannot download file from scp");
-                                                }
-                                            }
-                                            else
-                                            {
-                                                times.Add(existedDBLogFile.LoggingTime);
-                                                var now = DateTime.UtcNow.AddDays(-1);
-                                                if (existedDBLogFile.LoggingTime > now)
-                                                {
-
-                                                    var logPath = Path.Join(deviceFolder, logFile.Name);
-                                                    MemoryStream ms = new MemoryStream();
-                                                    try
-                                                    {
-                                                        client.DownloadFile(logPath, ms);
-                                                        var byteArr = ms.ToArray();
-                                                        existedDBLogFile.FileBytes = byteArr;
-                                                        databaseContext.Update(existedDBLogFile);
-                                                        databaseContext.SaveChanges();
-                                                    }
-                                                    catch (Exception)
-                                                    {
-                                                        Console.WriteLine("Cannot download file from scp");
-                                                    }
                                                 }
                                             }
                                         }
