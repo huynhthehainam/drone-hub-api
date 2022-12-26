@@ -254,7 +254,7 @@ namespace MiSmart.API
             });
             services.AddCronJob<SynchronizingLog>(o =>
             {
-                o.CronExpression = "0 0 23 * * *";
+                o.CronExpression = "0 */5 23 * * *";
                 o.TimeZoneInfo = TimeZoneInfo.Utc;
             });
             services.AddCronJob<RemovingTimeOutToken>(o =>
