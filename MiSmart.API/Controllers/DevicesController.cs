@@ -553,17 +553,39 @@ st_transform(st_geomfromtext ('point({secondLng} {secondLat})',4326) , 3857)) * 
         [AllowAnonymous]
         public async Task<IActionResult> GetListDeviceFromTM([FromQuery] PageCommand pageCommand,
         [FromServices] DeviceRepository deviceRepository, [FromQuery] String? search, [FromQuery] String? secretKey,
-        [FromServices] IOptions<FarmAppSettings> options, [FromQuery] Guid? deviceUUID)
+        [FromServices] IOptions<FarmAppSettings> options, [FromQuery] String? uuids)
         {
             ActionResponse response = actionResponseFactory.CreateInstance();
-            Expression<Func<Device, Boolean>> query = ww => (!String.IsNullOrWhiteSpace(search) ? (ww.Name ?? "").ToLower().Contains(search.ToLower()) : true)
-                                            && (deviceUUID.HasValue ? ww.UUID == deviceUUID.GetValueOrDefault() : true);
             var settings = options.Value;
             if (secretKey != settings.SecretKey)
             {
                 response.AddAuthorizationErr();
                 return response.ToIActionResult();
             }
+            List<Guid>? deviceUUIDs = null;
+            if (!String.IsNullOrEmpty(uuids))
+            {
+                try
+                {
+                    var words = uuids.Split(",").ToList();
+                    deviceUUIDs = new List<Guid>();
+                    foreach (var word in words)
+                    {
+                        Guid result = Guid.Empty;
+                        var success = Guid.TryParse(word, out result);
+                        if (success)
+                            deviceUUIDs.Add(result);
+                    }
+                }
+                catch (Exception)
+                {
+
+                }
+            }
+
+            Expression<Func<Device, Boolean>> query = ww => (!String.IsNullOrWhiteSpace(search) ? (ww.Name ?? "").ToLower().Contains(search.ToLower()) : true)
+                                            && (deviceUUIDs != null ? deviceUUIDs.Contains(ww.UUID) : true) ;
+
             var listResponse = await deviceRepository.GetListResponseViewAsync<SmallDeviceFromTMViewModel>(pageCommand, query);
             listResponse.SetResponse(response);
 
