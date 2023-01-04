@@ -147,6 +147,10 @@ namespace MiSmart.DAL.ViewModels
         public Int32 DeviceModelID { get; set; }
         public Int32? ExecutionCompanyId { get; set; }
         public List<CustomerUserViewModel>? CustomerUsers {get; set;}
+        public Guid? LastGroupID { get; set; }
+        public List<TelemetryRecordViewModel>? LastGroupRecords { get; set; }
+        public List<Guid>? LastBatteryGroupIDs;
+        public List<BatteryGroupLogViewModel>? BatteryGroupLogs { get; set; }
 
         public void LoadFrom(Device entity)
         {
@@ -163,6 +167,9 @@ namespace MiSmart.DAL.ViewModels
             DeviceModelID = entity.DeviceModelID;
             ExecutionCompanyId = entity.ExecutionCompanyID;
             CustomerUsers = entity.Customer?.CustomerUsers?.Select(ww => ViewModelHelpers.ConvertToViewModel<CustomerUser, CustomerUserViewModel>(ww)).ToList();
+            LastGroupID = entity.LastGroupID;
+            LastGroupRecords = entity.LastGroup?.Records?.OrderBy(ww => ww.CreatedTime).Select(ww => ViewModelHelpers.ConvertToViewModel<TelemetryRecord, TelemetryRecordViewModel>(ww)).ToList();
+            LastBatteryGroupIDs = entity.LastBatterGroupLogs;
         }
     }
 }
