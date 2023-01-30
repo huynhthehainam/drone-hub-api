@@ -151,6 +151,7 @@ namespace MiSmart.DAL.ViewModels
         public List<TelemetryRecordViewModel>? LastGroupRecords { get; set; }
         public List<Guid>? LastBatteryGroupIDs;
         public List<BatteryGroupLogViewModel>? BatteryGroupLogs { get; set; }
+        public DateTime? LastOnline { get; set; }
 
         public void LoadFrom(Device entity)
         {
@@ -170,6 +171,7 @@ namespace MiSmart.DAL.ViewModels
             LastGroupID = entity.LastGroupID;
             LastGroupRecords = entity.LastGroup?.Records?.OrderBy(ww => ww.CreatedTime).Select(ww => ViewModelHelpers.ConvertToViewModel<TelemetryRecord, TelemetryRecordViewModel>(ww)).ToList();
             LastBatteryGroupIDs = entity.LastBatterGroupLogs;
+            LastOnline = entity.LastOnline;
         }
     }
 }
