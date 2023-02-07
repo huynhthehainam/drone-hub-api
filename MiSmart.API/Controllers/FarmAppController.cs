@@ -12,6 +12,14 @@ using MiSmart.API.Settings;
 using MiSmart.Infrastructure.Constants;
 using MiSmart.API.Models;
 using System;
+using Microsoft.AspNetCore.Authorization;
+using MiSmart.Infrastructure.Commands;
+using MiSmart.DAL.Repositories;
+using System.Linq.Expressions;
+using MiSmart.DAL.Models;
+using MiSmart.DAL.ViewModels;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace MiSmart.API.Controllers
 {
@@ -104,6 +112,58 @@ namespace MiSmart.API.Controllers
                 actionResponse.SetData(gettingAllMedicinesResponse.Data.GetAllMedicineFromDroneHub.Data);
             }
 
+            return actionResponse.ToIActionResult();
+        }
+
+        [HttpGet("Plans")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetListPlan([FromQuery] PageCommand pageCommand, [FromServices] PlanRepository planRepository, [FromQuery] String? ids,
+        [FromServices] IOptions<FarmAppSettings> options, [FromQuery] String? secretKey)
+        {
+            ActionResponse actionResponse = actionResponseFactory.CreateInstance();
+            var settings = options.Value;
+            if (secretKey != settings.SecretKey)
+            {
+                actionResponse.AddAuthorizationErr();
+                return actionResponse.ToIActionResult();
+            }
+            List<Int64>? planIds = null;
+            if (!String.IsNullOrEmpty(ids))
+            {
+                var words = ids.Split(",").ToList();
+                planIds = new List<Int64>();
+                foreach (var word in words)
+                {
+                    planIds.Add(Int64.Parse(word));
+                }
+            }
+            Expression<Func<Plan, Boolean>> query = ww => (planIds != null ? (!planIds.Contains(ww.ID)) : true) ; 
+            var listResponse = await planRepository.GetListResponseViewAsync<SmallPlanViewModel>(pageCommand, query, ww => ww.CreatedTime, false);
+
+            listResponse.SetResponse(actionResponse);
+            return actionResponse.ToIActionResult();
+        }
+        [HttpGet("{id:long}/PlanFile")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetPlanFileFromTM([FromRoute] Int64 id, [FromServices] PlanRepository planRepository, [FromServices] ExecutionCompanyUserRepository executionCompanyUserRepository,
+        [FromServices] IOptions<FarmAppSettings> options, [FromQuery] String? secretKey)
+        {
+            ActionResponse actionResponse = actionResponseFactory.CreateInstance();
+            var settings = options.Value;
+            if (secretKey != settings.SecretKey)
+            {
+                actionResponse.AddAuthorizationErr();
+                return actionResponse.ToIActionResult();
+            }
+            Expression<Func<Plan, Boolean>> query = ww => (ww.ID == id);
+            var plan = await planRepository.GetAsync(query);
+            if (plan is null)
+            {
+                actionResponse.AddNotFoundErr("Plan");
+                return actionResponse.ToIActionResult();
+            }
+
+            actionResponse.SetFile(plan.FileBytes ?? new Byte[0], "application/octet-stream", plan.FileName ?? "example.plan");
             return actionResponse.ToIActionResult();
         }
     }
