@@ -42,7 +42,7 @@ namespace MiSmart.DAL.ViewModels
                 return result;
             }
         }
-        public SmallDeviceViewModel? Device {get; set;}
+        public OnlyUUIDDeviceViewModel? Device {get; set;}
 
 
 
@@ -57,7 +57,7 @@ namespace MiSmart.DAL.ViewModels
             CreatedTime = entity.CreatedTime;
             Area = entity.Area;
             Location = entity.Location is null ? null : new CoordinateViewModel(entity.Location.Coordinate);
-            Device = entity.Device is null ? null : ViewModelHelpers.ConvertToViewModel<Device, SmallDeviceViewModel>(entity.Device);
+            Device = entity.Device is null ? null : ViewModelHelpers.ConvertToViewModel<Device, OnlyUUIDDeviceViewModel>(entity.Device);
         }
     }
 }
