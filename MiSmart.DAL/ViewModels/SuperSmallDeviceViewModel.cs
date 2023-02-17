@@ -29,4 +29,15 @@ namespace MiSmart.DAL.ViewModels
             Name = entity.Name;
         }
     }
+    public class OnlyUUIDDeviceViewModel : IViewModel<Device>
+    {
+        public Int32 ID { get; set; }
+        public Guid UUID { get; set; }
+
+        public void LoadFrom(Device entity)
+        {
+            ID = entity.ID;
+            UUID = entity.UUID;
+        }
+    }
 }
